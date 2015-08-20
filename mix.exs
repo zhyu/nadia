@@ -3,8 +3,10 @@ defmodule Nadia.Mixfile do
 
   def project do
     [app: :nadia,
-     version: "0.0.1",
+     version: "0.1.0",
      elixir: "~> 1.0",
+     description: "Telegram Bot API Wrapper written in Elixir",
+     package: package,
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps]
@@ -14,7 +16,7 @@ defmodule Nadia.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger, :httpoison]]
+    [applications: [:httpoison]]
   end
 
   # Dependencies can be Hex packages:
@@ -29,5 +31,11 @@ defmodule Nadia.Mixfile do
   defp deps do
     [{:httpoison, "~> 0.7.2"},
     {:poison, "~> 1.4.0"}]
+  end
+
+  defp package do
+    [contributors: ["zhyu"],
+     licenses: ["MIT"],
+     links: %{"GitHub" => "https://github.com/zhyu/nadia"} ]
   end
 end

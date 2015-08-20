@@ -11,9 +11,10 @@ defmodule Nadia do
       {:error, %HTTPoison.Error{reason: reason}} -> {:error, reason}
       {:ok, %HTTPoison.Response{status_code: 403}} -> {:error, "token invalid"}
       {:ok, %HTTPoison.Response{body: body}} ->
-        case body |> Poison.decode! |> Dict.pop("ok") do
-          {true, data} -> {:ok, data}
-          {_, data} -> {:error, data}
+        data = Poison.decode!(body, keys: :atoms)
+        case Dict.get(data, :ok) do
+          true -> {:ok, data[:result]}
+          _ -> {:error, data[:description]}
         end
     end
   end

@@ -36,7 +36,9 @@ defmodule Nadia do
 
   defp build_request(params, file_field \\ nil) do
     {optional, required} = Keyword.pop(params, :options, [])
-    params = Enum.map(required ++ optional, fn {k, v} -> {k, to_string(v)} end)
+    params = required ++ optional
+    |> Keyword.update(:reply_markup, nil, &(Poison.encode!(&1)))
+    |> Enum.map(fn {k, v} -> {k, to_string(v)} end)
     if !is_nil(file_field) and File.exists?(params[file_field]) do
       build_multipart_request(params, file_field)
     else

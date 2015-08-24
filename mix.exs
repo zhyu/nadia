@@ -3,7 +3,7 @@ defmodule Nadia.Mixfile do
 
   def project do
     [app: :nadia,
-     version: "0.1.0",
+     version: "0.2.0",
      elixir: "~> 1.0",
      description: "Telegram Bot API Wrapper written in Elixir",
      package: package,
@@ -30,7 +30,9 @@ defmodule Nadia.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [{:httpoison, "~> 0.7.2"},
-    {:poison, "~> 1.4.0"}]
+     {:poison, "~> 1.4.0"},
+     {:earmark, "~> 0.1", only: :dev},
+     {:ex_doc, "~> 0.8", only: :dev}]
   end
 
   defp package do

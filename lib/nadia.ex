@@ -3,197 +3,89 @@ defmodule Nadia do
   Provides access to Telegram Bot API.
   """
 
-  @base_url "https://api.telegram.org/bot"
-
-  defp token, do: Application.get_env(:nadia, :token)
-
-  defp build_url(method), do: @base_url <> token <> "/" <> method
-
-  defp process_response(response) do
-    case response do
-      {:error, %HTTPoison.Error{reason: reason}} -> {:error, reason}
-      {:ok, %HTTPoison.Response{status_code: 403}} -> {:error, "token invalid"}
-      {:ok, %HTTPoison.Response{body: body}} ->
-        data = Poison.decode!(body, keys: :atoms)
-        case Dict.get(data, :ok) do
-          true -> {:ok, data[:result]}
-          _ -> {:error, data[:description]}
-        end
-    end
+  defmodule User do
+    defstruct id: nil, first_name: nil, last_name: nil, username: nil
+    @type t :: %User{id: integer, first_name: binary, last_name: binary, username: binary}
   end
 
-  defp get_response(method, request \\ []) do
-    method
-    |> build_url
-    |> HTTPoison.post(request)
-    |> process_response
+  defmodule GroupChat do
+    defstruct id: nil, title: nil
+    @type t :: %GroupChat{id: integer, title: binary}
   end
 
-  defp build_multipart_request(params, file_field) do
-    {file_path, params} = Keyword.pop(params, file_field)
-    params = for {k, v} <- params, do: {to_string(k), v}
-    {:multipart, params ++ [
-      {:file, file_path,
-      {"form-data", [{"name", to_string(file_field)}, {"filename", file_path}]}, []}
-    ]}
+  defmodule PhotoSize do
+    defstruct file_id: nil, width: nil, height: nil, file_size: nil
+    @type t :: %PhotoSize{file_id: binary, width: integer, height: integer, file_size: integer}
   end
 
-  defp build_request(params, file_field \\ nil) do
-    {optional, required} = Keyword.pop(params, :options, [])
-    params = required ++ optional
-    |> Keyword.update(:reply_markup, nil, &(Poison.encode!(&1)))
-    |> Enum.map(fn {k, v} -> {k, to_string(v)} end)
-    if !is_nil(file_field) and File.exists?(params[file_field]) do
-      build_multipart_request(params, file_field)
-    else
-      {:form, params}
-    end
+  defmodule Audio do
+    defstruct file_id: nil, duration: nil, performer: nil, title: nil, mime_type: nil, file_size: nil
+    @type t :: %Audio{file_id: binary, duration: integer, performer: binary, title: binary,
+                      mime_type: binary, file_size: integer}
   end
 
-  @doc """
-  A simple method for testing your bot's auth token. Requires no parameters.
-  Returns basic information about the bot in form of a User object.
-  """
-  def get_me do
-    "getMe" |> get_response
+  defmodule Document do
+    defstruct file_id: nil, thumb: nil, file_name: nil, mime_type: nil, file_size: nil
+    @type t :: %Document{file_id: binary, thumb: PhotoSize.t, file_name: binary, mime_type: binary, file_size: integer}
   end
 
-  @doc """
-  Use this method to send text messages.
-  On success, the sent Message is returned.
-  """
-  def send_message(chat_id, text, options \\ []) do
-    request = binding |> build_request
-    get_response("sendMessage", request)
+  defmodule Sticker do
+    defstruct file_id: nil, width: nil, height: nil, thumb: nil, file_size: nil
+    @type t :: %Sticker{file_id: binary, width: integer, height: integer, thumb: PhotoSize.t, file_size: integer}
   end
 
-  @doc """
-  Use this method to forward messages of any kind.
-  On success, the sent Message is returned.
-  """
-  def forward_message(chat_id, from_chat_id, message_id) do
-    request = binding |> build_request
-    get_response("forwardMessage", request)
+  defmodule Video do
+    defstruct file_id: nil, width: nil, height: nil, duration: nil, thumb: nil, mime_type: nil, file_size: nil
+    @type t :: %Video{file_id: binary, width: integer, height: integer, duration: integer, thumb: PhotoSize.t,
+                      mime_type: binary, file_size: integer}
   end
 
-  @doc """
-  Use this method to send photos.
-  On success, the sent Message is returned.
-  """
-  def send_photo(chat_id, photo, options \\ []) do
-    request = binding |> build_request(:photo)
-    get_response("sendPhoto", request)
+  defmodule Voice do
+    defstruct file_id: nil, duration: nil, mime_type: nil, file_size: nil
+    @type t :: %Voice{file_id: binary, duration: integer, mime_type: binary, file_size: integer}
   end
 
-  @doc """
-  Use this method to send audio files, if you want Telegram clients to display
-  them in the music player. Your audio must be in the .mp3 format.
-  On success, the sent Message is returned.
-  Bots can currently send audio files of up to 50 MB in size, this limit may
-  be changed in the future.
-
-  For backward compatibility, when the fields title and performer are both
-  empty and the mime-type of the file to be sent is not audio/mpeg, the file
-  will be sent as a playable voice message. For this to work, the audio must be
-  in an .ogg file encoded with OPUS. This behavior will be phased out in the
-  future. For sending voice messages, use the sendVoice method instead.
-  """
-  def send_audio(chat_id, audio, options \\ []) do
-    request = binding |> build_request(:audio)
-    get_response("sendAudio", request)
+  defmodule Contact do
+    defstruct phone_number: nil, first_name: nil, last_name: nil, user_id: nil
+    @type t :: %Contact{phone_number: binary, first_name: binary, last_name: binary, user_id: integer}
   end
 
-  @doc """
-  Use this method to send general files.
-  On success, the sent Message is returned.
-  Bots can currently send files of any type of up to 50 MB in size, this limit
-  may be changed in the future.
-  """
-  def send_document(chat_id, document, options \\ []) do
-    request = binding |> build_request(:document)
-    get_response("sendDocument", request)
+  defmodule Location do
+    defstruct latitude: nil, longitude: nil
+    @type t :: %Location{latitude: float, longitude: float}
   end
 
-  @doc """
-  Use this method to send .webp stickers.
-  On success, the sent Message is returned.
-  """
-  def send_sticker(chat_id, sticker, options \\ []) do
-    request = binding |> build_request(:sticker)
-    get_response("sendSticker", request)
+  defmodule Message do
+    defstruct message_id: nil, from: nil, date: nil, chat: nil, forward_from: nil,
+    forward_date: nil, reply_to_message: nil, text: nil, audio: nil, document: nil,
+    photo: [], sticker: nil, video: nil, voice: nil, caption: nil, contact: nil,
+    location: nil, new_chat_participant: nil, left_chat_participant: nil,
+    new_chat_title: nil, new_chat_photo: [], delete_chat_photo: nil, group_chat_created: nil
+
+    @type t :: %Message{message_id: integer, from: User.t, date: integer, chat: User.t | GroupChat.t,
+                        forward_from: User.t, forward_date: integer, reply_to_message: Message.t,
+                        text: binary, audio: Audio.t, document: Document.t, photo: [PhotoSize.t], sticker: any,
+                        video: any, voice: any, caption: binary, contact: any, location: any,
+                        new_chat_participant: User.t, left_chat_participant: User.t, new_chat_title: binary,
+                        new_chat_photo: [PhotoSize.t], delete_chat_photo: atom, group_chat_created: atom}
   end
 
-  @doc """
-  Use this method to send video files, Telegram clients support mp4 videos
-  (other formats may be sent as Document).
-  On success, the sent Message is returned.
-  Bots can currently send video files of up to 50 MB in size, this limit may be
-  changed in the future.
-  """
-  def send_video(chat_id, video, options \\ []) do
-    request = binding |> build_request(:video)
-    get_response("sendVideo", request)
+  defmodule Update do
+    defstruct update_id: nil, message: nil
+    @type t :: %Update{update_id: integer, message: Message.t}
   end
 
-  @doc """
-  Use this method to send audio files, if you want Telegram clients to display
-  the file as a playable voice message. For this to work, your audio must be in
-  an .ogg file encoded with OPUS (other formats may be sent as Audio or Document).
-  On success, the sent Message is returned.
-  Bots can currently send voice messages of up to 50 MB in size, this limit may be
-  changed in the future.
-  """
-  def send_voice(chat_id, voice, options \\ []) do
-    request = binding |> build_request(:voice)
-    get_response("sendVoice", request)
+  defmodule UserProfilePhotos do
+    defstruct total_count: nil, photos: []
+    @type t :: %UserProfilePhotos{total_count: integer, photos: [[PhotoSize.t]]}
   end
 
-  @doc """
-  Use this method to send point on the map.
-  On success, the sent Message is returned.
-  """
-  def send_location(chat_id, latitude, longitude, options \\ []) do
-    request = binding |> build_request
-    get_response("sendLocation", request)
+  defmodule Error do
+    defexception reason: nil
+    @type t :: %Error{reason: any}
+
+    def message(%Error{reason: reason}), do: inspect(reason)
   end
 
-  @doc """
-  Use this method when you need to tell the user that something is happening on
-  the bot's side. The status is set for 5 seconds or less (when a message
-  arrives from your bot, Telegram clients clear its typing status).
-  """
-  def send_chat_action(chat_id, action) do
-    request = binding |> build_request
-    get_response("sendChatAction", request)
-  end
-
-  @doc """
-  Use this method to get a list of profile pictures for a user.
-  Returns a UserProfilePhotos object.
-  """
-  def get_user_profile_photos(user_id, options \\ []) do
-    request = binding |> build_request
-    get_response("getUserProfilePhotos", request)
-  end
-
-  @doc """
-  Use this method to receive incoming updates using long polling.
-  An Array of Update objects is returned.
-  """
-  def get_updates(options \\ []) do
-    request = binding |> build_request
-    get_response("getUpdates", request)
-  end
-
-  @doc """
-  Use this method to specify a url and receive incoming updates via an outgoing
-  webhook. Whenever there is an update for the bot, we will send an HTTPS POST
-  request to the specified url, containing a JSON-serialized Update. In case of
-  an unsuccessful request, we will give up after a reasonable amount of attempts.
-  """
-  def set_webhook(options \\ []) do
-    request = binding |> build_request
-    get_response("setWebhook", request)
-  end
-
+  use Nadia.API
 end

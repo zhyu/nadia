@@ -31,8 +31,9 @@ defmodule Nadia.Mixfile do
   defp deps do
     [{:httpoison, "~> 0.7.2"},
      {:poison, "~> 1.4.0"},
-     {:earmark, "~> 0.1", only: :dev},
-     {:ex_doc, "~> 0.8", only: :dev}]
+     {:earmark, "~> 0.1", only: :docs},
+     {:ex_doc, "~> 0.8", only: :docs},
+     {:inch_ex, only: :docs}]
   end
 
   defp package do

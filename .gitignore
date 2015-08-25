@@ -2,5 +2,6 @@
 /config/config.exs
 /deps
 /doc
+/docs/all.json
 erl_crash.dump
 *.ez

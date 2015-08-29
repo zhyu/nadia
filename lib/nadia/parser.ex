@@ -31,6 +31,7 @@ defmodule Nadia.Parser do
     end
   end
 
+  defp parse_message(nil), do: nil
   defp parse_message(message) do
     message = struct(Message, message)
     from = struct(User, message.from)
@@ -86,19 +87,22 @@ defmodule Nadia.Parser do
     message
   end
 
+  defp parse_photo_size(nil), do: nil
+  defp parse_photo_size(photo_size), do: struct(PhotoSize, photo_size)
+
   defp parse_document(document) do
     document = struct(Document, document)
-    %{document | thumb: struct(PhotoSize, document.thumb)}
+    %{document | thumb: parse_photo_size(document.thumb)}
   end
 
   defp parse_sticker(sticker) do
     sticker = struct(Sticker, sticker)
-    %{sticker | thumb: struct(PhotoSize, sticker.thumb)}
+    %{sticker | thumb: parse_photo_size(sticker.thumb)}
   end
 
   defp parse_video(video) do
     video = struct(Video, video)
-    %{video | thumb: struct(PhotoSize, video.thumb)}
+    %{video | thumb: parse_photo_size(video.thumb)}
   end
 
   defp parse_user_profile_photos(user_profile_photos) do
@@ -112,10 +116,7 @@ defmodule Nadia.Parser do
   defp parse_updates(updates) do
     for update <- updates do
       update = struct(Update, update)
-      if update.message do
-        update = %{update | message: parse_message(update.message)}
-      end
-      update
+      %{update | message: parse_message(update.message)}
     end
   end
 

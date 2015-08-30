@@ -1,0 +1,22 @@
+[
+  {
+    "request": {
+      "body": "",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegram.org/botTEST_TOKEN/getMe"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":{\"id\":666,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"}}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Content-Length": "80",
+        "Date": "Sun, 30 Aug 2015 08:21:21 GMT",
+        "Server": "nginx/1.6.2"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

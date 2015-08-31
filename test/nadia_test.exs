@@ -2,7 +2,7 @@ defmodule NadiaTest do
   use ExUnit.Case
   use ExVCR.Mock, adapter: ExVCR.Adapter.Hackney
 
-  alias Nadia.User
+  alias Nadia.Model.User
 
   setup_all do
     Application.put_env(:nadia, :token, "TEST_TOKEN")

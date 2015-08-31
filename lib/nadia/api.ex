@@ -3,11 +3,11 @@ defmodule Nadia.API do
   Provides basic functionalities for Telegram Bot API.
   """
 
-  alias Nadia.User
-  alias Nadia.Message
-  alias Nadia.Update
-  alias Nadia.UserProfilePhotos
-  alias Nadia.Error
+  alias Nadia.Model.User
+  alias Nadia.Model.Message
+  alias Nadia.Model.Update
+  alias Nadia.Model.UserProfilePhotos
+  alias Nadia.Model.Error
 
   defmacro __using__(_) do
     quote do

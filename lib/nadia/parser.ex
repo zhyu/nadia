@@ -3,19 +3,19 @@ defmodule Nadia.Parser do
   Provides parser logics for API results.
   """
 
-  alias Nadia.User
-  alias Nadia.GroupChat
-  alias Nadia.Message
-  alias Nadia.PhotoSize
-  alias Nadia.Audio
-  alias Nadia.Document
-  alias Nadia.Sticker
-  alias Nadia.Video
-  alias Nadia.Voice
-  alias Nadia.Contact
-  alias Nadia.Location
-  alias Nadia.Update
-  alias Nadia.UserProfilePhotos
+  alias Nadia.Model.User
+  alias Nadia.Model.GroupChat
+  alias Nadia.Model.Message
+  alias Nadia.Model.PhotoSize
+  alias Nadia.Model.Audio
+  alias Nadia.Model.Document
+  alias Nadia.Model.Sticker
+  alias Nadia.Model.Video
+  alias Nadia.Model.Voice
+  alias Nadia.Model.Contact
+  alias Nadia.Model.Location
+  alias Nadia.Model.Update
+  alias Nadia.Model.UserProfilePhotos
 
   @doc """
   parse from the API response json.

@@ -1,22 +1,24 @@
 [
-    {
-        "request": {
-            "body": "",
-            "headers": [],
-            "method": "post",
-            "options": [],
-            "url": "https://api.telegram.org/botTEST_TOKEN/getUpdates"
-        },
-        "response": {
-            "body": "{\"ok\":true,\"result\":[{\"update_id\":1,\n\"message\":{\"message_id\":1,\"from\":{\"id\":777,\"first_name\":\"Tester\",\"username\":\"tester\"},\"chat\":{\"id\":777,\"first_name\":\"Tester\",\"username\":\"tester\"},\"date\":1440926322,\"text\":\"test\"}}]}",
-            "headers": {
-                "Content-Type": "application/json",
-                "Content-Length": "280",
-                "Date": "Sun, 30 Aug 2015 09:18:49 GMT",
-                "Server": "nginx/1.6.2"
-            },
-            "status_code": 200,
-            "type": "ok"
-        }
+  {
+    "request": {
+      "body": "limit=1&reply_markup=",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegram.org/bot<TOKEN>/getUpdates"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":[{\"update_id\":573666881,\n\"message\":{\"message_id\":226,\"from\":{\"id\":65816728,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\"},\"chat\":{\"id\":65816728,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\"},\"date\":1440926322,\"text\":\"test\"}}]}",
+      "headers": {
+        "Server": "nginx/1.6.2",
+        "Date": "Mon, 31 Aug 2015 01:13:06 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "280",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
     }
+  }
 ]

@@ -36,7 +36,7 @@ defmodule Nadia.API do
   defp build_request(params, file_field) do
     params = params
     |> Keyword.update(:reply_markup, nil, &(Poison.encode!(&1)))
-    |> Enum.map(fn {k, v} -> {k, to_string(v)} end)
+    |> Enum.filter_map(fn {_, v} -> v end, fn {k, v} -> {k, to_string(v)} end)
     if !is_nil(file_field) and File.exists?(params[file_field]) do
       build_multipart_request(params, file_field)
     else

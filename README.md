@@ -29,7 +29,7 @@ config :nadia,
 ```elixir
 iex(1)> Nadia.get_me
 {:ok,
- %Nadia.User{first_name: "Nadia", id: 81420469, last_name: nil,
+ %Nadia.User{first_name: "Nadia", id: 666, last_name: nil,
   username: "nadia_bot"}}
 ```
 

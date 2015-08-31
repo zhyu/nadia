@@ -6,13 +6,14 @@ defmodule NadiaTest do
 
   setup_all do
     ExVCR.Config.filter_sensitive_data("bot[^/]+/", "bot<TOKEN>/")
+    ExVCR.Config.filter_sensitive_data("id\":\\d+", "id\":666")
     :ok
   end
 
   test "get_me" do
     use_cassette "get_me" do
       {:ok, me} = Nadia.get_me
-      assert me == %User{id: 81420469, first_name: "Nadia", username: "nadia_bot"}
+      assert me == %User{id: 666, first_name: "Nadia", username: "nadia_bot"}
     end
   end
 

@@ -8,10 +8,10 @@
       "url": "https://api.telegram.org/bot<TOKEN>/getMe"
     },
     "response": {
-      "body": "{\"ok\":true,\"result\":{\"id\":81420469,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"}}",
+      "body": "{\"ok\":true,\"result\":{\"id\":666,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"}}",
       "headers": {
-        "Server": "nginx/1.6.2",
-        "Date": "Mon, 31 Aug 2015 01:13:06 GMT",
+        "Server": "nginx/1.9.1",
+        "Date": "Mon, 31 Aug 2015 01:27:06 GMT",
         "Content-Type": "application/json",
         "Content-Length": "80",
         "Connection": "keep-alive",

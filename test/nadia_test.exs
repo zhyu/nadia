@@ -5,6 +5,7 @@ defmodule NadiaTest do
   alias Nadia.User
 
   setup_all do
+    Application.put_env(:nadia, :token, "TEST_TOKEN")
     ExVCR.Config.filter_sensitive_data("bot[^/]+/", "bot<TOKEN>/")
     ExVCR.Config.filter_sensitive_data("id\":\\d+", "id\":666")
     :ok

@@ -1,0 +1,24 @@
+[
+  {
+    "request": {
+      "body": "chat_id=666&action=typing",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegram.org/bot<TOKEN>/sendChatAction"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":true}",
+      "headers": {
+        "Server": "nginx/1.6.2",
+        "Date": "Tue, 01 Sep 2015 02:19:51 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "25",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

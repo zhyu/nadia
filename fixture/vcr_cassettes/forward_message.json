@@ -1,0 +1,24 @@
+[
+  {
+    "request": {
+      "body": "chat_id=666&from_chat_id=666&message_id=666",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegram.org/bot<TOKEN>/forwardMessage"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":{\"message_id\":666,\"from\":{\"id\":666,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"},\"chat\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\"},\"date\":1441073870,\"forward_from\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\"},\"forward_date\":1441073476,\"text\":\"aloha\"}}",
+      "headers": {
+        "Server": "nginx/1.6.2",
+        "Date": "Tue, 01 Sep 2015 02:17:50 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "345",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

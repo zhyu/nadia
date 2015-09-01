@@ -1,0 +1,24 @@
+[
+  {
+    "request": {
+      "body": "chat_id=666&text=aloha",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegram.org/bot<TOKEN>/sendMessage"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":{\"message_id\":666,\"from\":{\"id\":666,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"},\"chat\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\"},\"date\":1441073165,\"text\":\"aloha\"}}",
+      "headers": {
+        "Server": "nginx/1.6.2",
+        "Date": "Tue, 01 Sep 2015 02:06:05 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "225",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

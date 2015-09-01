@@ -1,0 +1,24 @@
+[
+  {
+    "request": {
+      "body": "chat_id=666&sticker=BQADBQADBgADmEjsA1aqdSxtzvvVAg",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegram.org/bot<TOKEN>/sendSticker"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":{\"message_id\":666,\"from\":{\"id\":666,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"},\"chat\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\"},\"date\":1441074482,\"sticker\":{\"width\":512,\"height\":512,\"thumb\":{\"file_id\":\"AAQFABNMdrMyAAR-0JXX3cuRxXsGAAIC\",\"file_size\":3800,\"width\":128,\"height\":128},\"file_id\":\"BQADBQADBgADmEjsA1aqdSxtzvvVAg\",\"file_size\":17680}}}",
+      "headers": {
+        "Server": "nginx/1.6.2",
+        "Date": "Tue, 01 Sep 2015 02:28:02 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "405",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

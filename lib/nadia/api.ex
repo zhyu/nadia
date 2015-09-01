@@ -50,5 +50,4 @@ defmodule Nadia.API do
     |> HTTPoison.post(build_request(options, file_field))
     |> process_response(method)
   end
-
 end

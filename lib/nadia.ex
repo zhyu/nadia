@@ -281,5 +281,4 @@ defmodule Nadia do
   """
   @spec set_webhook([{atom, any}]) :: :ok | {:error, Error.t}
   def set_webhook(options \\ []), do: request("setWebhook", options)
-
 end

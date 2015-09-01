@@ -89,5 +89,4 @@ defmodule Nadia.Model do
 
     def message(%Error{reason: reason}), do: inspect(reason)
   end
-
 end

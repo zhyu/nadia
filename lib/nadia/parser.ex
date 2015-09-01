@@ -119,5 +119,4 @@ defmodule Nadia.Parser do
       %{update | message: parse_message(update.message)}
     end
   end
-
 end

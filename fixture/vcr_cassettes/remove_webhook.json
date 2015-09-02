@@ -1,0 +1,24 @@
+[
+  {
+    "request": {
+      "body": "",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegram.org/bot<TOKEN>/setWebhook"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":true,\"description\":\"Webhook was deleted\"}",
+      "headers": {
+        "Server": "nginx/1.9.1",
+        "Date": "Wed, 02 Sep 2015 09:21:47 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "61",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

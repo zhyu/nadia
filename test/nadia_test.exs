@@ -36,11 +36,29 @@ defmodule NadiaTest do
     end
   end
 
+  test "send_photo" do
+    use_cassette "send_photo" do
+      file_id = "AgADBQADq6cxG7Vg2gSIF48DtOpj4-edszIABGGN5AM6XKzcLjwAAgI"
+      {:ok, message} = Nadia.send_photo(666, file_id)
+      assert is_list(message.photo)
+      assert Enum.any?(message.photo, &(&1.file_id == file_id))
+    end
+  end
+
   test "send_sticker" do
     use_cassette "send_sticker" do
       {:ok, message} = Nadia.send_sticker(666, "BQADBQADBgADmEjsA1aqdSxtzvvVAg")
       refute is_nil(message.sticker)
       assert message.sticker.file_id == "BQADBQADBgADmEjsA1aqdSxtzvvVAg"
+    end
+  end
+
+  test "send_location" do
+    use_cassette "send_location" do
+      {:ok, message} = Nadia.send_location(666, 1, 2)
+      refute is_nil(message.location)
+      assert_in_delta message.location.latitude, 1, 1.0e-3
+      assert_in_delta message.location.longitude, 2, 1.0e-3
     end
   end
 
@@ -50,10 +68,30 @@ defmodule NadiaTest do
     end
   end
 
+  test "get_user_profile_photos" do
+    use_cassette "get_user_profile_photos" do
+      {:ok, user_profile_photos} = Nadia.get_user_profile_photos(666)
+      assert user_profile_photos.total_count == 1
+      refute is_nil(user_profile_photos.photos)
+    end
+  end
+
   test "get_updates" do
     use_cassette "get_updates" do
       {:ok, updates} = Nadia.get_updates(limit: 1)
       assert length(updates) == 1
+    end
+  end
+
+  test "set webhook" do
+    use_cassette "set_webhook" do
+      assert Nadia.set_webhook(url: "https://telegram.org/") == :ok
+    end
+  end
+
+  test "delete webhook" do
+    use_cassette "delete_webhook" do
+      assert Nadia.set_webhook == :ok
     end
   end
 end

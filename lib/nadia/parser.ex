@@ -35,12 +35,10 @@ defmodule Nadia.Parser do
   @keys_of_photo [:photo, :new_chat_photo]
   @keys_of_user [:from, :forward_from, :new_chat_participant, :left_chat_participant]
 
-  defp parse(_, nil), do: nil
   defp parse(:photo, l) when is_list(l), do: Enum.map(l, &(parse(PhotoSize, &1)))
   defp parse(:photos, l) when is_list(l), do: Enum.map(l, &(parse(:photo, &1)))
   defp parse(:updates, l) when is_list(l), do: Enum.map(l, &(parse(Update, &1)))
   defp parse(type, val), do: struct(type, Enum.map(val, &(parse(&1))))
-  defp parse({key, nil}), do: {key, nil}
   defp parse({:chat, val = %{title: _}}), do: {:chat, parse(GroupChat, val)}
   defp parse({:chat, val}), do: {:chat, parse(User, val)}
   defp parse({:audio, val}), do: {:audio, parse(Audio, val)}

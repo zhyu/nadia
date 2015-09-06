@@ -33,7 +33,7 @@ defmodule Nadia do
   Options:
   * `:disable_web_page_preview` - Disables link previews for links in this message
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user.
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_message(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_message(chat_id, text, options \\ []) do
@@ -67,7 +67,7 @@ defmodule Nadia do
   Options:
   * `:caption` - Photo caption (may also be used when resending photos by `file_id`)
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_photo(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_photo(chat_id, photo, options \\ []) do
@@ -98,7 +98,7 @@ defmodule Nadia do
   * `:performer` - Performer
   * `:title` - Track name
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_audio(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_audio(chat_id, audio, options \\ []) do
@@ -119,7 +119,7 @@ defmodule Nadia do
 
   Options:
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_document(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_document(chat_id, document, options \\ []) do
@@ -138,7 +138,7 @@ defmodule Nadia do
 
   Options:
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_sticker(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_sticker(chat_id, sticker, options \\ []) do
@@ -162,7 +162,7 @@ defmodule Nadia do
   * `:duration` - Duration of the video in seconds
   * `:caption` - Video caption (may also be used when resending videos by `file_id`)
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_video(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_video(chat_id, video, options \\ []) do
@@ -186,7 +186,7 @@ defmodule Nadia do
   Options:
   * `:duration` - Duration of the audio in seconds
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_voice(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_voice(chat_id, voice, options \\ []) do
@@ -205,7 +205,7 @@ defmodule Nadia do
 
   Options:
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_location(integer, float, float, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_location(chat_id, latitude, longitude, options \\ []) do

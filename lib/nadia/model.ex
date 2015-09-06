@@ -83,6 +83,21 @@ defmodule Nadia.Model do
     @type t :: %UserProfilePhotos{total_count: integer, photos: [[PhotoSize.t]]}
   end
 
+  defmodule ReplyKeyboardMarkup do
+    defstruct keyboard: [], resize_keyboard: false, one_time_keyboard: false, selective: false
+    @type t :: %ReplyKeyboardMarkup{keyboard: [[binary]], resize_keyboard: atom, one_time_keyboard: atom, selective: atom}
+  end
+
+  defmodule ReplyKeyboardHide do
+    defstruct hide_keyboard: true, selective: false
+    @type t :: %ReplyKeyboardHide{hide_keyboard: true, selective: atom}
+  end
+
+  defmodule ForceReply do
+    defstruct force_reply: true, selective: false
+    @type t :: %ForceReply{force_reply: true, selective: atom}
+  end
+
   defmodule Error do
     defexception reason: nil
     @type t :: %Error{reason: any}

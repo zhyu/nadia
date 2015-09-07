@@ -26,14 +26,17 @@ defmodule Nadia do
   On success, the sent Message is returned.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
+  `Nadia.Model.GroupChat` id
   * `text` - Text of the message to be sent
   * `options` - orddict of options
 
   Options:
   * `:disable_web_page_preview` - Disables link previews for links in this message
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
+  force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
+  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_message(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_message(chat_id, text, options \\ []) do
@@ -45,8 +48,10 @@ defmodule Nadia do
   On success, the sent Message is returned.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
-  * `from_chat_id` - Unique identifier for the chat where the original message was sent — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
+  `Nadia.Model.GroupChat` id
+  * `from_chat_id` - Unique identifier for the chat where the original message was
+  sent — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
   * `message_id` - Unique message identifier
   """
   @spec forward_message(integer, integer, integer) :: {:ok, Message.t} | {:error, Error.t}
@@ -59,15 +64,18 @@ defmodule Nadia do
   On success, the sent Message is returned.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
-  * `photo` - Photo to send. Either a `file_id` to resend a photo that is already on the Telegram servers,
-  or a `file_path` to upload a new photo
+  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
+  `Nadia.Model.GroupChat` id
+  * `photo` - Photo to send. Either a `file_id` to resend a photo that is already on
+  the Telegram servers, or a `file_path` to upload a new photo
   * `options` - orddict of options
 
   Options:
   * `:caption` - Photo caption (may also be used when resending photos by `file_id`)
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
+  force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
+  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_photo(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_photo(chat_id, photo, options \\ []) do
@@ -88,9 +96,10 @@ defmodule Nadia do
   future. For sending voice messages, use the sendVoice method instead.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
-  * `audio` - Audio to send. Either a `file_id` to resend an audio that is already on the Telegram servers,
-  or a `file_path` to upload a new audio
+  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
+  `Nadia.Model.GroupChat` id
+  * `audio` - Audio to send. Either a `file_id` to resend an audio that is already on
+  the Telegram servers, or a `file_path` to upload a new audio
   * `options` - orddict of options
 
   Options:
@@ -98,7 +107,9 @@ defmodule Nadia do
   * `:performer` - Performer
   * `:title` - Track name
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
+  force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
+  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_audio(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_audio(chat_id, audio, options \\ []) do
@@ -112,14 +123,17 @@ defmodule Nadia do
   may be changed in the future.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
-  * `document` - File to send. Either a `file_id` to resend a file that is already on the Telegram servers,
-  or a `file_path` to upload a new file
+  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
+  `Nadia.Model.GroupChat` id
+  * `document` - File to send. Either a `file_id` to resend a file that is already on
+  the Telegram servers, or a `file_path` to upload a new file
   * `options` - orddict of options
 
   Options:
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
+  force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
+  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_document(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_document(chat_id, document, options \\ []) do
@@ -131,14 +145,17 @@ defmodule Nadia do
   On success, the sent Message is returned.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
-  * `sticker` - File to send. Either a `file_id` to resend a sticker that is already on the Telegram servers,
-  or a `file_path` to upload a new sticker
+  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
+  `Nadia.Model.GroupChat` id
+  * `sticker` - File to send. Either a `file_id` to resend a sticker that is already on
+  the Telegram servers, or a `file_path` to upload a new sticker
   * `options` - orddict of options
 
   Options:
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
+  force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
+  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_sticker(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_sticker(chat_id, sticker, options \\ []) do
@@ -153,16 +170,19 @@ defmodule Nadia do
   changed in the future.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
-  * `video` - Video to send. Either a `file_id` to resend a video that is already on the Telegram servers,
-  or a `file_path` to upload a new video
+  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
+  `Nadia.Model.GroupChat` id
+  * `video` - Video to send. Either a `file_id` to resend a video that is already on
+  the Telegram servers, or a `file_path` to upload a new video
   * `options` - orddict of options
 
   Options:
   * `:duration` - Duration of the video in seconds
   * `:caption` - Video caption (may also be used when resending videos by `file_id`)
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
+  force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
+  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_video(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_video(chat_id, video, options \\ []) do
@@ -178,15 +198,18 @@ defmodule Nadia do
   changed in the future.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
-  * `voice` - Audio to send. Either a `file_id` to resend an audio that is already on the Telegram servers,
-  or a `file_path` to upload a new audio
+  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
+  `Nadia.Model.GroupChat` id
+  * `voice` - Audio to send. Either a `file_id` to resend an audio that is already on
+  the Telegram servers, or a `file_path` to upload a new audio
   * `options` - orddict of options
 
   Options:
   * `:duration` - Duration of the audio in seconds
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
+  force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
+  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_voice(integer, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_voice(chat_id, voice, options \\ []) do
@@ -198,14 +221,17 @@ defmodule Nadia do
   On success, the sent Message is returned.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
+  `Nadia.Model.GroupChat` id
   * `latitude` - Latitude of location
   * `longitude` - Longitude of location
   * `options` - orddict of options
 
   Options:
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
+  force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
+  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
   @spec send_location(integer, float, float, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
   def send_location(chat_id, latitude, longitude, options \\ []) do
@@ -218,14 +244,16 @@ defmodule Nadia do
   arrives from your bot, Telegram clients clear its typing status).
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
-  * `action` - Type of action to broadcast. Choose one, depending on what the user is about to receive:
-  * `typing` for text messages
-  * `upload_photo` for photos
-  * `record_video` or `upload_video` for videos
-  * `record_audio` or `upload_audio` for audio files
-  * `upload_document` for general files
-  * `find_location` for location data
+  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
+  `Nadia.Model.GroupChat` id
+  * `action` - Type of action to broadcast. Choose one, depending on what the user is
+  about to receive:
+      * `typing` for text messages
+      * `upload_photo` for photos
+      * `record_video` or `upload_video` for videos
+      * `record_audio` or `upload_audio` for audio files
+      * `upload_document` for general files
+      * `find_location` for location data
   """
   @spec send_chat_action(integer, binary) :: :ok | {:error, Error.t}
   def send_chat_action(chat_id, action) do
@@ -241,8 +269,10 @@ defmodule Nadia do
   * `options` - orddict of options
 
   Options:
-  * `:offset` - Sequential number of the first photo to be returned. By default, all photos are returned
-  * `:limit` - Limits the number of photos to be retrieved. Values between 1—100 are accepted. Defaults to 100
+  * `:offset` - Sequential number of the first photo to be returned. By default, all
+  photos are returned
+  * `:limit` - Limits the number of photos to be retrieved. Values between 1—100 are
+  accepted. Defaults to 100
   """
   @spec get_user_profile_photos(integer, [{atom, any}]) :: {:ok, UserProfilePhotos.t} | {:error, Error.t}
   def get_user_profile_photos(user_id, options \\ []) do
@@ -257,12 +287,15 @@ defmodule Nadia do
   * `options` - orddict of options
 
   Options:
-  * `:offset` - Identifier of the first update to be returned. Must be greater by one than the highest
-  among the identifiers of previously received updates. By default, updates starting with the earliest
-  unconfirmed update are returned. An update is considered confirmed as soon as `get_updates` is called
-  with an `offset` higher than its `update_id`.
-  * `:limit` - Limits the number of photos to be retrieved. Values between 1—100 are accepted. Defaults to 100
-  * `:timeout` - Timeout in seconds for long polling. Defaults to 0, i.e. usual short polling
+  * `:offset` - Identifier of the first update to be returned. Must be greater by one
+  than the highest among the identifiers of previously received updates. By default,
+  updates starting with the earliest unconfirmed update are returned. An update is
+  considered confirmed as soon as `get_updates` is called with an `offset` higher than
+  its `update_id`.
+  * `:limit` - Limits the number of photos to be retrieved. Values between 1—100 are
+  accepted. Defaults to 100
+  * `:timeout` - Timeout in seconds for long polling. Defaults to 0, i.e. usual short
+  polling
   """
   @spec get_updates([{atom, any}]) :: {:ok, [Update.t]} | {:error, Error.t}
   def get_updates(options \\ []), do: request("getUpdates", options)
@@ -277,7 +310,8 @@ defmodule Nadia do
   * `options` - orddict of options
 
   Options:
-  * `:url` - HTTPS url to send updates to. Use an empty string to remove webhook integration
+  * `:url` - HTTPS url to send updates to. Use an empty string to remove webhook
+  integration
   """
   @spec set_webhook([{atom, any}]) :: :ok | {:error, Error.t}
   def set_webhook(options \\ []), do: request("setWebhook", options)

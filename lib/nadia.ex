@@ -32,6 +32,8 @@ defmodule Nadia do
   * `options` - orddict of options
 
   Options:
+  * `:parse_mode` - Use `Markdown`, if you want Telegram apps to show bold, italic
+  and inline URLs in your bot's message
   * `:disable_web_page_preview` - Disables link previews for links in this message
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to

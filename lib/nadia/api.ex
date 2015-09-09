@@ -44,6 +44,14 @@ defmodule Nadia.API do
     end
   end
 
+  @doc """
+  Generic method to call Telegram Bot API.
+
+  Args:
+  * `method` - name of API method
+  * `options` - orddict of options
+  * `file_field` - specify the key of file_field in `options` when sending files
+  """
   def request(method, options \\ [], file_field \\ nil) do
     method
     |> build_url

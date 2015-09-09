@@ -18,7 +18,11 @@ defmodule Nadia.Parser do
   alias Nadia.Model.UserProfilePhotos
 
   @doc """
-  parse from the API response json.
+  parse `result` field of decoded API response json.
+
+  Args:
+  * `result` - `result` field of decoded API response json
+  * `method` - name of API method
   """
   def parse_result(result, method) do
     case method do

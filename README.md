@@ -22,6 +22,16 @@ config :nadia,
   token: "bot token"
 ```
 
+And then, in `mix.exs`, list `:nadia` as an application inside `application/0`:
+
+```elixir
+def application do
+  [applications: [:nadia]]
+end
+```
+
+Now Mix will guarantee the `:nadia` application is started before your application is started.
+
 ## Usage
 
 ### get_me

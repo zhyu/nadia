@@ -13,14 +13,14 @@ defmodule Nadia.API do
 
   defp process_response(response, method) do
     case response do
-      {:error, %HTTPoison.Error{reason: reason}} -> {:error, %Error{reason: reason}}
-      {:ok, %HTTPoison.Response{status_code: 403}} -> {:error, %Error{reason: "token invalid"}}
-      {:ok, %HTTPoison.Response{body: body}} ->
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         case Poison.decode!(body, keys: :atoms) do
           %{ok: false, description: description} -> {:error, %Error{reason: description}}
           %{result: true} -> :ok
           %{result: result} -> {:ok, Nadia.Parser.parse_result(result, method)}
         end
+      {:ok, %HTTPoison.Response{body: body}} -> {:error, %Error{reason: body}}
+      {:error, %HTTPoison.Error{reason: reason}} -> {:error, %Error{reason: reason}}
     end
   end
 

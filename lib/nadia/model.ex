@@ -83,6 +83,11 @@ defmodule Nadia.Model do
     @type t :: %UserProfilePhotos{total_count: integer, photos: [[PhotoSize.t]]}
   end
 
+  defmodule File do
+    defstruct file_id: nil, file_size: nil, file_path: nil
+    @type t :: %File{file_id: binary, file_size: integer, file_path: binary}
+  end
+
   defmodule ReplyKeyboardMarkup do
     defstruct keyboard: [], resize_keyboard: false, one_time_keyboard: false, selective: false
     @type t :: %ReplyKeyboardMarkup{keyboard: [[binary]], resize_keyboard: atom, one_time_keyboard: atom, selective: atom}

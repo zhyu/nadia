@@ -1,0 +1,24 @@
+[
+  {
+    "request": {
+      "body": "file_id=BQADBQADBgADmEjsA1aqdSxtzvvVAg",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegram.org/bot<TOKEN>/getFile"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":{\"file_id\":\"BQADBQADBgADmEjsA1aqdSxtzvvVAg\",\"file_size\":17680,\"file_path\":\"document\\/file_1\"}}",
+      "headers": {
+        "Server": "nginx/1.6.2",
+        "Date": "Sun, 20 Sep 2015 14:22:46 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "114",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

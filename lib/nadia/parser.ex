@@ -16,6 +16,7 @@ defmodule Nadia.Parser do
   alias Nadia.Model.Location
   alias Nadia.Model.Update
   alias Nadia.Model.UserProfilePhotos
+  alias Nadia.Model.File
 
   @doc """
   parse `result` field of decoded API response json.
@@ -31,6 +32,7 @@ defmodule Nadia.Parser do
       "getUserProfilePhotos" -> parse(UserProfilePhotos, result)
       "getUpdates" -> parse(:updates, result)
       "setWebhook" -> result
+      "getFile" -> parse(File, result)
       _ -> parse(Message, result)
     end
   end

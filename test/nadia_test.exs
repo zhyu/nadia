@@ -94,4 +94,12 @@ defmodule NadiaTest do
       assert Nadia.set_webhook == :ok
     end
   end
+
+  test "get_file" do
+    use_cassette "get_file" do
+      {:ok, file} = Nadia.get_file("BQADBQADBgADmEjsA1aqdSxtzvvVAg")
+      refute is_nil(file.file_path)
+      assert file.file_id == "BQADBQADBgADmEjsA1aqdSxtzvvVAg"
+    end
+  end
 end

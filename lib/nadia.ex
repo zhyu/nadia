@@ -10,6 +10,7 @@ defmodule Nadia do
   alias Nadia.Model.Message
   alias Nadia.Model.Update
   alias Nadia.Model.UserProfilePhotos
+  alias Nadia.Model.File
   alias Nadia.Model.Error
 
   import Nadia.API
@@ -317,4 +318,19 @@ defmodule Nadia do
   """
   @spec set_webhook([{atom, any}]) :: :ok | {:error, Error.t}
   def set_webhook(options \\ []), do: request("setWebhook", options)
+
+  @doc """
+  Use this method to get basic info about a file and prepare it for downloading.
+  For the moment, bots can download files of up to 20MB in size.
+  On success, a File object is returned.
+  The file can then be downloaded via the link
+  `https://api.telegram.org/file/bot<token>/<file_path>`, where <file_path> is taken
+  from the response. It is guaranteed that the link will be valid for at least 1 hour.
+  When the link expires, a new one can be requested by calling `get_file` again.
+
+  Args:
+  * `file_id` - File identifier to get info about
+  """
+  @spec get_file(binary) :: {:ok, File.t} | {:error, Error.t}
+  def get_file(file_id), do: request("getFile", file_id: file_id)
 end

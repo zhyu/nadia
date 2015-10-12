@@ -38,7 +38,7 @@ defmodule Nadia.Mixfile do
   end
 
   defp package do
-    [contributors: ["zhyu"],
+    [maintainers: ["zhyu"],
      licenses: ["MIT"],
      links: %{"GitHub" => "https://github.com/zhyu/nadia"} ]
   end

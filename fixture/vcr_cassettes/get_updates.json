@@ -1,19 +1,19 @@
 [
   {
     "request": {
-      "body": "limit=1&reply_markup=",
+      "body": "limit=1",
       "headers": [],
       "method": "post",
       "options": [],
       "url": "https://api.telegram.org/bot<TOKEN>/getUpdates"
     },
     "response": {
-      "body": "{\"ok\":true,\"result\":[{\"update_id\":666,\n\"message\":{\"message_id\":666,\"from\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\"},\"chat\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\"},\"date\":1440926322,\"text\":\"test\"}}]}",
+      "body": "{\"ok\":true,\"result\":[{\"update_id\":666,\n\"message\":{\"message_id\":666,\"from\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\"},\"chat\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\",\"type\":\"private\"},\"date\":1444613871,\"text\":\"aloha\"}}]}",
       "headers": {
-        "Server": "nginx/1.9.1",
-        "Date": "Mon, 31 Aug 2015 01:27:06 GMT",
+        "Server": "nginx/1.6.2",
+        "Date": "Mon, 12 Oct 2015 01:38:35 GMT",
         "Content-Type": "application/json",
-        "Content-Length": "280",
+        "Content-Length": "299",
         "Connection": "keep-alive",
         "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
       },

@@ -8,12 +8,12 @@
       "url": "https://api.telegram.org/bot<TOKEN>/sendPhoto"
     },
     "response": {
-      "body": "{\"ok\":true,\"result\":{\"message_id\":666,\"from\":{\"id\":666,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"},\"chat\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\"},\"date\":1441172077,\"photo\":[{\"file_id\":\"AgADBQADq6cxG7Vg2gSIF48DtOpj4-edszIABIVpKnHvuiG-KzwAAgI\",\"file_size\":11732,\"width\":160,\"height\":160},{\"file_id\":\"AgADBQADq6cxG7Vg2gSIF48DtOpj4-edszIABOmYjIschKjOLDwAAgI\",\"file_size\":33163,\"width\":320,\"height\":320},{\"file_id\":\"AgADBQADq6cxG7Vg2gSIF48DtOpj4-edszIABMmuxmnYfxqALTwAAgI\",\"file_size\":86725,\"width\":640,\"height\":640},{\"file_id\":\"AgADBQADq6cxG7Vg2gSIF48DtOpj4-edszIABGGN5AM6XKzcLjwAAgI\",\"file_size\":184813,\"width\":1090,\"height\":1090}]}}",
+      "body": "{\"ok\":true,\"result\":{\"message_id\":666,\"from\":{\"id\":666,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"},\"chat\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\",\"type\":\"private\"},\"date\":1444613739,\"photo\":[{\"file_id\":\"AgADBQADq6cxG7Vg2gSIF48DtOpj4-edszIABIVpKnHvuiG-KzwAAgI\",\"file_size\":11732,\"width\":160,\"height\":160},{\"file_id\":\"AgADBQADq6cxG7Vg2gSIF48DtOpj4-edszIABOmYjIschKjOLDwAAgI\",\"file_size\":33163,\"width\":320,\"height\":320},{\"file_id\":\"AgADBQADq6cxG7Vg2gSIF48DtOpj4-edszIABMmuxmnYfxqALTwAAgI\",\"file_size\":86725,\"width\":640,\"height\":640},{\"file_id\":\"AgADBQADq6cxG7Vg2gSIF48DtOpj4-edszIABGGN5AM6XKzcLjwAAgI\",\"width\":1090,\"height\":1090}]}}",
       "headers": {
-        "Server": "nginx/1.9.1",
-        "Date": "Wed, 02 Sep 2015 05:34:37 GMT",
+        "Server": "nginx/1.6.2",
+        "Date": "Mon, 12 Oct 2015 01:35:39 GMT",
         "Content-Type": "application/json",
-        "Content-Length": "675",
+        "Content-Length": "674",
         "Connection": "keep-alive",
         "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
       },

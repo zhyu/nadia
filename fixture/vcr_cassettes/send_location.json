@@ -8,12 +8,12 @@
       "url": "https://api.telegram.org/bot<TOKEN>/sendLocation"
     },
     "response": {
-      "body": "{\"ok\":true,\"result\":{\"message_id\":666,\"from\":{\"id\":666,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"},\"chat\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\"},\"date\":1441185268,\"location\":{\"longitude\":1.999999,\"latitude\":1.000000}}}",
+      "body": "{\"ok\":true,\"result\":{\"message_id\":666,\"from\":{\"id\":666,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"},\"chat\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\",\"type\":\"private\"},\"date\":1444613738,\"location\":{\"longitude\":1.999999,\"latitude\":1.000000}}}",
       "headers": {
-        "Server": "nginx/1.9.1",
-        "Date": "Wed, 02 Sep 2015 09:14:28 GMT",
+        "Server": "nginx/1.6.2",
+        "Date": "Mon, 12 Oct 2015 01:35:38 GMT",
         "Content-Type": "application/json",
-        "Content-Length": "264",
+        "Content-Length": "282",
         "Connection": "keep-alive",
         "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
       },

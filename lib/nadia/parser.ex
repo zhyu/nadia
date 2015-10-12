@@ -4,7 +4,7 @@ defmodule Nadia.Parser do
   """
 
   alias Nadia.Model.User
-  alias Nadia.Model.GroupChat
+  alias Nadia.Model.Chat
   alias Nadia.Model.Message
   alias Nadia.Model.PhotoSize
   alias Nadia.Model.Audio
@@ -45,8 +45,7 @@ defmodule Nadia.Parser do
   defp parse(:photos, l) when is_list(l), do: Enum.map(l, &(parse(:photo, &1)))
   defp parse(:updates, l) when is_list(l), do: Enum.map(l, &(parse(Update, &1)))
   defp parse(type, val), do: struct(type, Enum.map(val, &(parse(&1))))
-  defp parse({:chat, val = %{title: _}}), do: {:chat, parse(GroupChat, val)}
-  defp parse({:chat, val}), do: {:chat, parse(User, val)}
+  defp parse({:chat, val}), do: {:chat, parse(Chat, val)}
   defp parse({:audio, val}), do: {:audio, parse(Audio, val)}
   defp parse({:video, val}), do: {:video, parse(Video, val)}
   defp parse({:voice, val}), do: {:voice, parse(Voice, val)}

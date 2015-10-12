@@ -11,9 +11,9 @@ defmodule Nadia.Model do
     @type t :: %User{id: integer, first_name: binary, last_name: binary, username: binary}
   end
 
-  defmodule GroupChat do
-    defstruct id: nil, title: nil
-    @type t :: %GroupChat{id: integer, title: binary}
+  defmodule Chat do
+    defstruct id: nil, type: nil, title: nil, username: nil, first_name: nil, last_name: nil
+    @type t :: %Chat{id: integer, type: binary, title: binary, username: binary, first_name: binary, last_name: binary}
   end
 
   defmodule PhotoSize do

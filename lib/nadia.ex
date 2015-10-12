@@ -27,8 +27,8 @@ defmodule Nadia do
   On success, the sent Message is returned.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
-  `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
   * `text` - Text of the message to be sent
   * `options` - orddict of options
 
@@ -51,10 +51,10 @@ defmodule Nadia do
   On success, the sent Message is returned.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
-  `Nadia.Model.GroupChat` id
-  * `from_chat_id` - Unique identifier for the chat where the original message was
-  sent — `Nadia.Model.User `or `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `from_chat_id` - Unique identifier for the chat where the original message was sent
+  or username of the target channel (in the format @channelusername)
   * `message_id` - Unique message identifier
   """
   @spec forward_message(integer, integer, integer) :: {:ok, Message.t} | {:error, Error.t}
@@ -67,8 +67,8 @@ defmodule Nadia do
   On success, the sent Message is returned.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
-  `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
   * `photo` - Photo to send. Either a `file_id` to resend a photo that is already on
   the Telegram servers, or a `file_path` to upload a new photo
   * `options` - orddict of options
@@ -99,8 +99,8 @@ defmodule Nadia do
   future. For sending voice messages, use the sendVoice method instead.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
-  `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
   * `audio` - Audio to send. Either a `file_id` to resend an audio that is already on
   the Telegram servers, or a `file_path` to upload a new audio
   * `options` - orddict of options
@@ -126,8 +126,8 @@ defmodule Nadia do
   may be changed in the future.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
-  `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
   * `document` - File to send. Either a `file_id` to resend a file that is already on
   the Telegram servers, or a `file_path` to upload a new file
   * `options` - orddict of options
@@ -148,8 +148,8 @@ defmodule Nadia do
   On success, the sent Message is returned.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
-  `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
   * `sticker` - File to send. Either a `file_id` to resend a sticker that is already on
   the Telegram servers, or a `file_path` to upload a new sticker
   * `options` - orddict of options
@@ -173,8 +173,8 @@ defmodule Nadia do
   changed in the future.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
-  `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
   * `video` - Video to send. Either a `file_id` to resend a video that is already on
   the Telegram servers, or a `file_path` to upload a new video
   * `options` - orddict of options
@@ -201,8 +201,8 @@ defmodule Nadia do
   changed in the future.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
-  `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
   * `voice` - Audio to send. Either a `file_id` to resend an audio that is already on
   the Telegram servers, or a `file_path` to upload a new audio
   * `options` - orddict of options
@@ -224,8 +224,8 @@ defmodule Nadia do
   On success, the sent Message is returned.
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
-  `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
   * `latitude` - Latitude of location
   * `longitude` - Longitude of location
   * `options` - orddict of options
@@ -247,8 +247,8 @@ defmodule Nadia do
   arrives from your bot, Telegram clients clear its typing status).
 
   Args:
-  * `chat_id` - Unique identifier for the message recipient — `Nadia.Model.User `or
-  `Nadia.Model.GroupChat` id
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
   * `action` - Type of action to broadcast. Choose one, depending on what the user is
   about to receive:
       * `typing` for text messages

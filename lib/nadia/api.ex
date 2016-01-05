@@ -5,6 +5,7 @@ defmodule Nadia.API do
 
   alias Nadia.Model.Error
 
+  @default_timeout 4
   @base_url "https://api.telegram.org/bot"
 
   defp token, do: Application.get_env(:nadia, :token)
@@ -53,9 +54,10 @@ defmodule Nadia.API do
   * `file_field` - specify the key of file_field in `options` when sending files
   """
   def request(method, options \\ [], file_field \\ nil) do
+    timeout = ((options[:timeout] || @default_timeout) + 1) * 1000
     method
     |> build_url
-    |> HTTPoison.post(build_request(options, file_field))
+    |> HTTPoison.post(build_request(options, file_field), [], recv_timeout: timeout)
     |> process_response(method)
   end
 end

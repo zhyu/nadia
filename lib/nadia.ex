@@ -351,8 +351,8 @@ defmodule Nadia do
   @spec answer_inline_query(binary, list) :: :ok | {:error, Error.t}
   def answer_inline_query(inline_query_id, results, options \\ []) do
     encoded_results = results
-    |> Enum.map(fn p ->
-         for {k, v} <- Map.from_struct(p), v != nil, into: %{}, do: {k, v}
+    |> Enum.map(fn result ->
+         for {k, v} <- Map.from_struct(result), v != nil, into: %{}, do: {k, v}
        end)
     |> Poison.encode!
     args = [inline_query_id: inline_query_id, results: encoded_results]

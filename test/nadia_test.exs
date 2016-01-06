@@ -102,4 +102,11 @@ defmodule NadiaTest do
       assert file.file_id == "BQADBQADBgADmEjsA1aqdSxtzvvVAg"
     end
   end
+
+  test "answer_inline_query" do
+    photo = %Nadia.Model.InlineQueryResultPhoto{id: "1", photo_url: "http://vignette1.wikia.nocookie.net/cardfight/images/5/53/Monokuma.jpg/revision/latest?cb=20130928103410", thumb_url: "http://vignette1.wikia.nocookie.net/cardfight/images/5/53/Monokuma.jpg/revision/latest?cb=20130928103410"}
+    use_cassette "answer_inline_query" do
+      assert :ok == Nadia.answer_inline_query(666, [photo])
+    end
+  end
 end

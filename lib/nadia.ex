@@ -6,12 +6,7 @@ defmodule Nadia do
   https://core.telegram.org/bots/api#available-methods
   """
 
-  alias Nadia.Model.User
-  alias Nadia.Model.Message
-  alias Nadia.Model.Update
-  alias Nadia.Model.UserProfilePhotos
-  alias Nadia.Model.File
-  alias Nadia.Model.Error
+  alias Nadia.Model.{User, Message, Update, UserProfilePhotos, File, Error}
 
   import Nadia.API
 

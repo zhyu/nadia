@@ -2,9 +2,7 @@ defmodule Nadia.ParserTest do
   use ExUnit.Case, async: true
 
   alias Nadia.Parser
-  alias Nadia.Model.User
-  alias Nadia.Model.PhotoSize
-  alias Nadia.Model.UserProfilePhotos
+  alias Nadia.Model.{User, PhotoSize, UserProfilePhotos}
 
   test "parse result of get_me" do
     me = Parser.parse_result(%{id: 666, first_name: "Nadia", last_name: nil,

@@ -348,7 +348,7 @@ defmodule Nadia do
   * `is_personal` - Pass True, if results may be cached on the server side only for the user that sent the query. By default, results may be returned to any user who sends the same query
   * `next_offset` - Pass the offset that a client should send in the next query with the same text to receive more results. Pass an empty string if there are no more results or if you don‘t support pagination. Offset length can’t exceed 64 bytes.
   """
-  @spec answer_inline_query(binary, list) :: :ok | {:error, Error.t}
+  @spec answer_inline_query(binary, [{atom, any}]) :: :ok | {:error, Error.t}
   def answer_inline_query(inline_query_id, results, options \\ []) do
     encoded_results = results
     |> Enum.map(fn result ->

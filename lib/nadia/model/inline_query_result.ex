@@ -1,4 +1,10 @@
 defmodule Nadia.Model.InlineQueryResult do
+  @type t :: Nadia.Model.InlineQueryResult.Photo.t |
+             Nadia.Model.InlineQueryResult.Article.t |
+             Nadia.Model.InlineQueryResult.Gif.t |
+             Nadia.Model.InlineQueryResult.Mpeg4Gif.t |
+             Nadia.Model.InlineQueryResult.Video.t
+
   defmodule Photo do
     defstruct type: "photo", id: nil, photo_url: nil, photo_width: nil,
       photo_height: nil, thumb_url: nil, title: nil, description: nil,

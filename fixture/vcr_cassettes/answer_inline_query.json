@@ -1,0 +1,23 @@
+[
+  {
+    "request": {
+      "body": "inline_query_id=666&results=%5b%7b%22type%22%3a%22photo%22%2c%22thumb_url%22%3a%22http%3a%2f%2fvignette1.wikia.nocookie.net%2fcardfight%2fimages%2f5%2f53%2fMonokuma.jpg%2frevision%2flatest%3fcb%3d20130928103410%22%2c%22photo_url%22%3a%22http%3a%2f%2fvignette1.wikia.nocookie.net%2fcardfight%2fimages%2f5%2f53%2fMonokuma.jpg%2frevision%2flatest%3fcb%3d20130928103410%22%2c%22id%22%3a%221%22%7d%5d",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegram.org/bot<TOKEN>/answerInlineQuery"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":true}",
+      "headers": {
+        "Server": "nginx/1.6.2",
+        "Date": "Wed, 06 Jan 2016 12:18:17 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "84",
+        "Connection": "keep-alive"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

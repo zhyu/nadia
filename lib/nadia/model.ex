@@ -73,9 +73,14 @@ defmodule Nadia.Model do
                         new_chat_photo: [PhotoSize.t], delete_chat_photo: atom, group_chat_created: atom}
   end
 
+  defmodule InlineQuery do
+    defstruct id: nil, from: nil, query: nil, offset: nil
+    @type t :: %InlineQuery{id: binary, from: User.t, query: binary, offset: integer}
+  end
+
   defmodule Update do
-    defstruct update_id: nil, message: nil
-    @type t :: %Update{update_id: integer, message: Message.t}
+    defstruct update_id: nil, message: nil, inline_query: nil
+    @type t :: %Update{update_id: integer, message: Message.t, inline_query: InlineQuery.t}
   end
 
   defmodule UserProfilePhotos do
@@ -109,4 +114,5 @@ defmodule Nadia.Model do
 
     def message(%Error{reason: reason}), do: inspect(reason)
   end
+
 end

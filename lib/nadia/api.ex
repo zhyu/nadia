@@ -9,7 +9,7 @@ defmodule Nadia.API do
   @base_url "https://api.telegram.org/bot"
 
   defp token, do: Application.get_env(:nadia, :token)
-  defp opt_recv_timeout, do: Application.get_env(:nadia, :opt_recv_timeout)
+  defp opt_recv_timeout, do: Application.get_env(:nadia, :recv_timeout)
 
   defp build_url(method), do: @base_url <> token <> "/" <> method
 

@@ -22,6 +22,12 @@ config :nadia,
   token: "bot token"
 ```
 
+You can also add an optional recv_timeout in seconds (defaults to 5s).
+```elixir
+config :nadia,
+  opt_recv_timeout: 10
+```
+
 And then, in `mix.exs`, list `:nadia` as an application inside `application/0`:
 
 ```elixir

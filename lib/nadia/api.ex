@@ -14,16 +14,17 @@ defmodule Nadia.API do
   defp build_url(method), do: @base_url <> token <> "/" <> method
 
   defp process_response(response, method) do
-    case response do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        case Poison.decode!(body, keys: :atoms) do
-          %{ok: false, description: description} -> {:error, %Error{reason: description}}
-          %{result: true} -> :ok
-          %{result: result} -> {:ok, Nadia.Parser.parse_result(result, method)}
-        end
-      {:ok, %HTTPoison.Response{body: body}} -> {:error, %Error{reason: body}}
+    case process_within(response) do
+      {:ok, result} -> {:ok, Nadia.Parser.parse_result(result, method)}
+      %{ok: false, description: description} -> {:error, %Error{reason: description}}
       {:error, %HTTPoison.Error{reason: reason}} -> {:error, %Error{reason: reason}}
     end
+  end
+
+  defp process_within(response) do
+    with {:ok, %HTTPoison.Response{body: body}} <- response,
+          %{result: result} <- Poison.decode!(body, keys: :atoms),
+      do: {:ok, result}
   end
 
   defp build_multipart_request(params, file_field) do

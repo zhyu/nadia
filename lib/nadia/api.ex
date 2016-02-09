@@ -15,6 +15,7 @@ defmodule Nadia.API do
 
   defp process_response(response, method) do
     case process_within(response) do
+      {:ok, true} -> :ok
       {:ok, result} -> {:ok, Nadia.Parser.parse_result(result, method)}
       %{ok: false, description: description} -> {:error, %Error{reason: description}}
       {:error, %HTTPoison.Error{reason: reason}} -> {:error, %Error{reason: reason}}

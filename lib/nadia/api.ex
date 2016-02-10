@@ -14,7 +14,7 @@ defmodule Nadia.API do
   defp build_url(method), do: @base_url <> token <> "/" <> method
 
   defp process_response(response, method) do
-    case process_within(response) do
+    case decode_response(response) do
       {:ok, true} -> :ok
       {:ok, result} -> {:ok, Nadia.Parser.parse_result(result, method)}
       %{ok: false, description: description} -> {:error, %Error{reason: description}}
@@ -22,7 +22,7 @@ defmodule Nadia.API do
     end
   end
 
-  defp process_within(response) do
+  defp decode_response(response) do
     with {:ok, %HTTPoison.Response{body: body}} <- response,
           %{result: result} <- Poison.decode!(body, keys: :atoms),
       do: {:ok, result}

@@ -63,14 +63,18 @@ defmodule Nadia.Model do
     forward_date: nil, reply_to_message: nil, text: nil, audio: nil, document: nil,
     photo: [], sticker: nil, video: nil, voice: nil, caption: nil, contact: nil,
     location: nil, new_chat_participant: nil, left_chat_participant: nil,
-    new_chat_title: nil, new_chat_photo: [], delete_chat_photo: nil, group_chat_created: nil
+    new_chat_title: nil, new_chat_photo: [], delete_chat_photo: nil, group_chat_created: nil,
+    supergroup_chat_created: nil, channel_chat_created: nil, migrate_to_chat_id: nil,
+    migrate_from_chat_id: nil
 
     @type t :: %Message{message_id: integer, from: User.t, date: integer, chat: User.t | GroupChat.t,
                         forward_from: User.t, forward_date: integer, reply_to_message: Message.t,
                         text: binary, audio: Audio.t, document: Document.t, photo: [PhotoSize.t], sticker: any,
                         video: any, voice: any, caption: binary, contact: any, location: any,
                         new_chat_participant: User.t, left_chat_participant: User.t, new_chat_title: binary,
-                        new_chat_photo: [PhotoSize.t], delete_chat_photo: atom, group_chat_created: atom}
+                        new_chat_photo: [PhotoSize.t], delete_chat_photo: atom, group_chat_created: atom,
+                        supergroup_chat_created: atom, channel_chat_created: atom, migrate_to_chat_id: integer,
+                        migrate_from_chat_id: integer}
   end
 
   defmodule InlineQuery do

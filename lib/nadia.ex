@@ -329,11 +329,20 @@ defmodule Nadia do
   @spec get_file(binary) :: {:ok, File.t} | {:error, Error.t}
   def get_file(file_id), do: request("getFile", file_id: file_id)
 
+  @doc """
+  Use this method to get link for file for subsequent use.
+  This method is an extension of the `get_file` method.
+
+  *Attention: link will be valid for 1 hour.*
+
+  Args:
+  * `file_id` - File identifier to get link
+  """
   @spec get_file_link(binary) :: binary | {:error, Error.t}
   def get_file_link(file_id) do
     with {:ok, f} <- request("getFile", file_id: file_id),
-      base_url = "https://api.telegram.org/file/bot",
-      token = Application.get_env(:nadia, :token),
+          base_url = "https://api.telegram.org/file/bot",
+          token = Application.get_env(:nadia, :token),
       do: base_url <> token <> "/" <> f.file_path
   end
 

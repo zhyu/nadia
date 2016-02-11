@@ -329,6 +329,14 @@ defmodule Nadia do
   @spec get_file(binary) :: {:ok, File.t} | {:error, Error.t}
   def get_file(file_id), do: request("getFile", file_id: file_id)
 
+  @spec get_file_link(binary) :: binary | {:error, Error.t}
+  def get_file_link(file_id) do
+    with {:ok, f} <- request("getFile", file_id: file_id),
+      base_url = "https://api.telegram.org/file/bot",
+      token = Application.get_env(:nadia, :token),
+      do: base_url <> token <> "/" <> f.file_path
+  end
+
   @doc """
   Use this method to send answers to an inline query. On success, True is returned.
   No more than 50 results per query are allowed.

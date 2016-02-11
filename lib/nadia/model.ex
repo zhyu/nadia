@@ -82,9 +82,14 @@ defmodule Nadia.Model do
     @type t :: %InlineQuery{id: binary, from: User.t, query: binary, offset: integer}
   end
 
+  defmodule ChosenInlineResult do
+    defstruct result_id: nil, from: nil, query: nil
+    @type t :: %ChosenInlineResult{result_id: binary, from: User.t, query: binary}
+  end
+
   defmodule Update do
-    defstruct update_id: nil, message: nil, inline_query: nil
-    @type t :: %Update{update_id: integer, message: Message.t, inline_query: InlineQuery.t}
+    defstruct update_id: nil, message: nil, inline_query: nil, chosen_inline_result: nil
+    @type t :: %Update{update_id: integer, message: Message.t, inline_query: InlineQuery.t, chosen_inline_result: ChosenInlineResult.t}
   end
 
   defmodule UserProfilePhotos do

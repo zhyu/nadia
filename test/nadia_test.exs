@@ -1,7 +1,7 @@
 defmodule NadiaTest do
   use ExUnit.Case
   use ExVCR.Mock, adapter: ExVCR.Adapter.Hackney
-
+  doctest Nadia, only: [get_file_link: 1]
   alias Nadia.Model.User
 
   setup_all do

@@ -10,6 +10,8 @@ defmodule Nadia do
 
   import Nadia.API
 
+  @base_file_url "https://api.telegram.org/file/bot"
+
   @doc """
   A simple method for testing your bot's auth token. Requires no parameters.
   Returns basic information about the bot in form of a User object.
@@ -328,6 +330,22 @@ defmodule Nadia do
   """
   @spec get_file(binary) :: {:ok, File.t} | {:error, Error.t}
   def get_file(file_id), do: request("getFile", file_id: file_id)
+
+  @doc ~S"""
+  Use this method to get link for file for subsequent use.
+  This method is an extension of the `get_file` method.
+
+      iex> Nadia.get_file_link(%Nadia.Model.File{file_id: "BQADBQADBgADmEjsA1aqdSxtzvvVAg",
+      ...> file_path: "document/file_10", file_size: 17680})
+      {:ok,
+      "https://api.telegram.org/file/bot#{Application.get_env(:nadia, :token)}/document/file_10"}
+
+  """
+  @spec get_file_link(File.t) :: {:ok, binary} | {:error, Error.t}
+  def get_file_link(file) do
+    token = Application.get_env(:nadia, :token)
+    {:ok, @base_file_url <> token <> "/" <> file.file_path}
+  end
 
   @doc """
   Use this method to send answers to an inline query. On success, True is returned.

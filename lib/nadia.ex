@@ -33,6 +33,7 @@ defmodule Nadia do
   * `:parse_mode` - Use `Markdown`, if you want Telegram apps to show bold, italic
   and inline URLs in your bot's message
   * `:disable_web_page_preview` - Disables link previews for links in this message
+  * `:disable_notification` - Sends the message silently or without notification
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
@@ -52,6 +53,7 @@ defmodule Nadia do
   (in the format @channelusername)
   * `from_chat_id` - Unique identifier for the chat where the original message was sent
   or username of the target channel (in the format @channelusername)
+  * `:disable_notification` - Sends the message silently or without notification
   * `message_id` - Unique message identifier
   """
   @spec forward_message(integer, integer, integer) :: {:ok, Message.t} | {:error, Error.t}
@@ -72,6 +74,7 @@ defmodule Nadia do
 
   Options:
   * `:caption` - Photo caption (may also be used when resending photos by `file_id`)
+  * `:disable_notification` - Sends the message silently or without notification
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
@@ -106,6 +109,7 @@ defmodule Nadia do
   * `:duration` - Duration of the audio in seconds
   * `:performer` - Performer
   * `:title` - Track name
+  * `:disable_notification` - Sends the message silently or without notification
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
@@ -130,6 +134,7 @@ defmodule Nadia do
   * `options` - orddict of options
 
   Options:
+  * `:disable_notification` - Sends the message silently or without notification
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
@@ -152,6 +157,7 @@ defmodule Nadia do
   * `options` - orddict of options
 
   Options:
+  * `:disable_notification` - Sends the message silently or without notification
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
@@ -179,6 +185,7 @@ defmodule Nadia do
   Options:
   * `:duration` - Duration of the video in seconds
   * `:caption` - Video caption (may also be used when resending videos by `file_id`)
+  * `:disable_notification` - Sends the message silently or without notification
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
@@ -206,6 +213,7 @@ defmodule Nadia do
 
   Options:
   * `:duration` - Duration of the audio in seconds
+  * `:disable_notification` - Sends the message silently or without notification
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
@@ -228,6 +236,7 @@ defmodule Nadia do
   * `options` - orddict of options
 
   Options:
+  * `:disable_notification` - Sends the message silently or without notification
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or

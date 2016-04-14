@@ -29,12 +29,12 @@ defmodule Nadia.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    [{:httpoison, "~> 0.7"},
+    [{:httpoison, "~> 0.8"},
      {:poison, "~> 2.0"},
-     {:exvcr, "~> 0.5.0", only: [:dev, :test]},
-     {:earmark, "~> 0.1", only: :docs},
-     {:ex_doc, "~> 0.9", only: :docs},
-     {:inch_ex, "~> 0.5.1", only: :docs}]
+     {:exvcr, "~> 0.7", only: [:dev, :test]},
+     {:earmark, "~> 0.2", only: :docs},
+     {:ex_doc, "~> 0.11", only: :docs},
+     {:inch_ex, only: :docs}]
   end
 
   defp package do

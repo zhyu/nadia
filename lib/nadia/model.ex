@@ -58,38 +58,49 @@ defmodule Nadia.Model do
     @type t :: %Location{latitude: float, longitude: float}
   end
 
+  defmodule Venue do
+    defstruct location: nil, title: nil, address: nil, foursquare_id: nil
+    @type t :: %Venue{location: Location.t, title: binary, address: binary, foursquare_id: binary}
+  end
+
   defmodule Message do
     defstruct message_id: nil, from: nil, date: nil, chat: nil, forward_from: nil,
-    forward_date: nil, reply_to_message: nil, text: nil, audio: nil, document: nil,
+    forward_date: nil, reply_to_message: nil, text: nil, entities: nil, audio: nil, document: nil,
     photo: [], sticker: nil, video: nil, voice: nil, caption: nil, contact: nil,
-    location: nil, new_chat_participant: nil, left_chat_participant: nil,
+    location: nil, venue: nil, new_chat_member: nil, left_chat_member: nil,
     new_chat_title: nil, new_chat_photo: [], delete_chat_photo: nil, group_chat_created: nil,
     supergroup_chat_created: nil, channel_chat_created: nil, migrate_to_chat_id: nil,
-    migrate_from_chat_id: nil
+    migrate_from_chat_id: nil, pinned_message: nil
 
     @type t :: %Message{message_id: integer, from: User.t, date: integer, chat: User.t | GroupChat.t,
                         forward_from: User.t, forward_date: integer, reply_to_message: Message.t,
-                        text: binary, audio: Audio.t, document: Document.t, photo: [PhotoSize.t], sticker: any,
-                        video: any, voice: any, caption: binary, contact: any, location: any,
-                        new_chat_participant: User.t, left_chat_participant: User.t, new_chat_title: binary,
-                        new_chat_photo: [PhotoSize.t], delete_chat_photo: atom, group_chat_created: atom,
-                        supergroup_chat_created: atom, channel_chat_created: atom, migrate_to_chat_id: integer,
-                        migrate_from_chat_id: integer}
+                        text: binary, entities: MessageEntity.t, audio: Audio.t, document: Document.t,
+                        photo: [PhotoSize.t], sticker: any, video: any, voice: any, caption: binary,
+                        contact: any, location: any, venue: any, new_chat_member: User.t,
+                        left_chat_member: User.t, new_chat_title: binary, new_chat_photo: [PhotoSize.t],
+                        delete_chat_photo: atom, group_chat_created: atom, supergroup_chat_created: atom,
+                        channel_chat_created: atom, migrate_to_chat_id: integer, migrate_from_chat_id: integer,
+                        pinned_message: Message.t}
+  end
+
+  defmodule MessageEntity do
+    defstruct type: nil, offset: nil, length: nil, url: nil
+    @type t :: %MessageEntity{type: binary, offset: integer, length: integer, url: binary}
   end
 
   defmodule InlineQuery do
-    defstruct id: nil, from: nil, query: nil, offset: nil
-    @type t :: %InlineQuery{id: binary, from: User.t, query: binary, offset: integer}
+    defstruct id: nil, from: nil, location: nil, query: nil, offset: nil
+    @type t :: %InlineQuery{id: binary, from: User.t, location: Location.t, query: binary, offset: integer}
   end
 
   defmodule ChosenInlineResult do
-    defstruct result_id: nil, from: nil, query: nil
-    @type t :: %ChosenInlineResult{result_id: binary, from: User.t, query: binary}
+    defstruct result_id: nil, from: nil, location: nil, inline_message_id: nil, query: nil
+    @type t :: %ChosenInlineResult{result_id: binary, from: User.t, location: Location.t, inline_message_id: binary, query: binary}
   end
 
   defmodule Update do
-    defstruct update_id: nil, message: nil, inline_query: nil, chosen_inline_result: nil
-    @type t :: %Update{update_id: integer, message: Message.t, inline_query: InlineQuery.t, chosen_inline_result: ChosenInlineResult.t}
+    defstruct update_id: nil, message: nil, inline_query: nil, chosen_inline_result: nil, callback_query: nil
+    @type t :: %Update{update_id: integer, message: Message.t, inline_query: InlineQuery.t, chosen_inline_result: ChosenInlineResult.t, callback_query: CallbackQuery.t}
   end
 
   defmodule UserProfilePhotos do
@@ -104,12 +115,32 @@ defmodule Nadia.Model do
 
   defmodule ReplyKeyboardMarkup do
     defstruct keyboard: [], resize_keyboard: false, one_time_keyboard: false, selective: false
-    @type t :: %ReplyKeyboardMarkup{keyboard: [[binary]], resize_keyboard: atom, one_time_keyboard: atom, selective: atom}
+    @type t :: %ReplyKeyboardMarkup{keyboard: [[KeyboardButton.t]], resize_keyboard: atom, one_time_keyboard: atom, selective: atom}
+  end
+
+  defmodule KeyboardButton do
+    defstruct text: nil, request_contact: false, request_location: false
+    @type t :: %KeyboardButton{text: binary, request_contact: atom, request_location: atom}
   end
 
   defmodule ReplyKeyboardHide do
     defstruct hide_keyboard: true, selective: false
     @type t :: %ReplyKeyboardHide{hide_keyboard: true, selective: atom}
+  end
+
+  defmodule InlineKeyboardMarkup do
+    defstruct inline_keyboard: []
+    @type t :: %InlineKeyboardMarkup{inline_keyboard: [[InlineKeyboardButton.t]]}
+  end
+
+  defmodule InlineKeyboardButton do
+    defstruct text: nil, url: nil, callback_data: nil, switch_inline_query: nil
+    @type t :: %InlineKeyboardButton{text: binary, url: binary, callback_data: binary, switch_inline_query: binary}
+  end
+
+  defmodule CallbackQuery do
+    defstruct id: nil, from: nil, message: nil, inline_message_id: nil, data: nil
+    @type t :: %CallbackQuery{id: binary, from: User.t, message: Message.t, inline_message_id: binary, data: binary}
   end
 
   defmodule ForceReply do

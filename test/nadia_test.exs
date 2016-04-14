@@ -53,12 +53,32 @@ defmodule NadiaTest do
     end
   end
 
+  test "send_contact" do
+    use_cassette "send_contact" do
+      {:ok, message} = Nadia.send_contact(666, 10123800555, "Test")
+      refute is_nil(message.contact)
+      assert message.contact.phone_number == "10123800555"
+      assert message.contact.first_name == "Test"
+    end
+  end
+
   test "send_location" do
     use_cassette "send_location" do
       {:ok, message} = Nadia.send_location(666, 1, 2)
       refute is_nil(message.location)
       assert_in_delta message.location.latitude, 1, 1.0e-3
       assert_in_delta message.location.longitude, 2, 1.0e-3
+    end
+  end
+
+  test "send_venue" do
+    use_cassette "send_venue" do
+      {:ok, message} = Nadia.send_venue(666, 1, 2, "Test", "teststreet")
+      refute is_nil(message.venue)
+      assert_in_delta message.venue.location.latitude, 1, 1.0e-3
+      assert_in_delta message.venue.location.longitude, 2, 1.0e-3
+      assert message.venue.title == "Test"
+      assert message.venue.address == "teststreet"
     end
   end
 

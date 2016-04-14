@@ -1,0 +1,24 @@
+[
+  {
+    "request": {
+      "body": "chat_id=666&latitude=1&longitude=2&title=Test&address=teststreet",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegram.org/bot<TOKEN>/sendVenue"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":{\"message_id\":666,\"from\":{\"id\":666,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"},\"chat\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\",\"type\":\"private\"},\"date\":1460620410,\"location\":{\"latitude\":53.530014,\"longitude\":49.119984},\"venue\":{\"location\":{\"longitude\":1.999999,\"latitude\":1.000000},\"title\":\"Test\",\"address\":\"teststreet\"}}}",
+      "headers": {
+        "Server": "nginx/1.9.1",
+        "Date": "Thu, 14 Apr 2016 07:53:30 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "409",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

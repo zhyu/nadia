@@ -248,6 +248,60 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to send information about a venue.
+  On success, the sent Message is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `latitude` - Latitude of location
+  * `longitude` - Longitude of location
+  * `title` - Name of the venue
+  * `address` - Address of the venue
+  * `options` - orddict of options
+
+  Options:
+  * `:foursquare_id` - Foursquare identifier of the venue
+  * `:disable_notification` - Sends the message silently or without notification
+  * `:reply_to_message_id` - If the message is a reply, ID of the original message
+  * `:reply_markup` - Additional interface options. A JSON-serialized object for
+  an inline keyboard, custom reply keyboard, instructions to hide reply keyboard
+  or to force a reply from the user. - `Nadia.Model.InlineKeyboardMarkup` or
+  `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or
+  `Nadia.Model.ForceReply`
+  """
+  @spec send_venue(integer, float, float, binary, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
+  def send_venue(chat_id, latitude, longitude, title, address, options \\ []) do
+    request("sendVenue", [chat_id: chat_id, latitude: latitude, longitude: longitude, title: title, address: address] ++ options)
+  end
+
+  @doc """
+  Use this method to send phone contacts.
+  On success, the sent Message is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `phone_number` - Contact's phone number
+  * `first_name` - Contact's first name
+  * `options` - orddict of options
+
+  Options:
+  * `:last_name` - Contact's last name
+  * `:disable_notification` - Sends the message silently or without notification
+  * `:reply_to_message_id` - If the message is a reply, ID of the original message
+  * `:reply_markup` - Additional interface options. A JSON-serialized object for
+  an inline keyboard, custom reply keyboard, instructions to hide reply keyboard
+  or to force a reply from the user. - `Nadia.Model.InlineKeyboardMarkup` or
+  `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or
+  `Nadia.Model.ForceReply`
+  """
+  @spec send_contact(integer, binary, binary, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
+  def send_contact(chat_id, phone_number, first_name, options \\ []) do
+    request("sendContact", [chat_id: chat_id, phone_number: phone_number, first_name: first_name] ++ options)
+  end
+
+  @doc """
   Use this method when you need to tell the user that something is happening on
   the bot's side. The status is set for 5 seconds or less (when a message
   arrives from your bot, Telegram clients clear its typing status).
@@ -357,6 +411,132 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to kick a user from a group or a supergroup. In the case of supergroups,
+  the user will not be able to return to the group on their own using invite links, etc.,
+  unless unbanned first. The bot must be an administrator in the group for this to work.
+  Returns True on success.
+
+  Note: This will method only work if the ‘All Members Are Admins’ setting is off in the
+  target group. Otherwise members may only be removed by the group's creator or by the
+  member that added them.
+
+  Args:
+  * `chat_id` - Unique identifier for the target group or username of the target supergroup
+  (in the format @supergroupusername)
+  * `user_id` - Unique identifier of the target user
+  """
+  @spec kick_chat_member(integer | binary, integer) :: :ok | {:error, Error.t}
+  def kick_chat_member(chat_id, user_id) do
+    request("kickChatMember", chat_id: chat_id, user_id: user_id)
+  end
+
+  @doc """
+  Use this method to unban a previously kicked user in a supergroup. The user will not
+  return to the group automatically, but will be able to join via link, etc. The bot
+  must be an administrator in the group for this to work. Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target group or username of the target supergroup
+  (in the format @supergroupusername)
+  * `user_id` - Unique identifier of the target user
+  """
+  @spec unban_chat_member(integer | binary, integer) :: :ok | {:error, Error.t}
+  def unban_chat_member(chat_id, user_id) do
+    request("unbanChatMember", chat_id: chat_id, user_id: user_id)
+  end
+
+  @doc """
+  Use this method to send answers to callback queries sent from inline keyboards.
+  The answer will be displayed to the user as a notification at the top of the chat
+  screen or as an alert. On success, True is returned.
+
+  Args:
+  * `callback_query_id` - Unique identifier for the query to be answered
+  * `options` - orddict of options
+
+  Options:
+  * `:text` - Text of the notification. If not specified, nothing will be shown
+  to the user
+  * `:show_alert` - If true, an alert will be shown by the client instead of a
+  notification at the top of the chat screen. Defaults to false.
+  """
+  @spec answer_callback_query(binary, [{atom, any}]) :: :ok | {:error, Error.t}
+  def answer_callback_query(callback_query_id, options \\ []) do
+    request("answerCallbackQuery", [callback_query_id: callback_query_id] ++ options)
+  end
+
+  @doc """
+  Use this method to edit text messages sent by the bot or via the bot (for inline bots).
+  On success, the edited Message is returned
+
+  Args:
+  * `chat_id` -	Required if inline_message_id is not specified. Unique identifier
+  for the target chat or username of the target channel (in the format @channelusername)
+  * `message_id` - Required if inline_message_id is not specified. Unique identifier of
+  the sent message
+  * `inline_message_id`	- Required if `chat_id` and `message_id` are not specified.
+  Identifier of the inline message
+  * `text` - New text of the message
+  * `options` - orddict of options
+
+  Options:
+  * `:parse_mode`	- Send Markdown or HTML, if you want Telegram apps to show bold, italic,
+  fixed-width text or inline URLs in your bot's message.
+  * `:disable_web_page_preview` -	Disables link previews for links in this message
+  * `:reply_markup`	- A JSON-serialized object for an inline
+  keyboard - `Nadia.Model.InlineKeyboardMarkup`
+  """
+  @spec edit_message_text(integer | binary, integer, binary, [{atom, any}])  :: {:ok, Message.t} | {:error, Error.t}
+  def edit_message_text(chat_id, message_id, inline_message_id, text, options \\ []) do
+    request("editMessageText", [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id, text: text] ++ options)
+  end
+
+  @doc """
+  Use this method to edit captions of messages sent by the bot or via
+  the bot (for inline bots). On success, the edited Message is returned.
+
+  Args:
+  * `chat_id` -	Required if inline_message_id is not specified. Unique identifier
+  for the target chat or username of the target channel (in the format @channelusername)
+  * `message_id` - Required if inline_message_id is not specified. Unique identifier of
+  the sent message
+  * `inline_message_id`	- Required if `chat_id` and `message_id` are not specified.
+  Identifier of the inline message
+  * `options` - orddict of options
+
+  Options:
+  * `:caption` - New caption of the message
+  * `:reply_markup`	- A JSON-serialized object for an inline
+  keyboard - `Nadia.Model.InlineKeyboardMarkup`
+  """
+  @spec edit_message_caption(integer | binary, integer, binary, [{atom, any}])  :: {:ok, Message.t} | {:error, Error.t}
+  def edit_message_caption(chat_id, message_id, inline_message_id, options \\ []) do
+    request("editMessageCaption", [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id] ++ options)
+  end
+
+  @doc """
+  Use this method to edit only the reply markup of messages sent by the bot or via
+  the bot (for inline bots). On success, the edited Message is returned.
+
+  Args:
+  * `chat_id` -	Required if inline_message_id is not specified. Unique identifier
+  for the target chat or username of the target channel (in the format @channelusername)
+  * `message_id` - Required if inline_message_id is not specified. Unique identifier of
+  the sent message
+  * `inline_message_id`	- Required if `chat_id` and `message_id` are not specified.
+  Identifier of the inline message
+  * `options` - orddict of options
+
+  Options:
+  * `:reply_markup`	- A JSON-serialized object for an inline
+  keyboard - `Nadia.Model.InlineKeyboardMarkup`
+  """
+  @spec edit_message_reply_markup(integer | binary, integer, binary, [{atom, any}])  :: {:ok, Message.t} | {:error, Error.t}
+  def edit_message_reply_markup(chat_id, message_id, inline_message_id, options \\ []) do
+    request("editMessageReplyMarkup", [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id] ++ options)
+  end
+
+  @doc """
   Use this method to send answers to an inline query. On success, True is returned.
   No more than 50 results per query are allowed.
 
@@ -366,11 +546,19 @@ defmodule Nadia do
   * `options` - orddict of options
 
   Options:
-  * `cache_time` - The maximum amount of time in seconds that the result of the inline query may be cached on the server. Defaults to 300.
-  * `is_personal` - Pass True, if results may be cached on the server side only for the user that sent the query. By default, results may be returned to any user who sends the same query
-  * `next_offset` - Pass the offset that a client should send in the next query with the same text to receive more results. Pass an empty string if there are no more results or if you don‘t support pagination. Offset length can’t exceed 64 bytes.
-  * `switch_pm_text` - If passed, clients will display a button with specified text that switches the user to a private chat with the bot and sends the bot a start message with the parameter switch_pm_parameter.
-  * `switch_pm_parameter` - Parameter for the start message sent to the bot when user presses the switch button.
+  * `cache_time` - The maximum amount of time in seconds that the result of the inline
+  query may be cached on the server. Defaults to 300.
+  * `is_personal` - Pass True, if results may be cached on the server side only for
+  the user that sent the query. By default, results may be returned to any user who
+  sends the same query
+  * `next_offset` - Pass the offset that a client should send in the next query with
+  the same text to receive more results. Pass an empty string if there are no more
+  results or if you don‘t support pagination. Offset length can’t exceed 64 bytes.
+  * `switch_pm_text` - If passed, clients will display a button with specified text
+  that switches the user to a private chat with the bot and sends the bot a start
+  message with the parameter switch_pm_parameter.
+  * `switch_pm_parameter` - Parameter for the start message sent to the bot when user
+  presses the switch button.
   """
   @spec answer_inline_query(binary, [Nadia.Model.InlineQueryResult.t], [{atom, any}]) :: :ok | {:error, Error.t}
   def answer_inline_query(inline_query_id, results, options \\ []) do

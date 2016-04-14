@@ -4,7 +4,7 @@ defmodule Nadia.Parser do
   """
 
   alias Nadia.Model.{User, Chat, Message, PhotoSize, Audio, Document, Sticker}
-  alias Nadia.Model.{Video, Voice, Contact, Location, Update, File}
+  alias Nadia.Model.{Video, Voice, Contact, Location, Venue, Update, File}
   alias Nadia.Model.UserProfilePhotos
 
   @doc """
@@ -42,6 +42,7 @@ defmodule Nadia.Parser do
   defp parse({:document, val}), do: {:document, parse(Document, val)}
   defp parse({:contact, val}), do: {:contact, parse(Contact, val)}
   defp parse({:location, val}), do: {:location, parse(Location, val)}
+  defp parse({:venue, val}), do: {:venue, parse(Venue, val)}
   defp parse({:thumb, val}), do: {:thumb, parse(PhotoSize, val)}
   defp parse({:photos, val}), do: {:photos, parse(:photos, val)}
   defp parse({key, val}) when key in @keys_of_photo, do: {key, parse(:photo, val)}

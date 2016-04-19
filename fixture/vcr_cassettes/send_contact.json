@@ -1,0 +1,24 @@
+[
+  {
+    "request": {
+      "body": "chat_id=666&phone_number=10123800555&first_namefirst_name=Test",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegram.org/bot<TOKEN>/sendContact"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":{\"message_id\":666,\"from\":{\"id\":666,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"},\"chat\":{\"id\":666,\"first_name\":\"Yu\",\"last_name\":\"Zhang\",\"username\":\"angellwings\",\"type\":\"private\"},\"date\":1460622208,\"contact\":{\"phone_number\":\"10123800555\",\"first_name\":\"Test\"}}}",
+      "headers": {
+        "Server": "nginx/1.9.1",
+        "Date": "Thu, 14 Apr 2016 07:53:30 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "309",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

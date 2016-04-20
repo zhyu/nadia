@@ -5,10 +5,7 @@ defmodule NadiaTest do
   alias Nadia.Model.User
 
   setup_all do
-    unless Application.get_env(:nadia, :token) do
-      Application.put_env(:nadia, :token, "TEST_TOKEN")
-    end
-    ExVCR.Config.filter_sensitive_data("bot[^/]+/", "bot<TOKEN>/")
+    Application.put_env(:nadia, :token, "<TOKEN>")
     ExVCR.Config.filter_sensitive_data("id\":\\d+", "id\":666")
     ExVCR.Config.filter_sensitive_data("id=\\d+", "id=666")
     :ok
@@ -18,6 +15,13 @@ defmodule NadiaTest do
     use_cassette "get_me" do
       {:ok, me} = Nadia.get_me
       assert me == %User{id: 666, first_name: "Nadia", username: "nadia_bot"}
+    end
+  end
+
+  test "can set a token for an individual request" do
+    use_cassette "get_me_custom_token" do
+      {:ok, me} = Nadia.get_me(token: "<CUSTOM_TOKEN>")
+      assert me == %User{id: 666, first_name: "Other Nadia", username: "other_bot"}
     end
   end
 

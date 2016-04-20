@@ -11,8 +11,8 @@ defmodule Nadia.API do
   defp token, do: Application.get_env(:nadia, :token)
   defp recv_timeout, do: Application.get_env(:nadia, :recv_timeout, @default_timeout)
 
-  defp build_url(method, options \\ []) do
-    @base_url <> (options[:token] || token) <> "/" <> method
+  defp build_url(method, token) do
+    @base_url <> (token || token()) <> "/" <> method
   end
 
   defp process_response(response, method) do
@@ -61,8 +61,9 @@ defmodule Nadia.API do
   """
   def request(method, options \\ [], file_field \\ nil) do
     timeout = (Keyword.get(options, :timeout, 0) + recv_timeout) * 1000
+    {token, options} = Keyword.pop(options, :token)
     method
-    |> build_url(options)
+    |> build_url(token)
     |> HTTPoison.post(build_request(options, file_field), [], recv_timeout: timeout)
     |> process_response(method)
   end

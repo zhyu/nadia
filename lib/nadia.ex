@@ -16,8 +16,8 @@ defmodule Nadia do
   A simple method for testing your bot's auth token. Requires no parameters.
   Returns basic information about the bot in form of a User object.
   """
-  @spec get_me :: {:ok, User.t} | {:error, Error.t}
-  def get_me, do: request("getMe")
+  @spec get_me([{atom, any}]) :: {:ok, User.t} | {:error, Error.t}
+  def get_me(options \\ []), do: request("getMe", options)
 
   @doc """
   Use this method to send text messages.
@@ -56,9 +56,9 @@ defmodule Nadia do
   * `:disable_notification` - Sends the message silently or without notification
   * `message_id` - Unique message identifier
   """
-  @spec forward_message(integer, integer, integer) :: {:ok, Message.t} | {:error, Error.t}
-  def forward_message(chat_id, from_chat_id, message_id) do
-    request("forwardMessage", chat_id: chat_id, from_chat_id: from_chat_id, message_id: message_id)
+  @spec forward_message(integer, integer, integer, [{atom, any}]) :: {:ok, Message.t} | {:error, Error.t}
+  def forward_message(chat_id, from_chat_id, message_id, options \\ []) do
+    request("forwardMessage", [chat_id: chat_id, from_chat_id: from_chat_id, message_id: message_id] ++ options)
   end
 
   @doc """
@@ -318,9 +318,9 @@ defmodule Nadia do
       * `upload_document` for general files
       * `find_location` for location data
   """
-  @spec send_chat_action(integer, binary) :: :ok | {:error, Error.t}
-  def send_chat_action(chat_id, action) do
-    request("sendChatAction", chat_id: chat_id, action: action)
+  @spec send_chat_action(integer, binary, [{atom, any}]) :: :ok | {:error, Error.t}
+  def send_chat_action(chat_id, action, options \\ []) do
+    request("sendChatAction", [chat_id: chat_id, action: action] ++ options)
   end
 
   @doc """
@@ -391,8 +391,8 @@ defmodule Nadia do
   Args:
   * `file_id` - File identifier to get info about
   """
-  @spec get_file(binary) :: {:ok, File.t} | {:error, Error.t}
-  def get_file(file_id), do: request("getFile", file_id: file_id)
+  @spec get_file(binary, [{atom, any}]) :: {:ok, File.t} | {:error, Error.t}
+  def get_file(file_id, options \\ []), do: request("getFile", [file_id: file_id] ++ options)
 
   @doc ~S"""
   Use this method to get link for file for subsequent use.
@@ -404,9 +404,9 @@ defmodule Nadia do
       "https://api.telegram.org/file/bot#{Application.get_env(:nadia, :token)}/document/file_10"}
 
   """
-  @spec get_file_link(File.t) :: {:ok, binary} | {:error, Error.t}
-  def get_file_link(file) do
-    token = Application.get_env(:nadia, :token)
+  @spec get_file_link(File.t, [{atom, any}]) :: {:ok, binary} | {:error, Error.t}
+  def get_file_link(file, options \\ []) do
+    token = Keyword.pop(options, :token) || Application.get_env(:nadia, :token)
     {:ok, @base_file_url <> token <> "/" <> file.file_path}
   end
 

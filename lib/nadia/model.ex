@@ -72,7 +72,7 @@ defmodule Nadia.Model do
     group_chat_created: nil, supergroup_chat_created: nil, channel_chat_created: nil,
     migrate_to_chat_id: nil, migrate_from_chat_id: nil, pinned_message: nil
 
-    @type t :: %Message{message_id: integer, from: User.t, date: integer, chat: User.t | GroupChat.t,
+    @type t :: %Message{message_id: integer, from: User.t, date: integer, chat: Chat.t,
                         forward_from: User.t, forward_from_chat: Chat.t, forward_date: integer,
                         reply_to_message: Message.t, text: binary, entities: MessageEntity.t, audio: Audio.t,
                         document: Document.t, photo: [PhotoSize.t], sticker: any, video: any, voice: any,

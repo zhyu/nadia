@@ -33,8 +33,8 @@ defmodule Nadia.Model do
   end
 
   defmodule Sticker do
-    defstruct file_id: nil, width: nil, height: nil, thumb: nil, file_size: nil
-    @type t :: %Sticker{file_id: binary, width: integer, height: integer, thumb: PhotoSize.t, file_size: integer}
+    defstruct file_id: nil, width: nil, height: nil, thumb: nil, emoji: nil, file_size: nil
+    @type t :: %Sticker{file_id: binary, width: integer, height: integer, thumb: PhotoSize.t, emoji: binary, file_size: integer}
   end
 
   defmodule Video do
@@ -65,18 +65,18 @@ defmodule Nadia.Model do
 
   defmodule Message do
     defstruct message_id: nil, from: nil, date: nil, chat: nil, forward_from: nil,
-    forward_date: nil, reply_to_message: nil, text: nil, entities: nil, audio: nil, document: nil,
-    photo: [], sticker: nil, video: nil, voice: nil, caption: nil, contact: nil,
-    location: nil, venue: nil, new_chat_member: nil, left_chat_member: nil,
-    new_chat_title: nil, new_chat_photo: [], delete_chat_photo: nil, group_chat_created: nil,
-    supergroup_chat_created: nil, channel_chat_created: nil, migrate_to_chat_id: nil,
-    migrate_from_chat_id: nil, pinned_message: nil
+    forward_from_chat: nil, forward_date: nil, reply_to_message: nil, text: nil,
+    entities: nil, audio: nil, document: nil, photo: [], sticker: nil, video: nil,
+    voice: nil, caption: nil, contact: nil, location: nil, venue: nil, new_chat_member: nil,
+    left_chat_member: nil, new_chat_title: nil, new_chat_photo: [], delete_chat_photo: nil,
+    group_chat_created: nil, supergroup_chat_created: nil, channel_chat_created: nil,
+    migrate_to_chat_id: nil, migrate_from_chat_id: nil, pinned_message: nil
 
-    @type t :: %Message{message_id: integer, from: User.t, date: integer, chat: User.t | GroupChat.t,
-                        forward_from: User.t, forward_date: integer, reply_to_message: Message.t,
-                        text: binary, entities: MessageEntity.t, audio: Audio.t, document: Document.t,
-                        photo: [PhotoSize.t], sticker: any, video: any, voice: any, caption: binary,
-                        contact: any, location: any, venue: any, new_chat_member: User.t,
+    @type t :: %Message{message_id: integer, from: User.t, date: integer, chat: Chat.t,
+                        forward_from: User.t, forward_from_chat: Chat.t, forward_date: integer,
+                        reply_to_message: Message.t, text: binary, entities: MessageEntity.t, audio: Audio.t,
+                        document: Document.t, photo: [PhotoSize.t], sticker: any, video: any, voice: any,
+                        caption: binary, contact: any, location: any, venue: any, new_chat_member: User.t,
                         left_chat_member: User.t, new_chat_title: binary, new_chat_photo: [PhotoSize.t],
                         delete_chat_photo: atom, group_chat_created: atom, supergroup_chat_created: atom,
                         channel_chat_created: atom, migrate_to_chat_id: integer, migrate_from_chat_id: integer,

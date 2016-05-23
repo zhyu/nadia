@@ -65,8 +65,8 @@ defmodule Nadia.Model do
 
   defmodule Message do
     defstruct message_id: nil, from: nil, date: nil, chat: nil, forward_from: nil,
-    forward_from_chat: nil, forward_date: nil, reply_to_message: nil, text: nil,
-    entities: nil, audio: nil, document: nil, photo: [], sticker: nil, video: nil,
+    forward_from_chat: nil, forward_date: nil, reply_to_message: nil, edit_date: nil,
+    text: nil, entities: nil, audio: nil, document: nil, photo: [], sticker: nil, video: nil,
     voice: nil, caption: nil, contact: nil, location: nil, venue: nil, new_chat_member: nil,
     left_chat_member: nil, new_chat_title: nil, new_chat_photo: [], delete_chat_photo: nil,
     group_chat_created: nil, supergroup_chat_created: nil, channel_chat_created: nil,
@@ -74,9 +74,9 @@ defmodule Nadia.Model do
 
     @type t :: %Message{message_id: integer, from: User.t, date: integer, chat: Chat.t,
                         forward_from: User.t, forward_from_chat: Chat.t, forward_date: integer,
-                        reply_to_message: Message.t, text: binary, entities: MessageEntity.t, audio: Audio.t,
-                        document: Document.t, photo: [PhotoSize.t], sticker: any, video: any, voice: any,
-                        caption: binary, contact: any, location: any, venue: any, new_chat_member: User.t,
+                        reply_to_message: Message.t, edit_date: integer, text: binary, entities: MessageEntity.t,
+                        audio: Audio.t, document: Document.t, photo: [PhotoSize.t], sticker: any, video: any,
+                        voice: any, caption: binary, contact: any, location: any, venue: any, new_chat_member: User.t,
                         left_chat_member: User.t, new_chat_title: binary, new_chat_photo: [PhotoSize.t],
                         delete_chat_photo: atom, group_chat_created: atom, supergroup_chat_created: atom,
                         channel_chat_created: atom, migrate_to_chat_id: integer, migrate_from_chat_id: integer,
@@ -84,8 +84,8 @@ defmodule Nadia.Model do
   end
 
   defmodule MessageEntity do
-    defstruct type: nil, offset: nil, length: nil, url: nil
-    @type t :: %MessageEntity{type: binary, offset: integer, length: integer, url: binary}
+    defstruct type: nil, offset: nil, length: nil, url: nil, user: nil
+    @type t :: %MessageEntity{type: binary, offset: integer, length: integer, url: binary, user: User.t}
   end
 
   defmodule InlineQuery do
@@ -99,8 +99,9 @@ defmodule Nadia.Model do
   end
 
   defmodule Update do
-    defstruct update_id: nil, message: nil, inline_query: nil, chosen_inline_result: nil, callback_query: nil
-    @type t :: %Update{update_id: integer, message: Message.t, inline_query: InlineQuery.t, chosen_inline_result: ChosenInlineResult.t, callback_query: CallbackQuery.t}
+    defstruct update_id: nil, message: nil, edited_message: nil, inline_query: nil, chosen_inline_result: nil, callback_query: nil
+    @type t :: %Update{update_id: integer, message: Message.t, edited_message: Message.t, inline_query: InlineQuery.t,
+                       chosen_inline_result: ChosenInlineResult.t, callback_query: CallbackQuery.t}
   end
 
   defmodule UserProfilePhotos do

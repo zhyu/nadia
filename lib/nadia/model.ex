@@ -149,6 +149,11 @@ defmodule Nadia.Model do
     @type t :: %ForceReply{force_reply: true, selective: atom}
   end
 
+  defmodule ChatMember do
+    defstruct user: nil, status: nil
+    @type t :: %ChatMember{user: User.t, status: binary}
+  end
+
   defmodule Error do
     defexception reason: nil
     @type t :: %Error{reason: any}

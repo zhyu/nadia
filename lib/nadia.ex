@@ -431,6 +431,19 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method for your bot to leave a group, supergroup or channel.
+  Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target supergroup or
+  channel (in the format @supergroupusername)
+  """
+  @spec leave_chat(integer | binary) :: :ok | {:error, Error.t}
+  def leave_chat(chat_id) do
+    request("leaveChat", chat_id: chat_id)
+  end
+
+  @doc """
   Use this method to unban a previously kicked user in a supergroup. The user will not
   return to the group automatically, but will be able to join via link, etc. The bot
   must be an administrator in the group for this to work. Returns True on success.
@@ -445,6 +458,61 @@ defmodule Nadia do
     request("unbanChatMember", chat_id: chat_id, user_id: user_id)
   end
 
+  @doc """
+  Use this method to get up to date information about the chat (current name of
+  the user for one-on-one conversations, current username of a user, group or channel, etc.)
+  Returns a Chat object on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target supergroup or
+  channel (in the format @supergroupusername)
+  """
+  @spec get_chat(integer | binary) :: {:ok, Chat.t} | {:error, Error.t}
+  def get_chat(chat_id) do
+    request("getChat", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to get a list of administrators in a chat. On success, returns an Array of
+  ChatMember objects that contains information about all chat administrators except other bots.
+  If the chat is a group or a supergroup and no administrators were appointed, only the creator
+  will be returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target supergroup or
+  channel (in the format @channelusername)
+  """
+  @spec get_chat_administrators(integer | binary) :: {:ok, [ChatMember.t]} | {:error, Error.t}
+  def get_chat_administrators(chat_id) do
+    request("getChatAdministrators", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to get the number of members in a chat. Returns Int on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target supergroup or
+  channel (in the format @channelusername)
+  """
+  @spec get_chat_members_count(integer | binary) :: {:ok, integer} | {:error, Error.t}
+  def get_chat_members_count(chat_id) do
+    request("getChatMembersCount", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to get information about a member of a chat.
+  Returns a ChatMember object on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target supergroup or
+  channel (in the format @channelusername)
+  * `user_id` - Unique identifier of the target user
+  """
+  @spec get_chat_member(integer | binary, integer) :: {:ok, ChatMember.t} | {:error, Error.t}
+  def get_chat_member(chat_id, user_id) do
+    request("getChatMember", chat_id: chat_id, user_id: user_id)
+  end
+  
   @doc """
   Use this method to send answers to callback queries sent from inline keyboards.
   The answer will be displayed to the user as a notification at the top of the chat

@@ -11,6 +11,7 @@ defmodule NadiaTest do
     ExVCR.Config.filter_sensitive_data("bot[^/]+/", "bot<TOKEN>/")
     ExVCR.Config.filter_sensitive_data("id\":\\d+", "id\":666")
     ExVCR.Config.filter_sensitive_data("id=\\d+", "id=666")
+    ExVCR.Config.filter_sensitive_data("_id=@w+", "_id=@group")
     :ok
   end
 
@@ -120,6 +121,44 @@ defmodule NadiaTest do
       {:ok, file} = Nadia.get_file("BQADBQADBgADmEjsA1aqdSxtzvvVAg")
       refute is_nil(file.file_path)
       assert file.file_id == "BQADBQADBgADmEjsA1aqdSxtzvvVAg"
+    end
+  end
+
+  test "get_chat" do
+    use_cassette "get_chat" do
+      {:ok, chat} = Nadia.get_chat("@group")
+      assert chat.username == "group"
+    end
+  end
+
+  test "get_chat_member" do
+    use_cassette "get_chat_member" do
+      {:ok, chat_member} = Nadia.get_chat_member("@group", 666)
+      assert chat_member.user.username == "nadia_bot"
+      assert chat_member.status == "member"
+    end
+  end
+
+  test "get_chat_administrators" do
+    use_cassette "get_chat_administrators" do
+      {:ok, [admin | [creator]]} = Nadia.get_chat_administrators("@group")
+      assert admin.status == "administrator"
+      assert admin.user.username == "nadia_bot"
+      assert creator.status == "creator"
+      assert creator.user.username == "group_creator"
+    end
+  end
+
+  test "get_chat_members_count" do
+    use_cassette "get_chat_members_count" do
+      {:ok, count} = Nadia.get_chat_members_count("@group")
+      assert count == 2
+    end
+  end
+
+  test "leave_chat" do
+    use_cassette "leave_chat" do
+      assert Nadia.leave_chat("@group") == :ok
     end
   end
 

@@ -1,0 +1,30 @@
+[
+  {
+    "request": {
+      "body": "chat_id=@group",
+      "headers": [],
+      "method": "post",
+      "options": {
+        "recv_timeout": 10000
+      },
+      "request_body": "",
+      "url": "https://api.telegram.org/bot<TOKEN>/getChatAdministrators"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":[{\"user\":{\"id\":666,\"first_name\":\"Nadia\",\"username\":\"nadia_bot\"},\"status\":\"administrator\"},{\"user\":{\"id\":666,\"first_name\":\"GroupCreator\",\"username\":\"group_creator\"},\"status\":\"creator\"}]}",
+      "headers": {
+        "Server": "nginx/1.10.0",
+        "Date": "Tue, 24 May 2016 08:56:35 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "243",
+        "Connection": "keep-alive",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Expose-Headers": "Content-Length,Content-Type,Date,Server,Connection",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

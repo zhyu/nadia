@@ -1,0 +1,30 @@
+[
+  {
+    "request": {
+      "body": "chat_id=@group",
+      "headers": [],
+      "method": "post",
+      "options": {
+        "recv_timeout": 10000
+      },
+      "request_body": "",
+      "url": "https://api.telegram.org/bot<TOKEN>/getChat"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":{\"id\":666,\"title\":\"TestGroup\",\"username\":\"group\",\"type\":\"supergroup\"}}",
+      "headers": {
+        "Server": "nginx/1.10.0",
+        "Date": "Tue, 24 May 2016 08:26:17 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "110",
+        "Connection": "keep-alive",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Expose-Headers": "Content-Length,Content-Type,Date,Server,Connection",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

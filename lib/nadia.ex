@@ -512,7 +512,7 @@ defmodule Nadia do
   def get_chat_member(chat_id, user_id) do
     request("getChatMember", chat_id: chat_id, user_id: user_id)
   end
-  
+
   @doc """
   Use this method to send answers to callback queries sent from inline keyboards.
   The answer will be displayed to the user as a notification at the top of the chat
@@ -630,13 +630,7 @@ defmodule Nadia do
   """
   @spec answer_inline_query(binary, [Nadia.Model.InlineQueryResult.t], [{atom, any}]) :: :ok | {:error, Error.t}
   def answer_inline_query(inline_query_id, results, options \\ []) do
-    encoded_results = results
-    |> Enum.map(fn result ->
-         for {k, v} <- Map.from_struct(result), v != nil, into: %{}, do: {k, v}
-       end)
-    |> Poison.encode!
-    args = [inline_query_id: inline_query_id, results: encoded_results]
-
+    args = [inline_query_id: inline_query_id, results: results]
     request("answerInlineQuery", args ++ options)
   end
 end

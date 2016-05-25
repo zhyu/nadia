@@ -40,13 +40,27 @@ defmodule Nadia.API do
   defp build_request(params, file_field) do
     params = params
     |> Keyword.update(:reply_markup, nil, &(Poison.encode!(&1)))
-    |> Enum.filter_map(fn {_, v} -> v end, fn {k, v} -> {k, to_string(v)} end)
+    |> Enum.map(fn({k, v}) -> {k, drop_nil_fields(v)} end)
+
     if !is_nil(file_field) and File.exists?(params[file_field]) do
       build_multipart_request(params, file_field)
     else
       {:form, params}
     end
   end
+
+  defp drop_nil_fields(params) when is_list(params) do
+    params
+    |> Enum.map(&drop_nil_fields/1)
+    |> Poison.encode!
+  end
+  defp drop_nil_fields(params) when is_map(params) do
+    params
+    |> Map.from_struct
+    |> Enum.filter_map(fn {_, v} -> v != nil end, fn {k, v} -> {k, drop_nil_fields(v)} end)
+    |> Enum.into(%{})
+  end
+  defp drop_nil_fields(params), do: to_string(params)
 
   @doc """
   Generic method to call Telegram Bot API.

@@ -4,8 +4,8 @@ defmodule Nadia.Parser do
   """
 
   alias Nadia.Model.{User, Chat, ChatMember, Message, PhotoSize, Audio, Document, Sticker}
-  alias Nadia.Model.{Video, Voice, Contact, Location, Venue, Update, File}
-  alias Nadia.Model.UserProfilePhotos
+  alias Nadia.Model.{Video, Voice, Contact, Location, Venue, Update, File, UserProfilePhotos}
+  alias Nadia.Model.{ChosenInlineResult, InlineQuery, CallbackQuery}
 
   @doc """
   parse `result` field of decoded API response json.
@@ -30,9 +30,9 @@ defmodule Nadia.Parser do
     end
   end
 
-  @keys_of_message [:message, :reply_to_message]
+  @keys_of_message [:message, :edited_message, :reply_to_message]
   @keys_of_photo [:photo, :new_chat_photo]
-  @keys_of_user [:from, :forward_from, :new_chat_participant, :left_chat_participant]
+  @keys_of_user [:from, :forward_from, :new_chat_member, :left_chat_member, :user]
 
   defp parse(:photo, l) when is_list(l), do: Enum.map(l, &(parse(PhotoSize, &1)))
   defp parse(:photos, l) when is_list(l), do: Enum.map(l, &(parse(:photo, &1)))
@@ -50,6 +50,9 @@ defmodule Nadia.Parser do
   defp parse({:venue, val}), do: {:venue, parse(Venue, val)}
   defp parse({:thumb, val}), do: {:thumb, parse(PhotoSize, val)}
   defp parse({:photos, val}), do: {:photos, parse(:photos, val)}
+  defp parse({:inline_query, val}), do: {:inline_query, parse(InlineQuery, val)}
+  defp parse({:chosen_inline_result, val}), do: {:chosen_inline_result, parse(ChosenInlineResult, val)}
+  defp parse({:callback_query, val}), do: {:callback_query, parse(CallbackQuery, val)}
   defp parse({key, val}) when key in @keys_of_photo, do: {key, parse(:photo, val)}
   defp parse({key, val}) when key in @keys_of_user, do: {key, parse(User, val)}
   defp parse({key, val}) when key in @keys_of_message, do: {key, parse(Message, val)}

@@ -3,7 +3,7 @@ defmodule Nadia.Parser do
   Provides parser logics for API results.
   """
 
-  alias Nadia.Model.{User, Chat, Message, PhotoSize, Audio, Document, Sticker}
+  alias Nadia.Model.{User, Chat, ChatMember, Message, PhotoSize, Audio, Document, Sticker}
   alias Nadia.Model.{Video, Voice, Contact, Location, Venue, Update, File}
   alias Nadia.Model.UserProfilePhotos
 
@@ -22,6 +22,10 @@ defmodule Nadia.Parser do
       "getUpdates" -> parse(:updates, result)
       "setWebhook" -> result
       "getFile" -> parse(File, result)
+      "getChat" -> parse(Chat, result)
+      "getChatMember" -> parse(ChatMember, result)
+      "getChatAdministrators" -> parse(:chat_members, result)
+      "getChatMembersCount" -> result
       _ -> parse(Message, result)
     end
   end
@@ -33,6 +37,7 @@ defmodule Nadia.Parser do
   defp parse(:photo, l) when is_list(l), do: Enum.map(l, &(parse(PhotoSize, &1)))
   defp parse(:photos, l) when is_list(l), do: Enum.map(l, &(parse(:photo, &1)))
   defp parse(:updates, l) when is_list(l), do: Enum.map(l, &(parse(Update, &1)))
+  defp parse(:chat_members, l) when is_list(l), do: Enum.map(l, &(parse(ChatMember, &1)))
   defp parse(type, val), do: struct(type, Enum.map(val, &(parse(&1))))
   defp parse({:chat, val}), do: {:chat, parse(Chat, val)}
   defp parse({:audio, val}), do: {:audio, parse(Audio, val)}

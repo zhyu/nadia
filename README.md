@@ -1,4 +1,4 @@
-Nadia [![Build Status](https://travis-ci.org/zhyu/nadia.svg?branch=master)](https://travis-ci.org/zhyu/nadia) [![Inline docs](http://inch-ci.org/github/zhyu/nadia.svg)](http://inch-ci.org/github/zhyu/nadia) [![Hex pm](https://img.shields.io/hexpm/v/nadia.svg)](https://hex.pm/packages/nadia) [![Hex.pm](https://img.shields.io/hexpm/dt/nadia.svg)](https://hex.pm/packages/nadia)
+Nadia [![Build Status](https://travis-ci.org/zhyu/nadia.svg?branch=master)](https://travis-ci.org/zhyu/nadia) [![Deps Status](https://beta.hexfaktor.org/badge/all/github/zhyu/nadia.svg)](https://beta.hexfaktor.org/github/zhyu/nadia) [![Inline docs](http://inch-ci.org/github/zhyu/nadia.svg)](http://inch-ci.org/github/zhyu/nadia) [![Hex pm](https://img.shields.io/hexpm/v/nadia.svg)](https://hex.pm/packages/nadia) [![Hex.pm](https://img.shields.io/hexpm/dt/nadia.svg)](https://hex.pm/packages/nadia)
 =====
 
 Telegram Bot API Wrapper written in Elixir ([document](https://hexdocs.pm/nadia/))

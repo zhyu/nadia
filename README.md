@@ -8,7 +8,7 @@ Add Nadia to your `mix.exs` dependencies:
 
 ```elixir
 def deps do
-  [{:nadia, "~> 0.3"}]
+  [{:nadia, "~> 0.4"}]
 end
 ```
 and run `$ mix deps.get`.
@@ -83,7 +83,7 @@ iex> case Nadia.send_message(tlg_id, "The message text goes here") do
   {:error, %Nadia.Model.Error{reason: "Please wait a little"}} ->
     :wait
   end
-  
+
 :ok
 ```
 

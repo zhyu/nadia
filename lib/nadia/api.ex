@@ -11,7 +11,7 @@ defmodule Nadia.API do
   defp token, do: Application.get_env(:nadia, :token)
   defp recv_timeout, do: Application.get_env(:nadia, :recv_timeout, @default_timeout)
 
-  defp build_url(method), do: @base_url <> token <> "/" <> method
+  defp build_url(method), do: @base_url <> token() <> "/" <> method
 
   defp process_response(response, method) do
     case decode_response(response) do
@@ -57,7 +57,7 @@ defmodule Nadia.API do
   * `file_field` - specify the key of file_field in `options` when sending files
   """
   def request(method, options \\ [], file_field \\ nil) do
-    timeout = (Keyword.get(options, :timeout, 0) + recv_timeout) * 1000
+    timeout = (Keyword.get(options, :timeout, 0) + recv_timeout()) * 1000
     method
     |> build_url
     |> HTTPoison.post(build_request(options, file_field), [], recv_timeout: timeout)

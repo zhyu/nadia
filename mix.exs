@@ -6,10 +6,10 @@ defmodule Nadia.Mixfile do
      version: "0.4.1",
      elixir: "~> 1.2",
      description: "Telegram Bot API Wrapper written in Elixir",
-     package: package,
+     package: package(),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps]
+     deps: deps()]
   end
 
   # Configuration for the OTP application
@@ -34,7 +34,7 @@ defmodule Nadia.Mixfile do
      {:exvcr, "~> 0.7", only: [:dev, :test]},
      {:earmark, "~> 0.2", only: :docs},
      {:ex_doc, "~> 0.11", only: :docs},
-     {:inch_ex, only: :docs}]
+     {:inch_ex, "~> 0.5", only: :docs}]
   end
 
   defp package do

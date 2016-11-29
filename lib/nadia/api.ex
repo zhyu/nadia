@@ -8,8 +8,21 @@ defmodule Nadia.API do
   @default_timeout 5
   @base_url "https://api.telegram.org/bot"
 
-  defp token, do: Application.get_env(:nadia, :token)
-  defp recv_timeout, do: Application.get_env(:nadia, :recv_timeout, @default_timeout)
+  defp token, do: config_or_env(:token)
+  defp recv_timeout, do: config_or_env(:recv_timeout) || @default_timeout
+
+  defp config_or_env(key) do
+    case Application.fetch_env(:nadia, key) do
+      {:ok, {:system, var}} -> System.get_env(var)
+      {:ok, {:system, var, default}} ->
+        case System.get_env(var) do
+          nil -> default
+          val -> val
+        end
+      {:ok, value} -> value
+      :error -> nil
+    end
+  end
 
   defp build_url(method), do: @base_url <> token() <> "/" <> method
 

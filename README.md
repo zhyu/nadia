@@ -28,6 +28,13 @@ config :nadia,
   recv_timeout: 10
 ```
 
+Environment variables may be used as well:
+
+```elixir
+config :nadia,
+  token: {:system, "ENVVAR_WITH_MYAPP_TOKEN", "default_value_if_needed"}
+```
+
 And then, in `mix.exs`, list `:nadia` as an application inside `application/0`:
 
 ```elixir

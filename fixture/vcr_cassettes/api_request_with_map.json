@@ -1,0 +1,30 @@
+[
+  {
+    "request": {
+      "body": "limit=4",
+      "headers": [],
+      "method": "post",
+      "options": {
+        "recv_timeout": 5000
+      },
+      "request_body": "",
+      "url": "https://api.telegram.org/bot<TOKEN>/getUpdates"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":[]}",
+      "headers": {
+        "Server": "nginx/1.10.1",
+        "Date": "Mon, 16 Jan 2017 03:27:06 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "23",
+        "Connection": "keep-alive",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Expose-Headers": "Content-Length,Content-Type,Date,Server,Connection",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

@@ -61,6 +61,16 @@ defmodule Nadia.API do
     end
   end
 
+  defp build_options(options) do
+    timeout = (Keyword.get(options, :timeout, 0) + recv_timeout()) * 1000
+    opts = [recv_timeout: timeout]
+
+    case config_or_env(:proxy) do
+      proxy when byte_size(proxy) > 0 -> Keyword.put(opts, :proxy, proxy)
+      _ -> opts
+    end
+  end
+
   @doc """
   Generic method to call Telegram Bot API.
 
@@ -70,10 +80,9 @@ defmodule Nadia.API do
   * `file_field` - specify the key of file_field in `options` when sending files
   """
   def request(method, options \\ [], file_field \\ nil) do
-    timeout = (Keyword.get(options, :timeout, 0) + recv_timeout()) * 1000
     method
     |> build_url
-    |> HTTPoison.post(build_request(options, file_field), [], recv_timeout: timeout)
+    |> HTTPoison.post(build_request(options, file_field), [], build_options(options))
     |> process_response(method)
   end
 end

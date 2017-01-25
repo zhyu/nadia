@@ -4,6 +4,11 @@ use Mix.Config
 
 config :nadia,
   token: "bot_token",
+  proxy: "http://proxy.example.org:443/",
+  # can also be
+  # proxy: {"proxy.example.org", 443}
+  # or use an environment variable
+  # proxy: {:system, "https_proxy"}
   recv_timeout: 10
 
 # This configuration is loaded before any dependency and is restricted

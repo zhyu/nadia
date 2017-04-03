@@ -1,0 +1,24 @@
+[
+  {
+    "request": {
+      "body": "short_name=some_short_name&author_name=some_author_name&author_url=https://example.com/some",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegra.ph/createAccount"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":{\"short_name\":\"some_short_name\",\"author_name\":\"some_author_name\",\"author_url\":\"https://example.com/some\",\"access_token\":\"57d58ac15c59ac7d047efa3c1977b96188047bb9eef29b3642b7ae44b99d\",\"auth_url\":\"https:\\\/\\\/edit.telegra.ph\\\/auth\\\/QMtHJA0qwCUIWBfV1MblubZkRcVq9KE0w5FfGDDadx\"}}",
+      "headers": {
+        "Server": "nginx/1.6.2",
+        "Date": "Mon, 12 Oct 2015 01:35:39 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "243",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

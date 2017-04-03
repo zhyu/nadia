@@ -1,14 +1,13 @@
-defmodule Nadia.API do
+defmodule Nadia.Graph.API do
   @moduledoc """
   Provides basic functionalities for Telegram Bot API.
   """
 
-  alias Nadia.Model.Error
+  alias Nadia.Graph.Model.Error
 
   @default_timeout 5
-  @base_url "https://api.telegram.org/bot"
+  @base_url "https://api.telegra.ph"
 
-  defp token, do: config_or_env(:token)
   defp recv_timeout, do: config_or_env(:recv_timeout) || @default_timeout
 
   defp config_or_env(key) do
@@ -24,12 +23,12 @@ defmodule Nadia.API do
     end
   end
 
-  defp build_url(method), do: @base_url <> token() <> "/" <> method
+  defp build_url(method), do: @base_url <> "/" <> method
 
   defp process_response(response, method) do
     case decode_response(response) do
       {:ok, true} -> :ok
-      {:ok, result} -> {:ok, Nadia.Parser.parse_result(result, method)}
+      {:ok, result} -> {:ok, Nadia.Graph.Parser.parse_result(result, method)}
       %{ok: false, description: description} -> {:error, %Error{reason: description}}
       {:error, %HTTPoison.Error{reason: reason}} -> {:error, %Error{reason: reason}}
     end
@@ -50,15 +49,7 @@ defmodule Nadia.API do
     ]}
   end
 
-  defp calculate_timeout(options) when is_list(options) do
-     (Keyword.get(options, :timeout, 0) + recv_timeout()) * 1000
-  end
-
-  defp calculate_timeout(options) when is_map(options) do
-     (Map.get(options, :timeout, 0) + recv_timeout()) * 1000
-  end
-
-  defp build_request(params, file_field) when is_list(params) do
+  defp build_request(params, file_field) do
     params = params
     |> Keyword.update(:reply_markup, nil, &(Poison.encode!(&1)))
     |> Enum.filter_map(fn {_, v} -> v end, fn {k, v} -> {k, to_string(v)} end)
@@ -66,27 +57,6 @@ defmodule Nadia.API do
       build_multipart_request(params, file_field)
     else
       {:form, params}
-    end
-  end
-
-  defp build_request(params, file_field) when is_map(params) do
-    params = params
-    |> Map.update(:reply_markup, nil, &(Poison.encode!(&1)))
-    |> Enum.filter_map(fn {_, v} -> v end, fn {k, v} -> {k, to_string(v)} end)
-    if !is_nil(file_field) and File.exists?(params[file_field]) do
-      build_multipart_request(params, file_field)
-    else
-      {:form, params}
-    end
-  end
-
-  defp build_options(options) do
-    timeout = calculate_timeout(options)
-    opts = [recv_timeout: timeout]
-
-    case config_or_env(:proxy) do
-      proxy when byte_size(proxy) > 0 -> Keyword.put(opts, :proxy, proxy)
-      _ -> opts
     end
   end
 
@@ -99,13 +69,10 @@ defmodule Nadia.API do
   * `file_field` - specify the key of file_field in `options` when sending files
   """
   def request(method, options \\ [], file_field \\ nil) do
+    timeout = (Keyword.get(options, :timeout, 0) + recv_timeout()) * 1000
     method
     |> build_url
-    |> HTTPoison.post(build_request(options, file_field), [], build_options(options))
+    |> HTTPoison.post(build_request(options, file_field), [], recv_timeout: timeout)
     |> process_response(method)
-  end
-
-  def request?(method, options \\ [], file_field \\ nil) do
-    {_, response} = request(method, options, file_field); response
   end
 end

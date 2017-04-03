@@ -1,0 +1,24 @@
+[
+  {
+    "request": {
+      "body": "access_token=b968da509bb76866c35425099bc0989a5ec3b32997d55286c657e6994bbb&title=Sample+Page&author_name=Anonymous&content=[{\"tag\":\"p\",\"children\":[\"Hello,+world!\"]}]&return_content=true",
+      "headers": [],
+      "method": "post",
+      "options": [],
+      "url": "https://api.telegra.ph/createPage"
+    },
+    "response": {
+      "body": "{\"ok\":true,\"result\":{\"path\":\"Sample-Page-01-13-3\",\"url\":\"http:\\\/\\\/telegra.ph\\\/Sample-Page-01-13-3\",\"title\":\"Sample Page\",\"description\":\"\",\"author_name\":\"Anonymous\",\"content\":[{\"tag\":\"p\",\"children\":[\"Hello, world!\"]}],\"views\":0,\"can_edit\":true}}",
+      "headers": {
+        "Server": "nginx/1.6.2",
+        "Date": "Mon, 12 Oct 2015 01:35:39 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "243",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

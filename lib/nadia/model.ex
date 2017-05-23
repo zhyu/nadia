@@ -139,15 +139,6 @@ defmodule Nadia.Model do
     @type t :: %InlineKeyboardButton{text: binary, url: binary, callback_data: binary, switch_inline_query: binary}
   end
 
-  defimpl Poison.Encoder, for: InlineKeyboardButton do
-    def encode(button, options) do
-      Map.from_struct(button)
-      |> Enum.filter(fn {_, v} -> !is_nil(v) end)
-      |> Map.new
-      |> Poison.Encoder.encode(options)
-    end
-  end
-
   defmodule CallbackQuery do
     defstruct id: nil, from: nil, message: nil, inline_message_id: nil, data: nil
     @type t :: %CallbackQuery{id: binary, from: User.t, message: Message.t, inline_message_id: binary, data: binary}

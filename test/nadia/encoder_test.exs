@@ -1,4 +1,4 @@
-defmodule Nadia.ModelTest do
+defmodule Nadia.EncoderTest do
   use ExUnit.Case, async: true
 
   alias Nadia.Model.{InlineKeyboardButton}

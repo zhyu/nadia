@@ -13,6 +13,7 @@ defmodule Nadia.API do
 
   defp config_or_env(key) do
     case Application.fetch_env(:nadia, key) do
+      {:ok, {:process, key}} -> Process.get(key)
       {:ok, {:system, var}} -> System.get_env(var)
       {:ok, {:system, var, default}} ->
         case System.get_env(var) do

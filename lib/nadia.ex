@@ -401,12 +401,12 @@ defmodule Nadia do
       iex> Nadia.get_file_link(%Nadia.Model.File{file_id: "BQADBQADBgADmEjsA1aqdSxtzvvVAg",
       ...> file_path: "document/file_10", file_size: 17680})
       {:ok,
-      "https://api.telegram.org/file/bot#{Application.get_env(:nadia, :token)}/document/file_10"}
+      "https://api.telegram.org/file/bot#{Nadia.API.token()}/document/file_10"}
 
   """
   @spec get_file_link(File.t) :: {:ok, binary} | {:error, Error.t}
   def get_file_link(file) do
-    token = Application.get_env(:nadia, :token)
+    token = Nadia.API.token()
     {:ok, @base_file_url <> token <> "/" <> file.file_path}
   end
 
@@ -512,7 +512,7 @@ defmodule Nadia do
   def get_chat_member(chat_id, user_id) do
     request("getChatMember", chat_id: chat_id, user_id: user_id)
   end
-  
+
   @doc """
   Use this method to send answers to callback queries sent from inline keyboards.
   The answer will be displayed to the user as a notification at the top of the chat

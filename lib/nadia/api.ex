@@ -8,7 +8,7 @@ defmodule Nadia.API do
   @default_timeout 5
   @base_url "https://api.telegram.org/bot"
 
-  defp token, do: config_or_env(:token)
+  def token, do: config_or_env(:token)
   defp recv_timeout, do: config_or_env(:recv_timeout) || @default_timeout
 
   defp config_or_env(key) do

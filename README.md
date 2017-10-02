@@ -28,6 +28,18 @@ config :nadia,
   recv_timeout: 10
 ```
 
+You can also configure the the base url for the api if you need to for some
+reason.
+
+```elixir
+config :nadia,
+  # Telegram API. Default: https://api.telegram.org/bot
+  base_url: "http://my-own-endpoint.com/whatever/"
+
+  # Telegram Graph API. Default: https://api.telegra.ph
+  graph_base_url: "http://my-own-endpoint.com/whatever/"
+```
+
 Environment variables may be used as well:
 
 ```elixir

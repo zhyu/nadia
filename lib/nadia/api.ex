@@ -6,10 +6,11 @@ defmodule Nadia.API do
   alias Nadia.Model.Error
 
   @default_timeout 5
-  @base_url "https://api.telegram.org/bot"
+  @default_base_url "https://api.telegram.org/bot"
 
   defp token, do: config_or_env(:token)
   defp recv_timeout, do: config_or_env(:recv_timeout) || @default_timeout
+  defp base_Url, do: config_or_env(:base_url) || @default_base_url
 
   defp config_or_env(key) do
     case Application.fetch_env(:nadia, key) do
@@ -24,7 +25,7 @@ defmodule Nadia.API do
     end
   end
 
-  defp build_url(method), do: @base_url <> token() <> "/" <> method
+  defp build_url(method), do: base_url() <> token() <> "/" <> method
 
   defp process_response(response, method) do
     case decode_response(response) do

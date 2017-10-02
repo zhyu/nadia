@@ -2,6 +2,24 @@ defmodule Nadia.ConfigTest do
   use ExUnit.Case
   alias Nadia.Config
 
+  defp restore_env!(key, value) do
+    if value do
+      :ok = Application.put_env(:nadia, key, value)
+    else
+      :ok = Application.delete_env(:nadia, key)
+    end
+  end
+
+  setup do
+    base_url = Application.get_env(:nadia, :base_url)
+    graph_base_url = Application.get_env(:nadia, :graph_base_url)
+
+    on_exit fn ->
+      restore_env!(:base_url, base_url)
+      restore_env!(:graph_base_url, graph_base_url)
+    end
+  end
+
   describe "base_url/0" do
     test "returns config value when present" do
       :ok = Application.put_env(:nadia, :base_url, "http://something.com/api")

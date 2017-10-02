@@ -13,7 +13,7 @@ config :nadia,
 
   # If the need ever rises, you can configure the base url for the api
   # Telegram API
-  #base_url: "http://my-own-endpoint.com/whatever/"
+  #base_url: "http://my-own-endpoint.com/whatever/",
   # Telegram Graph API
   #graph_base_url: "http://my-own-endpoint.com/whatever/"
 

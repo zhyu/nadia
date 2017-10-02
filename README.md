@@ -34,7 +34,7 @@ reason.
 ```elixir
 config :nadia,
   # Telegram API. Default: https://api.telegram.org/bot
-  base_url: "http://my-own-endpoint.com/whatever/"
+  base_url: "http://my-own-endpoint.com/whatever/",
 
   # Telegram Graph API. Default: https://api.telegra.ph
   graph_base_url: "http://my-own-endpoint.com/whatever/"

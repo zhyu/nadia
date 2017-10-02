@@ -10,7 +10,7 @@ defmodule Nadia.API do
 
   defp token, do: config_or_env(:token)
   defp recv_timeout, do: config_or_env(:recv_timeout) || @default_timeout
-  defp base_Url, do: config_or_env(:base_url) || @default_base_url
+  defp base_url, do: config_or_env(:base_url) || @default_base_url
 
   defp config_or_env(key) do
     case Application.fetch_env(:nadia, key) do

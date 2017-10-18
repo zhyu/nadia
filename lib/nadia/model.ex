@@ -99,8 +99,8 @@ defmodule Nadia.Model do
   end
 
   defmodule Update do
-    defstruct update_id: nil, message: nil, edited_message: nil, inline_query: nil, chosen_inline_result: nil, callback_query: nil
-    @type t :: %Update{update_id: integer, message: Message.t, edited_message: Message.t, inline_query: InlineQuery.t,
+    defstruct update_id: nil, message: nil, edited_message: nil, channel_post: nil, inline_query: nil, chosen_inline_result: nil, callback_query: nil
+    @type t :: %Update{update_id: integer, message: Message.t, edited_message: Message.t, channel_post: Message.t, inline_query: InlineQuery.t,
                        chosen_inline_result: ChosenInlineResult.t, callback_query: CallbackQuery.t}
   end
 

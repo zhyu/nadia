@@ -10,6 +10,8 @@ defmodule Nadia do
 
   import Nadia.API
 
+  @behaviour Nadia.Behaviour
+
   @base_file_url "https://api.telegram.org/file/bot"
 
   @doc """

@@ -98,6 +98,7 @@ defmodule Nadia.API do
   * `options` - orddict of options
   * `file_field` - specify the key of file_field in `options` when sending files
   """
+  @spec request(binary, [{atom, any}], atom) :: :ok | {:error, Error.t} | {:ok, any}
   def request(method, options \\ [], file_field \\ nil) do
     method
     |> build_url

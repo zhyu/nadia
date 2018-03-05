@@ -26,4 +26,46 @@ defmodule Nadia.ParserTest do
                 %PhotoSize{file_id: "bar", file_size: 200, height: 320, width: 320}]],
       total_count: 1}
   end
+
+  test "pase result of get_updates" do
+
+    raw_updates = [%{channel_post: %{chat: %{id: -1000000000000, title: "Test Channel",
+           type: "channel"}, date: 1508358735,
+         entities: [%{length: 5, offset: 0, type: "bot_command"},
+          %{length: 9, offset: 6, type: "mention"}], message_id: 5,
+         text: "/test @my_test_bot"}, update_id: 790000000},
+     %{message: %{chat: %{first_name: "John", id: 440000000,
+           last_name: "Doe", type: "private"}, date: 1508359228,
+         from: %{first_name: "John", id: 440000000, is_bot: false,
+           language_code: "en-US", last_name: "Doe"}, message_id: 3,
+         text: "Test"}, update_id: 790000001}]
+
+    updates = Parser.parse_result(raw_updates, "getUpdates")
+
+    assert updates == [
+      %Nadia.Model.Update{
+        channel_post: %Nadia.Model.Message{
+          chat: %Nadia.Model.Chat{id: -1000000000000, title: "Test Channel", type: "channel"},
+          date: 1508358735,
+          entities: [
+            %{length: 5, offset: 0, type: "bot_command"},
+            %{length: 9, offset: 6, type: "mention"}
+          ],
+          message_id: 5,
+          text: "/test @my_test_bot",
+        },
+        update_id: 790000000,
+      },
+      %Nadia.Model.Update{
+        message: %Nadia.Model.Message{
+          chat: %Nadia.Model.Chat{first_name: "John", id: 440000000, last_name: "Doe", type: "private"},
+          date: 1508359228,
+          from: %Nadia.Model.User{first_name: "John", id: 440000000, last_name: "Doe"},
+          message_id: 3,
+          text: "Test",
+        },
+        update_id: 790000001,
+      }
+    ]
+  end
 end

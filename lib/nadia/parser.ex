@@ -30,7 +30,7 @@ defmodule Nadia.Parser do
     end
   end
 
-  @keys_of_message [:message, :reply_to_message]
+  @keys_of_message [:message, :reply_to_message, :channel_post]
   @keys_of_photo [:photo, :new_chat_photo]
   @keys_of_user [:from, :forward_from, :new_chat_participant, :left_chat_participant]
 

@@ -4,27 +4,9 @@ defmodule Nadia.API do
   """
 
   alias Nadia.Model.Error
+  alias Nadia.Config
 
-  @default_timeout 5
-  @base_url "https://api.telegram.org/bot"
-
-  defp token, do: config_or_env(:token)
-  defp recv_timeout, do: config_or_env(:recv_timeout) || @default_timeout
-
-  defp config_or_env(key) do
-    case Application.fetch_env(:nadia, key) do
-      {:ok, {:system, var}} -> System.get_env(var)
-      {:ok, {:system, var, default}} ->
-        case System.get_env(var) do
-          nil -> default
-          val -> val
-        end
-      {:ok, value} -> value
-      :error -> nil
-    end
-  end
-
-  defp build_url(method), do: @base_url <> token() <> "/" <> method
+  defp build_url(method), do: Config.base_url() <> Config.token() <> "/" <> method
 
   defp process_response(response, method) do
     case decode_response(response) do
@@ -52,11 +34,11 @@ defmodule Nadia.API do
   end
 
   defp calculate_timeout(options) when is_list(options) do
-     (Keyword.get(options, :timeout, 0) + recv_timeout()) * 1000
+     (Keyword.get(options, :timeout, 0) + Config.recv_timeout()) * 1000
   end
 
   defp calculate_timeout(options) when is_map(options) do
-     (Map.get(options, :timeout, 0) + recv_timeout()) * 1000
+     (Map.get(options, :timeout, 0) + Config.recv_timeout()) * 1000
   end
 
   defp build_request(params, file_field) when is_list(params) do
@@ -88,7 +70,7 @@ defmodule Nadia.API do
     timeout = calculate_timeout(options)
     opts = [recv_timeout: timeout]
 
-    case config_or_env(:proxy) do
+    case Config.proxy() do
       proxy when byte_size(proxy) > 0 -> Keyword.put(opts, :proxy, proxy)
       _ -> opts
     end

@@ -4,26 +4,9 @@ defmodule Nadia.Graph.API do
   """
 
   alias Nadia.Graph.Model.Error
+  alias Nadia.Config
 
-  @default_timeout 5
-  @base_url "https://api.telegra.ph"
-
-  defp recv_timeout, do: config_or_env(:recv_timeout) || @default_timeout
-
-  defp config_or_env(key) do
-    case Application.fetch_env(:nadia, key) do
-      {:ok, {:system, var}} -> System.get_env(var)
-      {:ok, {:system, var, default}} ->
-        case System.get_env(var) do
-          nil -> default
-          val -> val
-        end
-      {:ok, value} -> value
-      :error -> nil
-    end
-  end
-
-  defp build_url(method), do: @base_url <> "/" <> method
+  defp build_url(method), do: Config.graph_base_url() <> "/" <> method
 
   defp process_response(response, method) do
     case decode_response(response) do
@@ -69,7 +52,7 @@ defmodule Nadia.Graph.API do
   * `file_field` - specify the key of file_field in `options` when sending files
   """
   def request(method, options \\ [], file_field \\ nil) do
-    timeout = (Keyword.get(options, :timeout, 0) + recv_timeout()) * 1000
+    timeout = (Keyword.get(options, :timeout, 0) + Config.recv_timeout()) * 1000
     method
     |> build_url
     |> HTTPoison.post(build_request(options, file_field), [], recv_timeout: timeout)

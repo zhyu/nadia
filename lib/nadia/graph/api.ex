@@ -19,23 +19,28 @@ defmodule Nadia.Graph.API do
 
   defp decode_response(response) do
     with {:ok, %HTTPoison.Response{body: body}} <- response,
-          %{result: result} <- Poison.decode!(body, keys: :atoms),
-      do: {:ok, result}
+         %{result: result} <- Poison.decode!(body, keys: :atoms),
+         do: {:ok, result}
   end
 
   defp build_multipart_request(params, file_field) do
     {file_path, params} = Keyword.pop(params, file_field)
     params = for {k, v} <- params, do: {to_string(k), v}
-    {:multipart, params ++ [
-      {:file, file_path,
-       {"form-data", [{"name", to_string(file_field)}, {"filename", file_path}]}, []}
-    ]}
+
+    {:multipart,
+     params ++
+       [
+         {:file, file_path,
+          {"form-data", [{"name", to_string(file_field)}, {"filename", file_path}]}, []}
+       ]}
   end
 
   defp build_request(params, file_field) do
-    params = params
-    |> Keyword.update(:reply_markup, nil, &(Poison.encode!(&1)))
-    |> Enum.filter_map(fn {_, v} -> v end, fn {k, v} -> {k, to_string(v)} end)
+    params =
+      params
+      |> Keyword.update(:reply_markup, nil, &Poison.encode!(&1))
+      |> Enum.filter_map(fn {_, v} -> v end, fn {k, v} -> {k, to_string(v)} end)
+
     if !is_nil(file_field) and File.exists?(params[file_field]) do
       build_multipart_request(params, file_field)
     else
@@ -53,6 +58,7 @@ defmodule Nadia.Graph.API do
   """
   def request(method, options \\ [], file_field \\ nil) do
     timeout = (Keyword.get(options, :timeout, 0) + Config.recv_timeout()) * 1000
+
     method
     |> build_url
     |> HTTPoison.post(build_request(options, file_field), [], recv_timeout: timeout)

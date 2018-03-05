@@ -32,13 +32,14 @@ defmodule Nadia.API do
       {:ok, result} -> {:ok, Nadia.Parser.parse_result(result, method)}
       %{ok: false, description: description} -> {:error, %Error{reason: description}}
       {:error, %HTTPoison.Error{reason: reason}} -> {:error, %Error{reason: reason}}
+      {:error, error} -> {:error, %Error{reason: error}}
     end
   end
 
   defp decode_response(response) do
     with {:ok, %HTTPoison.Response{body: body}} <- response,
-          %{result: result} <- Poison.decode!(body, keys: :atoms),
-      do: {:ok, result}
+         {:ok, %{result: result}} <- Poison.decode(body, keys: :atoms),
+         do: {:ok, result}
   end
 
   defp build_multipart_request(params, file_field) do

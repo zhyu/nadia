@@ -39,7 +39,8 @@ defmodule Nadia.Graph.API do
     params =
       params
       |> Keyword.update(:reply_markup, nil, &Poison.encode!(&1))
-      |> Enum.filter_map(fn {_, v} -> v end, fn {k, v} -> {k, to_string(v)} end)
+      |> Stream.filter(fn {_, v} -> v end)
+      |> Enum.map(fn {k, v} -> {k, to_string(v)} end)
 
     if !is_nil(file_field) and File.exists?(params[file_field]) do
       build_multipart_request(params, file_field)

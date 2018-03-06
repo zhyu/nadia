@@ -11,8 +11,19 @@ defmodule Nadia.Model do
     @type t :: %User{id: integer, first_name: binary, last_name: binary, username: binary}
   end
 
+  defmodule ChatPhoto do
+    defstruct small_file_id: nil, big_file_id: nil
+    @type t :: %ChatPhoto{small_file_id: binary, big_file_id: binary}
+  end
+
   defmodule Chat do
-    defstruct id: nil, type: nil, title: nil, username: nil, first_name: nil, last_name: nil
+    defstruct id: nil,
+              type: nil,
+              title: nil,
+              username: nil,
+              first_name: nil,
+              last_name: nil,
+              photo: nil
 
     @type t :: %Chat{
             id: integer,
@@ -20,7 +31,8 @@ defmodule Nadia.Model do
             title: binary,
             username: binary,
             first_name: binary,
-            last_name: binary
+            last_name: binary,
+            photo: ChatPhoto.t()
           }
   end
 

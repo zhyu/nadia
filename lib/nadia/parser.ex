@@ -3,7 +3,18 @@ defmodule Nadia.Parser do
   Provides parser logics for API results.
   """
 
-  alias Nadia.Model.{User, Chat, ChatMember, Message, PhotoSize, Audio, Document, Sticker}
+  alias Nadia.Model.{
+    User,
+    Chat,
+    ChatMember,
+    Message,
+    ChatPhoto,
+    PhotoSize,
+    Audio,
+    Document,
+    Sticker
+  }
+
   alias Nadia.Model.{Video, Voice, Contact, Location, Venue, Update, File, CallbackQuery}
   alias Nadia.Model.UserProfilePhotos
 
@@ -35,6 +46,7 @@ defmodule Nadia.Parser do
   @keys_of_user [:from, :forward_from, :new_chat_participant, :left_chat_participant]
 
   defp parse(:photo, l) when is_list(l), do: Enum.map(l, &parse(PhotoSize, &1))
+  defp parse(:photo, p), do: parse(ChatPhoto, p)
   defp parse(:photos, l) when is_list(l), do: Enum.map(l, &parse(:photo, &1))
   defp parse(:updates, l) when is_list(l), do: Enum.map(l, &parse(Update, &1))
   defp parse(:chat_members, l) when is_list(l), do: Enum.map(l, &parse(ChatMember, &1))

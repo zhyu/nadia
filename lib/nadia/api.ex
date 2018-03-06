@@ -27,29 +27,32 @@ defmodule Nadia.API do
   defp build_multipart_request(params, file_field) do
     {file_path, params} = Keyword.pop(params, file_field)
     params = for {k, v} <- params, do: {to_string(k), v}
-    {:multipart, params ++ [
-      {:file, file_path,
-       {"form-data", [{"name", to_string(file_field)}, {"filename", file_path}]}, []}
-    ]}
+
+    {:multipart,
+     params ++
+       [
+         {:file, file_path,
+          {"form-data", [{"name", to_string(file_field)}, {"filename", file_path}]}, []}
+       ]}
   end
 
   defp calculate_timeout(options) when is_list(options) do
-     (Keyword.get(options, :timeout, 0) + Config.recv_timeout()) * 1000
+    (Keyword.get(options, :timeout, 0) + Config.recv_timeout()) * 1000
   end
 
   defp calculate_timeout(options) when is_map(options) do
-     (Map.get(options, :timeout, 0) + Config.recv_timeout()) * 1000
+    (Map.get(options, :timeout, 0) + Config.recv_timeout()) * 1000
   end
 
   defp build_request(params, file_field) when is_list(params) do
     params
-    |> Keyword.update(:reply_markup, nil, &(Poison.encode!(&1)))
+    |> Keyword.update(:reply_markup, nil, &Poison.encode!(&1))
     |> map_params(file_field)
   end
 
   defp build_request(params, file_field) when is_map(params) do
     params
-    |> Map.update(:reply_markup, nil, &(Poison.encode!(&1)))
+    |> Map.update(:reply_markup, nil, &Poison.encode!(&1))
     |> map_params(file_field)
   end
 
@@ -84,7 +87,7 @@ defmodule Nadia.API do
   * `options` - orddict of options
   * `file_field` - specify the key of file_field in `options` when sending files
   """
-  @spec request(binary, [{atom, any}], atom) :: :ok | {:error, Error.t} | {:ok, any}
+  @spec request(binary, [{atom, any}], atom) :: :ok | {:error, Error.t()} | {:ok, any}
   def request(method, options \\ [], file_field \\ nil) do
     method
     |> build_url
@@ -93,6 +96,7 @@ defmodule Nadia.API do
   end
 
   def request?(method, options \\ [], file_field \\ nil) do
-    {_, response} = request(method, options, file_field); response
+    {_, response} = request(method, options, file_field)
+    response
   end
 end

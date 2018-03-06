@@ -14,10 +14,10 @@ defmodule Nadia.ConfigTest do
     base_url = Application.get_env(:nadia, :base_url)
     graph_base_url = Application.get_env(:nadia, :graph_base_url)
 
-    on_exit fn ->
+    on_exit(fn ->
       restore_env!(:base_url, base_url)
       restore_env!(:graph_base_url, graph_base_url)
-    end
+    end)
   end
 
   test "Config.base_url/0 returns config value when present" do
@@ -34,8 +34,13 @@ defmodule Nadia.ConfigTest do
   end
 
   test "Config.base_url/0 returns environment variable default" do
-    :ok = Application.put_env(:nadia, :base_url,
-      {:system, "PHONY_BASE_URL", "http://somedefault.com/api"})
+    :ok =
+      Application.put_env(
+        :nadia,
+        :base_url,
+        {:system, "PHONY_BASE_URL", "http://somedefault.com/api"}
+      )
+
     :ok = System.delete_env("PHONY_BASE_URL")
 
     assert Config.base_url() == "http://somedefault.com/api"
@@ -61,8 +66,13 @@ defmodule Nadia.ConfigTest do
   end
 
   test "Config.graph_base_url/0 returns environment variable default" do
-    :ok = Application.put_env(:nadia, :graph_base_url,
-      {:system, "PHONY_BASE_URL", "http://somedefault.com/api"})
+    :ok =
+      Application.put_env(
+        :nadia,
+        :graph_base_url,
+        {:system, "PHONY_BASE_URL", "http://somedefault.com/api"}
+      )
+
     :ok = System.delete_env("PHONY_BASE_URL")
 
     assert Config.graph_base_url() == "http://somedefault.com/api"

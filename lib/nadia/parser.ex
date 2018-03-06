@@ -34,11 +34,11 @@ defmodule Nadia.Parser do
   @keys_of_photo [:photo, :new_chat_photo]
   @keys_of_user [:from, :forward_from, :new_chat_participant, :left_chat_participant]
 
-  defp parse(:photo, l) when is_list(l), do: Enum.map(l, &(parse(PhotoSize, &1)))
-  defp parse(:photos, l) when is_list(l), do: Enum.map(l, &(parse(:photo, &1)))
-  defp parse(:updates, l) when is_list(l), do: Enum.map(l, &(parse(Update, &1)))
-  defp parse(:chat_members, l) when is_list(l), do: Enum.map(l, &(parse(ChatMember, &1)))
-  defp parse(type, val), do: struct(type, Enum.map(val, &(parse(&1))))
+  defp parse(:photo, l) when is_list(l), do: Enum.map(l, &parse(PhotoSize, &1))
+  defp parse(:photos, l) when is_list(l), do: Enum.map(l, &parse(:photo, &1))
+  defp parse(:updates, l) when is_list(l), do: Enum.map(l, &parse(Update, &1))
+  defp parse(:chat_members, l) when is_list(l), do: Enum.map(l, &parse(ChatMember, &1))
+  defp parse(type, val), do: struct(type, Enum.map(val, &parse(&1)))
   defp parse({:chat, val}), do: {:chat, parse(Chat, val)}
   defp parse({:audio, val}), do: {:audio, parse(Audio, val)}
   defp parse({:video, val}), do: {:video, parse(Video, val)}

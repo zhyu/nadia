@@ -8,6 +8,7 @@ defmodule NadiaTest do
     unless Application.get_env(:nadia, :token) do
       Application.put_env(:nadia, :token, "TEST_TOKEN")
     end
+
     ExVCR.Config.filter_sensitive_data("bot[^/]+/", "bot<TOKEN>/")
     ExVCR.Config.filter_sensitive_data("id\":\\d+", "id\":666")
     ExVCR.Config.filter_sensitive_data("id=\\d+", "id=666")
@@ -17,7 +18,7 @@ defmodule NadiaTest do
 
   test "get_me" do
     use_cassette "get_me" do
-      {:ok, me} = Nadia.get_me
+      {:ok, me} = Nadia.get_me()
       assert me == %User{id: 666, first_name: "Nadia", username: "nadia_bot"}
     end
   end
@@ -56,7 +57,7 @@ defmodule NadiaTest do
 
   test "send_contact" do
     use_cassette "send_contact" do
-      {:ok, message} = Nadia.send_contact(666, 10123800555, "Test")
+      {:ok, message} = Nadia.send_contact(666, 10_123_800_555, "Test")
       refute is_nil(message.contact)
       assert message.contact.phone_number == "10123800555"
       assert message.contact.first_name == "Test"
@@ -112,7 +113,7 @@ defmodule NadiaTest do
 
   test "delete webhook" do
     use_cassette "delete_webhook" do
-      assert Nadia.set_webhook == :ok
+      assert Nadia.set_webhook() == :ok
     end
   end
 
@@ -163,7 +164,14 @@ defmodule NadiaTest do
   end
 
   test "answer_inline_query" do
-    photo = %Nadia.Model.InlineQueryResult.Photo{id: "1", photo_url: "http://vignette1.wikia.nocookie.net/cardfight/images/5/53/Monokuma.jpg/revision/latest?cb=20130928103410", thumb_url: "http://vignette1.wikia.nocookie.net/cardfight/images/5/53/Monokuma.jpg/revision/latest?cb=20130928103410"}
+    photo = %Nadia.Model.InlineQueryResult.Photo{
+      id: "1",
+      photo_url:
+        "http://vignette1.wikia.nocookie.net/cardfight/images/5/53/Monokuma.jpg/revision/latest?cb=20130928103410",
+      thumb_url:
+        "http://vignette1.wikia.nocookie.net/cardfight/images/5/53/Monokuma.jpg/revision/latest?cb=20130928103410"
+    }
+
     use_cassette "answer_inline_query" do
       assert :ok == Nadia.answer_inline_query(666, [photo])
     end

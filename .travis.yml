@@ -10,6 +10,6 @@ cache:
     - deps
 script:
   - mix test || travis_terminate 1
-  - mix format --check-formatted || travis_treminate 1
+  - mix format --check-formatted || travis_terminate 1
 after_script:
   - MIX_ENV=docs mix do deps.get, inch.report

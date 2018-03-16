@@ -3,7 +3,7 @@ defmodule Nadia.Graph.Parser do
   Provides parser logics for API results.
   """
 
-  alias Nadia.Graph.Model.{Account, PageList, Page, PageViews, NodeElement}
+  alias Nadia.Graph.Model.{Account, PageList, Page, PageViews}
 
   @doc """
   parse `result` field of decoded API response json.

@@ -4,7 +4,7 @@ defmodule Nadia.Mixfile do
   def project do
     [
       app: :nadia,
-      version: "0.4.2",
+      version: "0.4.3",
       elixir: "~> 1.6",
       description: "Telegram Bot API Wrapper written in Elixir",
       package: package(),

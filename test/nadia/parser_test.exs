@@ -62,7 +62,13 @@ defmodule Nadia.ParserTest do
       },
       %{
         message: %{
-          chat: %{first_name: "John", id: 440_000_000, last_name: "Doe", type: "private"},
+          chat: %{
+            first_name: "John",
+            id: 440_000_000,
+            last_name: "Doe",
+            type: "private",
+            photo: %{small_file_id: "sid", big_file_id: "bid"}
+          },
           date: 1_508_359_228,
           from: %{
             first_name: "John",
@@ -104,7 +110,8 @@ defmodule Nadia.ParserTest do
                    first_name: "John",
                    id: 440_000_000,
                    last_name: "Doe",
-                   type: "private"
+                   type: "private",
+                   photo: %Nadia.Model.ChatPhoto{small_file_id: "sid", big_file_id: "bid"}
                  },
                  date: 1_508_359_228,
                  from: %Nadia.Model.User{first_name: "John", id: 440_000_000, last_name: "Doe"},

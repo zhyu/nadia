@@ -35,7 +35,7 @@ defmodule Nadia.Mixfile do
       {:httpoison, "~> 0.9"},
       {:poison, "~> 3.0"},
       {:exvcr, "~> 0.7", only: [:dev, :test]},
-      {:earmark, "~> 0.2", only: :docs},
+      {:earmark, "~> 1.2.4", only: :docs},
       {:ex_doc, "~> 0.11", only: :docs},
       {:inch_ex, "~> 0.5", only: :docs}
     ]

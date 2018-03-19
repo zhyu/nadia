@@ -1,5 +1,5 @@
 defmodule NadiaTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
   use ExVCR.Mock, adapter: ExVCR.Adapter.Hackney
   doctest Nadia, only: [get_file_link: 1]
   alias Nadia.Model.User
@@ -8,7 +8,10 @@ defmodule NadiaTest do
     unless Application.get_env(:nadia, :token) do
       Application.put_env(:nadia, :token, "TEST_TOKEN")
     end
+    :ok
+  end
 
+  setup do
     ExVCR.Config.filter_sensitive_data("bot[^/]+/", "bot<TOKEN>/")
     ExVCR.Config.filter_sensitive_data("id\":\\d+", "id\":666")
     ExVCR.Config.filter_sensitive_data("id=\\d+", "id=666")

@@ -7,6 +7,7 @@ defmodule Nadia.APITest do
     unless Application.get_env(:nadia, :token) do
       Application.put_env(:nadia, :token, "304884665:AAE1ItId1gf9MsM-Smrv9sPc0glmB2HkMAo")
     end
+
     :ok
   end
 

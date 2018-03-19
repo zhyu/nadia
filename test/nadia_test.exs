@@ -8,6 +8,7 @@ defmodule NadiaTest do
     unless Application.get_env(:nadia, :token) do
       Application.put_env(:nadia, :token, "TEST_TOKEN")
     end
+
     :ok
   end
 

@@ -2,7 +2,17 @@ defmodule Nadia.ParserTest do
   use ExUnit.Case, async: true
 
   alias Nadia.Parser
-  alias Nadia.Model.{User, PhotoSize, UserProfilePhotos}
+
+  alias Nadia.Model.{
+    Update,
+    InlineQuery,
+    CallbackQuery,
+    ChosenInlineResult,
+    User,
+    PhotoSize,
+    UserProfilePhotos,
+    Message
+  }
 
   test "parse result of get_me" do
     me =
@@ -119,6 +129,116 @@ defmodule Nadia.ParserTest do
                  text: "Test"
                },
                update_id: 790_000_001
+             }
+           ]
+  end
+
+  test "parse result of get_updates inline query" do
+    inline_query =
+      Parser.parse_result(
+        [
+          %{
+            inline_query: %{
+              id: 111,
+              from: %{
+                id: 222,
+                username: "Rastopyr",
+                first_name: "Roman",
+                last_name: "Senin"
+              },
+              location: %{
+                latitude: 123,
+                longitude: 321
+              },
+              offset: 0,
+              query: "/new-feature"
+            }
+          }
+        ],
+        "getUpdates"
+      )
+
+    assert inline_query == [
+             %Update{
+               inline_query: %InlineQuery{
+                 id: 111,
+                 from: %Nadia.Model.User{
+                   id: 222,
+                   first_name: "Roman",
+                   last_name: "Senin",
+                   username: "Rastopyr"
+                 },
+                 location: %Nadia.Model.Location{
+                   latitude: 123,
+                   longitude: 321
+                 },
+                 offset: 0,
+                 query: "/new-feature"
+               }
+             }
+           ]
+  end
+
+  test "parse result of get_updates callback query" do
+    callback_query =
+      Parser.parse_result(
+        [
+          %{
+            callback_query: %{
+              id: 111,
+              data: "111",
+              inline_message_id: "111",
+              message: %{
+                text: "Hello world"
+              }
+            }
+          }
+        ],
+        "getUpdates"
+      )
+
+    assert callback_query == [
+             %Update{
+               callback_query: %CallbackQuery{
+                 id: 111,
+                 data: "111",
+                 inline_message_id: "111",
+                 message: %Message{
+                   text: "Hello world"
+                 }
+               }
+             }
+           ]
+  end
+
+  test "parse result of get_updates chosen inline result" do
+    chosen_inline_result =
+      Parser.parse_result(
+        [
+          %{
+            chosen_inline_result: %{
+              result_id: 111,
+              from: %{
+                id: 111,
+                first_name: "Roman"
+              },
+              query: "42"
+            }
+          }
+        ],
+        "getUpdates"
+      )
+
+    assert chosen_inline_result == [
+             %Update{
+               chosen_inline_result: %ChosenInlineResult{
+                 result_id: 111,
+                 from: %User{
+                   id: 111,
+                   first_name: "Roman"
+                 },
+                 query: "42"
+               }
              }
            ]
   end

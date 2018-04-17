@@ -5,6 +5,9 @@ defmodule Nadia.Config do
 
   def token, do: config_or_env(:token)
   def proxy, do: config_or_env(:proxy)
+  def proxy_auth, do: config_or_env(:proxy_auth)
+  def socks5_user, do: config_or_env(:socks5_user)
+  def socks5_pass, do: config_or_env(:socks5_pass)
   def recv_timeout, do: config_or_env(:recv_timeout) || @default_timeout
   def base_url, do: config_or_env(:base_url) || @default_base_url
   def graph_base_url, do: config_or_env(:graph_base_url) || @default_graph_base_url

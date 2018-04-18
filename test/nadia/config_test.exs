@@ -26,7 +26,6 @@ defmodule Nadia.ConfigTest do
     assert Config.base_url() == "http://something.com/api"
   end
 
-
   test "Config.proxy/0 returns config value when present" do
     :ok = Application.put_env(:nadia, :proxy, {:socks5, 'localhost', 1080})
 

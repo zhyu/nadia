@@ -26,6 +26,24 @@ defmodule Nadia.ConfigTest do
     assert Config.base_url() == "http://something.com/api"
   end
 
+  test "Config.proxy/0 returns config value when present" do
+    :ok = Application.put_env(:nadia, :proxy, {:socks5, 'localhost', 1080})
+
+    assert Config.proxy() == {:socks5, 'localhost', 1080}
+  end
+
+  test "Config.socks5_user/0 returns config value when present" do
+    :ok = Application.put_env(:nadia, :socks5_user, "user")
+
+    assert Config.socks5_user() == "user"
+  end
+
+  test "Config.socks5_pass/0 returns config value when present" do
+    :ok = Application.put_env(:nadia, :socks5_pass, "password")
+
+    assert Config.socks5_pass() == "password"
+  end
+
   test "Config.base_url/0 returns environment variable" do
     :ok = Application.put_env(:nadia, :base_url, {:system, "PHONY_BASE_URL"})
     :ok = System.put_env("PHONY_BASE_URL", "http://somethingelse.com/api")

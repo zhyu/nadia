@@ -73,8 +73,33 @@ defmodule Nadia.API do
     timeout = calculate_timeout(options)
     opts = [recv_timeout: timeout]
 
-    case Config.proxy() do
-      proxy when byte_size(proxy) > 0 -> Keyword.put(opts, :proxy, proxy)
+    opts =
+      case Config.proxy() do
+        proxy when byte_size(proxy) > 0 -> Keyword.put(opts, :proxy, proxy)
+        proxy when is_tuple(proxy) and tuple_size(proxy) == 3 -> Keyword.put(opts, :proxy, proxy)
+        _ -> opts
+      end
+
+    opts =
+      case Config.proxy_auth() do
+        proxy_auth when is_tuple(proxy_auth) and tuple_size(proxy_auth) == 2 ->
+          Keyword.put(opts, :proxy_auth, proxy_auth)
+
+        _ ->
+          opts
+      end
+
+    opts =
+      case Config.socks5_user() do
+        socks5_user when byte_size(socks5_user) > 0 ->
+          Keyword.put(opts, :socks5_user, socks5_user)
+
+        _ ->
+          opts
+      end
+
+    case Config.socks5_pass() do
+      socks5_pass when byte_size(socks5_pass) > 0 -> Keyword.put(opts, :socks5_pass, socks5_pass)
       _ -> opts
     end
   end

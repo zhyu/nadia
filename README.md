@@ -48,7 +48,7 @@ config :nadia,
 ```
 
 And then, in `mix.exs`, list `:nadia` as an application inside `application/0`:
-
+(you can omit this if your elixir is >= 1.4)
 ```elixir
 def application do
   [applications: [:nadia]]

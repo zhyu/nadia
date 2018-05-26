@@ -6,7 +6,7 @@ defmodule NadiaTest do
 
   setup_all do
     unless Application.get_env(:nadia, :token) do
-      Application.put_env(:nadia, :token, "TEST_TOKEN")
+      Application.put_env(:nadia, :token, {:system, "ENV_TOKEN", "TEST_TOKEN"})
     end
 
     :ok
@@ -127,6 +127,19 @@ defmodule NadiaTest do
       refute is_nil(file.file_path)
       assert file.file_id == "BQADBQADBgADmEjsA1aqdSxtzvvVAg"
     end
+  end
+
+  test "get_file_link" do
+    file = %Nadia.Model.File{
+      file_id: "BQADBQADBgADmEjsA1aqdSxtzvvVAg",
+      file_path: "document/file_10",
+      file_size: 17680
+    }
+
+    {:ok, file_link} = Nadia.get_file_link(file)
+
+    assert file_link ==
+             "https://api.telegram.org/file/bot#{Nadia.Config.token()}/document/file_10"
   end
 
   test "get_chat" do

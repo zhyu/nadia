@@ -124,4 +124,15 @@ defmodule Nadia.API do
     {_, response} = request(method, options, file_field)
     response
   end
+
+  @doc ~S"""
+  Use this function to build file url.
+
+  iex> Nadia.API.build_file_url("document/file_10")
+  "https://api.telegram.org/file/bot#{Nadia.Config.token()}/document/file_10"
+  """
+  @spec build_file_url(binary) :: binary
+  def build_file_url(file_path) do
+    Config.file_base_url() <> Config.token() <> "/" <> file_path
+  end
 end

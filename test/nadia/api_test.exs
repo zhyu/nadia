@@ -19,7 +19,7 @@ defmodule Nadia.APITest do
 
   test "request_with_map" do
     use_cassette "api_request_with_map", match_requests_on: [:request_body] do
-      assert [] == Nadia.API.request?("getUpdates", %{"limit" => 4})
+      assert [] == API.request?("getUpdates", %{"limit" => 4})
     end
   end
 

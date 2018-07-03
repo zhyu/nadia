@@ -55,7 +55,7 @@ defmodule Nadia.Parser do
   defp parse(:photos, l) when is_list(l), do: Enum.map(l, &parse(:photo, &1))
   defp parse(:updates, l) when is_list(l), do: Enum.map(l, &parse(Update, &1))
   defp parse(:updates, s) do
-    Logger.error fn() -> IO.inspect("Message parser issue: #{inspect(s)}" end
+    Logger.error fn() -> IO.inspect("Message parser issue: #{inspect(s)}") end
     []
   end
   defp parse(:chat_members, l) when is_list(l), do: Enum.map(l, &parse(ChatMember, &1))

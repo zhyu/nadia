@@ -12,7 +12,7 @@ defmodule Nadia.API do
     case decode_response(response) do
       {:ok, true} -> :ok
       {:ok, result} -> {:ok, Nadia.Parser.parse_result(result, method)}
-      %{ok: false, description: description} -> {:error, %Error{reason: description}}
+      {:ok, %{ok: false, description: description}} -> {:error, %Error{reason: description}}
       {:error, %HTTPoison.Error{reason: reason}} -> {:error, %Error{reason: reason}}
       {:error, error} -> {:error, %Error{reason: error}}
     end

@@ -19,7 +19,6 @@ defmodule Nadia.Parser do
 
   alias Nadia.Model.{Video, Voice, Contact, Location, Venue, Update, File, CallbackQuery}
   alias Nadia.Model.UserProfilePhotos
-  require Logger
 
   @doc """
   parse `result` field of decoded API response json.
@@ -54,10 +53,6 @@ defmodule Nadia.Parser do
   defp parse(:photo, p), do: parse(ChatPhoto, p)
   defp parse(:photos, l) when is_list(l), do: Enum.map(l, &parse(:photo, &1))
   defp parse(:updates, l) when is_list(l), do: Enum.map(l, &parse(Update, &1))
-  defp parse(:updates, s) do
-    Logger.error fn() -> IO.inspect("Message parser issue: #{inspect(s)}") end
-    []
-  end
   defp parse(:chat_members, l) when is_list(l), do: Enum.map(l, &parse(ChatMember, &1))
   defp parse(type, val), do: struct(type, Enum.map(val, &parse(&1)))
   defp parse({:chat, val}), do: {:chat, parse(Chat, val)}

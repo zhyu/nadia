@@ -374,7 +374,7 @@ defmodule Nadia do
   updates starting with the earliest unconfirmed update are returned. An update is
   considered confirmed as soon as `get_updates` is called with an `offset` higher than
   its `update_id`.
-  * `:limit` - Limits the number of photos to be retrieved. Values between 1—100 are
+  * `:limit` - Limits the number of updates to be retrieved. Values between 1—100 are
   accepted. Defaults to 100
   * `:timeout` - Timeout in seconds for long polling. Defaults to 0, i.e. usual short
   polling

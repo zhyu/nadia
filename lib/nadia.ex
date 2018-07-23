@@ -388,6 +388,8 @@ defmodule Nadia do
   request to the specified url, containing a JSON-serialized Update. In case of
   an unsuccessful request, we will give up after a reasonable amount of attempts.
 
+  To delete webhook you could use `Nadia.set_webhook/0` without any parameters.
+
   Args:
   * `options` - orddict of options
 
@@ -397,6 +399,7 @@ defmodule Nadia do
   """
   @spec set_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
   def set_webhook(options \\ []), do: request("setWebhook", options)
+
 
   @doc """
   Use this method to get basic info about a file and prepare it for downloading.

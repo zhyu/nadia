@@ -6,7 +6,7 @@ defmodule Nadia do
   https://core.telegram.org/bots/api#available-methods
   """
 
-  alias Nadia.Model.{User, Message, Update, UserProfilePhotos, File, Error}
+  alias Nadia.Model.{User, Message, Update, UserProfilePhotos, File, Error, WebhookInfo}
 
   import Nadia.API
 
@@ -388,18 +388,31 @@ defmodule Nadia do
   request to the specified url, containing a JSON-serialized Update. In case of
   an unsuccessful request, we will give up after a reasonable amount of attempts.
 
-  To delete webhook you could use `Nadia.set_webhook/0` without any parameters.
-
   Args:
   * `options` - orddict of options
 
   Options:
-  * `:url` - HTTPS url to send updates to. Use an empty string to remove webhook
-  integration
+  * `:url` - HTTPS url to send updates to. 
   """
   @spec set_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
   def set_webhook(options \\ []), do: request("setWebhook", options)
 
+  @doc """
+  Use this method to remove webhook integration if you decide to switch back to `Nadia.get_updates/1`. 
+  Returns `:ok` on success. 
+
+  Requires no parameters.
+  """
+  @spec delete_webhook() :: :ok | {:error, Error.t()}
+  def delete_webhook(), do: request("deleteWebhook")
+
+  @doc """
+  Use this method to get current webhook status. Requires no parameters. 
+  On success, returns a `Nadia.Model.WebhookInfo.t()` object with webhook details. 
+  If the bot is using getUpdates, will return an object with the url field empty.
+  """
+  @spec get_webhook_info() :: {:ok, WebhookInfo.t()} | {:error, Error.t()}
+  def get_webhook_info(), do: request("getWebhookInfo")
 
   @doc """
   Use this method to get basic info about a file and prepare it for downloading.

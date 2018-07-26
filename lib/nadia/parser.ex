@@ -14,7 +14,8 @@ defmodule Nadia.Parser do
     Document,
     Sticker,
     InlineQuery,
-    ChosenInlineResult
+    ChosenInlineResult,
+    WebhookInfo
   }
 
   alias Nadia.Model.{Video, Voice, Contact, Location, Venue, Update, File, CallbackQuery}
@@ -33,6 +34,8 @@ defmodule Nadia.Parser do
       "getUserProfilePhotos" -> parse(UserProfilePhotos, result)
       "getUpdates" -> parse(:updates, result)
       "setWebhook" -> result
+      "deleteWebhook" -> result
+      "getWebhookInfo" -> parse(WebhookInfo, result)
       "getFile" -> parse(File, result)
       "getChat" -> parse(Chat, result)
       "getChatMember" -> parse(ChatMember, result)

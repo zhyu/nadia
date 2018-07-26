@@ -115,9 +115,25 @@ defmodule NadiaTest do
     end
   end
 
+  test "get webhook info" do
+    use_cassette "get_webhook_info" do
+      webhook_info = %Nadia.Model.WebhookInfo{
+        allowed_updates: [],
+        has_custom_certificate: false,
+        last_error_date: nil,
+        last_error_message: nil,
+        max_connections: nil,
+        pending_update_count: 0,
+        url: ""
+      }
+
+      assert Nadia.get_webhook_info() == {:ok, webhook_info}
+    end
+  end
+
   test "delete webhook" do
     use_cassette "delete_webhook" do
-      assert Nadia.set_webhook() == :ok
+      assert Nadia.delete_webhook() == :ok
     end
   end
 

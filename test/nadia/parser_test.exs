@@ -11,7 +11,8 @@ defmodule Nadia.ParserTest do
     User,
     PhotoSize,
     UserProfilePhotos,
-    Message
+    Message,
+    WebhookInfo
   }
 
   test "parse result of get_me" do
@@ -241,5 +242,31 @@ defmodule Nadia.ParserTest do
                }
              }
            ]
+  end
+
+  test "parse result of get_webhook_info" do
+    webhook_info =
+      Parser.parse_result(
+        %{
+          allowed_updates: [],
+          has_custom_certificate: false,
+          last_error_date: nil,
+          last_error_message: nil,
+          max_connections: 40,
+          pending_update_count: 0,
+          url: "https://elixir-trading-bot.herokuapp.com/"
+        },
+        "getWebhookInfo"
+      )
+
+    assert webhook_info == %WebhookInfo{
+             allowed_updates: [],
+             has_custom_certificate: false,
+             last_error_date: nil,
+             last_error_message: nil,
+             max_connections: 40,
+             pending_update_count: 0,
+             url: "https://elixir-trading-bot.herokuapp.com/"
+           }
   end
 end

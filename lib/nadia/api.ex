@@ -5,6 +5,7 @@ defmodule Nadia.API do
 
   alias Nadia.Model.Error
   alias Nadia.Config
+  alias Nadia.Client
 
   defp build_url(method), do: Config.base_url() <> Config.token() <> "/" <> method
 
@@ -13,13 +14,13 @@ defmodule Nadia.API do
       {:ok, true} -> :ok
       {:ok, %{ok: false, description: description}} -> {:error, %Error{reason: description}}
       {:ok, result} -> {:ok, Nadia.Parser.parse_result(result, method)}
-      {:error, %HTTPoison.Error{reason: reason}} -> {:error, %Error{reason: reason}}
+      {:error, %{reason: reason}} -> {:error, %Error{reason: reason}}
       {:error, error} -> {:error, %Error{reason: error}}
     end
   end
 
   defp decode_response(response) do
-    with {:ok, %HTTPoison.Response{body: body}} <- response,
+    with {:ok, %{body: body}} <- response,
          {:ok, %{result: result}} <- Poison.decode(body, keys: :atoms),
          do: {:ok, result}
   end
@@ -116,7 +117,7 @@ defmodule Nadia.API do
   def request(method, options \\ [], file_field \\ nil) do
     method
     |> build_url
-    |> HTTPoison.post(build_request(options, file_field), [], build_options(options))
+    |> Client.post(build_request(options, file_field), [], build_options(options))
     |> process_response(method)
   end
 

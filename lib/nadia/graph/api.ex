@@ -5,6 +5,7 @@ defmodule Nadia.Graph.API do
 
   alias Nadia.Graph.Model.Error
   alias Nadia.Config
+  alias Nadia.Client
 
   defp build_url(method), do: Config.graph_base_url() <> "/" <> method
 
@@ -13,12 +14,12 @@ defmodule Nadia.Graph.API do
       {:ok, true} -> :ok
       {:ok, result} -> {:ok, Nadia.Graph.Parser.parse_result(result, method)}
       %{ok: false, description: description} -> {:error, %Error{reason: description}}
-      {:error, %HTTPoison.Error{reason: reason}} -> {:error, %Error{reason: reason}}
+      {:error, %{reason: reason}} -> {:error, %Error{reason: reason}}
     end
   end
 
   defp decode_response(response) do
-    with {:ok, %HTTPoison.Response{body: body}} <- response,
+    with {:ok, %{body: body}} <- response,
          %{result: result} <- Poison.decode!(body, keys: :atoms),
          do: {:ok, result}
   end
@@ -62,7 +63,7 @@ defmodule Nadia.Graph.API do
 
     method
     |> build_url
-    |> HTTPoison.post(build_request(options, file_field), [], recv_timeout: timeout)
+    |> Client.post(build_request(options, file_field), [], recv_timeout: timeout)
     |> process_response(method)
   end
 end

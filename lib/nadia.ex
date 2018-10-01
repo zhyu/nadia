@@ -588,7 +588,7 @@ defmodule Nadia do
   * `:reply_markup`	- A JSON-serialized object for an inline
   keyboard - `Nadia.Model.InlineKeyboardMarkup`
   """
-  @spec edit_message_text(integer | binary, integer, binary, [{atom, any}]) ::
+  @spec edit_message_text(integer | binary, integer, binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
   def edit_message_text(chat_id, message_id, inline_message_id, text, options \\ []) do
     request(

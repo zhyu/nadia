@@ -39,7 +39,7 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
   """
-  @spec send_message(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_message(integer | binary, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
   def send_message(chat_id, text, options \\ []) do
     request("sendMessage", [chat_id: chat_id, text: text] ++ options)
   end

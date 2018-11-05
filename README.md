@@ -28,7 +28,7 @@ config :nadia,
   recv_timeout: 10
 ```
 
-You can also add an proxy support.
+You can also add a proxy support.
 ```elixir
 config :nadia,
   proxy: "http://proxy_url:proxy_port",

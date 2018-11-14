@@ -28,6 +28,14 @@ config :nadia,
   recv_timeout: 10
 ```
 
+You can also add a proxy support.
+```elixir
+config :nadia,
+  proxy: "http://proxy_url:proxy_port",
+  proxy_auth: {"user", "password"},
+  ssl: [versions: [:'tlsv1.2']]
+```
+
 You can also configure the the base url for the api if you need to for some
 reason.
 

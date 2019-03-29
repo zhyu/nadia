@@ -2,8 +2,14 @@
 # and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
+
+config :nadia, bots: [
+  %{bot_name: "AlexandraBot", commands_module: YourAppModule.AlexandraBot.Commands,
+  token:  Base.decode64!("KFEDOSKYG5KUQSZVK5CDKU22INEUUWCZGRLDIRKPJ5BEUQZWK5IA")},
+  %{bot_name: "MegaCoolBot", commands_module: YourAppModule.MegaCoolBot.Commands,
+  token: Base.decode64!("KZDU2VBUJZJUQQJSIFLVMT2SGZCVMWKYKFKUOQ2OKNHU4QSXIU2Q")}]
+
 config :nadia,
-  token: "bot_token",
   proxy: "http://proxy.example.org:443/",
   # can also be
   # proxy: {"proxy.example.org", 443}

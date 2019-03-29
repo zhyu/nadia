@@ -4,7 +4,7 @@ defmodule Nadia.Mixfile do
   def project do
     [
       app: :nadia,
-      version: "0.4.4",
+      version: "0.5.0",
       elixir: "~> 1.6",
       description: "Telegram Bot API Wrapper written in Elixir",
       package: package(),
@@ -32,12 +32,12 @@ defmodule Nadia.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:httpoison, "~> 1.1.1"},
-      {:poison, "~> 3.1"},
+      {:httpoison, "~> 1.5.0"},
+      {:poison, "~> 3.0"}, #4.0.1 Breaks dependency with sqlite
       {:exvcr, "~> 0.10.1", only: [:dev, :test]},
-      {:earmark, "~> 1.2", only: :docs},
+      {:earmark, "~> 1.3.2", only: :docs},
       {:ex_doc, "~> 0.18.3", only: :docs},
-      {:inch_ex, "~> 0.5.6", only: :docs}
+      {:inch_ex, "~> 2.0.0", only: :docs}
     ]
   end
 

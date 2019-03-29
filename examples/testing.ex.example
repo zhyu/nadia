@@ -1,0 +1,102 @@
+defmodule Testing do
+      alias Nadia.Model
+      alias Nadia.Model.{InlineQueryResult}
+      alias Nadia.Governor
+      require Logger
+  def text_command("/question",update,token)  do
+    {:ok, _} =   Nadia.send_message(token,Nadia.Governor.get_chat_id(update),
+    "Which color do you like most?",
+    # See also: https://hexdocs.pm/nadia/Nadia.Model.InlineKeyboardMarkup.html
+    reply_markup: %Model.InlineKeyboardMarkup{
+      inline_keyboard: [
+        [
+          %{
+            callback_data: "/choose green",
+            text: "Green like the Forests",
+          },
+          %{
+            callback_data: "/choose blue",
+            text: "Blue like the sky",
+          },
+        ],
+        [%{
+            callback_data: "/typo-:p",
+            text: "Other",                },
+        ]
+      ]
+    })
+  end
+
+  def text_command("/power",update,token)  do
+    {:ok, _} =   Nadia.send_message(token,Nadia.Governor.get_chat_id(update), "Who's the best?",
+
+    reply_markup: %Model.ReplyKeyboardMarkup{
+      one_time_keyboard: true,
+      keyboard: [
+        [
+          %{
+            request_location: true,
+            text: "Andrei C. The Original",
+          },
+          %{
+            request_contact: true,
+            text: "Enot Soulaviere's Inventor  (Enotsoul)",
+          },
+
+          %{
+            text: "Then it must be MR Clinciu",
+          },
+        ]
+      ],
+    })
+
+  end
+
+
+  def callback_query_command("/choose"<>_,update,token) do
+    Logger.log :info, "Callback Query Command /choose"
+
+    case update.callback_query.data do
+      "/choose blue" ->
+        Nadia.answer_callback_query token, update.callback_query.id,
+         text: "Indeed you have good taste."
+      "/choose green" ->
+        Nadia.answer_callback_query token, update.callback_query.id,
+         text: "I can't agree more."
+    end
+  end
+
+  def inline_query_command("troll",update,token) do
+    :ok = Nadia.answer_inline_query token, update.inline_query.id, [
+          %InlineQueryResult.Article{
+            id: "1",
+            title: "TROLLS OFFICIAL TRAILER!",
+            thumb_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXti_M1-prmVaQfCVX49m10hCEaGCls-zMPY7umR0ZNXAR-DYK",
+            description: "Did you mean  TROLL?",
+            input_message_content: %{
+              message_text: "https://www.youtube.com/watch?v=xyjm5VQ11TQ",
+            }
+          },
+          %InlineQueryResult.Article{
+            id: "2",
+            title: "Science of Internet Trolls!",
+            thumb_url: "http://static.nautil.us/10977_7ca5eb06feca2d4d2029ef99de456a25.jpg",
+            description: "Did you mean the Science of internet TROLLs?",
+            input_message_content: %{
+              message_text: "https://www.youtube.com/watch?v=6Zxy_dScjsM",
+            }
+          },
+          %InlineQueryResult.Article{
+            id: "3",
+            title: "Remember the worst internet trolls",
+            thumb_url: "https://www.youtube.com/watch?v=ePQRgLVSqH0",
+            description: "How about the 10 worst internet trolls?",
+            input_message_content: %{
+              message_text: "https://www.youtube.com/watch?v=ePQRgLVSqH0",
+            }
+          }
+        ]
+    end
+
+
+end

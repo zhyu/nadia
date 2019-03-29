@@ -1,47 +1,47 @@
 defmodule Nadia.Behaviour do
   alias Nadia.Model.{User, Message, Update, UserProfilePhotos, File, Error}
 
-  @callback get_me :: {:ok, User.t()} | {:error, Error.t()}
-  @callback send_message(integer, binary, [{atom, any}]) ::
+  @callback get_me(binary) :: {:ok, User.t()} | {:error, Error.t()}
+  @callback send_message(binary, integer, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-  @callback forward_message(integer, integer, integer) :: {:ok, Message.t()} | {:error, Error.t()}
-  @callback send_photo(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
-  @callback send_audio(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
-  @callback send_document(integer, binary, [{atom, any}]) ::
+  @callback forward_message(binary, integer, integer, integer) :: {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_photo(binary, integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_audio(binary, integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_document(binary, integer, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-  @callback send_sticker(integer, binary, [{atom, any}]) ::
+  @callback send_sticker(binary, integer, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-  @callback send_video(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
-  @callback send_voice(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
-  @callback send_location(integer, float, float, [{atom, any}]) ::
+  @callback send_video(binary, integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_voice(binary, integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_location(binary, integer, float, float, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-  @callback send_venue(integer, float, float, binary, binary, [{atom, any}]) ::
+  @callback send_venue(binary, integer, float, float, binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-  @callback send_contact(integer, binary, binary, [{atom, any}]) ::
+  @callback send_contact(binary, integer, binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-  @callback send_chat_action(integer, binary) :: :ok | {:error, Error.t()}
-  @callback get_user_profile_photos(integer, [{atom, any}]) ::
+  @callback send_chat_action(binary, integer, binary) :: :ok | {:error, Error.t()}
+  @callback get_user_profile_photos(binary, integer, [{atom, any}]) ::
               {:ok, UserProfilePhotos.t()} | {:error, Error.t()}
-  @callback get_updates([{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
-  @callback set_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
-  @callback get_file(binary) :: {:ok, File.t()} | {:error, Error.t()}
-  @callback get_file_link(File.t()) :: {:ok, binary} | {:error, Error.t()}
-  @callback kick_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
-  @callback leave_chat(integer | binary) :: :ok | {:error, Error.t()}
-  @callback unban_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
-  @callback get_chat(integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
-  @callback get_chat_administrators(integer | binary) ::
+  @callback get_updates(binary,[{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
+  @callback set_webhook(binary, [{atom, any}]) :: :ok | {:error, Error.t()}
+  @callback get_file(binary,binary) :: {:ok, File.t()} | {:error, Error.t()}
+  @callback get_file_link(binary,File.t()) :: {:ok, binary} | {:error, Error.t()}
+  @callback kick_chat_member(binary,integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback leave_chat(binary,integer | binary) :: :ok | {:error, Error.t()}
+  @callback unban_chat_member(binary,integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback get_chat(binary,integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
+  @callback get_chat_administrators(binary,integer | binary) ::
               {:ok, [ChatMember.t()]} | {:error, Error.t()}
-  @callback get_chat_members_count(integer | binary) :: {:ok, integer} | {:error, Error.t()}
-  @callback get_chat_member(integer | binary, integer) ::
+  @callback get_chat_members_count(binary,integer | binary) :: {:ok, integer} | {:error, Error.t()}
+  @callback get_chat_member(binary,integer | binary, integer) ::
               {:ok, ChatMember.t()} | {:error, Error.t()}
-  @callback answer_callback_query(binary, [{atom, any}]) :: :ok | {:error, Error.t()}
-  @callback edit_message_text(integer | binary, integer, binary, [{atom, any}]) ::
+  @callback answer_callback_query(binary,binary, [{atom, any}]) :: :ok | {:error, Error.t()}
+  @callback edit_message_text(binary,integer | binary, integer, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-  @callback edit_message_caption(integer | binary, integer, binary, [{atom, any}]) ::
+  @callback edit_message_caption(binary,integer | binary, integer, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-  @callback edit_message_reply_markup(integer | binary, integer, binary, [{atom, any}]) ::
+  @callback edit_message_reply_markup(binary,integer | binary, integer, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-  @callback answer_inline_query(binary, [Nadia.Model.InlineQueryResult.t()], [{atom, any}]) ::
+  @callback answer_inline_query(binary, binary, [Nadia.Model.InlineQueryResult.t()], [{atom, any}]) ::
               :ok | {:error, Error.t()}
 end

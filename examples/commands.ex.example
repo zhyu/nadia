@@ -1,0 +1,68 @@
+defmodule YourBot.Commands do
+    #alias Nadia.Model
+
+  #Handling Messages from chats to their own command
+  def command(%{message: %{text: text} } = update, token) do
+    text_command(text,update,token)
+  end
+
+  #Handy when using the Up arrow! and editing the previous message
+    def command(%{edited_message: %{text: text} } = update, token) do
+      text_command(text,update,token)
+    end
+  #Inline queries see documentation
+  def command(%{inline_query: %{query: query}} = update,token) do
+    inline_query_command(query,update,token)
+  end
+  #Callback queries, see documentation
+  def command(%{callback_query: %{data: data}} = update,token) do
+    callback_query_command(data,update,token)
+  end
+
+  #Catchall, can be used for debugging/Testing OR
+  #Showing your default help/answer for unknown requests
+  def command(update, token), do: default_reply(update,token)
+
+  #Example of externalizing
+  def inline_query_command("troll" <> _,update,token), do: Testing.inline_query_command("troll",update,token)
+
+  def inline_query_command(_query,update,token) do
+    :ok = Nadia.answer_inline_query token, update.inline_query.id, [
+      %Nadia.Model.InlineQueryResult.Article{
+        id: "1",
+        title: "The Greatest Mafia Documentary",
+        thumb_url: "https://www.economist.com/sites/default/files/images/print-edition/20180818_FNP001_0.jpg",
+        description: "Did you want a look into the mafia?",
+        input_message_content: %{
+          message_text: "https://www.youtube.com/watch?v=0AC7Ex__YEI",
+        }
+      }
+    ]
+  end
+  def callback_query_command("/choose" <> _,update,token), do: Testing.callback_query_command("/choose",update,token)
+
+  def callback_query_command(_data,update,token) do
+      Nadia.answer_callback_query token,update.callback_query.id,
+       text: "Sorry, but there is no other color in my spectrum unless you type in RGB or hex:)."
+  end
+  #Run code in yet another module based on a command
+  #Code Not provided, but you get the idea
+  def text_command("/start",update,token), do: MafiaBot.Commands.StartGame.start(update,token)
+  #A different module yet again.. to keep your code "cleaner"
+  def text_command("/hash" <> _ = text,update,token),
+    do: UtilitiesBot.Commands.Conversion.hash(text,update,token)
+  def text_command("hash" <> _ = text,update,token),
+    do: UtilitiesBot.Commands.Conversion.hash(text,update,token)
+
+  def text_command("hello",update,token)  do
+    Nadia.send_message(token,Nadia.Governor.get_chat_id(update),"Well, hello there! #{update.message.from.first_name}")
+  end
+  def text_command("/question",update,token),  do: Testing.text_command("/question",update,token)
+  def text_command("/power",update,token),  do: Testing.text_command("/power",update,token)
+  def text_command(_,update,token) , do: default_reply(update,token)
+
+  #The default reply
+    def default_reply(update,token) do
+      Nadia.send_message(token,Nadia.Governor.get_chat_id(update), "Sorry, that command is NOT yet implemented!")
+    end
+end

@@ -1,0 +1,12 @@
+_build/*
+/db
+deps/*
+*.ez
+erl_crash.dump
+npm-debug.log
+assets/node_modules
+priv/static/
+logs/*
+config/*.secret.exs
+doc/*
+docs/all.json

@@ -6,7 +6,7 @@ defmodule Nadia.API do
   alias Nadia.Model.Error
   alias Nadia.Config
 
-  defp build_url(method), do: Config.base_url() <> Config.token() <> "/" <> method
+  defp build_url(method,token), do: Config.base_url() <> token <> "/" <> method
 
   defp process_response(response, method) do
     case decode_response(response) do
@@ -109,30 +109,31 @@ defmodule Nadia.API do
 
   Args:
   * `method` - name of API method
+  * `bot_token` - token of the bot
   * `options` - orddict of options
   * `file_field` - specify the key of file_field in `options` when sending files
   """
-  @spec request(binary, [{atom, any}], atom) :: :ok | {:error, Error.t()} | {:ok, any}
-  def request(method, options \\ [], file_field \\ nil) do
+  @spec request(binary, binary, [{atom, any}], atom) :: :ok | {:error, Error.t()} | {:ok, any}
+  def request(method, bot_token, options \\ [], file_field \\ nil) do
     method
-    |> build_url
+    |> build_url(bot_token)
     |> HTTPoison.post(build_request(options, file_field), [], build_options(options))
     |> process_response(method)
   end
 
-  def request?(method, options \\ [], file_field \\ nil) do
-    {_, response} = request(method, options, file_field)
+  def request?(method, token, options \\ [], file_field \\ nil) do
+    {_, response} = request(method, token, options, file_field)
     response
   end
 
   @doc ~S"""
   Use this function to build file url.
 
-  iex> Nadia.API.build_file_url("document/file_10")
-  "https://api.telegram.org/file/bot#{Nadia.Config.token()}/document/file_10"
+  iex> Nadia.API.build_file_url("bot_token","document/file_10")
+  "https://api.telegram.org/file/bot#{bot_token}/document/file_10"
   """
-  @spec build_file_url(binary) :: binary
-  def build_file_url(file_path) do
-    Config.file_base_url() <> Config.token() <> "/" <> file_path
+  @spec build_file_url(binary,binary) :: binary
+  def build_file_url(token,file_path) do
+    Config.file_base_url() <> token <> "/" <> file_path
   end
 end

@@ -20,7 +20,7 @@ defmodule Nadia.API do
 
   defp decode_response(response) do
     with {:ok, %HTTPoison.Response{body: body}} <- response,
-         {:ok, %{result: result}} <- Poison.decode(body, keys: :atoms),
+         {:ok, %{result: result}} <- Jason.decode(body, keys: :atoms),
          do: {:ok, result}
   end
 
@@ -46,13 +46,13 @@ defmodule Nadia.API do
 
   defp build_request(params, file_field) when is_list(params) do
     params
-    |> Keyword.update(:reply_markup, nil, &Poison.encode!(&1))
+    |> Keyword.update(:reply_markup, nil, &Jason.encode!(&1))
     |> map_params(file_field)
   end
 
   defp build_request(params, file_field) when is_map(params) do
     params
-    |> Map.update(:reply_markup, nil, &Poison.encode!(&1))
+    |> Map.update(:reply_markup, nil, &Jason.encode!(&1))
     |> map_params(file_field)
   end
 

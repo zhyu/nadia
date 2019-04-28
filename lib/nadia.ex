@@ -683,7 +683,7 @@ defmodule Nadia do
       |> Enum.map(fn result ->
         for {k, v} <- Map.from_struct(result), v != nil, into: %{}, do: {k, v}
       end)
-      |> Poison.encode!()
+      |> Jason.encode!()
 
     args = [inline_query_id: inline_query_id, results: encoded_results]
 

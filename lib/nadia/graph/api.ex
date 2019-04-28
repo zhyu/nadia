@@ -19,7 +19,7 @@ defmodule Nadia.Graph.API do
 
   defp decode_response(response) do
     with {:ok, %HTTPoison.Response{body: body}} <- response,
-         %{result: result} <- Poison.decode!(body, keys: :atoms),
+         %{result: result} <- Jason.decode!(body, keys: :atoms),
          do: {:ok, result}
   end
 
@@ -38,7 +38,7 @@ defmodule Nadia.Graph.API do
   defp build_request(params, file_field) do
     params =
       params
-      |> Keyword.update(:reply_markup, nil, &Poison.encode!(&1))
+      |> Keyword.update(:reply_markup, nil, &Jason.encode!(&1))
       |> Stream.filter(fn {_, v} -> v end)
       |> Enum.map(fn {k, v} -> {k, to_string(v)} end)
 

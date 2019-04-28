@@ -18,7 +18,7 @@ defmodule Nadia.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:httpoison, :poison]]
+    [applications: [:httpoison]]
   end
 
   # Dependencies can be Hex packages:
@@ -33,7 +33,7 @@ defmodule Nadia.Mixfile do
   defp deps do
     [
       {:httpoison, "~> 1.5.1"},
-      {:poison, "~> 4.0.1"},
+      {:jason, "~> 1.1"},
       {:exvcr, "~> 0.10.1", only: [:dev, :test]},
       {:earmark, "~> 1.2", only: :docs},
       {:ex_doc, "~> 0.20.2", only: :docs},

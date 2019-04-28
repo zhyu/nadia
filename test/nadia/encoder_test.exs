@@ -4,7 +4,7 @@ defmodule Nadia.EncoderTest do
   alias Nadia.Model.{InlineKeyboardButton}
 
   test "inline keyboard button excludes unknown keys as json" do
-    json = Poison.encode!(%InlineKeyboardButton{})
+    json = Jason.encode!(%InlineKeyboardButton{})
 
     assert json == "{}"
   end

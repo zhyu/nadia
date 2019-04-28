@@ -8,7 +8,7 @@ Add Nadia to your `mix.exs` dependencies:
 
 ```elixir
 def deps do
-  [{:nadia, "~> 0.4.4"}]
+  [{:nadia, "~> 0.4.5"}]
 end
 ```
 and run `$ mix deps.get`.

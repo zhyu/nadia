@@ -72,7 +72,14 @@ defmodule Nadia.Model do
   end
 
   defmodule Sticker do
-    defstruct file_id: nil, width: nil, height: nil, thumb: nil, emoji: nil, file_size: nil
+    defstruct file_id: nil,
+              width: nil,
+              height: nil,
+              thumb: nil,
+              emoji: nil,
+              set_name: nil,
+              mask_position: nil,
+              file_size: nil
 
     @type t :: %Sticker{
             file_id: binary,
@@ -80,7 +87,31 @@ defmodule Nadia.Model do
             height: integer,
             thumb: PhotoSize.t(),
             emoji: binary,
+            set_name: binary,
+            mask_position: MaskPosition.t(),
             file_size: integer
+          }
+  end
+
+  defmodule StickerSet do
+    defstruct name: nil, title: nil, contains_masks: false, stickers: []
+
+    @type t :: %StickerSet{
+            name: binary,
+            title: binary,
+            contains_masks: boolean,
+            stickers: [Sticker.t()]
+          }
+  end
+
+  defmodule MaskPosition do
+    defstruct point: nil, x_shift: nil, y_shift: nil, scale: nil
+
+    @type t :: %MaskPosition{
+            point: binary,
+            x_shift: float,
+            y_shift: float,
+            scale: float
           }
   end
 

@@ -1,0 +1,31 @@
+[
+  {
+    "request": {
+      "body": "user_id=666&png_sticker=BQADBAADzwADZgctUjisl0we_2qGAg",
+      "headers": [],
+      "method": "post",
+      "options": {
+        "recv_timeout": 5000
+      },
+      "request_body": "",
+      "url": "https://api.telegram.org/bot<TOKEN>/uploadStickerFile"
+    },
+    "response": {
+      "binary": false,
+      "body": "{\"ok\":true,\"result\":{\"file_id\":\"BQADBAADzwADZgctUjisl0we_2qGAg\",\"file_size\":1746}}",
+      "headers": {
+        "Server": "nginx/1.12.2",
+        "Date": "Sun, 28 Apr 2019 10:27:39 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "82",
+        "Connection": "keep-alive",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Expose-Headers": "Content-Length,Content-Type,Date,Server,Connection",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

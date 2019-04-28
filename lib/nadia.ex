@@ -689,4 +689,118 @@ defmodule Nadia do
 
     request("answerInlineQuery", args ++ options)
   end
+
+  @doc """
+  Use this method to get a sticker set. On success, a StickerSet object is returned.
+
+  Args:
+  * `name` - Name of the sticker set
+  """
+  @spec get_sticker_set(binary) :: {:ok, Nadia.Model.StickerSet.t()} | {:error, Error.t()}
+  def get_sticker_set(name) do
+    request("getStickerSet", name: name)
+  end
+
+  @doc """
+  Use this method to upload a .png file with a sticker for later use in
+  createNewStickerSet and addStickerToSet methods (can be used multiple times).
+  Returns the uploaded File on success.
+
+  Args:
+  * `user_id` - User identifier of sticker file owner
+  * `png_sticker` - Png image with the sticker, must be up to 512 kilobytes in size,
+  dimensions must not exceed 512px, and either width or height must be exactly 512px.
+  Either a `file_id` to resend a file that is already on the Telegram servers,
+  or a `file_path` to upload a new file from local, or a `HTTP URL` to get a file
+  from the internet.
+  """
+  @spec upload_sticker_file(integer, binary) :: {:ok, File.t()} | {:error, Error.t()}
+  def upload_sticker_file(user_id, png_sticker) do
+    request("uploadStickerFile", [user_id: user_id, png_sticker: png_sticker], :png_sticker)
+  end
+
+  @doc """
+  Use this method to create new sticker set owned by a user. The bot will be able to
+  edit the created sticker set. Returns True on success.
+
+  Args:
+  * `user_id` - User identifier of created sticker set owner
+  * `name` - Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals).
+  Can contain only english letters, digits and underscores. Must begin with a letter,
+  can't contain consecutive underscores and must end in “_by_<bot username>”. <bot_username>
+  is case insensitive. 1-64 characters.
+  * `title` - Sticker set title, 1-64 characters
+  * `png_sticker` - Png image with the sticker, must be up to 512 kilobytes in size,
+  dimensions must not exceed 512px, and either width or height must be exactly 512px.
+  Either a `file_id` to resend a file that is already on the Telegram servers,
+  or a `file_path` to upload a new file from local, or a `HTTP URL` to get a file
+  from the internet.
+  * `emojis` - One or more emoji corresponding to the sticker
+
+  Options:
+  * `contains_masks` - Pass True, if a set of mask stickers should be created
+  * `mask_position` - A `Nadia.Model.MaskPosition` object for position where the mask
+  should be placed on faces
+  """
+  @spec create_new_sticker_set(integer, binary, binary, binary, binary, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def create_new_sticker_set(user_id, name, title, png_sticker, emojis, options \\ []) do
+    request(
+      "createNewStickerSet",
+      [user_id: user_id, name: name, title: title, png_sticker: png_sticker, emojis: emojis] ++
+        options,
+      :png_sticker
+    )
+  end
+
+  @doc """
+  Use this method to add a new sticker to a set created by the bot. Returns True on success.
+
+  Args:
+  * `user_id` - User identifier of created sticker set owner
+  * `name` - Sticker set name
+  * `png_sticker` - Png image with the sticker, must be up to 512 kilobytes in size,
+  dimensions must not exceed 512px, and either width or height must be exactly 512px.
+  Either a `file_id` to resend a file that is already on the Telegram servers,
+  or a `file_path` to upload a new file from local, or a `HTTP URL` to get a file
+  from the internet.
+  * `emojis` - One or more emoji corresponding to the sticker
+
+  Options:
+  * `mask_position` - A `Nadia.Model.MaskPosition` object for position where the mask
+  should be placed on faces
+  """
+  @spec add_sticker_to_set(integer, binary, binary, binary, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def add_sticker_to_set(user_id, name, png_sticker, emojis, options \\ []) do
+    request(
+      "addStickerToSet",
+      [user_id: user_id, name: name, png_sticker: png_sticker, emojis: emojis] ++ options,
+      :png_sticker
+    )
+  end
+
+  @doc """
+  Use this method to move a sticker in a set created by the bot to a specific position.
+  Returns True on success.
+
+  Args:
+  * `sticker` - File identifier of the sticker
+  * `position` - New sticker position in the set, zero-based
+  """
+  @spec set_sticker_position_in_set(binary, integer) :: :ok | {:error, Error.t()}
+  def set_sticker_position_in_set(sticker, position) do
+    request("setStickerPositionInSet", sticker: sticker, position: position)
+  end
+
+  @doc """
+  Use this method to delete a sticker from a set created by the bot. Returns True on success.
+
+  Args:
+  * `sticker` - File identifier of the sticker
+  """
+  @spec delete_sticker_from_set(binary) :: :ok | {:error, Error.t()}
+  def delete_sticker_from_set(sticker) do
+    request("deleteStickerFromSet", sticker: sticker)
+  end
 end

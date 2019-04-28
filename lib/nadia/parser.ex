@@ -12,7 +12,6 @@ defmodule Nadia.Parser do
     PhotoSize,
     Audio,
     Document,
-    Sticker,
     InlineQuery,
     ChosenInlineResult,
     WebhookInfo
@@ -20,6 +19,7 @@ defmodule Nadia.Parser do
 
   alias Nadia.Model.{Video, Voice, Contact, Location, Venue, Update, File, CallbackQuery}
   alias Nadia.Model.UserProfilePhotos
+  alias Nadia.Model.{Sticker, StickerSet}
 
   @doc """
   parse `result` field of decoded API response json.
@@ -41,6 +41,8 @@ defmodule Nadia.Parser do
       "getChatMember" -> parse(ChatMember, result)
       "getChatAdministrators" -> parse(:chat_members, result)
       "getChatMembersCount" -> result
+      "getStickerSet" -> parse(StickerSet, result)
+      "uploadStickerFile" -> parse(File, result)
       _ -> parse(Message, result)
     end
   end

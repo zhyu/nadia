@@ -209,4 +209,56 @@ defmodule NadiaTest do
       assert :ok == Nadia.answer_inline_query(666, [photo])
     end
   end
+
+  test "get_sticker_set" do
+    use_cassette "get_sticker_set" do
+      {:ok, sticker_set} = Nadia.get_sticker_set("TomNJerry")
+      assert sticker_set.name == "TomNJerry"
+      assert is_list(sticker_set.stickers)
+    end
+  end
+
+  test "upload_sticker_file" do
+    use_cassette "upload_sticker_file" do
+      {:ok, file} = Nadia.upload_sticker_file(666, "BQADBAADzwADZgctUjisl0we_2qGAg")
+      assert file.file_id == "BQADBAADzwADZgctUjisl0we_2qGAg"
+    end
+  end
+
+  test "create_new_sticker_set" do
+    use_cassette "create_new_sticker_set" do
+      assert :ok =
+               Nadia.create_new_sticker_set(
+                 666,
+                 "test_sticker_set_by_nadia_bot",
+                 "nadia test",
+                 "BQADBAADzwADZgctUjisl0we_2qGAg",
+                 "😂"
+               )
+    end
+  end
+
+  test "add_sticker_to_set" do
+    use_cassette "add_sticker_to_set" do
+      assert :ok =
+               Nadia.add_sticker_to_set(
+                 666,
+                 "test_sticker_set_by_nadia_bot",
+                 "BQADBAADqgADVTwsUrIHnx5jZ0XkAg",
+                 "🤔"
+               )
+    end
+  end
+
+  test "set_sticker_position_in_set" do
+    use_cassette "set_sticker_position_in_set" do
+      assert :ok = Nadia.set_sticker_position_in_set("CAADBQADLgADmEjsA7jm5QOy8WxsAg", 0)
+    end
+  end
+
+  test "delete_sticker_from_set" do
+    use_cassette "delete_sticker_from_set" do
+      assert :ok = Nadia.delete_sticker_from_set("CAADBQADLgADmEjsA7jm5QOy8WxsAg")
+    end
+  end
 end

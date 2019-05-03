@@ -288,9 +288,9 @@ defmodule Nadia.Model do
     @type t :: %KeyboardButton{text: binary, request_contact: atom, request_location: atom}
   end
 
-  defmodule ReplyKeyboardHide do
-    defstruct hide_keyboard: true, selective: false
-    @type t :: %ReplyKeyboardHide{hide_keyboard: true, selective: atom}
+  defmodule ReplyKeyboardRemove do
+    defstruct remove_keyboard: true, selective: false
+    @type t :: %ReplyKeyboardRemove{remove_keyboard: true, selective: atom}
   end
 
   defmodule InlineKeyboardMarkup do

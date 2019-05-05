@@ -37,7 +37,7 @@ defmodule Nadia do
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
-  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
   @spec send_message(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
   def send_message(chat_id, text, options \\ []) do
@@ -83,7 +83,7 @@ defmodule Nadia do
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
-  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
   @spec send_photo(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
   def send_photo(chat_id, photo, options \\ []) do
@@ -118,7 +118,7 @@ defmodule Nadia do
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
-  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
   @spec send_audio(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
   def send_audio(chat_id, audio, options \\ []) do
@@ -143,7 +143,7 @@ defmodule Nadia do
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
-  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
   @spec send_document(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
   def send_document(chat_id, document, options \\ []) do
@@ -166,7 +166,7 @@ defmodule Nadia do
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
-  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
   @spec send_sticker(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
   def send_sticker(chat_id, sticker, options \\ []) do
@@ -194,7 +194,7 @@ defmodule Nadia do
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
-  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
   @spec send_video(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
   def send_video(chat_id, video, options \\ []) do
@@ -222,7 +222,7 @@ defmodule Nadia do
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
-  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
   @spec send_voice(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
   def send_voice(chat_id, voice, options \\ []) do
@@ -245,7 +245,7 @@ defmodule Nadia do
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
-  `Nadia.Model.ReplyKeyboardHide` or `Nadia.Model.ForceReply`
+  `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
   @spec send_location(integer, float, float, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
@@ -276,7 +276,7 @@ defmodule Nadia do
   * `:reply_markup` - Additional interface options. A JSON-serialized object for
   an inline keyboard, custom reply keyboard, instructions to hide reply keyboard
   or to force a reply from the user. - `Nadia.Model.InlineKeyboardMarkup` or
-  `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or
+  `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardRemove` or
   `Nadia.Model.ForceReply`
   """
   @spec send_venue(integer, float, float, binary, binary, [{atom, any}]) ::
@@ -307,7 +307,7 @@ defmodule Nadia do
   * `:reply_markup` - Additional interface options. A JSON-serialized object for
   an inline keyboard, custom reply keyboard, instructions to hide reply keyboard
   or to force a reply from the user. - `Nadia.Model.InlineKeyboardMarkup` or
-  `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardHide` or
+  `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardRemove` or
   `Nadia.Model.ForceReply`
   """
   @spec send_contact(integer, binary, binary, [{atom, any}]) ::
@@ -392,14 +392,14 @@ defmodule Nadia do
   * `options` - orddict of options
 
   Options:
-  * `:url` - HTTPS url to send updates to. 
+  * `:url` - HTTPS url to send updates to.
   """
   @spec set_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
   def set_webhook(options \\ []), do: request("setWebhook", options)
 
   @doc """
-  Use this method to remove webhook integration if you decide to switch back to `Nadia.get_updates/1`. 
-  Returns `:ok` on success. 
+  Use this method to remove webhook integration if you decide to switch back to `Nadia.get_updates/1`.
+  Returns `:ok` on success.
 
   Requires no parameters.
   """
@@ -407,8 +407,8 @@ defmodule Nadia do
   def delete_webhook(), do: request("deleteWebhook")
 
   @doc """
-  Use this method to get current webhook status. Requires no parameters. 
-  On success, returns a `Nadia.Model.WebhookInfo.t()` object with webhook details. 
+  Use this method to get current webhook status. Requires no parameters.
+  On success, returns a `Nadia.Model.WebhookInfo.t()` object with webhook details.
   If the bot is using getUpdates, will return an object with the url field empty.
   """
   @spec get_webhook_info() :: {:ok, WebhookInfo.t()} | {:error, Error.t()}

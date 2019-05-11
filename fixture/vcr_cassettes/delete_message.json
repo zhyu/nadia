@@ -1,0 +1,31 @@
+[
+    {
+      "request": {
+        "body": "chat_id=1&message_id=666",
+        "headers": [],
+        "method": "post",
+        "options": {
+          "recv_timeout": 5000
+        },
+        "request_body": "",
+        "url": "https://api.telegram.org/bot<TOKEN>/deleteMessage"
+      },
+      "response": {
+        "binary": false,
+        "body": "{\"ok\":true, \"result\":true}",
+        "headers": {
+          "Server": "nginx/1.12.2",
+          "Date": "Thu, 26 Jul 2018 12:49:37 GMT",
+          "Content-Type": "application/json",
+          "Content-Length": "68",
+          "Connection": "keep-alive",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Expose-Headers": "Content-Length,Content-Type,Date,Server,Connection",
+          "Strict-Transport-Security": "max-age=31536000; includeSubdomains"
+        },
+        "status_code": 200,
+        "type": "ok"
+      }
+    }
+  ]

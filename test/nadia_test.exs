@@ -89,7 +89,7 @@ defmodule NadiaTest do
   end
 
   test "delete_message" do
-    use_cassette "delete_message"  do
+    use_cassette "delete_message" do
       assert Nadia.delete_message(1, 666) == :ok
     end
   end

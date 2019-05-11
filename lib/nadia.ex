@@ -602,7 +602,8 @@ defmodule Nadia do
   def delete_message(chat_id, message_id) do
     request(
       "deleteMessage",
-      [chat_id: chat_id, message_id: message_id]
+      chat_id: chat_id,
+      message_id: message_id
     )
   end
 

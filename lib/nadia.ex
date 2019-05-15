@@ -599,6 +599,26 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to delete message from a chat.
+  Bot should have admin permission to do that, and remember you can't delete messages that are more than
+  48 hours old.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `message_id` - Required if inline_message_id is not specified. Unique identifier of
+  the sent message
+  """
+  @spec delete_message(integer | binary, integer) :: :ok | {:error, Error.t()}
+  def delete_message(chat_id, message_id) do
+    request(
+      "deleteMessage",
+      chat_id: chat_id,
+      message_id: message_id
+    )
+  end
+
+  @doc """
   Use this method to edit captions of messages sent by the bot or via
   the bot (for inline bots). On success, the edited Message is returned.
 

@@ -36,7 +36,7 @@ defmodule Nadia.Behaviour do
   @callback get_chat_member(integer | binary, integer) ::
               {:ok, ChatMember.t()} | {:error, Error.t()}
   @callback answer_callback_query(binary, [{atom, any}]) :: :ok | {:error, Error.t()}
-  @callback edit_message_text(integer | binary, integer, binary, [{atom, any}]) ::
+  @callback edit_message_text(integer | binary, integer, binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
   @callback edit_message_caption(integer | binary, integer, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}

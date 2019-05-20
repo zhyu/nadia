@@ -325,6 +325,7 @@ defmodule Nadia.Model do
   end
 
   defmodule InlineKeyboardMarkup do
+    @derive Jason.Encoder
     defstruct inline_keyboard: []
     @type t :: %InlineKeyboardMarkup{inline_keyboard: [[InlineKeyboardButton.t()]]}
   end

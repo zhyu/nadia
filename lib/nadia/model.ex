@@ -304,6 +304,7 @@ defmodule Nadia.Model do
   end
 
   defmodule ReplyKeyboardMarkup do
+    @derive Jason.Encoder
     defstruct keyboard: [], resize_keyboard: false, one_time_keyboard: false, selective: false
 
     @type t :: %ReplyKeyboardMarkup{
@@ -315,6 +316,7 @@ defmodule Nadia.Model do
   end
 
   defmodule KeyboardButton do
+    @derive Jason.Encoder
     defstruct text: nil, request_contact: false, request_location: false
     @type t :: %KeyboardButton{text: binary, request_contact: atom, request_location: atom}
   end

@@ -322,11 +322,13 @@ defmodule Nadia.Model do
   end
 
   defmodule ReplyKeyboardRemove do
+    @derive Jason.Encoder
     defstruct remove_keyboard: true, selective: false
     @type t :: %ReplyKeyboardRemove{remove_keyboard: true, selective: atom}
   end
 
   defmodule InlineKeyboardMarkup do
+    @derive Jason.Encoder
     defstruct inline_keyboard: []
     @type t :: %InlineKeyboardMarkup{inline_keyboard: [[InlineKeyboardButton.t()]]}
   end
@@ -355,6 +357,7 @@ defmodule Nadia.Model do
   end
 
   defmodule ForceReply do
+    @derive Jason.Encoder
     defstruct force_reply: true, selective: false
     @type t :: %ForceReply{force_reply: true, selective: atom}
   end

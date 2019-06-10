@@ -66,6 +66,10 @@ defmodule Nadia do
     )
   end
 
+  def send_animation(chat_id, animation, options \\ []) do
+    request("sendAnimation", [chat_id: chat_id, animation: animation] ++ options, nil)
+  end
+
   @doc """
   Use this method to send photos.
   On success, the sent Message is returned.

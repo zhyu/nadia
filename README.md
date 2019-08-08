@@ -31,7 +31,7 @@ config :nadia,
 You can also add a proxy support.
 ```elixir
 config :nadia,
-  proxy: "http://proxy_url:proxy_port",
+  proxy: "http://proxy_host:proxy_port", # or {:socks5, 'proxy_host', proxy_port}
   proxy_auth: {"user", "password"},
   ssl: [versions: [:'tlsv1.2']]
 ```

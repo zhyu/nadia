@@ -6,7 +6,7 @@ config :nadia,
   token: "bot_token",
   proxy: "http://proxy.example.org:443/",
   # can also be
-  # proxy: {"proxy.example.org", 443}
+  # proxy: {:socks5, 'proxy.example.org', 443}
   # or use an environment variable
   # proxy: {:system, "https_proxy"}
   recv_timeout: 10

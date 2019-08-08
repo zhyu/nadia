@@ -3,7 +3,7 @@ language: elixir
 elixir:
   - 1.6.0
 otp_release:
-  - 20.2
+  - 20.3
 cache:
   directories:
     - _build

@@ -831,17 +831,36 @@ defmodule Nadia do
   Args:
   * `chat_id` - Unique identifier for the target chat or username of the target
   channel (in the format @channelusername). A native poll can't be sent to a private chat.
+  * `question` - Poll question, 1-255 characters
+  * `answers` - List of answer options, 2-10 strings 1-100 characters each
+  * `options` - orddict of options
+
+  Options:
+  * `:disable_notification` - Sends the message silently or without notification
+  * `:reply_to_message_id` - If the message is a reply, ID of the original message
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
+  """
+  @spec send_poll(integer | binary, binary, [binary(), ...], [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_poll(chat_id, question, answers, options \\ []) do
+    args = [chat_id: chat_id, question: question, options: Jason.encode!(answers)] ++ options
+    request("sendPoll", args)
+  end
+
+  @doc """
+  Use this method to stop a poll which was sent by the bot. On success, the stopped Poll with the final results is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target
+  channel (in the format @channelusername). A native poll can't be sent to a private chat.
   * `message_id` - Identifier of the original message with the poll
   * `options` - orddict of options
 
   Options:
   * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
   """
-  def send_poll(chat_id, question, answers, options \\ []) do
-    args = [chat_id: chat_id, question: question, options: Jason.encode!(answers)] ++ options
-    request("sendPoll", args)
-  end
-
+  @spec stop_poll(integer | binary, integer, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   def stop_poll(chat_id, message_id, options \\ []) do
     args = [chat_id: chat_id, message_id: message_id] ++ options
     request("stopPoll", args)

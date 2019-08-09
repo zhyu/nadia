@@ -823,4 +823,27 @@ defmodule Nadia do
   def delete_sticker_from_set(sticker) do
     request("deleteStickerFromSet", sticker: sticker)
   end
+  
+  @doc """
+  Use this method to send a native poll. A native poll can't be sent to a private chat.
+  On success, the sent Message is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target
+  channel (in the format @channelusername). A native poll can't be sent to a private chat.
+  * `message_id` - Identifier of the original message with the poll
+  * `options` - orddict of options
+
+  Options:
+  * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
+  """
+  def send_poll(chat_id, question, answers, options \\ []) do
+    args = [chat_id: chat_id, question: question, options: Jason.encode!(answers)] ++ options
+    request("sendPoll", args)
+  end
+
+  def stop_poll(chat_id, message_id, options \\ []) do
+    args = [chat_id: chat_id, message_id: message_id] ++ options
+    request("stopPoll", args)
+  end
 end

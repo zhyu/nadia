@@ -823,7 +823,7 @@ defmodule Nadia do
   def delete_sticker_from_set(sticker) do
     request("deleteStickerFromSet", sticker: sticker)
   end
-  
+
   @doc """
   Use this method to send a native poll. A native poll can't be sent to a private chat.
   On success, the sent Message is returned.

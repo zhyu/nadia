@@ -814,6 +814,34 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to pin a message in a group, a supergroup, or a channel.
+  Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  * `message_id` - Identifier of a message to pin
+
+  Options:
+  * `disable_notification` - Pass true, if it is not necessary to send a notification to all chat members about the new pinned message.
+  """
+  @spec pin_chat_message(integer, integer, [{atom, any}]) :: :ok | {:error, Error.t()}
+  def pin_chat_message(chat_id, message_id, options \\ []) do
+    request("pinChatMessage", [chat_id: chat_id, message_id: message_id] ++ options)
+  end
+
+  @doc """
+  Use this method to unpin a message in a group, a supergroup, or a channel.
+  Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  """
+  @spec unpin_chat_message(integer) :: :ok | {:error, Error.t()}
+  def unpin_chat_message(chat_id) do
+    request("unpinChatMessage", chat_id: chat_id)
+  end
+
+  @doc """
   Use this method to delete a sticker from a set created by the bot. Returns True on success.
 
   Args:

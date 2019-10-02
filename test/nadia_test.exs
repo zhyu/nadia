@@ -202,6 +202,18 @@ defmodule NadiaTest do
     end
   end
 
+  test "pin_message" do
+    use_cassette "pin_chat_message" do
+      assert Nadia.pin_chat_message(1, 666) == :ok
+    end    
+  end
+
+  test "unpin_message" do
+    use_cassette "unpin_chat_message" do
+      assert Nadia.unpin_chat_message(1) == :ok
+    end       
+  end
+
   test "answer_inline_query" do
     photo = %Nadia.Model.InlineQueryResult.Photo{
       id: "1",

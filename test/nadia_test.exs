@@ -205,13 +205,13 @@ defmodule NadiaTest do
   test "pin_message" do
     use_cassette "pin_chat_message" do
       assert Nadia.pin_chat_message(1, 666) == :ok
-    end    
+    end
   end
 
   test "unpin_message" do
     use_cassette "unpin_chat_message" do
       assert Nadia.unpin_chat_message(1) == :ok
-    end       
+    end
   end
 
   test "answer_inline_query" do

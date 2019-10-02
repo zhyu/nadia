@@ -267,4 +267,16 @@ defmodule NadiaTest do
       assert :ok = Nadia.delete_sticker_from_set("CAADBQADLgADmEjsA7jm5QOy8WxsAg")
     end
   end
+
+  test "pin_chat_message" do
+    use_cassette "pin_chat_message" do
+      assert :ok = Nadia.pin_chat_message(666, 666)
+    end
+  end
+
+  test "unpin_chat_message" do
+    use_cassette "unpin_chat_message" do
+      assert :ok = Nadia.unpin_chat_message(666)
+    end
+  end
 end

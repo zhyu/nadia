@@ -1,7 +1,7 @@
 [
   {
     "request": {
-      "body": "chat_id=-261856796",
+      "body": "chat_id=1",
       "headers": [],
       "method": "post",
       "options": {

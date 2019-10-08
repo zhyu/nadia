@@ -342,6 +342,37 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound). 
+  On success, the sent Message is returned. Bots can currently send animation files of up 
+  to 50 MB in size, this limit may be changed in the future.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel 
+  (in the format @channelusername)
+  * `animation` - Animation to send. Pass a file_id as String to send an animation that 
+  exists on the Telegram servers (recommended), pass an HTTP URL as a String for 
+  Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data.
+
+  Options:
+  * `:duration` - Duration of sent animation in seconds
+  * `:width` - Animation width
+  * `:height` - Animation height
+  * `:thumb` - Thumbnail of the file sent; can be ignored if thumbnail generation for the file 
+  is supported server-side. thumbnail should be in JPEG format and less than 200 kB in size.
+  * `:caption` - Animation caption (may also be used when resending animation by file_id), 0-1024 characters
+  * `:parse_mode` - Send Markdown or HTML, if you want Telegram apps to show bold, italic, fixed-width 
+  text or inline URLs in the media caption.
+  * `:disable_notification` - Sends the message silently. Users will receive a notification with no sound.
+  * `:reply_to_message_id` - If the message is a reply, ID of the original message
+  * `:reply_markup` - Additional interface options. A JSON-serialized object for an inline keyboard, 
+  custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
+  """
+  @spec send_animation(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  def send_animation(chat_id, animation, options \\ []) do
+    request("sendAnimation", [chat_id: chat_id, animation: animation] ++ options)
+  end
+
+  @doc """
   Use this method to get a list of profile pictures for a user.
   Returns a UserProfilePhotos object.
 

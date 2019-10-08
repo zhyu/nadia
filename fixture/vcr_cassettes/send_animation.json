@@ -1,0 +1,31 @@
+[
+  {
+    "request": {
+      "body": "chat_id=666&animation=BQADBAADhQEAArKi5FCHKeOFAAEsKQkWBA",
+      "headers": [],
+      "method": "post",
+      "options": {
+        "recv_timeout": 10000
+      },
+      "request_body": "",
+      "url": "https://api.telegram.org/bot<TOKEN>/sendAnimation"
+    },
+    "response": {
+      "binary": false,
+      "body": "{\"ok\":true,\"result\":{\"message_id\":62,\"from\":{\"id\":1,\"is_bot\":true,\"first_name\":\"leprabot\",\"username\":\"NaduaBot\"},\"chat\":{\"id\":666,\"title\":\"Nadia Testing Channel\",\"type\":\"group\",\"all_members_are_administrators\":true},\"date\":1570518856,\"document\":{\"file_name\":\"jyp57gt60hi31.jpg\",\"mime_type\":\"image/jpeg\",\"thumb\":{\"file_id\":\"AAQEAAOFAQACsqLkUIcp44UAASwpCQbyOBsABAEAB20AA6gXAAIWBA\",\"file_size\":29082,\"width\":320,\"height\":320},\"file_id\":\"BQADBAADhQEAArKi5FCHKeOFAAEsKQkWBA\",\"file_size\":190564}}}",
+      "headers": {
+        "Server": "nginx/1.16.1",
+        "Date": "Tue, 08 Oct 2019 07:14:16 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "510",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Expose-Headers": "Content-Length,Content-Type,Date,Server,Connection"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

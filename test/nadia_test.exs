@@ -267,4 +267,14 @@ defmodule NadiaTest do
       assert :ok = Nadia.delete_sticker_from_set("CAADBQADLgADmEjsA7jm5QOy8WxsAg")
     end
   end
+
+  test "send_animation" do
+    use_cassette "send_animation" do
+      file_id = "BQADBAADhQEAArKi5FCHKeOFAAEsKQkWBA"
+      {:ok, message} = Nadia.send_animation(-261_856_796, file_id)
+
+      assert is_map(message.document)
+      assert message.document.file_id == file_id
+    end
+  end
 end

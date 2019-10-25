@@ -854,4 +854,38 @@ defmodule Nadia do
   def delete_sticker_from_set(sticker) do
     request("deleteStickerFromSet", sticker: sticker)
   end
+
+  @doc """
+  Use this method to pin a message in a group, a supergroup, or a channel. The bot must be an
+  administrator in the chat for this to work and must have the ‘can_pin_messages’ admin right
+  in the supergroup or ‘can_edit_messages’ admin right in the channel. Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `message_id` - Identifier of a message to pin
+
+  Options:
+  * `disable_notification` - Pass True, if it is not necessary to send a notification to all
+  chat members about the new pinned message. Notifications are always disabled in channels.
+  """
+  @spec pin_chat_message(integer | binary, integer | binary, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def pin_chat_message(chat_id, message_id, options \\ []) do
+    request("pinChatMessage", [chat_id: chat_id, message_id: message_id] ++ options)
+  end
+
+  @doc """
+  Use this method to unpin a message in a group, a supergroup, or a channel. The bot must be an
+  administrator in the chat for this to work and must have the ‘can_pin_messages’ admin right in
+  the supergroup or ‘can_edit_messages’ admin right in the channel. Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  """
+  @spec unpin_chat_message(integer | binary) :: :ok | {:error, Error.t()}
+  def unpin_chat_message(chat_id) do
+    request("unpinChatMessage", chat_id: chat_id)
+  end
 end

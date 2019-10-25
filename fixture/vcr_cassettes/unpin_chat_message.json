@@ -1,0 +1,31 @@
+[
+  {
+    "request": {
+      "body": "chat_id=666",
+      "headers": [],
+      "method": "post",
+      "options": {
+        "recv_timeout": 10000
+      },
+      "request_body": "",
+      "url": "https://api.telegram.org/bot<TOKEN>/unpinChatMessage"
+    },
+    "response": {
+      "binary": false,
+      "body": "{\"ok\":true,\"result\":true}",
+      "headers": {
+        "Server": "nginx/1.16.1",
+        "Date": "Wed, 02 Oct 2019 15:49:52 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": "25",
+        "Connection": "keep-alive",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Expose-Headers": "Content-Length,Content-Type,Date,Server,Connection"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]

@@ -268,6 +268,16 @@ defmodule NadiaTest do
     end
   end
 
+  test "send_animation" do
+    use_cassette "send_animation" do
+      file_id = "BQADBAADhQEAArKi5FCHKeOFAAEsKQkWBA"
+      {:ok, message} = Nadia.send_animation(666, file_id)
+
+      assert is_map(message.document)
+      assert message.document.file_id == file_id
+    end
+  end
+
   test "pin_chat_message" do
     use_cassette "pin_chat_message" do
       assert :ok = Nadia.pin_chat_message(666, 666)

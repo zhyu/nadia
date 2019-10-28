@@ -13,6 +13,8 @@ defmodule Nadia.Behaviour do
               {:ok, Message.t()} | {:error, Error.t()}
   @callback send_video(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
   @callback send_voice(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_animation(integer, binary, [{atom, any}]) ::
+              {:ok, Message.t()} | {:error, Error.t()}
   @callback send_location(integer, float, float, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
   @callback send_venue(integer, float, float, binary, binary, [{atom, any}]) ::

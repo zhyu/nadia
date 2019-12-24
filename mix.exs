@@ -32,7 +32,7 @@ defmodule Nadia.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:httpoison, "~> 1.5.1"},
+      {:httpoison, "~> 1.6.2"},
       {:jason, "~> 1.1"},
       {:exvcr, "~> 0.10.1", only: [:dev, :test]},
       {:earmark, "~> 1.2", only: :docs},

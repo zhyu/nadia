@@ -6,7 +6,6 @@ elixir:
   - 1.10.0
 otp_release:
   - 22.0
-  - 23.0
 cache:
   directories:
     - _build

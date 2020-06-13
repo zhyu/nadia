@@ -367,6 +367,29 @@ defmodule Nadia.Model do
     @type t :: %ChatMember{user: User.t(), status: binary}
   end
 
+  defmodule ChatPermissions do
+    @derive Jason.Encoder
+    defstruct can_send_messages: nil,
+              can_send_media_messages: nil,
+              can_send_polls: nil,
+              can_send_other_messages: nil,
+              can_add_web_page_previews: nil,
+              can_change_info: nil,
+              can_invite_users: nil,
+              can_pin_messages: nil
+
+    @type t :: %ChatPermissions{
+            can_send_messages: boolean(),
+            can_send_media_messages: boolean(),
+            can_send_polls: boolean(),
+            can_send_other_messages: boolean(),
+            can_add_web_page_previews: boolean(),
+            can_change_info: boolean(),
+            can_invite_users: boolean(),
+            can_pin_messages: boolean()
+          }
+  end
+
   defmodule WebhookInfo do
     defstruct url: nil,
               has_custom_certificate: nil,

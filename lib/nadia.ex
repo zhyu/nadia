@@ -6,7 +6,16 @@ defmodule Nadia do
   https://core.telegram.org/bots/api#available-methods
   """
 
-  alias Nadia.Model.{User, Message, Update, UserProfilePhotos, File, Error, WebhookInfo}
+  alias Nadia.Model.{
+    ChatPermissions,
+    User,
+    Message,
+    Update,
+    UserProfilePhotos,
+    File,
+    Error,
+    WebhookInfo
+  }
 
   import Nadia.API
 
@@ -342,29 +351,29 @@ defmodule Nadia do
   end
 
   @doc """
-  Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound). 
-  On success, the sent Message is returned. Bots can currently send animation files of up 
+  Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound).
+  On success, the sent Message is returned. Bots can currently send animation files of up
   to 50 MB in size, this limit may be changed in the future.
 
   Args:
-  * `chat_id` - Unique identifier for the target chat or username of the target channel 
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
-  * `animation` - Animation to send. Pass a file_id as String to send an animation that 
-  exists on the Telegram servers (recommended), pass an HTTP URL as a String for 
+  * `animation` - Animation to send. Pass a file_id as String to send an animation that
+  exists on the Telegram servers (recommended), pass an HTTP URL as a String for
   Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data.
 
   Options:
   * `:duration` - Duration of sent animation in seconds
   * `:width` - Animation width
   * `:height` - Animation height
-  * `:thumb` - Thumbnail of the file sent; can be ignored if thumbnail generation for the file 
+  * `:thumb` - Thumbnail of the file sent; can be ignored if thumbnail generation for the file
   is supported server-side. thumbnail should be in JPEG format and less than 200 kB in size.
   * `:caption` - Animation caption (may also be used when resending animation by file_id), 0-1024 characters
-  * `:parse_mode` - Send Markdown or HTML, if you want Telegram apps to show bold, italic, fixed-width 
+  * `:parse_mode` - Send Markdown or HTML, if you want Telegram apps to show bold, italic, fixed-width
   text or inline URLs in the media caption.
   * `:disable_notification` - Sends the message silently. Users will receive a notification with no sound.
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. A JSON-serialized object for an inline keyboard, 
+  * `:reply_markup` - Additional interface options. A JSON-serialized object for an inline keyboard,
   custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
   """
   @spec send_animation(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
@@ -521,6 +530,42 @@ defmodule Nadia do
   @spec unban_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
   def unban_chat_member(chat_id, user_id) do
     request("unbanChatMember", chat_id: chat_id, user_id: user_id)
+  end
+
+  @doc """
+  Use this method to restrict a user in a supergroup. The bot must be an administrator
+  in the supergroup for this to work and must have the appropriate admin rights. Pass True
+  for all permissions to lift restrictions from a user. Returns True on success.
+  Args:
+  * `chat_id` - Unique identifier for the target group or username of the target supergroup
+  (in the format @supergroupusername)
+  * `user_id` - Unique identifier of the target user
+  * `permissions` - New user permissions
+  * `until_date` - Date when restrictions will be lifted for the user, unix time. If user is
+  restricted for more than 366 days or less than 30 seconds from the current time, they are
+  considered to be restricted forever
+  """
+  @spec restrict_chat_member(
+          integer() | binary(),
+          integer(),
+          ChatPermissions.t(),
+          integer() | nil
+        ) ::
+          :ok | {:error, Error.t()}
+  def restrict_chat_member(chat_id, user_id, permissions, until_date \\ nil) do
+    encoded_permissions =
+      permissions
+      |> Map.from_struct()
+      |> Enum.filter(fn {_, v} -> v != nil end)
+      |> Enum.into(%{})
+      |> Jason.encode!()
+
+    request("restrictChatMember",
+      chat_id: chat_id,
+      user_id: user_id,
+      permissions: encoded_permissions,
+      until_date: until_date
+    )
   end
 
   @doc """

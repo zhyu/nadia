@@ -7,22 +7,58 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  format:
+    name: Format
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
+      - name: Setup elixir
+        uses: actions/setup-elixir@v1
+        with:
+          otp-version: '23.0'
+          elixir-version: '1.10.3'
+      
+      - name: Install Dependencies
+        run: mix deps.get
+      
+      - name: Format Check
+        run: mix format --check-formatted
+  
+  test:
+    name: Test with OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    strategy:
+      fail-fast: false
+      matrix:
+        otp: ['22.3', '23.0']
+        elixir: ['1.9.4', '1.10.3']
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      
     - name: Setup elixir
       uses: actions/setup-elixir@v1
       with:
-        elixir-version: '1.10.3'
-        otp-version: '23.0'
+        otp-version: ${{matrix.otp}}
+        elixir-version: ${{matrix.elixir}}
+
     - name: Install Dependencies
       run: mix deps.get
+
     - name: Run Tests
       run: mix test
-    - name: Format Check
-      run: mix format --check-formatted
-    - name: Evaluate Documentations
-      run: MIX_ENV=docs mix do deps.get, inch.report
+
+  docs:
+    name: Documentations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup elixir
+        uses: actions/setup-elixir@v1
+        with:
+          otp-version: '23.0'
+          elixir-version: '1.10.3'
+      
+      - name: Evaluate Documentations
+        run: MIX_ENV=docs mix do deps.get, inch.report

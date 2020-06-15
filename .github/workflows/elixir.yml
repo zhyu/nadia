@@ -22,5 +22,7 @@ jobs:
       run: mix deps.get
     - name: Run Tests
       run: mix test
-    - name: Format check
+    - name: Format Check
       run: mix format --check-formatted
+    - name: Evaluate Documentations
+      run: MIX_ENV=docs mix do deps.get, inch.report

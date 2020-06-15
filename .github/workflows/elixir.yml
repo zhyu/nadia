@@ -51,6 +51,7 @@ jobs:
   docs:
     name: Documentations
     runs-on: ubuntu-latest
+    needs: [format, test]
     steps:
       - uses: actions/checkout@v2
 

@@ -1,4 +1,5 @@
 /.idea
+/.elixir_ls
 /_build
 /config/config.exs
 /deps

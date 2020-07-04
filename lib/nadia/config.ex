@@ -1,35 +1,30 @@
 defmodule Nadia.Config do
-  @default_timeout 5
-  @default_base_url "https://api.telegram.org/bot"
-  @default_graph_base_url "https://api.telegra.ph"
-  @default_file_base_url "https://api.telegram.org/file/bot"
+  alias Nadia.Bot.Config
 
-  def token, do: config_or_env(:token)
-  def proxy, do: config_or_env(:proxy)
-  def proxy_auth, do: config_or_env(:proxy_auth)
-  def socks5_user, do: config_or_env(:socks5_user)
-  def socks5_pass, do: config_or_env(:socks5_pass)
-  def recv_timeout, do: config_or_env(:recv_timeout) || @default_timeout
-  def base_url, do: config_or_env(:base_url) || @default_base_url
-  def graph_base_url, do: config_or_env(:graph_base_url) || @default_graph_base_url
-  def file_base_url, do: config_or_env(:file_base_url) || @default_file_base_url
+  @spec token :: binary
+  def token, do: Config.token(:nadia)
 
-  defp config_or_env(key) do
-    case Application.fetch_env(:nadia, key) do
-      {:ok, {:system, var}} ->
-        System.get_env(var)
+  @spec proxy :: binary
+  def proxy, do: Config.proxy(:nadia)
 
-      {:ok, {:system, var, default}} ->
-        case System.get_env(var) do
-          nil -> default
-          val -> val
-        end
+  @spec proxy_auth :: binary
+  def proxy_auth, do: Config.proxy_auth(:nadia)
 
-      {:ok, value} ->
-        value
+  @spec socks5_user :: binary
+  def socks5_user, do: Config.socks5_user(:nadia)
 
-      :error ->
-        nil
-    end
-  end
+  @spec socks5_pass :: binary
+  def socks5_pass, do: Config.socks5_pass(:nadia)
+
+  @spec recv_timeout :: binary
+  def recv_timeout, do: Config.recv_timeout(:nadia)
+
+  @spec base_url :: binary
+  def base_url, do: Config.base_url(:nadia)
+
+  @spec graph_base_url :: binary
+  def graph_base_url, do: Config.graph_base_url(:nadia)
+
+  @spec file_base_url :: binary
+  def file_base_url, do: Config.file_base_url(:nadia)
 end

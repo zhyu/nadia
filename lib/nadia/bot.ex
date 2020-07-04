@@ -1,4 +1,4 @@
-defmodule Nadia do
+defmodule Nadia.Bot do
   @moduledoc """
   Provides access to Telegram Bot API.
 
@@ -6,23 +6,28 @@ defmodule Nadia do
   https://core.telegram.org/bots/api#available-methods
   """
 
-  alias Nadia.Model.{User, Message, Update, UserProfilePhotos, File, Error, WebhookInfo}
-  alias Nadia.Bot
+  alias Nadia.Model.{Message, Update, UserProfilePhotos, File, Error, WebhookInfo}
 
-  @behaviour Nadia.Behaviour
+  import Nadia.Bot.API
+
+  @behaviour Nadia.Bot.Behaviour
 
   @doc """
   A simple method for testing your bot's auth token. Requires no parameters.
   Returns basic information about the bot in form of a User object.
+
+  Args:
+  * `bot` - Bot name
   """
-  @spec get_me :: {:ok, User.t()} | {:error, Error.t()}
-  def get_me, do: Bot.get_me(:nadia)
+  @spec get_me(atom) :: {:ok, Message.t()} | {:error, Error.t()}
+  def get_me(bot), do: request(bot, "getMe")
 
   @doc """
   Use this method to send text messages.
   On success, the sent Message is returned.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `text` - Text of the message to be sent
@@ -38,15 +43,18 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_message(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
-  def send_message(chat_id, text, options \\ []),
-    do: Bot.send_message(:nadia, chat_id, text, options)
+  @spec send_message(atom, integer, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_message(bot, chat_id, text, options \\ []) do
+    request(bot, "sendMessage", [chat_id: chat_id, text: text] ++ options)
+  end
 
   @doc """
   Use this method to forward messages of any kind.
   On success, the sent Message is returned.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `from_chat_id` - Unique identifier for the chat where the original message was sent
@@ -54,15 +62,24 @@ defmodule Nadia do
   * `:disable_notification` - Sends the message silently or without notification
   * `message_id` - Unique message identifier
   """
-  @spec forward_message(integer, integer, integer) :: {:ok, Message.t()} | {:error, Error.t()}
-  def forward_message(chat_id, from_chat_id, message_id),
-    do: Bot.forward_message(:nadia, chat_id, from_chat_id, message_id)
+  @spec forward_message(atom, integer, integer, integer) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def forward_message(bot, chat_id, from_chat_id, message_id) do
+    request(
+      bot,
+      "forwardMessage",
+      chat_id: chat_id,
+      from_chat_id: from_chat_id,
+      message_id: message_id
+    )
+  end
 
   @doc """
   Use this method to send photos.
   On success, the sent Message is returned.
 
   Args:
+  * `bot`- Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `photo` - Photo to send. Either a `file_id` to resend a photo that is already on
@@ -77,9 +94,11 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_photo(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
-  def send_photo(chat_id, photo, options \\ []),
-    do: Bot.send_photo(:nadia, chat_id, photo, options)
+  @spec send_photo(atom, integer, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_photo(bot, chat_id, photo, options \\ []) do
+    request(bot, "sendPhoto", [chat_id: chat_id, photo: photo] ++ options, :photo)
+  end
 
   @doc """
   Use this method to send audio files, if you want Telegram clients to display
@@ -95,6 +114,7 @@ defmodule Nadia do
   future. For sending voice messages, use the sendVoice method instead.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `audio` - Audio to send. Either a `file_id` to resend an audio that is already on
@@ -111,9 +131,11 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_audio(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
-  def send_audio(chat_id, audio, options \\ []),
-    do: Bot.send_audio(:nadia, chat_id, audio, options)
+  @spec send_audio(atom, integer, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_audio(bot, chat_id, audio, options \\ []) do
+    request(bot, "sendAudio", [chat_id: chat_id, audio: audio] ++ options, :audio)
+  end
 
   @doc """
   Use this method to send general files.
@@ -122,6 +144,7 @@ defmodule Nadia do
   may be changed in the future.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `document` - File to send. Either a `file_id` to resend a file that is already on
@@ -135,15 +158,18 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_document(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
-  def send_document(chat_id, document, options \\ []),
-    do: Bot.send_document(:nadia, chat_id, document, options)
+  @spec send_document(atom, integer, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_document(bot, chat_id, document, options \\ []) do
+    request(bot, "sendDocument", [chat_id: chat_id, document: document] ++ options, :document)
+  end
 
   @doc """
   Use this method to send .webp stickers.
   On success, the sent Message is returned.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `sticker` - File to send. Either a `file_id` to resend a sticker that is already on
@@ -157,9 +183,11 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_sticker(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
-  def send_sticker(chat_id, sticker, options \\ []),
-    do: Bot.send_sticker(:nadia, chat_id, sticker, options)
+  @spec send_sticker(atom, integer, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_sticker(bot, chat_id, sticker, options \\ []) do
+    request(bot, "sendSticker", [chat_id: chat_id, sticker: sticker] ++ options, :sticker)
+  end
 
   @doc """
   Use this method to send video files, Telegram clients support mp4 videos
@@ -169,6 +197,7 @@ defmodule Nadia do
   changed in the future.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `video` - Video to send. Either a `file_id` to resend a video that is already on
@@ -184,9 +213,11 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_video(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
-  def send_video(chat_id, video, options \\ []),
-    do: Bot.send_video(:nadia, chat_id, video, options)
+  @spec send_video(atom, integer, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_video(bot, chat_id, video, options \\ []) do
+    request(bot, "sendVideo", [chat_id: chat_id, video: video] ++ options, :video)
+  end
 
   @doc """
   Use this method to send audio files, if you want Telegram clients to display
@@ -197,6 +228,7 @@ defmodule Nadia do
   changed in the future.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `voice` - Audio to send. Either a `file_id` to resend an audio that is already on
@@ -211,15 +243,18 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_voice(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
-  def send_voice(chat_id, voice, options \\ []),
-    do: Bot.send_voice(:nadia, chat_id, voice, options)
+  @spec send_voice(atom, integer, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_voice(bot, chat_id, voice, options \\ []) do
+    request(bot, "sendVoice", [chat_id: chat_id, voice: voice] ++ options, :voice)
+  end
 
   @doc """
   Use this method to send point on the map.
   On success, the sent Message is returned.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `latitude` - Latitude of location
@@ -233,16 +268,22 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_location(integer, float, float, [{atom, any}]) ::
+  @spec send_location(atom, integer, float, float, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_location(chat_id, latitude, longitude, options \\ []),
-    do: Bot.send_location(:nadia, chat_id, latitude, longitude, options)
+  def send_location(bot, chat_id, latitude, longitude, options \\ []) do
+    request(
+      bot,
+      "sendLocation",
+      [chat_id: chat_id, latitude: latitude, longitude: longitude] ++ options
+    )
+  end
 
   @doc """
   Use this method to send information about a venue.
   On success, the sent Message is returned.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `latitude` - Latitude of location
@@ -261,16 +302,23 @@ defmodule Nadia do
   `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardRemove` or
   `Nadia.Model.ForceReply`
   """
-  @spec send_venue(integer, float, float, binary, binary, [{atom, any}]) ::
+  @spec send_venue(atom, integer, float, float, binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_venue(chat_id, latitude, longitude, title, address, options \\ []),
-    do: Bot.send_venue(:nadia, chat_id, latitude, longitude, title, address, options)
+  def send_venue(bot, chat_id, latitude, longitude, title, address, options \\ []) do
+    request(
+      bot,
+      "sendVenue",
+      [chat_id: chat_id, latitude: latitude, longitude: longitude, title: title, address: address] ++
+        options
+    )
+  end
 
   @doc """
   Use this method to send phone contacts.
   On success, the sent Message is returned.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `phone_number` - Contact's phone number
@@ -287,10 +335,15 @@ defmodule Nadia do
   `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardRemove` or
   `Nadia.Model.ForceReply`
   """
-  @spec send_contact(integer, binary, binary, [{atom, any}]) ::
+  @spec send_contact(atom, integer, binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_contact(chat_id, phone_number, first_name, options \\ []),
-    do: Bot.send_contact(:nadia, chat_id, phone_number, first_name, options)
+  def send_contact(bot, chat_id, phone_number, first_name, options \\ []) do
+    request(
+      bot,
+      "sendContact",
+      [chat_id: chat_id, phone_number: phone_number, first_name: first_name] ++ options
+    )
+  end
 
   @doc """
   Use this method when you need to tell the user that something is happening on
@@ -298,6 +351,7 @@ defmodule Nadia do
   arrives from your bot, Telegram clients clear its typing status).
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `action` - Type of action to broadcast. Choose one, depending on what the user is
@@ -309,8 +363,10 @@ defmodule Nadia do
       * `upload_document` for general files
       * `find_location` for location data
   """
-  @spec send_chat_action(integer, binary) :: :ok | {:error, Error.t()}
-  def send_chat_action(chat_id, action), do: Bot.send_chat_action(:nadia, chat_id, action)
+  @spec send_chat_action(atom, integer, binary) :: :ok | {:error, Error.t()}
+  def send_chat_action(bot, chat_id, action) do
+    request(bot, "sendChatAction", chat_id: chat_id, action: action)
+  end
 
   @doc """
   Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound).
@@ -318,6 +374,7 @@ defmodule Nadia do
   to 50 MB in size, this limit may be changed in the future.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `animation` - Animation to send. Pass a file_id as String to send an animation that
@@ -338,15 +395,18 @@ defmodule Nadia do
   * `:reply_markup` - Additional interface options. A JSON-serialized object for an inline keyboard,
   custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
   """
-  @spec send_animation(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
-  def send_animation(chat_id, animation, options \\ []),
-    do: Bot.send_animation(:nadia, chat_id, animation, options)
+  @spec send_animation(atom, integer, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_animation(bot, chat_id, animation, options \\ []) do
+    request(bot, "sendAnimation", [chat_id: chat_id, animation: animation] ++ options)
+  end
 
   @doc """
   Use this method to get a list of profile pictures for a user.
   Returns a UserProfilePhotos object.
 
   Args:
+  * `bot` - Bot name
   * `user_id` - Unique identifier of the target user
   * `options` - orddict of options
 
@@ -356,16 +416,18 @@ defmodule Nadia do
   * `:limit` - Limits the number of photos to be retrieved. Values between 1—100 are
   accepted. Defaults to 100
   """
-  @spec get_user_profile_photos(integer, [{atom, any}]) ::
+  @spec get_user_profile_photos(atom, integer, [{atom, any}]) ::
           {:ok, UserProfilePhotos.t()} | {:error, Error.t()}
-  def get_user_profile_photos(user_id, options \\ []),
-    do: Bot.get_user_profile_photos(:nadia, user_id, options)
+  def get_user_profile_photos(bot, user_id, options \\ []) do
+    request(bot, "getUserProfilePhotos", [user_id: user_id] ++ options)
+  end
 
   @doc """
   Use this method to receive incoming updates using long polling.
   An Array of Update objects is returned.
 
   Args:
+  * `bot` - Bot name
   * `options` - orddict of options
 
   Options:
@@ -379,8 +441,8 @@ defmodule Nadia do
   * `:timeout` - Timeout in seconds for long polling. Defaults to 0, i.e. usual short
   polling
   """
-  @spec get_updates([{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
-  def get_updates(options \\ []), do: Bot.get_updates(:nadia, options)
+  @spec get_updates(atom, [{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
+  def get_updates(bot, options \\ []), do: request(bot, "getUpdates", options)
 
   @doc """
   Use this method to specify a url and receive incoming updates via an outgoing
@@ -389,30 +451,35 @@ defmodule Nadia do
   an unsuccessful request, we will give up after a reasonable amount of attempts.
 
   Args:
+  * `bot` - Bot name
   * `options` - orddict of options
 
   Options:
   * `:url` - HTTPS url to send updates to.
   """
-  @spec set_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
-  def set_webhook(options \\ []), do: Bot.set_webhook(:nadia, options)
+  @spec set_webhook(atom, [{atom, any}]) :: :ok | {:error, Error.t()}
+  def set_webhook(bot, options \\ []), do: request(bot, "setWebhook", options)
 
   @doc """
   Use this method to remove webhook integration if you decide to switch back to `Nadia.get_updates/1`.
   Returns `:ok` on success.
 
-  Requires no parameters.
+  Args:
+  * `bot` - Bot name
   """
-  @spec delete_webhook() :: :ok | {:error, Error.t()}
-  def delete_webhook(), do: Bot.delete_webhook(:nadia)
+  @spec delete_webhook(atom) :: :ok | {:error, Error.t()}
+  def delete_webhook(bot), do: request(bot, "deleteWebhook")
 
   @doc """
   Use this method to get current webhook status. Requires no parameters.
   On success, returns a `Nadia.Model.WebhookInfo.t()` object with webhook details.
   If the bot is using getUpdates, will return an object with the url field empty.
+
+  Args:
+  * `bot` - Bot name
   """
-  @spec get_webhook_info() :: {:ok, WebhookInfo.t()} | {:error, Error.t()}
-  def get_webhook_info(), do: Bot.get_webhook_info(:nadia)
+  @spec get_webhook_info(atom) :: {:ok, WebhookInfo.t()} | {:error, Error.t()}
+  def get_webhook_info(bot), do: request(bot, "getWebhookInfo")
 
   @doc """
   Use this method to get basic info about a file and prepare it for downloading.
@@ -424,10 +491,11 @@ defmodule Nadia do
   When the link expires, a new one can be requested by calling `get_file` again.
 
   Args:
+  * `bot` - Bot name
   * `file_id` - File identifier to get info about
   """
-  @spec get_file(binary) :: {:ok, File.t()} | {:error, Error.t()}
-  def get_file(file_id), do: Bot.get_file(:nadia, file_id)
+  @spec get_file(atom, binary) :: {:ok, File.t()} | {:error, Error.t()}
+  def get_file(bot, file_id), do: request(bot, "getFile", file_id: file_id)
 
   @doc ~S"""
   Use this method to get link for file for subsequent use.
@@ -438,9 +506,14 @@ defmodule Nadia do
       {:ok,
       "https://api.telegram.org/file/bot#{Nadia.Config.token()}/document/file_10"}
 
+  Args:
+  * `bot` - Bot name
+  * `file` - Nadia.Model.File
   """
-  @spec get_file_link(File.t()) :: {:ok, binary} | {:error, Error.t()}
-  def get_file_link(file), do: Bot.get_file_link(:nadia, file)
+  @spec get_file_link(atom, File.t()) :: {:ok, binary} | {:error, Error.t()}
+  def get_file_link(bot, file) do
+    {:ok, build_file_url(bot, file.file_path)}
+  end
 
   @doc """
   Use this method to kick a user from a group or a supergroup. In the case of supergroups,
@@ -453,23 +526,29 @@ defmodule Nadia do
   member that added them.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target group or username of the target supergroup
   (in the format @supergroupusername)
   * `user_id` - Unique identifier of the target user
   """
-  @spec kick_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
-  def kick_chat_member(chat_id, user_id), do: Bot.kick_chat_member(:nadia, chat_id, user_id)
+  @spec kick_chat_member(atom, integer | binary, integer) :: :ok | {:error, Error.t()}
+  def kick_chat_member(bot, chat_id, user_id) do
+    request(bot, "kickChatMember", chat_id: chat_id, user_id: user_id)
+  end
 
   @doc """
   Use this method for your bot to leave a group, supergroup or channel.
   Returns True on success.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target supergroup or
   channel (in the format @supergroupusername)
   """
-  @spec leave_chat(integer | binary) :: :ok | {:error, Error.t()}
-  def leave_chat(chat_id), do: Bot.leave_chat(:nadia, chat_id)
+  @spec leave_chat(atom, integer | binary) :: :ok | {:error, Error.t()}
+  def leave_chat(bot, chat_id) do
+    request(bot, "leaveChat", chat_id: chat_id)
+  end
 
   @doc """
   Use this method to unban a previously kicked user in a supergroup. The user will not
@@ -477,12 +556,15 @@ defmodule Nadia do
   must be an administrator in the group for this to work. Returns True on success.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target group or username of the target supergroup
   (in the format @supergroupusername)
   * `user_id` - Unique identifier of the target user
   """
-  @spec unban_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
-  def unban_chat_member(chat_id, user_id), do: Bot.unban_chat_member(:nadia, chat_id, user_id)
+  @spec unban_chat_member(atom, integer | binary, integer) :: :ok | {:error, Error.t()}
+  def unban_chat_member(bot, chat_id, user_id) do
+    request(bot, "unbanChatMember", chat_id: chat_id, user_id: user_id)
+  end
 
   @doc """
   Use this method to get up to date information about the chat (current name of
@@ -490,11 +572,14 @@ defmodule Nadia do
   Returns a Chat object on success.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target supergroup or
   channel (in the format @supergroupusername)
   """
-  @spec get_chat(integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
-  def get_chat(chat_id), do: Bot.get_chat(:nadia, chat_id)
+  @spec get_chat(atom, integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
+  def get_chat(bot, chat_id) do
+    request(bot, "getChat", chat_id: chat_id)
+  end
 
   @doc """
   Use this method to get a list of administrators in a chat. On success, returns an Array of
@@ -503,33 +588,44 @@ defmodule Nadia do
   will be returned.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target supergroup or
   channel (in the format @channelusername)
   """
-  @spec get_chat_administrators(integer | binary) :: {:ok, [ChatMember.t()]} | {:error, Error.t()}
-  def get_chat_administrators(chat_id), do: Bot.get_chat_administrators(:nadia, chat_id)
+  @spec get_chat_administrators(atom, integer | binary) ::
+          {:ok, [ChatMember.t()]} | {:error, Error.t()}
+  def get_chat_administrators(bot, chat_id) do
+    request(bot, "getChatAdministrators", chat_id: chat_id)
+  end
 
   @doc """
   Use this method to get the number of members in a chat. Returns Int on success.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target supergroup or
   channel (in the format @channelusername)
   """
-  @spec get_chat_members_count(integer | binary) :: {:ok, integer} | {:error, Error.t()}
-  def get_chat_members_count(chat_id), do: Bot.get_chat_members_count(:nadia, chat_id)
+  @spec get_chat_members_count(atom, integer | binary) :: {:ok, integer} | {:error, Error.t()}
+  def get_chat_members_count(bot, chat_id) do
+    request(bot, "getChatMembersCount", chat_id: chat_id)
+  end
 
   @doc """
   Use this method to get information about a member of a chat.
   Returns a ChatMember object on success.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target supergroup or
   channel (in the format @channelusername)
   * `user_id` - Unique identifier of the target user
   """
-  @spec get_chat_member(integer | binary, integer) :: {:ok, ChatMember.t()} | {:error, Error.t()}
-  def get_chat_member(chat_id, user_id), do: Bot.get_chat_member(:nadia, chat_id, user_id)
+  @spec get_chat_member(atom, integer | binary, integer) ::
+          {:ok, ChatMember.t()} | {:error, Error.t()}
+  def get_chat_member(bot, chat_id, user_id) do
+    request(bot, "getChatMember", chat_id: chat_id, user_id: user_id)
+  end
 
   @doc """
   Use this method to send answers to callback queries sent from inline keyboards.
@@ -537,6 +633,7 @@ defmodule Nadia do
   screen or as an alert. On success, True is returned.
 
   Args:
+  * `bot` - Bot name
   * `callback_query_id` - Unique identifier for the query to be answered
   * `options` - orddict of options
 
@@ -546,15 +643,17 @@ defmodule Nadia do
   * `:show_alert` - If true, an alert will be shown by the client instead of a
   notification at the top of the chat screen. Defaults to false.
   """
-  @spec answer_callback_query(binary, [{atom, any}]) :: :ok | {:error, Error.t()}
-  def answer_callback_query(callback_query_id, options \\ []),
-    do: Bot.answer_callback_query(callback_query_id, options)
+  @spec answer_callback_query(atom, binary, [{atom, any}]) :: :ok | {:error, Error.t()}
+  def answer_callback_query(bot, callback_query_id, options \\ []) do
+    request(bot, "answerCallbackQuery", [callback_query_id: callback_query_id] ++ options)
+  end
 
   @doc """
   Use this method to edit text messages sent by the bot or via the bot (for inline bots).
   On success, the edited Message is returned
 
   Args:
+  * `bot` - Bot name
   * `chat_id` -	Required if inline_message_id is not specified. Unique identifier
   for the target chat or username of the target channel (in the format @channelusername)
   * `message_id` - Required if inline_message_id is not specified. Unique identifier of
@@ -571,10 +670,16 @@ defmodule Nadia do
   * `:reply_markup`	- A JSON-serialized object for an inline
   keyboard - `Nadia.Model.InlineKeyboardMarkup`
   """
-  @spec edit_message_text(integer | binary, integer, binary, binary, [{atom, any}]) ::
+  @spec edit_message_text(atom, integer | binary, integer, binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def edit_message_text(chat_id, message_id, inline_message_id, text, options \\ []),
-    do: Bot.edit_message_text(chat_id, message_id, inline_message_id, text, options)
+  def edit_message_text(bot, chat_id, message_id, inline_message_id, text, options \\ []) do
+    request(
+      bot,
+      "editMessageText",
+      [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id, text: text] ++
+        options
+    )
+  end
 
   @doc """
   Use this method to delete message from a chat.
@@ -582,19 +687,28 @@ defmodule Nadia do
   48 hours old.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `message_id` - Required if inline_message_id is not specified. Unique identifier of
   the sent message
   """
-  @spec delete_message(integer | binary, integer) :: :ok | {:error, Error.t()}
-  def delete_message(chat_id, message_id), do: Bot.delete_message(:nadia, chat_id, message_id)
+  @spec delete_message(atom, integer | binary, integer) :: :ok | {:error, Error.t()}
+  def delete_message(bot, chat_id, message_id) do
+    request(
+      bot,
+      "deleteMessage",
+      chat_id: chat_id,
+      message_id: message_id
+    )
+  end
 
   @doc """
   Use this method to edit captions of messages sent by the bot or via
   the bot (for inline bots). On success, the edited Message is returned.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` -	Required if inline_message_id is not specified. Unique identifier
   for the target chat or username of the target channel (in the format @channelusername)
   * `message_id` - Required if inline_message_id is not specified. Unique identifier of
@@ -608,16 +722,22 @@ defmodule Nadia do
   * `:reply_markup`	- A JSON-serialized object for an inline
   keyboard - `Nadia.Model.InlineKeyboardMarkup`
   """
-  @spec edit_message_caption(integer | binary, integer, binary, [{atom, any}]) ::
+  @spec edit_message_caption(atom, integer | binary, integer, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def edit_message_caption(chat_id, message_id, inline_message_id, options \\ []),
-    do: Bot.edit_message_caption(:nadia, chat_id, message_id, inline_message_id, options)
+  def edit_message_caption(bot, chat_id, message_id, inline_message_id, options \\ []) do
+    request(
+      bot,
+      "editMessageCaption",
+      [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id] ++ options
+    )
+  end
 
   @doc """
   Use this method to edit only the reply markup of messages sent by the bot or via
   the bot (for inline bots). On success, the edited Message is returned.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` -	Required if inline_message_id is not specified. Unique identifier
   for the target chat or username of the target channel (in the format @channelusername)
   * `message_id` - Required if inline_message_id is not specified. Unique identifier of
@@ -630,16 +750,22 @@ defmodule Nadia do
   * `:reply_markup`	- A JSON-serialized object for an inline
   keyboard - `Nadia.Model.InlineKeyboardMarkup`
   """
-  @spec edit_message_reply_markup(integer | binary, integer, binary, [{atom, any}]) ::
+  @spec edit_message_reply_markup(atom, integer | binary, integer, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def edit_message_reply_markup(chat_id, message_id, inline_message_id, options \\ []),
-    do: Bot.edit_message_reply_markup(:nadia, chat_id, message_id, inline_message_id, options)
+  def edit_message_reply_markup(bot, chat_id, message_id, inline_message_id, options \\ []) do
+    request(
+      bot,
+      "editMessageReplyMarkup",
+      [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id] ++ options
+    )
+  end
 
   @doc """
   Use this method to send answers to an inline query. On success, True is returned.
   No more than 50 results per query are allowed.
 
   Args:
+  * `bot` - Bot name
   * `inline_query_id` - Unique identifier for the answered query
   * `results` - An array of results for the inline query
   * `options` - orddict of options
@@ -659,19 +785,32 @@ defmodule Nadia do
   * `switch_pm_parameter` - Parameter for the start message sent to the bot when user
   presses the switch button.
   """
-  @spec answer_inline_query(binary, [Nadia.Model.InlineQueryResult.t()], [{atom, any}]) ::
+  @spec answer_inline_query(atom, binary, [Nadia.Model.InlineQueryResult.t()], [{atom, any}]) ::
           :ok | {:error, Error.t()}
-  def answer_inline_query(inline_query_id, results, options \\ []),
-    do: Bot.answer_inline_query(:nadia, inline_query_id, results, options)
+  def answer_inline_query(bot, inline_query_id, results, options \\ []) do
+    encoded_results =
+      results
+      |> Enum.map(fn result ->
+        for {k, v} <- Map.from_struct(result), v != nil, into: %{}, do: {k, v}
+      end)
+      |> Jason.encode!()
+
+    args = [inline_query_id: inline_query_id, results: encoded_results]
+
+    request(bot, "answerInlineQuery", args ++ options)
+  end
 
   @doc """
   Use this method to get a sticker set. On success, a StickerSet object is returned.
 
   Args:
+  * `bot` - Bot name
   * `name` - Name of the sticker set
   """
-  @spec get_sticker_set(binary) :: {:ok, Nadia.Model.StickerSet.t()} | {:error, Error.t()}
-  def get_sticker_set(name), do: Bot.get_sticker_set(:nadia, name)
+  @spec get_sticker_set(atom, binary) :: {:ok, Nadia.Model.StickerSet.t()} | {:error, Error.t()}
+  def get_sticker_set(bot, name) do
+    request(bot, "getStickerSet", name: name)
+  end
 
   @doc """
   Use this method to upload a .png file with a sticker for later use in
@@ -679,6 +818,7 @@ defmodule Nadia do
   Returns the uploaded File on success.
 
   Args:
+  * `bot` - Bot name
   * `user_id` - User identifier of sticker file owner
   * `png_sticker` - Png image with the sticker, must be up to 512 kilobytes in size,
   dimensions must not exceed 512px, and either width or height must be exactly 512px.
@@ -686,15 +826,17 @@ defmodule Nadia do
   or a `file_path` to upload a new file from local, or a `HTTP URL` to get a file
   from the internet.
   """
-  @spec upload_sticker_file(integer, binary) :: {:ok, File.t()} | {:error, Error.t()}
-  def upload_sticker_file(user_id, png_sticker),
-    do: Bot.upload_sticker_file(:nadia, user_id, png_sticker)
+  @spec upload_sticker_file(atom, integer, binary) :: {:ok, File.t()} | {:error, Error.t()}
+  def upload_sticker_file(bot, user_id, png_sticker) do
+    request(bot, "uploadStickerFile", [user_id: user_id, png_sticker: png_sticker], :png_sticker)
+  end
 
   @doc """
   Use this method to create new sticker set owned by a user. The bot will be able to
   edit the created sticker set. Returns True on success.
 
   Args:
+  * `bot` - Bot name
   * `user_id` - User identifier of created sticker set owner
   * `name` - Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals).
   Can contain only english letters, digits and underscores. Must begin with a letter,
@@ -713,15 +855,23 @@ defmodule Nadia do
   * `mask_position` - A `Nadia.Model.MaskPosition` object for position where the mask
   should be placed on faces
   """
-  @spec create_new_sticker_set(integer, binary, binary, binary, binary, [{atom, any}]) ::
+  @spec create_new_sticker_set(atom, integer, binary, binary, binary, binary, [{atom, any}]) ::
           :ok | {:error, Error.t()}
-  def create_new_sticker_set(user_id, name, title, png_sticker, emojis, options \\ []),
-    do: Bot.create_new_sticker_set(:nadia, user_id, name, title, png_sticker, emojis, options)
+  def create_new_sticker_set(bot, user_id, name, title, png_sticker, emojis, options \\ []) do
+    request(
+      bot,
+      "createNewStickerSet",
+      [user_id: user_id, name: name, title: title, png_sticker: png_sticker, emojis: emojis] ++
+        options,
+      :png_sticker
+    )
+  end
 
   @doc """
   Use this method to add a new sticker to a set created by the bot. Returns True on success.
 
   Args:
+  * `bot` - Bot name
   * `user_id` - User identifier of created sticker set owner
   * `name` - Sticker set name
   * `png_sticker` - Png image with the sticker, must be up to 512 kilobytes in size,
@@ -735,31 +885,42 @@ defmodule Nadia do
   * `mask_position` - A `Nadia.Model.MaskPosition` object for position where the mask
   should be placed on faces
   """
-  @spec add_sticker_to_set(integer, binary, binary, binary, [{atom, any}]) ::
+  @spec add_sticker_to_set(atom, integer, binary, binary, binary, [{atom, any}]) ::
           :ok | {:error, Error.t()}
-  def add_sticker_to_set(user_id, name, png_sticker, emojis, options \\ []),
-    do: Bot.add_sticker_to_set(:nadia, user_id, name, png_sticker, emojis, options)
+  def add_sticker_to_set(bot, user_id, name, png_sticker, emojis, options \\ []) do
+    request(
+      bot,
+      "addStickerToSet",
+      [user_id: user_id, name: name, png_sticker: png_sticker, emojis: emojis] ++ options,
+      :png_sticker
+    )
+  end
 
   @doc """
   Use this method to move a sticker in a set created by the bot to a specific position.
   Returns True on success.
 
   Args:
+  * `bot` - Bot name
   * `sticker` - File identifier of the sticker
   * `position` - New sticker position in the set, zero-based
   """
-  @spec set_sticker_position_in_set(binary, integer) :: :ok | {:error, Error.t()}
-  def set_sticker_position_in_set(sticker, position),
-    do: Bot.set_sticker_position_in_set(:nadia, sticker, position)
+  @spec set_sticker_position_in_set(atom, binary, integer) :: :ok | {:error, Error.t()}
+  def set_sticker_position_in_set(bot, sticker, position) do
+    request(bot, "setStickerPositionInSet", sticker: sticker, position: position)
+  end
 
   @doc """
   Use this method to delete a sticker from a set created by the bot. Returns True on success.
 
   Args:
+  * `bot` - Bot name
   * `sticker` - File identifier of the sticker
   """
-  @spec delete_sticker_from_set(binary) :: :ok | {:error, Error.t()}
-  def delete_sticker_from_set(sticker), do: Bot.delete_sticker_from_set(:nadia, sticker)
+  @spec delete_sticker_from_set(atom, binary) :: :ok | {:error, Error.t()}
+  def delete_sticker_from_set(bot, sticker) do
+    request(bot, "deleteStickerFromSet", sticker: sticker)
+  end
 
   @doc """
   Use this method to pin a message in a group, a supergroup, or a channel. The bot must be an
@@ -767,6 +928,7 @@ defmodule Nadia do
   in the supergroup or ‘can_edit_messages’ admin right in the channel. Returns True on success.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   * `message_id` - Identifier of a message to pin
@@ -775,10 +937,11 @@ defmodule Nadia do
   * `disable_notification` - Pass True, if it is not necessary to send a notification to all
   chat members about the new pinned message. Notifications are always disabled in channels.
   """
-  @spec pin_chat_message(integer | binary, integer | binary, [{atom, any}]) ::
+  @spec pin_chat_message(atom, integer | binary, integer | binary, [{atom, any}]) ::
           :ok | {:error, Error.t()}
-  def pin_chat_message(chat_id, message_id, options \\ []),
-    do: Bot.pin_chat_message(:nadia, chat_id, message_id, options)
+  def pin_chat_message(bot, chat_id, message_id, options \\ []) do
+    request(bot, "pinChatMessage", [chat_id: chat_id, message_id: message_id] ++ options)
+  end
 
   @doc """
   Use this method to unpin a message in a group, a supergroup, or a channel. The bot must be an
@@ -786,9 +949,12 @@ defmodule Nadia do
   the supergroup or ‘can_edit_messages’ admin right in the channel. Returns True on success.
 
   Args:
+  * `bot` - Bot name
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
   """
-  @spec unpin_chat_message(integer | binary) :: :ok | {:error, Error.t()}
-  def unpin_chat_message(chat_id), do: Bot.unpin_chat_message(:nadia, chat_id)
+  @spec unpin_chat_message(atom, integer | binary) :: :ok | {:error, Error.t()}
+  def unpin_chat_message(bot, chat_id) do
+    request(bot, "unpinChatMessage", chat_id: chat_id)
+  end
 end

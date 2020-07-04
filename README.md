@@ -57,6 +57,10 @@ config :nadia,
 
 ## Usage
 
+There is two ways of using this bot:
+- `Nadia` - uses default `:nadia` config section and simplifies configration
+- `Nadia.Bot` - uses whatever you pass to it as a bot name
+
 ### get_me
 
 ```elixir

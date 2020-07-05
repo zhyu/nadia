@@ -39,7 +39,8 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_message(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_message(integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   def send_message(chat_id, text, options \\ []) do
     request("sendMessage", [chat_id: chat_id, text: text] ++ options)
   end
@@ -56,7 +57,8 @@ defmodule Nadia do
   * `:disable_notification` - Sends the message silently or without notification
   * `message_id` - Unique message identifier
   """
-  @spec forward_message(integer, integer, integer) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec forward_message(integer | binary, integer | binary, integer) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   def forward_message(chat_id, from_chat_id, message_id) do
     request(
       "forwardMessage",
@@ -85,7 +87,8 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_photo(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_photo(integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   def send_photo(chat_id, photo, options \\ []) do
     request("sendPhoto", [chat_id: chat_id, photo: photo] ++ options, :photo)
   end
@@ -120,7 +123,8 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_audio(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_audio(integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   def send_audio(chat_id, audio, options \\ []) do
     request("sendAudio", [chat_id: chat_id, audio: audio] ++ options, :audio)
   end
@@ -145,7 +149,8 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_document(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_document(integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   def send_document(chat_id, document, options \\ []) do
     request("sendDocument", [chat_id: chat_id, document: document] ++ options, :document)
   end
@@ -168,7 +173,8 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_sticker(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_sticker(integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   def send_sticker(chat_id, sticker, options \\ []) do
     request("sendSticker", [chat_id: chat_id, sticker: sticker] ++ options, :sticker)
   end
@@ -196,7 +202,8 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_video(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_video(integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   def send_video(chat_id, video, options \\ []) do
     request("sendVideo", [chat_id: chat_id, video: video] ++ options, :video)
   end
@@ -224,7 +231,8 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_voice(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_voice(integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   def send_voice(chat_id, voice, options \\ []) do
     request("sendVoice", [chat_id: chat_id, voice: voice] ++ options, :voice)
   end
@@ -247,7 +255,7 @@ defmodule Nadia do
   force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
   `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
   """
-  @spec send_location(integer, float, float, [{atom, any}]) ::
+  @spec send_location(integer | binary, float, float, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
   def send_location(chat_id, latitude, longitude, options \\ []) do
     request(
@@ -279,7 +287,7 @@ defmodule Nadia do
   `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardRemove` or
   `Nadia.Model.ForceReply`
   """
-  @spec send_venue(integer, float, float, binary, binary, [{atom, any}]) ::
+  @spec send_venue(integer | binary, float, float, binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
   def send_venue(chat_id, latitude, longitude, title, address, options \\ []) do
     request(
@@ -310,7 +318,7 @@ defmodule Nadia do
   `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardRemove` or
   `Nadia.Model.ForceReply`
   """
-  @spec send_contact(integer, binary, binary, [{atom, any}]) ::
+  @spec send_contact(integer | binary, binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
   def send_contact(chat_id, phone_number, first_name, options \\ []) do
     request(
@@ -336,38 +344,39 @@ defmodule Nadia do
       * `upload_document` for general files
       * `find_location` for location data
   """
-  @spec send_chat_action(integer, binary) :: :ok | {:error, Error.t()}
+  @spec send_chat_action(integer | binary, binary) :: :ok | {:error, Error.t()}
   def send_chat_action(chat_id, action) do
     request("sendChatAction", chat_id: chat_id, action: action)
   end
 
   @doc """
-  Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound). 
-  On success, the sent Message is returned. Bots can currently send animation files of up 
+  Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound).
+  On success, the sent Message is returned. Bots can currently send animation files of up
   to 50 MB in size, this limit may be changed in the future.
 
   Args:
-  * `chat_id` - Unique identifier for the target chat or username of the target channel 
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
-  * `animation` - Animation to send. Pass a file_id as String to send an animation that 
-  exists on the Telegram servers (recommended), pass an HTTP URL as a String for 
+  * `animation` - Animation to send. Pass a file_id as String to send an animation that
+  exists on the Telegram servers (recommended), pass an HTTP URL as a String for
   Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data.
 
   Options:
   * `:duration` - Duration of sent animation in seconds
   * `:width` - Animation width
   * `:height` - Animation height
-  * `:thumb` - Thumbnail of the file sent; can be ignored if thumbnail generation for the file 
+  * `:thumb` - Thumbnail of the file sent; can be ignored if thumbnail generation for the file
   is supported server-side. thumbnail should be in JPEG format and less than 200 kB in size.
   * `:caption` - Animation caption (may also be used when resending animation by file_id), 0-1024 characters
-  * `:parse_mode` - Send Markdown or HTML, if you want Telegram apps to show bold, italic, fixed-width 
+  * `:parse_mode` - Send Markdown or HTML, if you want Telegram apps to show bold, italic, fixed-width
   text or inline URLs in the media caption.
   * `:disable_notification` - Sends the message silently. Users will receive a notification with no sound.
   * `:reply_to_message_id` - If the message is a reply, ID of the original message
-  * `:reply_markup` - Additional interface options. A JSON-serialized object for an inline keyboard, 
+  * `:reply_markup` - Additional interface options. A JSON-serialized object for an inline keyboard,
   custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
   """
-  @spec send_animation(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_animation(integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   def send_animation(chat_id, animation, options \\ []) do
     request("sendAnimation", [chat_id: chat_id, animation: animation] ++ options)
   end

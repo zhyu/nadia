@@ -47,7 +47,7 @@ defmodule Nadia.Parser do
     end
   end
 
-  @keys_of_message [:message, :reply_to_message, :channel_post]
+  @keys_of_message [:message, :reply_to_message, :channel_post, :edited_message]
   @keys_of_inline_query [:inline_query]
   @keys_of_callback_query [:callback_query]
   @keys_of_choosen_inline_result [:chosen_inline_result]

@@ -244,6 +244,38 @@ defmodule Nadia.ParserTest do
            ]
   end
 
+  test "pase result of get_updates edited_message" do
+    raw_updates = [
+      %{
+        edited_message: %{
+          chat: %{first_name: "John", id: 440_000_000, type: "private"},
+          date: 1_508_359_228,
+          edit_date: 1_508_360_678,
+          from: %{first_name: "John", id: 440_000_000, is_bot: false, language_code: "en-US"},
+          message_id: 3,
+          text: "Edited message"
+        },
+        update_id: 790_000_001
+      }
+    ]
+
+    updates = Parser.parse_result(raw_updates, "getUpdates")
+
+    assert updates == [
+             %Nadia.Model.Update{
+               edited_message: %Nadia.Model.Message{
+                 chat: %Nadia.Model.Chat{first_name: "John", id: 440_000_000, type: "private"},
+                 date: 1_508_359_228,
+                 edit_date: 1_508_360_678,
+                 from: %Nadia.Model.User{first_name: "John", id: 440_000_000},
+                 message_id: 3,
+                 text: "Edited message"
+               },
+               update_id: 790_000_001
+             }
+           ]
+  end
+
   test "parse result of get_webhook_info" do
     webhook_info =
       Parser.parse_result(

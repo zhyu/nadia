@@ -334,13 +334,18 @@ defmodule Nadia.Model do
   end
 
   defmodule InlineKeyboardButton do
-    defstruct text: nil, url: nil, callback_data: nil, switch_inline_query: nil
+    defstruct text: nil,
+              url: nil,
+              callback_data: nil,
+              switch_inline_query: nil,
+              switch_inline_query_current_chat: nil
 
     @type t :: %InlineKeyboardButton{
             text: binary,
             url: binary,
             callback_data: binary,
-            switch_inline_query: binary
+            switch_inline_query: binary,
+            switch_inline_query_current_chat: binary
           }
   end
 

@@ -46,4 +46,10 @@ defmodule Nadia.Behaviour do
               {:ok, Message.t()} | {:error, Error.t()}
   @callback answer_inline_query(binary, [Nadia.Model.InlineQueryResult.t()], [{atom, any}]) ::
               :ok | {:error, Error.t()}
+  @callback send_invoice(integer | binary, binary, binary, binary, binary, binary, binary, [Nadia.Model.LabeledPrice.t()], [{atom, any}]) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback answer_shipping_query(integer | binary, boolean, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback answer_pre_checkout_query(integer | binary, boolean, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
 end

@@ -6,7 +6,7 @@ defmodule Nadia do
   https://core.telegram.org/bots/api#available-methods
   """
 
-  alias Nadia.Model.{User, Message, Update, UserProfilePhotos, File, Error, WebhookInfo}
+  alias Nadia.Model.{User, Message, Update, UserProfilePhotos, File, Error, WebhookInfo, LabeledPrice}
 
   import Nadia.API
 
@@ -896,5 +896,104 @@ defmodule Nadia do
   @spec unpin_chat_message(integer | binary) :: :ok | {:error, Error.t()}
   def unpin_chat_message(chat_id) do
     request("unpinChatMessage", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to send invoices. On success, the sent Message is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target
+  * `title` - Product name, 1-32 characters
+  * `description` - Product description, 1-255 characters
+  * `payload` - Bot-defined invoice payload, 1-128 bytes. This will not be displayed to
+  the user, use for your internal processes.
+  * `provider_token` - Payments provider token, obtained via Botfather
+  * `start_parameter` - Unique deep-linking parameter that can be used to generate 
+  this invoice when used as a start parameter
+  * `currency` - Three-letter ISO 4217 currency code
+  * `prices` - Array of `LabeledPrice`. Price breakdown (e.g. product price, tax, 
+  discount, delivery cost, delivery tax, bonus, etc.)
+
+  Options:
+  * `provider_data` - A JSON-serialized data about the invoice, which will be shared
+  with the payment provider. A detailed description of required fields should be provided
+  by the payment provider.
+  * `photo_url` - URL of the product photo for the invoice. Can be a photo of the goods 
+  or a marketing image for a service. People like it better when they see what they are paying for.
+  * `photo_size` - Photo size
+  * `photo_width` - Photo width
+  * `photo_height` - Photo height
+  * `need_name` - Pass True, if you require the user's full name to complete the order
+  * `need_phone_number` - Pass True, if you require the user's phone number to complete the order
+  * `need_email` - Pass True, if you require the user's email address to complete the order
+  * `need_shipping_address` - Pass True, if you require the user's shipping address to complete the order
+  * `send_phone_number_to_provider` - Pass True, if user's phone number should be sent to provider
+  * `send_email_to_provider` - Pass True, if user's email address should be sent to provider
+  * `is_flexible` - Pass True, if the final price depends on the shipping method
+  * `disable_notification` - Sends the message silently. Users will receive a notification with no sound.
+  * `reply_to_message_id` - If the message is a reply, ID of the original message
+  * `allow_sending_without_reply` - Pass True, if the message should be sent even if the 
+  specified replied-to message is not found
+  * `reply_markup` - A JSON-serialized object for an inline keyboard - `Nadia.Model.InlineKeyboardMarkup`
+  """
+  @spec send_invoice(integer | binary, binary, binary, binary, binary, binary, binary, [LabeledPrice.t()], [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_invoice(chat_id, title, description, payload, provider_token, start_parameter, currency, prices, options \\ []) do
+    request("sendInvoice",
+      [
+        chat_id: chat_id,
+        title: title,
+        description: description,
+        payload: payload,
+        provider_token: provider_token,
+        start_parameter: start_parameter,
+        currency: currency,
+        prices: prices,
+      ] ++ options
+    )
+  end
+
+  @doc """
+  If you sent an invoice requesting a shipping address and the parameter is_flexible was specified,
+  the Bot API will send an Update with a shipping_query field to the bot. Use this method to reply
+  to shipping queries. On success, True is returned.
+
+  Args:
+  * `shipping_query_id` - Unique identifier for the query to be answered
+  * `ok` - Specify True if delivery to the specified address is possible and False if there are any
+  problems (for example, if delivery to the specified address is not possible)
+
+  Options:
+  * `shipping_address` - Required if ok is True. A list of `Nadia.Model.ShippingOption`
+  * `error_message` - Required if ok is False. Error message in human readable form that explains
+  why it is impossible to complete the order (e.g. "Sorry, delivery to your desired address is
+  unavailable'). Telegram will display this message to the user.
+  """
+  @spec answer_shipping_query(integer | binary, boolean, [{atom, any}]) :: :ok | {:error, Error.t()}
+  def answer_shipping_query(shipping_query_id, ok, options \\ []) do
+    request("answerShippingQuery", [shipping_query_id: shipping_query_id, ok: ok] ++ options)
+  end
+
+  @doc """
+  Once the user has confirmed their payment and shipping details, the Bot API sends the final
+  confirmation in the form of an Update with the field pre_checkout_query. Use this method to
+  respond to such pre-checkout queries. On success, True is returned. Note: The Bot API must receive
+  an answer within 10 seconds after the pre-checkout query was sent.
+
+  Args:
+  * `pre_checkout_query_id` - Unique identifier for the query to be answered
+  * `ok` - Specify True if everything is alright (goods are available, etc.) and the bot
+  is ready to proceed with the order. Use False if there are any problems.
+
+  Options:
+  * `error_message` - Required if ok is False. Error message in human readable form that explains
+  the reason for failure to proceed with the checkout (e.g. "Sorry, somebody just bought the last of
+  our amazing black T-shirts while you were busy filling out your payment details. Please choose
+  a different color or garment!"). Telegram will display this message to the user.
+  """
+  @spec answer_pre_checkout_query(integer | binary, boolean, [{atom, any}]) :: :ok | {:error, Error.t()}
+  def answer_pre_checkout_query(pre_checkout_query_id, ok, options \\ []) do 
+    request("answerPreCheckoutQuery",
+      [pre_checkout_query_id: pre_checkout_query_id, ok: ok] ++ options)
   end
 end

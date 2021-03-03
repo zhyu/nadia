@@ -47,12 +47,14 @@ defmodule Nadia.API do
   defp build_request(params, file_field) when is_list(params) do
     params
     |> Keyword.update(:reply_markup, nil, &Jason.encode!(&1))
+    |> Keyword.update(:prices, nil, &Jason.encode!(&1))
     |> map_params(file_field)
   end
 
   defp build_request(params, file_field) when is_map(params) do
     params
     |> Map.update(:reply_markup, nil, &Jason.encode!(&1))
+    |> Map.update(:prices, nil, &Jason.encode!(&1))
     |> map_params(file_field)
   end
 

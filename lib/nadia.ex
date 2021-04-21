@@ -6,7 +6,16 @@ defmodule Nadia do
   https://core.telegram.org/bots/api#available-methods
   """
 
-  alias Nadia.Model.{User, Message, Update, UserProfilePhotos, File, Error, WebhookInfo}
+  alias Nadia.Model.{
+    ChatPermissions,
+    User,
+    Message,
+    Update,
+    UserProfilePhotos,
+    File,
+    Error,
+    WebhookInfo
+  }
 
   import Nadia.API
 
@@ -530,6 +539,42 @@ defmodule Nadia do
   @spec unban_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
   def unban_chat_member(chat_id, user_id) do
     request("unbanChatMember", chat_id: chat_id, user_id: user_id)
+  end
+
+  @doc """
+  Use this method to restrict a user in a supergroup. The bot must be an administrator
+  in the supergroup for this to work and must have the appropriate admin rights. Pass True
+  for all permissions to lift restrictions from a user. Returns True on success.
+  Args:
+  * `chat_id` - Unique identifier for the target group or username of the target supergroup
+  (in the format @supergroupusername)
+  * `user_id` - Unique identifier of the target user
+  * `permissions` - New user permissions
+  * `until_date` - Date when restrictions will be lifted for the user, unix time. If user is
+  restricted for more than 366 days or less than 30 seconds from the current time, they are
+  considered to be restricted forever
+  """
+  @spec restrict_chat_member(
+          integer() | binary(),
+          integer(),
+          ChatPermissions.t(),
+          integer() | nil
+        ) ::
+          :ok | {:error, Error.t()}
+  def restrict_chat_member(chat_id, user_id, permissions, until_date \\ nil) do
+    encoded_permissions =
+      permissions
+      |> Map.from_struct()
+      |> Enum.filter(fn {_, v} -> v != nil end)
+      |> Enum.into(%{})
+      |> Jason.encode!()
+
+    request("restrictChatMember",
+      chat_id: chat_id,
+      user_id: user_id,
+      permissions: encoded_permissions,
+      until_date: until_date
+    )
   end
 
   @doc """

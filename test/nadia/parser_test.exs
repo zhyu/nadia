@@ -25,7 +25,7 @@ defmodule Nadia.ParserTest do
     assert me == %User{id: 666, first_name: "Nadia", last_name: nil, username: "nadia_bot"}
   end
 
-  test "pase result of get_user_profile_photos" do
+  test "parse result of get_user_profile_photos" do
     user_profile_photos =
       Parser.parse_result(%{photos: [], total_count: 0}, "getUserProfilePhotos")
 
@@ -56,7 +56,7 @@ defmodule Nadia.ParserTest do
            }
   end
 
-  test "pase result of get_updates" do
+  test "parse result of get_updates" do
     raw_updates = [
       %{
         channel_post: %{
@@ -244,7 +244,7 @@ defmodule Nadia.ParserTest do
            ]
   end
 
-  test "pase result of get_updates edited_message" do
+  test "parse result of get_updates edited_message" do
     raw_updates = [
       %{
         edited_message: %{

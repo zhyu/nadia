@@ -85,7 +85,7 @@ defmodule Nadia.Graph do
   Args:
   * `access_token` - (String) Access token of the Telegraph account.
   * `title` - (String, 1-256 characters) Page title.
-  * `content` - (Array of Node, up to 64 KB)` Content of the page.
+  * `content` - (Array of Node, up to 64 KB) Content of the page.
   * `options` - orddict of options
 
   Options:

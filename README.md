@@ -1,17 +1,27 @@
-Nadia ![Elixir CI](https://github.com/zhyu/nadia/workflows/Elixir%20CI/badge.svg) [![Inline docs](http://inch-ci.org/github/zhyu/nadia.svg)](http://inch-ci.org/github/zhyu/nadia) [![Hex pm](https://img.shields.io/hexpm/v/nadia.svg)](https://hex.pm/packages/nadia) [![Hex.pm](https://img.shields.io/hexpm/dt/nadia.svg)](https://hex.pm/packages/nadia)
-=====
+# Nadia
+
+[![Elixir CI](https://github.com/zhyu/nadia/actions/workflows/elixir.yml/badge.svg)](https://github.com/zhyu/nadia/actions/workflows/elixir.yml)
+[![Module Version](https://img.shields.io/hexpm/v/nadia.svg)](https://hex.pm/packages/nadia)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/nadia/)
+[![Total Download](https://img.shields.io/hexpm/dt/nadia.svg)](https://hex.pm/packages/nadia)
+[![License](https://img.shields.io/hexpm/l/nadia.svg)](https://github.com/zhyu/nadia/blob/master/LICENSE)
+[![Last Updated](https://img.shields.io/github/last-commit/zhyu/nadia.svg)](https://github.com/zhyu/nadia/commits/master)
 
 Telegram Bot API Wrapper written in Elixir ([document](https://hexdocs.pm/nadia/))
 
 ## Installation
-Add Nadia to your `mix.exs` dependencies:
+
+Add `:nadia` to your `mix.exs` dependencies:
 
 ```elixir
 def deps do
-  [{:nadia, "~> 0.7.0"}]
+  [
+    {:nadia, "~> 0.7.0"}
+  ]
 end
 ```
-and run `$ mix deps.get`.
+
+And run `$ mix deps.get`.
 
 ## Configuration
 
@@ -22,13 +32,15 @@ config :nadia,
   token: "bot token"
 ```
 
-You can also add an optional recv_timeout in seconds (defaults to 5s).
+You can also add an optional `recv_timeout` in seconds (defaults to 5s):
+
 ```elixir
 config :nadia,
   recv_timeout: 10
 ```
 
-You can also add a proxy support.
+You can also add a proxy support:
+
 ```elixir
 config :nadia,
   proxy: "http://proxy_host:proxy_port", # or {:socks5, 'proxy_host', proxy_port}
@@ -37,7 +49,7 @@ config :nadia,
 ```
 
 You can also configure the the base url for the api if you need to for some
-reason.
+reason:
 
 ```elixir
 config :nadia,
@@ -57,7 +69,7 @@ config :nadia,
 
 ## Usage
 
-### get_me
+### `get_me`
 
 ```elixir
 iex> Nadia.get_me
@@ -66,7 +78,7 @@ iex> Nadia.get_me
   username: "nadia_bot"}}
 ```
 
-### get_updates
+### `get_updates`
 
 ```elixir
 iex> Nadia.get_updates limit: 5
@@ -91,7 +103,7 @@ iex> {:ok,
     text: "rew", venue: nil, video: nil, voice: nil}, update_id: 98765}]}
 ```
 
-### send_message
+### `send_message`
 
 ```elixir
 iex> case Nadia.send_message(tlg_id, "The message text goes here") do
@@ -105,3 +117,9 @@ iex> case Nadia.send_message(tlg_id, "The message text goes here") do
 ```
 
 Refer to [Nadia document](https://hexdocs.pm/nadia/) and [Telegram Bot API document](https://core.telegram.org/bots/api) for more details.
+
+## Copyright and License
+
+Copyright (c) 2015 Yu Zhang
+
+This library licensed under the [MIT license](./LICENSE.md).

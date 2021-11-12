@@ -13,8 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup elixir
-        uses: actions/setup-elixir@v1
+      - name: Setup Erlang/OTP + Elixir
+        uses: erlef/setup-beam@v1
         with:
           otp-version: '23.0'
           elixir-version: '1.10.3'
@@ -36,8 +36,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Setup elixir
-      uses: actions/setup-elixir@v1
+    - name: Setup Erlang/OTP + Elixir
+      uses: erlef/setup-beam@v1
       with:
         otp-version: ${{matrix.otp}}
         elixir-version: ${{matrix.elixir}}
@@ -55,8 +55,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup elixir
-        uses: actions/setup-elixir@v1
+      - name: Setup Erlang/OTP + Elixir
+        uses: erlef/setup-beam@v1
         with:
           otp-version: '23.0'
           elixir-version: '1.10.3'

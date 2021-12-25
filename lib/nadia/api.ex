@@ -20,8 +20,16 @@ defmodule Nadia.API do
 
   defp decode_response(response) do
     with {:ok, %HTTPoison.Response{body: body}} <- response,
-         {:ok, %{result: result}} <- Jason.decode(body, keys: :atoms),
+         {:ok, %{result: result}} <- Jason.decode(body, keys: &json_key_decoder/1),
          do: {:ok, result}
+  end
+
+  defp json_key_decoder(key) do
+    try do
+      String.to_existing_atom(key)
+    rescue
+      _ -> key
+    end
   end
 
   defp build_multipart_request(params, file_field) do

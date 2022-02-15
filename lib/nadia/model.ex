@@ -349,6 +349,118 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule LabeledPrice do
+    @derive Jason.Encoder
+    defstruct label: nil, amount: nil
+
+    @type t :: %LabeledPrice{label: binary, amount: integer}
+  end
+
+  defmodule Invoice do
+    @derive Jason.Encoder
+    defstruct title: nil, description: nil, start_parameter: nil, currency: nil, total_amount: nil
+
+    @type t :: %Invoice{
+      title: binary,
+      description: binary,
+      start_parameter: binary,
+      currency: binary,
+      total_amount: integer
+    }
+  end
+
+  defmodule ShippingAddress do
+    @derive Jason.Encoder
+    defstruct id: nil, title: nil, prices: []
+
+    @type t :: %ShippingAddress{
+      id: binary,
+      title: binary,
+      prices: [ LabeledPrice.t() ]
+    }
+  end
+
+  defmodule OrderInfo do
+    @derive Jason.Encoder
+    defstruct name: nil, phone_number: nil, email: nil, shipping_address: nil
+
+    @type t :: %OrderInfo{
+      name: binary,
+      phone_number: binary,
+      email: binary,
+      shipping_address: ShippingAddress.t()
+    }
+  end
+
+  defmodule ShippingOption do
+    @derive Jason.Encoder
+    defstruct id: nil, title: nil, prices: []
+
+    @type t :: %ShippingOption{
+      id: binary,
+      title: binary,
+      prices: [ LabeledPrice.t() ]
+    }
+  end
+
+  defmodule SuccessfulPayment do
+    @derive Jason.Encoder
+    defstruct [
+      currency: "USD",
+      total_amount: nil,
+      invoice_payload: nil,
+      shipping_option_id: nil,
+      order_info: nil,
+      telegram_payment_charge_id: nil,
+      provider_payment_charge_id: nil
+    ]
+
+    @type t :: %SuccessfulPayment{
+      currency: binary,
+      total_amount: non_neg_integer,
+      invoice_payload: binary,
+      shipping_option_id: binary,
+      order_info: OrderInfo.t(),
+      telegram_payment_charge_id: binary,
+      provider_payment_charge_id: binary
+    }
+  end
+
+  defmodule ShippingQuery do
+    @derive Jason.Encoder
+    defstruct id: nil, from: nil, invoice_payload: nil, shipping_address: nil
+
+    @type t :: %ShippingQuery{
+      id: binary,
+      from: User.t(),
+      invoice_payload: binary,
+      shipping_address: ShippingAddress.t()
+    }
+  end
+
+  defmodule PreCheckoutQuery do
+    @derive Jason.Encoder
+    defstruct [
+      id: nil,
+      from: nil,
+      currency: nil,
+      total_amount: nil,
+      invoice_payload: nil,
+      shipping_option_id: nil,
+      order_info: nil
+    ]
+
+    @type t :: %PreCheckoutQuery{
+      id: binary,
+      from: User.t(),
+      currency: binary,
+      total_amount: integer,
+      invoice_payload: binary,
+      shipping_option_id: binary,
+      order_info: OrderInfo.t()
+    }
+  end
+
   defmodule CallbackQuery do
     defstruct id: nil, from: nil, message: nil, inline_message_id: nil, data: nil
 

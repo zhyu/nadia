@@ -29,9 +29,9 @@ defmodule Nadia.ConfigTest do
   end
 
   test "Config.proxy/0 returns config value when present" do
-    :ok = Application.put_env(:nadia, :proxy, {:socks5, 'localhost', 1080})
+    :ok = Application.put_env(:nadia, :proxy, {:socks5, ~c"localhost", 1080})
 
-    assert Config.proxy() == {:socks5, 'localhost', 1080}
+    assert Config.proxy() == {:socks5, ~c"localhost", 1080}
   end
 
   test "Config.socks5_user/0 returns config value when present" do

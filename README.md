@@ -11,6 +11,8 @@ Telegram Bot API Wrapper written in Elixir ([document](https://hexdocs.pm/nadia/
 
 ## Installation
 
+Nadia requires Elixir 1.15 or later.
+
 Add `:nadia` to your `mix.exs` dependencies:
 
 ```elixir
@@ -43,9 +45,9 @@ You can also add a proxy support:
 
 ```elixir
 config :nadia,
-  proxy: "http://proxy_host:proxy_port", # or {:socks5, 'proxy_host', proxy_port}
+  proxy: "http://proxy_host:proxy_port", # or {:socks5, ~c"proxy_host", proxy_port}
   proxy_auth: {"user", "password"},
-  ssl: [versions: [:'tlsv1.2']]
+  ssl: [versions: [:"tlsv1.2"]]
 ```
 
 You can also configure the the base url for the api if you need to for some

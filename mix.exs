@@ -8,24 +8,27 @@ defmodule Nadia.Mixfile do
     [
       app: :nadia,
       version: @version,
-      elixir: "~> 1.8",
+      elixir: "~> 1.15",
       package: package(),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      docs: docs(),
-      preferred_cli_env: [docs: :docs]
+      docs: docs()
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [docs: :docs]
     ]
   end
 
   defp deps do
     [
-      {:httpoison, "~> 1.8.0"},
-      {:jason, "~> 1.1"},
-      {:exvcr, "~> 0.12.0", only: [:dev, :test]},
-      {:earmark, "~> 1.2", only: :docs},
-      {:ex_doc, ">= 0.0.0", only: :docs, runtime: false},
-      {:inch_ex, "~> 2.0.0", only: :docs}
+      {:httpoison, "~> 2.3"},
+      {:jason, "~> 1.4"},
+      {:exvcr, "~> 0.17", only: [:dev, :test]},
+      {:ex_doc, ">= 0.0.0", only: :docs, runtime: false}
     ]
   end
 

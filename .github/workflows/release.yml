@@ -41,7 +41,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          project_version="$(mix run --no-start -e 'IO.write(Mix.Project.config()[:version])')"
+          project_version="$(mix run --no-start --no-compile -e 'IO.write(Mix.Project.config()[:version])' | tail -n 1)"
           tag_version="${GITHUB_REF_NAME#v}"
 
           if [[ ! "$tag_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then

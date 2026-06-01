@@ -75,7 +75,7 @@ jobs:
     name: Publish to Hex
     runs-on: ubuntu-24.04
     needs: verify
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     environment:
       name: hex-publish
     steps:

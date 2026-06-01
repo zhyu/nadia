@@ -1,0 +1,126 @@
+name: Hex Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      check_hex_key:
+        description: 'Run Hex credential dry-run with the hex-publish secret'
+        required: false
+        default: false
+        type: boolean
+  push:
+    tags:
+      - 'v*'
+      - '[0-9]*'
+
+permissions:
+  contents: read
+
+env:
+  OTP_VERSION: '28.1'
+  ELIXIR_VERSION: '1.19.5'
+
+jobs:
+  verify:
+    name: Verify Release
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Erlang/OTP + Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+
+      - name: Install Dependencies
+        run: mix deps.get
+
+      - name: Verify release tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -euo pipefail
+
+          project_version="$(mix run --no-start -e 'IO.write(Mix.Project.config()[:version])')"
+          tag_version="${GITHUB_REF_NAME#v}"
+
+          if [[ ! "$tag_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Release tags must be vMAJOR.MINOR.PATCH or MAJOR.MINOR.PATCH; got ${GITHUB_REF_NAME}"
+            exit 1
+          fi
+
+          if [[ "$project_version" != "$tag_version" ]]; then
+            echo "mix.exs version ${project_version} does not match tag ${GITHUB_REF_NAME}"
+            exit 1
+          fi
+
+      - name: Format Check
+        run: mix format --check-formatted
+
+      - name: Compile with warnings as errors
+        run: mix compile --warnings-as-errors
+
+      - name: Run Tests
+        run: mix test
+
+      - name: Generate Docs
+        env:
+          MIX_ENV: docs
+        run: mix docs --warnings-as-errors
+
+      - name: Build Hex Package
+        run: mix hex.build --unpack --output /tmp/nadia-hex-package
+
+  publish:
+    name: Publish to Hex
+    runs-on: ubuntu-24.04
+    needs: verify
+    if: startsWith(github.ref, 'refs/tags/')
+    environment:
+      name: hex-publish
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Erlang/OTP + Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+
+      - name: Install Dependencies
+        env:
+          MIX_ENV: docs
+        run: mix deps.get
+
+      - name: Publish to Hex
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+          MIX_ENV: docs
+        run: mix hex.publish --yes
+
+  credential-check:
+    name: Check Hex Credentials
+    runs-on: ubuntu-24.04
+    needs: verify
+    if: github.event_name == 'workflow_dispatch' && inputs.check_hex_key
+    environment:
+      name: hex-publish
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Erlang/OTP + Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+
+      - name: Install Dependencies
+        env:
+          MIX_ENV: docs
+        run: mix deps.get
+
+      - name: Hex Publish Dry Run
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+          MIX_ENV: docs
+        run: mix hex.publish --dry-run --yes

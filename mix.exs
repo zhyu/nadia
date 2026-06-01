@@ -2,7 +2,7 @@ defmodule Nadia.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/zhyu/nadia"
-  @version "0.7.0"
+  @version "0.8.0"
 
   def project do
     [
@@ -37,13 +37,17 @@ defmodule Nadia.Mixfile do
       description: "Telegram Bot API Wrapper written in Elixir",
       maintainers: ["zhyu"],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/zhyu/nadia"}
+      links: %{
+        "GitHub" => @source_url,
+        "Changelog" => @source_url <> "/blob/master/CHANGELOG.md"
+      }
     ]
   end
 
   defp docs do
     [
       extras: [
+        "CHANGELOG.md": [title: "Changelog"],
         "LICENSE.md": [title: "License"],
         "README.md": [title: "Overview"]
       ],

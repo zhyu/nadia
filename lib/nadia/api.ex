@@ -27,8 +27,8 @@ defmodule Nadia.API do
   end
 
   defp build_multipart_request(params, file_field) do
-    {file_path, params} = Keyword.pop(params, file_field)
-    params = for {k, v} <- params, do: {to_string(k), v}
+    file_field = to_string(file_field)
+    {{_, file_path}, params} = List.keytake(params, file_field, 0)
 
     {:multipart,
      params ++
@@ -62,12 +62,23 @@ defmodule Nadia.API do
     params =
       params
       |> Enum.filter(fn {_, v} -> v end)
-      |> Enum.map(fn {k, v} -> {k, to_string(v)} end)
+      |> Enum.map(fn {k, v} -> {to_string(k), to_string(v)} end)
 
-    if !is_nil(file_field) and File.exists?(params[file_field]) do
+    file_path = file_path(params, file_field)
+
+    if file_path && File.exists?(file_path) do
       build_multipart_request(params, file_field)
     else
       {:form, params}
+    end
+  end
+
+  defp file_path(_params, nil), do: nil
+
+  defp file_path(params, file_field) do
+    case List.keyfind(params, to_string(file_field), 0) do
+      {_, file_path} -> file_path
+      nil -> nil
     end
   end
 

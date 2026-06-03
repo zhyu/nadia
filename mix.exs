@@ -13,7 +13,8 @@ defmodule Nadia.Mixfile do
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      docs: docs()
+      docs: docs(),
+      test_ignore_filters: [~r"test/support/"]
     ]
   end
 

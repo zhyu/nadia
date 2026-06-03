@@ -3,8 +3,11 @@ defmodule Nadia.API do
   Provides basic functionalities for Telegram Bot API.
   """
 
-  alias Nadia.Model.Error
   alias Nadia.Config
+  alias Nadia.HTTPClient
+  alias Nadia.HTTPRequest
+  alias Nadia.HTTPResponse
+  alias Nadia.Model.Error
 
   defp build_url(method), do: Config.base_url() <> Config.token() <> "/" <> method
 
@@ -13,13 +16,12 @@ defmodule Nadia.API do
       {:ok, true} -> :ok
       {:ok, %{ok: false, description: description}} -> {:error, %Error{reason: description}}
       {:ok, result} -> {:ok, Nadia.Parser.parse_result(result, method)}
-      {:error, %HTTPoison.Error{reason: reason}} -> {:error, %Error{reason: reason}}
       {:error, error} -> {:error, %Error{reason: error}}
     end
   end
 
   defp decode_response(response) do
-    with {:ok, %HTTPoison.Response{body: body}} <- response,
+    with {:ok, %HTTPResponse{body: body}} <- response,
          {:ok, %{result: result}} <- Jason.decode(body, keys: :atoms),
          do: {:ok, result}
   end
@@ -114,9 +116,14 @@ defmodule Nadia.API do
   """
   @spec request(binary, [{atom, any}], atom) :: :ok | {:error, Error.t()} | {:ok, any}
   def request(method, options \\ [], file_field \\ nil) do
-    method
-    |> build_url
-    |> HTTPoison.post(build_request(options, file_field), [], build_options(options))
+    %HTTPRequest{
+      method: :post,
+      url: build_url(method),
+      body: build_request(options, file_field),
+      headers: [],
+      options: build_options(options)
+    }
+    |> HTTPClient.post()
     |> process_response(method)
   end
 

@@ -14,11 +14,17 @@ defmodule Nadia.ConfigTest do
     base_url = Application.get_env(:nadia, :base_url)
     graph_base_url = Application.get_env(:nadia, :graph_base_url)
     file_base_url = Application.get_env(:nadia, :file_base_url)
+    proxy = Application.get_env(:nadia, :proxy)
+    socks5_user = Application.get_env(:nadia, :socks5_user)
+    socks5_pass = Application.get_env(:nadia, :socks5_pass)
 
     on_exit(fn ->
       restore_env!(:base_url, base_url)
       restore_env!(:graph_base_url, graph_base_url)
       restore_env!(:file_base_url, file_base_url)
+      restore_env!(:proxy, proxy)
+      restore_env!(:socks5_user, socks5_user)
+      restore_env!(:socks5_pass, socks5_pass)
     end)
   end
 

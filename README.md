@@ -120,6 +120,50 @@ iex> case Nadia.send_message(tlg_id, "The message text goes here") do
 
 Refer to [Nadia document](https://hexdocs.pm/nadia/) and [Telegram Bot API document](https://core.telegram.org/bots/api) for more details.
 
+## Testing
+
+The default test suite is offline and credential-free:
+
+```sh
+mix test
+```
+
+Optional live Telegram smoke tests are tagged with `:telegram_live` and are not
+run by default:
+
+```sh
+mix test --only telegram_live
+```
+
+Live tests require two bots with Bot-to-Bot Communication Mode enabled in
+BotFather. Configure credentials by copying the committed seed file to the
+ignored local env file, then edit the local file:
+
+```sh
+cp .env.live.local.example .env.live.local
+chmod 600 .env.live.local
+${EDITOR:-vi} .env.live.local
+```
+
+The local `.env.live.local` file should define:
+
+```sh
+export NADIA_LIVE_BOT_A_TOKEN="123:bot-a-token"
+export NADIA_LIVE_BOT_A_USERNAME="bot_a_username"
+export NADIA_LIVE_BOT_B_TOKEN="456:bot-b-token"
+export NADIA_LIVE_BOT_B_USERNAME="bot_b_username"
+```
+
+Then source the local file and run the live suite from the same shell:
+
+```sh
+source .env.live.local
+mix test --only telegram_live
+```
+
+Set `NADIA_LIVE_API_ENV=test` in `.env.live.local` to route live smoke tests
+through Telegram's Bot API test environment.
+
 ## Copyright and License
 
 Copyright (c) 2015 Yu Zhang

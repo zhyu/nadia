@@ -25,6 +25,9 @@ nadia-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 
+# Local live-test credentials.
+/.env.live.local
+
 # Misc.
 /config/config.exs
 /docs/all.json

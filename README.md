@@ -45,10 +45,13 @@ You can also add a proxy support:
 
 ```elixir
 config :nadia,
-  proxy: "http://proxy_host:proxy_port", # or {:socks5, ~c"proxy_host", proxy_port}
-  proxy_auth: {"user", "password"},
-  ssl: [versions: [:"tlsv1.2"]]
+  proxy: "http://proxy_host:proxy_port",
+  proxy_auth: {"user", "password"}
 ```
+
+Nadia uses Req as its HTTP client. Proxy configuration supports HTTP and HTTPS
+proxies accepted by Req/Mint; hackney-specific SOCKS options are no longer
+supported.
 
 You can also configure the the base url for the api if you need to for some
 reason:

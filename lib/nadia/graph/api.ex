@@ -5,6 +5,9 @@ defmodule Nadia.Graph.API do
 
   alias Nadia.Graph.Model.Error
   alias Nadia.Config
+  alias Nadia.HTTPClient
+  alias Nadia.HTTPRequest
+  alias Nadia.HTTPResponse
 
   defp build_url(method), do: Config.graph_base_url() <> "/" <> method
 
@@ -12,20 +15,24 @@ defmodule Nadia.Graph.API do
     case decode_response(response) do
       {:ok, true} -> :ok
       {:ok, result} -> {:ok, Nadia.Graph.Parser.parse_result(result, method)}
-      %{ok: false, description: description} -> {:error, %Error{reason: description}}
-      {:error, %HTTPoison.Error{reason: reason}} -> {:error, %Error{reason: reason}}
+      {:error, reason} -> {:error, %Error{reason: reason}}
     end
   end
 
-  defp decode_response(response) do
-    with {:ok, %HTTPoison.Response{body: body}} <- response,
-         %{result: result} <- Jason.decode!(body, keys: :atoms),
-         do: {:ok, result}
+  defp decode_response({:ok, %HTTPResponse{body: body}}) do
+    case Jason.decode(body, keys: :atoms) do
+      {:ok, %{ok: false, description: description}} -> {:error, description}
+      {:ok, %{ok: false, error: error}} -> {:error, error}
+      {:ok, %{result: result}} -> {:ok, result}
+      {:error, error} -> {:error, error}
+    end
   end
 
+  defp decode_response({:error, reason}), do: {:error, reason}
+
   defp build_multipart_request(params, file_field) do
-    {file_path, params} = Keyword.pop(params, file_field)
-    params = for {k, v} <- params, do: {to_string(k), v}
+    file_field = to_string(file_field)
+    {{_, file_path}, params} = List.keytake(params, file_field, 0)
 
     {:multipart,
      params ++
@@ -40,12 +47,23 @@ defmodule Nadia.Graph.API do
       params
       |> Keyword.update(:reply_markup, nil, &Jason.encode!(&1))
       |> Stream.filter(fn {_, v} -> v end)
-      |> Enum.map(fn {k, v} -> {k, to_string(v)} end)
+      |> Enum.map(fn {k, v} -> {to_string(k), to_string(v)} end)
 
-    if !is_nil(file_field) and File.exists?(params[file_field]) do
+    file_path = file_path(params, file_field)
+
+    if file_path && File.exists?(file_path) do
       build_multipart_request(params, file_field)
     else
       {:form, params}
+    end
+  end
+
+  defp file_path(_params, nil), do: nil
+
+  defp file_path(params, file_field) do
+    case List.keyfind(params, to_string(file_field), 0) do
+      {_, file_path} -> file_path
+      nil -> nil
     end
   end
 
@@ -60,9 +78,14 @@ defmodule Nadia.Graph.API do
   def request(method, options \\ [], file_field \\ nil) do
     timeout = (Keyword.get(options, :timeout, 0) + Config.recv_timeout()) * 1000
 
-    method
-    |> build_url
-    |> HTTPoison.post(build_request(options, file_field), [], recv_timeout: timeout)
+    %HTTPRequest{
+      method: :post,
+      url: build_url(method),
+      body: build_request(options, file_field),
+      headers: [],
+      options: [recv_timeout: timeout]
+    }
+    |> HTTPClient.post()
     |> process_response(method)
   end
 end

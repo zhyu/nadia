@@ -11,13 +11,12 @@ defmodule Nadia.HTTPCase do
     :http_client,
     :token,
     :base_url,
+    :graph_base_url,
     :file_base_url,
     :api_environment,
     :recv_timeout,
     :proxy,
     :proxy_auth,
-    :socks5_user,
-    :socks5_pass,
     :bots
   ]
 
@@ -50,13 +49,12 @@ defmodule Nadia.HTTPCase do
     Application.put_env(:nadia, :http_client, StubHTTPClient)
     Application.put_env(:nadia, :token, @token)
     Application.delete_env(:nadia, :base_url)
+    Application.delete_env(:nadia, :graph_base_url)
     Application.delete_env(:nadia, :file_base_url)
     Application.delete_env(:nadia, :api_environment)
     Application.delete_env(:nadia, :recv_timeout)
     Application.delete_env(:nadia, :proxy)
     Application.delete_env(:nadia, :proxy_auth)
-    Application.delete_env(:nadia, :socks5_user)
-    Application.delete_env(:nadia, :socks5_pass)
     Application.delete_env(:nadia, :bots)
 
     on_exit(fn ->
@@ -108,6 +106,10 @@ defmodule Nadia.HTTPCase do
 
   def telegram_url(api_method) do
     "https://api.telegram.org/bot#{@token}/#{api_method}"
+  end
+
+  def graph_url(api_method) do
+    "https://api.telegra.ph/#{api_method}"
   end
 
   defp encode_result(result), do: Jason.encode!(%{ok: true, result: result})

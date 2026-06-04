@@ -4,7 +4,7 @@ defmodule Nadia.HTTPClient do
   alias Nadia.HTTPRequest
   alias Nadia.HTTPResponse
 
-  @default_adapter Nadia.HTTPClient.HTTPoison
+  @default_adapter Nadia.HTTPClient.Req
 
   @callback post(HTTPRequest.t()) :: {:ok, HTTPResponse.t()} | {:error, term}
 

@@ -7,6 +7,18 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Changed
+
+- Promoted Req to Nadia's production HTTP transport for both Telegram Bot API
+  and Telegraph API requests.
+- Replaced remaining Telegraph cassette coverage with deterministic offline
+  request/response tests.
+
+### Removed
+
+- Removed HTTPoison, hackney, ExVCR, and hackney-specific SOCKS proxy
+  configuration.
+
 ## 0.8.0 - 2026-06-02
 
 ### Changed

@@ -1,112 +1,225 @@
 defmodule Nadia.GraphTest do
-  use ExUnit.Case
-  use ExVCR.Mock, adapter: ExVCR.Adapter.Hackney
+  use Nadia.HTTPCase
+
   doctest Nadia.Graph
 
-  setup_all do
-    ExVCR.Config.filter_sensitive_data("bot[^/]+/", "bot<TOKEN>/")
-    ExVCR.Config.filter_sensitive_data("id\":\\d+", "id\":666")
-    ExVCR.Config.filter_sensitive_data("id=\\d+", "id=666")
-    ExVCR.Config.filter_sensitive_data("_id=@w+", "_id=@group")
-    :ok
+  alias Nadia.Graph.Model.{Account, Error, Page, PageList, PageViews}
+  alias Nadia.HTTPResponse
+
+  defp stub_graph_result(result) do
+    stub_http_response(
+      {:ok, %HTTPResponse{status_code: 200, body: Jason.encode!(%{ok: true, result: result})}}
+    )
   end
 
-  test "create_account" do
-    use_cassette "graph/create_account" do
-      {:ok, account} = Nadia.Graph.create_account("some_short_name", "some_author_name")
-      assert account.short_name == "some_short_name"
-    end
+  defp stub_graph_error(reason) do
+    stub_http_response(
+      {:ok, %HTTPResponse{status_code: 400, body: Jason.encode!(%{ok: false, error: reason})}}
+    )
   end
 
-  test "edit_account_info" do
-    use_cassette "graph/edit_account_info" do
-      {:ok, account} =
-        Nadia.Graph.edit_account_info(
-          "b968da509bb76866c35425099bc0989a5ec3b32997d55286c657e6994bbb",
-          "some_short_name",
-          "some_author_name"
-        )
+  defp assert_graph_request(api_method, expected) do
+    defaults = [
+      method: :post,
+      url: graph_url(api_method),
+      headers: []
+    ]
 
-      assert account.short_name == "some_short_name"
-    end
+    assert_http_request(Keyword.merge(defaults, expected))
   end
 
-  test "get_account_info" do
-    use_cassette "graph/get_account_info" do
-      {:ok, account} =
-        Nadia.Graph.get_account_info(
-          "b968da509bb76866c35425099bc0989a5ec3b32997d55286c657e6994bbb",
-          ["short_name", "page_count"]
-        )
+  test "create_account builds a request and parses an account" do
+    stub_graph_result(%{
+      short_name: "some_short_name",
+      author_name: "some_author_name",
+      access_token: "access-token"
+    })
 
-      assert account.short_name == "some_short_name"
-    end
+    assert {:ok,
+            %Account{
+              short_name: "some_short_name",
+              author_name: "some_author_name",
+              access_token: "access-token"
+            }} =
+             Nadia.Graph.create_account(
+               "some_short_name",
+               "some_author_name",
+               author_url: "https://example.test"
+             )
+
+    assert_graph_request("createAccount",
+      body:
+        {:form,
+         [
+           {"short_name", "some_short_name"},
+           {"author_name", "some_author_name"},
+           {"author_url", "https://example.test"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
   end
 
-  test "revoke_access_token" do
-    use_cassette "graph/revoke_access_token" do
-      {:ok, account} =
-        Nadia.Graph.revoke_access_token(
-          "b968da509bb76866c35425099bc0989a5ec3b32997d55286c657e6994bbb"
-        )
+  test "account management wrappers build requests and parse accounts" do
+    access_token = "b968da509bb76866c35425099bc0989a5ec3b32997d55286c657e6994bbb"
 
-      assert account.short_name == "some_short_name"
-    end
+    stub_graph_result(%{short_name: "some_short_name", author_name: "some_author_name"})
+
+    assert {:ok, %Account{short_name: "some_short_name"}} =
+             Nadia.Graph.edit_account_info(
+               access_token,
+               "some_short_name",
+               "some_author_name"
+             )
+
+    assert_graph_request("editAccountInfo",
+      body:
+        {:form,
+         [
+           {"access_token", access_token},
+           {"short_name", "some_short_name"},
+           {"author_name", "some_author_name"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_graph_result(%{short_name: "some_short_name", page_count: 42})
+
+    assert {:ok, %Account{short_name: "some_short_name", page_count: 42}} =
+             Nadia.Graph.get_account_info(access_token, ["short_name", "page_count"])
+
+    assert_graph_request("getAccountInfo",
+      body:
+        {:form,
+         [
+           {"access_token", access_token},
+           {"fields", "short_namepage_count"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_graph_result(%{short_name: "some_short_name", access_token: "new-access-token"})
+
+    assert {:ok, %Account{short_name: "some_short_name", access_token: "new-access-token"}} =
+             Nadia.Graph.revoke_access_token(access_token)
+
+    assert_graph_request("revokeAccessToken",
+      body: {:form, [{"access_token", access_token}]},
+      options: [recv_timeout: 5000]
+    )
   end
 
-  test "get_page_list" do
-    use_cassette "graph/get_page_list" do
-      {:ok, page_list} =
-        Nadia.Graph.get_page_list(
-          "b968da509bb76866c35425099bc0989a5ec3b32997d55286c657e6994bbb",
-          0,
-          3
-        )
+  test "page wrappers build requests and parse page models" do
+    access_token = "b968da509bb76866c35425099bc0989a5ec3b32997d55286c657e6994bbb"
+    content = ~s([{"tag":"p","children":["Hello, world!"]}])
 
-      assert page_list.total_count == 1058
-      assert hd(page_list.pages).path == "Sample-Page-01-13-6"
-    end
+    stub_graph_result(%{
+      total_count: 1058,
+      pages: [%{path: "Sample-Page-01-13-6", title: "Sample Page"}]
+    })
+
+    assert {:ok, %PageList{total_count: 1058, pages: [%{path: "Sample-Page-01-13-6"}]}} =
+             Nadia.Graph.get_page_list(access_token, 0, 3)
+
+    assert_graph_request("getPageList",
+      body:
+        {:form,
+         [
+           {"access_token", access_token},
+           {"offset", "0"},
+           {"limit", "3"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_graph_result(%{path: "Sample-Page", title: "Sample Page"})
+
+    assert {:ok, %Page{path: "Sample-Page", title: "Sample Page"}} =
+             Nadia.Graph.create_page(access_token, "Sample Page", content)
+
+    assert_graph_request("createPage",
+      body:
+        {:form,
+         [
+           {"access_token", access_token},
+           {"title", "Sample Page"},
+           {"content", content}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_graph_result(%{path: "Sample-Page-12-15", title: "Sample Page", content: []})
+
+    assert {:ok, %Page{title: "Sample Page", content: []}} =
+             Nadia.Graph.get_page("Sample-Page-12-15")
+
+    assert_graph_request("getPage/Sample-Page-12-15",
+      body: {:form, [{"return_content", "true"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_graph_result(%{path: "Sample-Page-12-15", title: "Sample Page2"})
+
+    assert {:ok, %Page{title: "Sample Page2"}} =
+             Nadia.Graph.edit_page(access_token, "Sample-Page-12-15", "Some Page2", content)
+
+    assert_graph_request("editPage/Sample-Page-12-15",
+      body:
+        {:form,
+         [
+           {"access_token", access_token},
+           {"title", "Some Page2"},
+           {"content", content}
+         ]},
+      options: [recv_timeout: 5000]
+    )
   end
 
-  test "create_page" do
-    use_cassette "graph/create_page" do
-      {:ok, page} =
-        Nadia.Graph.create_page(
-          "b968da509bb76866c35425099bc0989a5ec3b32997d55286c657e6994bbb",
-          "Sample Page",
-          "[{\"tag\":\"p\",\"children\":[\"Hello,+world!\"]}]"
-        )
+  test "get_views builds a request and parses page views" do
+    stub_graph_result(%{views: 40})
 
-      assert page.title == "Sample Page"
-    end
+    assert {:ok, %PageViews{views: 40}} =
+             Nadia.Graph.get_views("Sample-Page-12-15", year: 2012, month: 12)
+
+    assert_graph_request("getViews/Sample-Page-12-15",
+      body: {:form, [{"year", "2012"}, {"month", "12"}]},
+      options: [recv_timeout: 5000]
+    )
   end
 
-  test "get_page" do
-    use_cassette "graph/get_page" do
-      {:ok, page} = Nadia.Graph.get_page("Sample-Page-12-15")
-      assert page.title == "Sample Page"
-      assert page.content != nil
-    end
+  test "request uses configured graph base URL and timeout" do
+    Application.put_env(:nadia, :graph_base_url, "https://graph.example.test")
+    Application.put_env(:nadia, :recv_timeout, 12)
+
+    stub_graph_result(%{views: 40})
+
+    assert {:ok, %PageViews{views: 40}} =
+             Nadia.Graph.get_views("Sample-Page-12-15", year: 2012, timeout: 2)
+
+    assert_http_request(
+      method: :post,
+      url: "https://graph.example.test/getViews/Sample-Page-12-15",
+      body: {:form, [{"year", "2012"}, {"timeout", "2"}]},
+      headers: [],
+      options: [recv_timeout: 14_000]
+    )
   end
 
-  test "edit_page" do
-    use_cassette "graph/edit_page" do
-      {:ok, page} =
-        Nadia.Graph.edit_page(
-          "b968da509bb76866c35425099bc0989a5ec3b32997d55286c657e6994bbb",
-          "Sample-Page-12-15",
-          "Some Page2",
-          "[{\"tag\":\"p\",\"children\":[\"Hello,+world!\"]}]"
-        )
+  test "request normalizes Telegraph errors" do
+    stub_graph_error("ACCESS_TOKEN_INVALID")
 
-      assert page.title == "Sample Page2"
-    end
+    assert {:error, %Error{reason: "ACCESS_TOKEN_INVALID"}} =
+             Nadia.Graph.get_account_info("bad-token")
   end
 
-  test "get_views" do
-    use_cassette "graph/get_views" do
-      {:ok, result} = Nadia.Graph.get_views("Sample-Page-12-15", year: 2012, month: 12)
-      assert result.views == 40
-    end
+  test "request normalizes transport errors" do
+    stub_transport_error(:timeout)
+
+    assert {:error, %Error{reason: :timeout}} = Nadia.Graph.get_page("Sample-Page")
+  end
+
+  test "request normalizes malformed JSON responses" do
+    stub_http_response({:ok, %HTTPResponse{status_code: 200, body: "not json"}})
+
+    assert {:error, %Error{reason: %Jason.DecodeError{}}} = Nadia.Graph.get_page("Sample-Page")
   end
 end

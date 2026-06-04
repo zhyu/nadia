@@ -26,10 +26,8 @@ defmodule Nadia.Mixfile do
 
   defp deps do
     [
-      {:httpoison, "~> 2.3"},
       {:jason, "~> 1.4"},
-      {:req, "~> 0.5.0", optional: true},
-      {:exvcr, "~> 0.17", only: [:dev, :test]},
+      {:req, "~> 0.5.0"},
       {:ex_doc, ">= 0.0.0", only: :docs, runtime: false}
     ]
   end

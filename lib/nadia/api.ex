@@ -106,19 +106,7 @@ defmodule Nadia.API do
           opts
       end
 
-    opts =
-      case client.socks5_user do
-        socks5_user when byte_size(socks5_user) > 0 ->
-          Keyword.put(opts, :socks5_user, socks5_user)
-
-        _ ->
-          opts
-      end
-
-    case client.socks5_pass do
-      socks5_pass when byte_size(socks5_pass) > 0 -> Keyword.put(opts, :socks5_pass, socks5_pass)
-      _ -> opts
-    end
+    opts
   end
 
   @doc """

@@ -98,7 +98,7 @@ defmodule Nadia.HTTPClient.ReqTest do
     assert String.starts_with?(content_type, "multipart/form-data; boundary=")
   end
 
-  test "translates HTTPoison timeout and HTTP proxy options to Req options" do
+  test "translates Nadia timeout and HTTP proxy options to Req options" do
     request = %HTTPRequest{
       method: :post,
       url: "https://api.example.test/getMe",

@@ -2,7 +2,7 @@ defmodule Nadia.ClientTest do
   use ExUnit.Case
 
   alias Nadia.Client
-  alias Nadia.HTTPClient.HTTPoison
+  alias Nadia.HTTPClient.Req
 
   defp restore_env!(key, value) do
     if value do
@@ -21,8 +21,6 @@ defmodule Nadia.ClientTest do
       :recv_timeout,
       :proxy,
       :proxy_auth,
-      :socks5_user,
-      :socks5_pass,
       :http_client,
       :bots
     ]
@@ -48,9 +46,7 @@ defmodule Nadia.ClientTest do
     assert client.recv_timeout == 5
     assert client.proxy == nil
     assert client.proxy_auth == nil
-    assert client.socks5_user == nil
-    assert client.socks5_pass == nil
-    assert client.http_client == HTTPoison
+    assert client.http_client == Req
   end
 
   test "new/1 resolves system environment tuples" do
@@ -86,8 +82,6 @@ defmodule Nadia.ClientTest do
     Application.put_env(:nadia, :recv_timeout, 12)
     Application.put_env(:nadia, :proxy, "http://proxy.test")
     Application.put_env(:nadia, :proxy_auth, {"user", "pass"})
-    Application.put_env(:nadia, :socks5_user, "socks-user")
-    Application.put_env(:nadia, :socks5_pass, "socks-pass")
     Application.put_env(:nadia, :http_client, __MODULE__.TopLevelHTTPClient)
 
     client = Client.default()
@@ -99,8 +93,6 @@ defmodule Nadia.ClientTest do
     assert client.recv_timeout == 12
     assert client.proxy == "http://proxy.test"
     assert client.proxy_auth == {"user", "pass"}
-    assert client.socks5_user == "socks-user"
-    assert client.socks5_pass == "socks-pass"
     assert client.http_client == __MODULE__.TopLevelHTTPClient
   end
 
@@ -112,7 +104,7 @@ defmodule Nadia.ClientTest do
       support: [
         token: {:system, "SUPPORT_BOT_TOKEN"},
         recv_timeout: 9,
-        proxy: {:socks5, ~c"proxy.test", 1080},
+        proxy: {:http, "proxy.test", 8080},
         http_client: __MODULE__.NamedHTTPClient
       ]
     )
@@ -121,7 +113,7 @@ defmodule Nadia.ClientTest do
 
     assert client.token == "support-token"
     assert client.recv_timeout == 9
-    assert client.proxy == {:socks5, ~c"proxy.test", 1080}
+    assert client.proxy == {:http, "proxy.test", 8080}
     assert client.http_client == __MODULE__.NamedHTTPClient
   end
 

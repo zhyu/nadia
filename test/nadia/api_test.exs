@@ -145,13 +145,11 @@ defmodule Nadia.APITest do
   end
 
   test "request propagates proxy options" do
-    proxy = {:socks5, ~c"localhost", 1080}
+    proxy = {:http, "localhost", 8080}
     proxy_auth = {"proxy-user", "proxy-password"}
 
     Application.put_env(:nadia, :proxy, proxy)
     Application.put_env(:nadia, :proxy_auth, proxy_auth)
-    Application.put_env(:nadia, :socks5_user, "socks-user")
-    Application.put_env(:nadia, :socks5_pass, "socks-password")
 
     stub_telegram_result(true)
 
@@ -162,8 +160,6 @@ defmodule Nadia.APITest do
     assert Keyword.get(request.options, :recv_timeout) == 5000
     assert Keyword.get(request.options, :proxy) == proxy
     assert Keyword.get(request.options, :proxy_auth) == proxy_auth
-    assert Keyword.get(request.options, :socks5_user) == "socks-user"
-    assert Keyword.get(request.options, :socks5_pass) == "socks-password"
   end
 
   test "request/4 uses explicit clients independently of application config" do

@@ -7,7 +7,7 @@ defmodule Nadia.Client do
   @default_base_url "https://api.telegram.org/bot"
   @default_file_base_url "https://api.telegram.org/file/bot"
   @default_api_environment :production
-  @default_http_client Nadia.HTTPClient.HTTPoison
+  @default_http_client Nadia.HTTPClient.Req
 
   defstruct token: nil,
             base_url: @default_base_url,
@@ -16,8 +16,6 @@ defmodule Nadia.Client do
             recv_timeout: @default_timeout,
             proxy: nil,
             proxy_auth: nil,
-            socks5_user: nil,
-            socks5_pass: nil,
             http_client: @default_http_client
 
   @type api_environment :: :production | :test
@@ -30,8 +28,6 @@ defmodule Nadia.Client do
           recv_timeout: non_neg_integer,
           proxy: term,
           proxy_auth: term,
-          socks5_user: binary | nil,
-          socks5_pass: binary | nil,
           http_client: module
         }
 
@@ -43,8 +39,6 @@ defmodule Nadia.Client do
     :recv_timeout,
     :proxy,
     :proxy_auth,
-    :socks5_user,
-    :socks5_pass,
     :http_client
   ]
 
@@ -70,8 +64,6 @@ defmodule Nadia.Client do
         resolve(Keyword.get(opts, :recv_timeout, @default_timeout)) || @default_timeout,
       proxy: resolve(Keyword.get(opts, :proxy)),
       proxy_auth: resolve(Keyword.get(opts, :proxy_auth)),
-      socks5_user: resolve(Keyword.get(opts, :socks5_user)),
-      socks5_pass: resolve(Keyword.get(opts, :socks5_pass)),
       http_client:
         resolve(Keyword.get(opts, :http_client, @default_http_client)) || @default_http_client
     }

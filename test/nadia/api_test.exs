@@ -4,9 +4,30 @@ defmodule Nadia.APITest do
   doctest Nadia.API
 
   alias Nadia.API
+  alias Nadia.Client
   alias Nadia.HTTPResponse
   alias Nadia.Model.Error
   alias Nadia.Model.{ReplyKeyboardRemove, User}
+
+  defmodule BotAHTTPClient do
+    @behaviour Nadia.HTTPClient
+
+    @impl Nadia.HTTPClient
+    def post(request) do
+      send(self(), {:bot_a_request, request})
+      {:ok, %Nadia.HTTPResponse{status_code: 200, body: Jason.encode!(%{ok: true, result: true})}}
+    end
+  end
+
+  defmodule BotBHTTPClient do
+    @behaviour Nadia.HTTPClient
+
+    @impl Nadia.HTTPClient
+    def post(request) do
+      send(self(), {:bot_b_request, request})
+      {:ok, %Nadia.HTTPResponse{status_code: 200, body: Jason.encode!(%{ok: true, result: true})}}
+    end
+  end
 
   test "request_with_map" do
     stub_telegram_result([])
@@ -145,6 +166,76 @@ defmodule Nadia.APITest do
     assert Keyword.get(request.options, :socks5_pass) == "socks-password"
   end
 
+  test "request/4 uses explicit clients independently of application config" do
+    Application.put_env(:nadia, :token, "global-token")
+    Application.put_env(:nadia, :recv_timeout, 30)
+
+    bot_a =
+      Client.new(
+        token: "111:bot-a",
+        recv_timeout: 1,
+        proxy: "http://bot-a-proxy.test",
+        http_client: BotAHTTPClient
+      )
+
+    bot_b =
+      Client.new(
+        token: "222:bot-b",
+        recv_timeout: 3,
+        proxy_auth: {"bot-b-user", "bot-b-pass"},
+        http_client: BotBHTTPClient
+      )
+
+    assert :ok ==
+             API.request(
+               bot_a,
+               "sendChatAction",
+               [chat_id: 123, action: "typing", timeout: 2],
+               nil
+             )
+
+    assert :ok == API.request(bot_b, "setWebhook", [url: "https://example.test/webhook"], nil)
+
+    assert_received {:bot_a_request, bot_a_request}
+    assert_received {:bot_b_request, bot_b_request}
+
+    assert bot_a_request.url == "https://api.telegram.org/bot111:bot-a/sendChatAction"
+
+    assert bot_a_request.body ==
+             {:form, [{"chat_id", "123"}, {"action", "typing"}, {"timeout", "2"}]}
+
+    assert Keyword.get(bot_a_request.options, :recv_timeout) == 3000
+    assert Keyword.get(bot_a_request.options, :proxy) == "http://bot-a-proxy.test"
+    refute Keyword.has_key?(bot_a_request.options, :proxy_auth)
+
+    assert bot_b_request.url == "https://api.telegram.org/bot222:bot-b/setWebhook"
+    assert bot_b_request.body == {:form, [{"url", "https://example.test/webhook"}]}
+    assert Keyword.get(bot_b_request.options, :recv_timeout) == 3000
+    assert Keyword.get(bot_b_request.options, :proxy_auth) == {"bot-b-user", "bot-b-pass"}
+    refute Keyword.has_key?(bot_b_request.options, :proxy)
+  end
+
+  test "request/4 builds test environment API URLs" do
+    client =
+      Client.new(
+        token: "123:test-token",
+        api_environment: :test,
+        http_client: Nadia.HTTPCase.StubHTTPClient
+      )
+
+    stub_telegram_result(true)
+
+    assert :ok == API.request(client, "setWebhook", [], nil)
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot123:test-token/test/setWebhook",
+      body: {:form, []},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+  end
+
   test "request returns :ok for true responses" do
     stub_telegram_result(true)
 
@@ -180,5 +271,16 @@ defmodule Nadia.APITest do
 
     assert API.build_file_url("document/file_10") ==
              "https://files.example/bot123:test-token/document/file_10"
+  end
+
+  test "build_file_url/2 uses explicit client file settings" do
+    client =
+      Client.new(
+        token: "999:file-token",
+        file_base_url: "https://files.example/bot"
+      )
+
+    assert API.build_file_url(client, "document/file_10") ==
+             "https://files.example/bot999:file-token/document/file_10"
   end
 end

@@ -12,11 +12,13 @@ defmodule Nadia.HTTPCase do
     :token,
     :base_url,
     :file_base_url,
+    :api_environment,
     :recv_timeout,
     :proxy,
     :proxy_auth,
     :socks5_user,
-    :socks5_pass
+    :socks5_pass,
+    :bots
   ]
 
   defmodule StubHTTPClient do
@@ -49,11 +51,13 @@ defmodule Nadia.HTTPCase do
     Application.put_env(:nadia, :token, @token)
     Application.delete_env(:nadia, :base_url)
     Application.delete_env(:nadia, :file_base_url)
+    Application.delete_env(:nadia, :api_environment)
     Application.delete_env(:nadia, :recv_timeout)
     Application.delete_env(:nadia, :proxy)
     Application.delete_env(:nadia, :proxy_auth)
     Application.delete_env(:nadia, :socks5_user)
     Application.delete_env(:nadia, :socks5_pass)
+    Application.delete_env(:nadia, :bots)
 
     on_exit(fn ->
       for {key, value} <- previous_env do

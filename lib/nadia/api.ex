@@ -3,13 +3,17 @@ defmodule Nadia.API do
   Provides basic functionalities for Telegram Bot API.
   """
 
-  alias Nadia.Config
+  alias Nadia.Client
   alias Nadia.HTTPClient
   alias Nadia.HTTPRequest
   alias Nadia.HTTPResponse
   alias Nadia.Model.Error
 
-  defp build_url(method), do: Config.base_url() <> Config.token() <> "/" <> method
+  defp build_url(%Client{api_environment: :test} = client, method) do
+    client.base_url <> client.token <> "/test/" <> method
+  end
+
+  defp build_url(%Client{} = client, method), do: client.base_url <> client.token <> "/" <> method
 
   defp process_response(response, method) do
     case decode_response(response) do
@@ -38,12 +42,12 @@ defmodule Nadia.API do
        ]}
   end
 
-  defp calculate_timeout(options) when is_list(options) do
-    (Keyword.get(options, :timeout, 0) + Config.recv_timeout()) * 1000
+  defp calculate_timeout(%Client{} = client, options) when is_list(options) do
+    (Keyword.get(options, :timeout, 0) + client.recv_timeout) * 1000
   end
 
-  defp calculate_timeout(options) when is_map(options) do
-    (Map.get(options, :timeout, 0) + Config.recv_timeout()) * 1000
+  defp calculate_timeout(%Client{} = client, options) when is_map(options) do
+    (Map.get(options, :timeout, 0) + client.recv_timeout) * 1000
   end
 
   defp build_request(params, file_field) when is_list(params) do
@@ -82,19 +86,19 @@ defmodule Nadia.API do
     end
   end
 
-  defp build_options(options) do
-    timeout = calculate_timeout(options)
+  defp build_options(%Client{} = client, options) do
+    timeout = calculate_timeout(client, options)
     opts = [recv_timeout: timeout]
 
     opts =
-      case Config.proxy() do
+      case client.proxy do
         proxy when byte_size(proxy) > 0 -> Keyword.put(opts, :proxy, proxy)
         proxy when is_tuple(proxy) and tuple_size(proxy) == 3 -> Keyword.put(opts, :proxy, proxy)
         _ -> opts
       end
 
     opts =
-      case Config.proxy_auth() do
+      case client.proxy_auth do
         proxy_auth when is_tuple(proxy_auth) and tuple_size(proxy_auth) == 2 ->
           Keyword.put(opts, :proxy_auth, proxy_auth)
 
@@ -103,7 +107,7 @@ defmodule Nadia.API do
       end
 
     opts =
-      case Config.socks5_user() do
+      case client.socks5_user do
         socks5_user when byte_size(socks5_user) > 0 ->
           Keyword.put(opts, :socks5_user, socks5_user)
 
@@ -111,7 +115,7 @@ defmodule Nadia.API do
           opts
       end
 
-    case Config.socks5_pass() do
+    case client.socks5_pass do
       socks5_pass when byte_size(socks5_pass) > 0 -> Keyword.put(opts, :socks5_pass, socks5_pass)
       _ -> opts
     end
@@ -127,19 +131,30 @@ defmodule Nadia.API do
   """
   @spec request(binary, [{atom, any}], atom) :: :ok | {:error, Error.t()} | {:ok, any}
   def request(method, options \\ [], file_field \\ nil) do
+    request(Client.default(), method, options, file_field)
+  end
+
+  @spec request(Client.t(), binary, [{atom, any}] | map, atom | nil) ::
+          :ok | {:error, Error.t()} | {:ok, any}
+  def request(%Client{} = client, method, options, file_field) do
     %HTTPRequest{
       method: :post,
-      url: build_url(method),
+      url: build_url(client, method),
       body: build_request(options, file_field),
       headers: [],
-      options: build_options(options)
+      options: build_options(client, options)
     }
-    |> HTTPClient.post()
+    |> then(&HTTPClient.post(client.http_client, &1))
     |> process_response(method)
   end
 
   def request?(method, options \\ [], file_field \\ nil) do
     {_, response} = request(method, options, file_field)
+    response
+  end
+
+  def request?(%Client{} = client, method, options, file_field) do
+    {_, response} = request(client, method, options, file_field)
     response
   end
 
@@ -151,6 +166,11 @@ defmodule Nadia.API do
   """
   @spec build_file_url(binary) :: binary
   def build_file_url(file_path) do
-    Config.file_base_url() <> Config.token() <> "/" <> file_path
+    build_file_url(Client.default(), file_path)
+  end
+
+  @spec build_file_url(Client.t(), binary) :: binary
+  def build_file_url(%Client{} = client, file_path) do
+    client.file_base_url <> client.token <> "/" <> file_path
   end
 end

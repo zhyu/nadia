@@ -32,6 +32,16 @@ As of 2026-05-29 this project was verified with Elixir 1.19.5 and Erlang/OTP
 29 after dependency modernization. Mix may need permission to open a local TCP
 socket for `Mix.PubSub` when run from a sandboxed agent environment.
 
+## Changelog
+
+When making user-facing changes, update the `Unreleased` section of
+`CHANGELOG.md` in the same slice or in a follow-up changelog commit.
+
+User-facing changes include public API changes, configuration changes,
+dependency or transport changes, behavior changes, and notable test or live-test
+workflow changes. Internal-only refactors do not need changelog entries unless
+they affect users or release risk.
+
 ## Current refresh context
 
 The original locked dependency set did not compile on Elixir 1.19.5/OTP 29:

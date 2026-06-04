@@ -7,12 +7,28 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Added
+
+- Added `%Nadia.Client{}` for explicit bot configuration, including default and
+  named application-config constructors.
+- Added token-redacted inspect output for `%Nadia.Client{}`.
+- Added client-aware public Telegram wrapper arities, such as
+  `Nadia.send_message(client, chat_id, text, options)`, while preserving legacy
+  single-bot arities.
+- Added client-aware `Nadia.API.request/4`, `Nadia.API.request?/4`, and
+  `Nadia.API.build_file_url/2`.
+- Added a Nadia-owned HTTP boundary with normalized `Nadia.HTTPRequest` and
+  `Nadia.HTTPResponse` structs and configurable HTTP adapters.
+- Added default-off `:telegram_live` smoke tests for two explicit bot clients.
+
 ### Changed
 
 - Promoted Req to Nadia's production HTTP transport for both Telegram Bot API
   and Telegraph API requests.
-- Replaced remaining Telegraph cassette coverage with deterministic offline
+- Replaced Bot API and Telegraph cassette coverage with deterministic offline
   request/response tests.
+- Normalized Telegraph transport errors and malformed JSON responses into
+  `Nadia.Graph.Model.Error`.
 
 ### Removed
 

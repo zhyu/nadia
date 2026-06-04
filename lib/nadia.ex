@@ -4,20 +4,47 @@ defmodule Nadia do
 
   ## Reference
   https://core.telegram.org/bots/api#available-methods
+
+  ## Explicit clients
+
+  Public Bot API wrappers accept a `%Nadia.Client{}` as the first argument when
+  a call should use a specific bot identity:
+
+      client = Nadia.Client.new(token: System.fetch_env!("TELEGRAM_BOT_TOKEN"))
+      Nadia.send_message(client, 123, "hello")
+
+  Legacy application config based calls remain supported:
+
+      Nadia.send_message(123, "hello")
   """
 
+  alias Nadia.Client
   alias Nadia.Model.{User, Message, Update, UserProfilePhotos, File, Error, WebhookInfo}
 
   import Nadia.API
 
   @behaviour Nadia.Behaviour
 
+  defp api_request(method), do: request(method)
+
+  defp api_request(%Client{} = client, method), do: request(client, method, [], nil)
+  defp api_request(method, options), do: request(method, options)
+
+  defp api_request(%Client{} = client, method, options), do: request(client, method, options, nil)
+  defp api_request(method, options, file_field), do: request(method, options, file_field)
+
+  defp api_request(%Client{} = client, method, options, file_field) do
+    request(client, method, options, file_field)
+  end
+
   @doc """
   A simple method for testing your bot's auth token. Requires no parameters.
   Returns basic information about the bot in form of a User object.
   """
   @spec get_me :: {:ok, User.t()} | {:error, Error.t()}
-  def get_me, do: request("getMe")
+  @spec get_me(Client.t()) :: {:ok, User.t()} | {:error, Error.t()}
+  def get_me, do: api_request("getMe")
+  def get_me(%Client{} = client), do: api_request(client, "getMe")
 
   @doc """
   Use this method to send text messages.
@@ -41,8 +68,17 @@ defmodule Nadia do
   """
   @spec send_message(integer | binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_message(chat_id, text, options \\ []) do
-    request("sendMessage", [chat_id: chat_id, text: text] ++ options)
+  @spec send_message(Client.t(), integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_message(chat_id, text), do: send_message(chat_id, text, [])
+  def send_message(%Client{} = client, chat_id, text), do: send_message(client, chat_id, text, [])
+
+  def send_message(chat_id, text, options) do
+    api_request("sendMessage", [chat_id: chat_id, text: text] ++ options)
+  end
+
+  def send_message(%Client{} = client, chat_id, text, options) do
+    api_request(client, "sendMessage", [chat_id: chat_id, text: text] ++ options)
   end
 
   @doc """
@@ -59,8 +95,20 @@ defmodule Nadia do
   """
   @spec forward_message(integer | binary, integer | binary, integer) ::
           {:ok, Message.t()} | {:error, Error.t()}
+  @spec forward_message(Client.t(), integer | binary, integer | binary, integer) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   def forward_message(chat_id, from_chat_id, message_id) do
-    request(
+    api_request(
+      "forwardMessage",
+      chat_id: chat_id,
+      from_chat_id: from_chat_id,
+      message_id: message_id
+    )
+  end
+
+  def forward_message(%Client{} = client, chat_id, from_chat_id, message_id) do
+    api_request(
+      client,
       "forwardMessage",
       chat_id: chat_id,
       from_chat_id: from_chat_id,
@@ -89,8 +137,17 @@ defmodule Nadia do
   """
   @spec send_photo(integer | binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_photo(chat_id, photo, options \\ []) do
-    request("sendPhoto", [chat_id: chat_id, photo: photo] ++ options, :photo)
+  @spec send_photo(Client.t(), integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_photo(chat_id, photo), do: send_photo(chat_id, photo, [])
+  def send_photo(%Client{} = client, chat_id, photo), do: send_photo(client, chat_id, photo, [])
+
+  def send_photo(chat_id, photo, options) do
+    api_request("sendPhoto", [chat_id: chat_id, photo: photo] ++ options, :photo)
+  end
+
+  def send_photo(%Client{} = client, chat_id, photo, options) do
+    api_request(client, "sendPhoto", [chat_id: chat_id, photo: photo] ++ options, :photo)
   end
 
   @doc """
@@ -125,8 +182,17 @@ defmodule Nadia do
   """
   @spec send_audio(integer | binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_audio(chat_id, audio, options \\ []) do
-    request("sendAudio", [chat_id: chat_id, audio: audio] ++ options, :audio)
+  @spec send_audio(Client.t(), integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_audio(chat_id, audio), do: send_audio(chat_id, audio, [])
+  def send_audio(%Client{} = client, chat_id, audio), do: send_audio(client, chat_id, audio, [])
+
+  def send_audio(chat_id, audio, options) do
+    api_request("sendAudio", [chat_id: chat_id, audio: audio] ++ options, :audio)
+  end
+
+  def send_audio(%Client{} = client, chat_id, audio, options) do
+    api_request(client, "sendAudio", [chat_id: chat_id, audio: audio] ++ options, :audio)
   end
 
   @doc """
@@ -151,8 +217,25 @@ defmodule Nadia do
   """
   @spec send_document(integer | binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_document(chat_id, document, options \\ []) do
-    request("sendDocument", [chat_id: chat_id, document: document] ++ options, :document)
+  @spec send_document(Client.t(), integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_document(chat_id, document), do: send_document(chat_id, document, [])
+
+  def send_document(%Client{} = client, chat_id, document) do
+    send_document(client, chat_id, document, [])
+  end
+
+  def send_document(chat_id, document, options) do
+    api_request("sendDocument", [chat_id: chat_id, document: document] ++ options, :document)
+  end
+
+  def send_document(%Client{} = client, chat_id, document, options) do
+    api_request(
+      client,
+      "sendDocument",
+      [chat_id: chat_id, document: document] ++ options,
+      :document
+    )
   end
 
   @doc """
@@ -175,8 +258,20 @@ defmodule Nadia do
   """
   @spec send_sticker(integer | binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_sticker(chat_id, sticker, options \\ []) do
-    request("sendSticker", [chat_id: chat_id, sticker: sticker] ++ options, :sticker)
+  @spec send_sticker(Client.t(), integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_sticker(chat_id, sticker), do: send_sticker(chat_id, sticker, [])
+
+  def send_sticker(%Client{} = client, chat_id, sticker) do
+    send_sticker(client, chat_id, sticker, [])
+  end
+
+  def send_sticker(chat_id, sticker, options) do
+    api_request("sendSticker", [chat_id: chat_id, sticker: sticker] ++ options, :sticker)
+  end
+
+  def send_sticker(%Client{} = client, chat_id, sticker, options) do
+    api_request(client, "sendSticker", [chat_id: chat_id, sticker: sticker] ++ options, :sticker)
   end
 
   @doc """
@@ -204,8 +299,17 @@ defmodule Nadia do
   """
   @spec send_video(integer | binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_video(chat_id, video, options \\ []) do
-    request("sendVideo", [chat_id: chat_id, video: video] ++ options, :video)
+  @spec send_video(Client.t(), integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_video(chat_id, video), do: send_video(chat_id, video, [])
+  def send_video(%Client{} = client, chat_id, video), do: send_video(client, chat_id, video, [])
+
+  def send_video(chat_id, video, options) do
+    api_request("sendVideo", [chat_id: chat_id, video: video] ++ options, :video)
+  end
+
+  def send_video(%Client{} = client, chat_id, video, options) do
+    api_request(client, "sendVideo", [chat_id: chat_id, video: video] ++ options, :video)
   end
 
   @doc """
@@ -233,8 +337,17 @@ defmodule Nadia do
   """
   @spec send_voice(integer | binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_voice(chat_id, voice, options \\ []) do
-    request("sendVoice", [chat_id: chat_id, voice: voice] ++ options, :voice)
+  @spec send_voice(Client.t(), integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_voice(chat_id, voice), do: send_voice(chat_id, voice, [])
+  def send_voice(%Client{} = client, chat_id, voice), do: send_voice(client, chat_id, voice, [])
+
+  def send_voice(chat_id, voice, options) do
+    api_request("sendVoice", [chat_id: chat_id, voice: voice] ++ options, :voice)
+  end
+
+  def send_voice(%Client{} = client, chat_id, voice, options) do
+    api_request(client, "sendVoice", [chat_id: chat_id, voice: voice] ++ options, :voice)
   end
 
   @doc """
@@ -257,8 +370,25 @@ defmodule Nadia do
   """
   @spec send_location(integer | binary, float, float, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_location(chat_id, latitude, longitude, options \\ []) do
-    request(
+  @spec send_location(Client.t(), integer | binary, float, float, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_location(chat_id, latitude, longitude),
+    do: send_location(chat_id, latitude, longitude, [])
+
+  def send_location(%Client{} = client, chat_id, latitude, longitude) do
+    send_location(client, chat_id, latitude, longitude, [])
+  end
+
+  def send_location(chat_id, latitude, longitude, options) do
+    api_request(
+      "sendLocation",
+      [chat_id: chat_id, latitude: latitude, longitude: longitude] ++ options
+    )
+  end
+
+  def send_location(%Client{} = client, chat_id, latitude, longitude, options) do
+    api_request(
+      client,
       "sendLocation",
       [chat_id: chat_id, latitude: latitude, longitude: longitude] ++ options
     )
@@ -289,8 +419,27 @@ defmodule Nadia do
   """
   @spec send_venue(integer | binary, float, float, binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_venue(chat_id, latitude, longitude, title, address, options \\ []) do
-    request(
+  @spec send_venue(Client.t(), integer | binary, float, float, binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_venue(chat_id, latitude, longitude, title, address) do
+    send_venue(chat_id, latitude, longitude, title, address, [])
+  end
+
+  def send_venue(%Client{} = client, chat_id, latitude, longitude, title, address) do
+    send_venue(client, chat_id, latitude, longitude, title, address, [])
+  end
+
+  def send_venue(chat_id, latitude, longitude, title, address, options) do
+    api_request(
+      "sendVenue",
+      [chat_id: chat_id, latitude: latitude, longitude: longitude, title: title, address: address] ++
+        options
+    )
+  end
+
+  def send_venue(%Client{} = client, chat_id, latitude, longitude, title, address, options) do
+    api_request(
+      client,
       "sendVenue",
       [chat_id: chat_id, latitude: latitude, longitude: longitude, title: title, address: address] ++
         options
@@ -320,8 +469,25 @@ defmodule Nadia do
   """
   @spec send_contact(integer | binary, binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_contact(chat_id, phone_number, first_name, options \\ []) do
-    request(
+  @spec send_contact(Client.t(), integer | binary, binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_contact(chat_id, phone_number, first_name),
+    do: send_contact(chat_id, phone_number, first_name, [])
+
+  def send_contact(%Client{} = client, chat_id, phone_number, first_name) do
+    send_contact(client, chat_id, phone_number, first_name, [])
+  end
+
+  def send_contact(chat_id, phone_number, first_name, options) do
+    api_request(
+      "sendContact",
+      [chat_id: chat_id, phone_number: phone_number, first_name: first_name] ++ options
+    )
+  end
+
+  def send_contact(%Client{} = client, chat_id, phone_number, first_name, options) do
+    api_request(
+      client,
       "sendContact",
       [chat_id: chat_id, phone_number: phone_number, first_name: first_name] ++ options
     )
@@ -345,8 +511,13 @@ defmodule Nadia do
       * `find_location` for location data
   """
   @spec send_chat_action(integer | binary, binary) :: :ok | {:error, Error.t()}
+  @spec send_chat_action(Client.t(), integer | binary, binary) :: :ok | {:error, Error.t()}
   def send_chat_action(chat_id, action) do
-    request("sendChatAction", chat_id: chat_id, action: action)
+    api_request("sendChatAction", chat_id: chat_id, action: action)
+  end
+
+  def send_chat_action(%Client{} = client, chat_id, action) do
+    api_request(client, "sendChatAction", chat_id: chat_id, action: action)
   end
 
   @doc """
@@ -377,8 +548,20 @@ defmodule Nadia do
   """
   @spec send_animation(integer | binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def send_animation(chat_id, animation, options \\ []) do
-    request("sendAnimation", [chat_id: chat_id, animation: animation] ++ options)
+  @spec send_animation(Client.t(), integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_animation(chat_id, animation), do: send_animation(chat_id, animation, [])
+
+  def send_animation(%Client{} = client, chat_id, animation) do
+    send_animation(client, chat_id, animation, [])
+  end
+
+  def send_animation(chat_id, animation, options) do
+    api_request("sendAnimation", [chat_id: chat_id, animation: animation] ++ options)
+  end
+
+  def send_animation(%Client{} = client, chat_id, animation, options) do
+    api_request(client, "sendAnimation", [chat_id: chat_id, animation: animation] ++ options)
   end
 
   @doc """
@@ -397,8 +580,20 @@ defmodule Nadia do
   """
   @spec get_user_profile_photos(integer, [{atom, any}]) ::
           {:ok, UserProfilePhotos.t()} | {:error, Error.t()}
-  def get_user_profile_photos(user_id, options \\ []) do
-    request("getUserProfilePhotos", [user_id: user_id] ++ options)
+  @spec get_user_profile_photos(Client.t(), integer, [{atom, any}]) ::
+          {:ok, UserProfilePhotos.t()} | {:error, Error.t()}
+  def get_user_profile_photos(user_id), do: get_user_profile_photos(user_id, [])
+
+  def get_user_profile_photos(%Client{} = client, user_id) do
+    get_user_profile_photos(client, user_id, [])
+  end
+
+  def get_user_profile_photos(user_id, options) do
+    api_request("getUserProfilePhotos", [user_id: user_id] ++ options)
+  end
+
+  def get_user_profile_photos(%Client{} = client, user_id, options) do
+    api_request(client, "getUserProfilePhotos", [user_id: user_id] ++ options)
   end
 
   @doc """
@@ -420,7 +615,11 @@ defmodule Nadia do
   polling
   """
   @spec get_updates([{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
-  def get_updates(options \\ []), do: request("getUpdates", options)
+  @spec get_updates(Client.t(), [{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
+  def get_updates(), do: get_updates([])
+  def get_updates(%Client{} = client), do: get_updates(client, [])
+  def get_updates(options), do: api_request("getUpdates", options)
+  def get_updates(%Client{} = client, options), do: api_request(client, "getUpdates", options)
 
   @doc """
   Use this method to specify a url and receive incoming updates via an outgoing
@@ -435,7 +634,11 @@ defmodule Nadia do
   * `:url` - HTTPS url to send updates to.
   """
   @spec set_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
-  def set_webhook(options \\ []), do: request("setWebhook", options)
+  @spec set_webhook(Client.t(), [{atom, any}]) :: :ok | {:error, Error.t()}
+  def set_webhook(), do: set_webhook([])
+  def set_webhook(%Client{} = client), do: set_webhook(client, [])
+  def set_webhook(options), do: api_request("setWebhook", options)
+  def set_webhook(%Client{} = client, options), do: api_request(client, "setWebhook", options)
 
   @doc """
   Use this method to remove webhook integration if you decide to switch back to `Nadia.get_updates/1`.
@@ -444,7 +647,9 @@ defmodule Nadia do
   Requires no parameters.
   """
   @spec delete_webhook() :: :ok | {:error, Error.t()}
-  def delete_webhook(), do: request("deleteWebhook")
+  @spec delete_webhook(Client.t()) :: :ok | {:error, Error.t()}
+  def delete_webhook(), do: api_request("deleteWebhook")
+  def delete_webhook(%Client{} = client), do: api_request(client, "deleteWebhook")
 
   @doc """
   Use this method to get current webhook status. Requires no parameters.
@@ -452,7 +657,9 @@ defmodule Nadia do
   If the bot is using getUpdates, will return an object with the url field empty.
   """
   @spec get_webhook_info() :: {:ok, WebhookInfo.t()} | {:error, Error.t()}
-  def get_webhook_info(), do: request("getWebhookInfo")
+  @spec get_webhook_info(Client.t()) :: {:ok, WebhookInfo.t()} | {:error, Error.t()}
+  def get_webhook_info(), do: api_request("getWebhookInfo")
+  def get_webhook_info(%Client{} = client), do: api_request(client, "getWebhookInfo")
 
   @doc """
   Use this method to get basic info about a file and prepare it for downloading.
@@ -467,7 +674,9 @@ defmodule Nadia do
   * `file_id` - File identifier to get info about
   """
   @spec get_file(binary) :: {:ok, File.t()} | {:error, Error.t()}
-  def get_file(file_id), do: request("getFile", file_id: file_id)
+  @spec get_file(Client.t(), binary) :: {:ok, File.t()} | {:error, Error.t()}
+  def get_file(file_id), do: api_request("getFile", file_id: file_id)
+  def get_file(%Client{} = client, file_id), do: api_request(client, "getFile", file_id: file_id)
 
   @doc ~S"""
   Use this method to get link for file for subsequent use.
@@ -480,8 +689,13 @@ defmodule Nadia do
 
   """
   @spec get_file_link(File.t()) :: {:ok, binary} | {:error, Error.t()}
+  @spec get_file_link(Client.t(), File.t()) :: {:ok, binary} | {:error, Error.t()}
   def get_file_link(file) do
     {:ok, build_file_url(file.file_path)}
+  end
+
+  def get_file_link(%Client{} = client, file) do
+    {:ok, build_file_url(client, file.file_path)}
   end
 
   @doc """
@@ -500,8 +714,13 @@ defmodule Nadia do
   * `user_id` - Unique identifier of the target user
   """
   @spec kick_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec kick_chat_member(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
   def kick_chat_member(chat_id, user_id) do
-    request("kickChatMember", chat_id: chat_id, user_id: user_id)
+    api_request("kickChatMember", chat_id: chat_id, user_id: user_id)
+  end
+
+  def kick_chat_member(%Client{} = client, chat_id, user_id) do
+    api_request(client, "kickChatMember", chat_id: chat_id, user_id: user_id)
   end
 
   @doc """
@@ -513,8 +732,13 @@ defmodule Nadia do
   channel (in the format @supergroupusername)
   """
   @spec leave_chat(integer | binary) :: :ok | {:error, Error.t()}
+  @spec leave_chat(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
   def leave_chat(chat_id) do
-    request("leaveChat", chat_id: chat_id)
+    api_request("leaveChat", chat_id: chat_id)
+  end
+
+  def leave_chat(%Client{} = client, chat_id) do
+    api_request(client, "leaveChat", chat_id: chat_id)
   end
 
   @doc """
@@ -528,8 +752,13 @@ defmodule Nadia do
   * `user_id` - Unique identifier of the target user
   """
   @spec unban_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec unban_chat_member(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
   def unban_chat_member(chat_id, user_id) do
-    request("unbanChatMember", chat_id: chat_id, user_id: user_id)
+    api_request("unbanChatMember", chat_id: chat_id, user_id: user_id)
+  end
+
+  def unban_chat_member(%Client{} = client, chat_id, user_id) do
+    api_request(client, "unbanChatMember", chat_id: chat_id, user_id: user_id)
   end
 
   @doc """
@@ -542,8 +771,13 @@ defmodule Nadia do
   channel (in the format @supergroupusername)
   """
   @spec get_chat(integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
+  @spec get_chat(Client.t(), integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
   def get_chat(chat_id) do
-    request("getChat", chat_id: chat_id)
+    api_request("getChat", chat_id: chat_id)
+  end
+
+  def get_chat(%Client{} = client, chat_id) do
+    api_request(client, "getChat", chat_id: chat_id)
   end
 
   @doc """
@@ -557,8 +791,14 @@ defmodule Nadia do
   channel (in the format @channelusername)
   """
   @spec get_chat_administrators(integer | binary) :: {:ok, [ChatMember.t()]} | {:error, Error.t()}
+  @spec get_chat_administrators(Client.t(), integer | binary) ::
+          {:ok, [ChatMember.t()]} | {:error, Error.t()}
   def get_chat_administrators(chat_id) do
-    request("getChatAdministrators", chat_id: chat_id)
+    api_request("getChatAdministrators", chat_id: chat_id)
+  end
+
+  def get_chat_administrators(%Client{} = client, chat_id) do
+    api_request(client, "getChatAdministrators", chat_id: chat_id)
   end
 
   @doc """
@@ -569,8 +809,14 @@ defmodule Nadia do
   channel (in the format @channelusername)
   """
   @spec get_chat_members_count(integer | binary) :: {:ok, integer} | {:error, Error.t()}
+  @spec get_chat_members_count(Client.t(), integer | binary) ::
+          {:ok, integer} | {:error, Error.t()}
   def get_chat_members_count(chat_id) do
-    request("getChatMembersCount", chat_id: chat_id)
+    api_request("getChatMembersCount", chat_id: chat_id)
+  end
+
+  def get_chat_members_count(%Client{} = client, chat_id) do
+    api_request(client, "getChatMembersCount", chat_id: chat_id)
   end
 
   @doc """
@@ -583,8 +829,14 @@ defmodule Nadia do
   * `user_id` - Unique identifier of the target user
   """
   @spec get_chat_member(integer | binary, integer) :: {:ok, ChatMember.t()} | {:error, Error.t()}
+  @spec get_chat_member(Client.t(), integer | binary, integer) ::
+          {:ok, ChatMember.t()} | {:error, Error.t()}
   def get_chat_member(chat_id, user_id) do
-    request("getChatMember", chat_id: chat_id, user_id: user_id)
+    api_request("getChatMember", chat_id: chat_id, user_id: user_id)
+  end
+
+  def get_chat_member(%Client{} = client, chat_id, user_id) do
+    api_request(client, "getChatMember", chat_id: chat_id, user_id: user_id)
   end
 
   @doc """
@@ -603,8 +855,19 @@ defmodule Nadia do
   notification at the top of the chat screen. Defaults to false.
   """
   @spec answer_callback_query(binary, [{atom, any}]) :: :ok | {:error, Error.t()}
-  def answer_callback_query(callback_query_id, options \\ []) do
-    request("answerCallbackQuery", [callback_query_id: callback_query_id] ++ options)
+  @spec answer_callback_query(Client.t(), binary, [{atom, any}]) :: :ok | {:error, Error.t()}
+  def answer_callback_query(callback_query_id), do: answer_callback_query(callback_query_id, [])
+
+  def answer_callback_query(%Client{} = client, callback_query_id) do
+    answer_callback_query(client, callback_query_id, [])
+  end
+
+  def answer_callback_query(callback_query_id, options) do
+    api_request("answerCallbackQuery", [callback_query_id: callback_query_id] ++ options)
+  end
+
+  def answer_callback_query(%Client{} = client, callback_query_id, options) do
+    api_request(client, "answerCallbackQuery", [callback_query_id: callback_query_id] ++ options)
   end
 
   @doc """
@@ -630,8 +893,27 @@ defmodule Nadia do
   """
   @spec edit_message_text(integer | binary, integer, binary, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def edit_message_text(chat_id, message_id, inline_message_id, text, options \\ []) do
-    request(
+  @spec edit_message_text(Client.t(), integer | binary, integer, binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def edit_message_text(chat_id, message_id, inline_message_id, text) do
+    edit_message_text(chat_id, message_id, inline_message_id, text, [])
+  end
+
+  def edit_message_text(%Client{} = client, chat_id, message_id, inline_message_id, text) do
+    edit_message_text(client, chat_id, message_id, inline_message_id, text, [])
+  end
+
+  def edit_message_text(chat_id, message_id, inline_message_id, text, options) do
+    api_request(
+      "editMessageText",
+      [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id, text: text] ++
+        options
+    )
+  end
+
+  def edit_message_text(%Client{} = client, chat_id, message_id, inline_message_id, text, options) do
+    api_request(
+      client,
       "editMessageText",
       [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id, text: text] ++
         options
@@ -650,8 +932,18 @@ defmodule Nadia do
   the sent message
   """
   @spec delete_message(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec delete_message(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
   def delete_message(chat_id, message_id) do
-    request(
+    api_request(
+      "deleteMessage",
+      chat_id: chat_id,
+      message_id: message_id
+    )
+  end
+
+  def delete_message(%Client{} = client, chat_id, message_id) do
+    api_request(
+      client,
       "deleteMessage",
       chat_id: chat_id,
       message_id: message_id
@@ -678,8 +970,26 @@ defmodule Nadia do
   """
   @spec edit_message_caption(integer | binary, integer, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def edit_message_caption(chat_id, message_id, inline_message_id, options \\ []) do
-    request(
+  @spec edit_message_caption(Client.t(), integer | binary, integer, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def edit_message_caption(chat_id, message_id, inline_message_id) do
+    edit_message_caption(chat_id, message_id, inline_message_id, [])
+  end
+
+  def edit_message_caption(%Client{} = client, chat_id, message_id, inline_message_id) do
+    edit_message_caption(client, chat_id, message_id, inline_message_id, [])
+  end
+
+  def edit_message_caption(chat_id, message_id, inline_message_id, options) do
+    api_request(
+      "editMessageCaption",
+      [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id] ++ options
+    )
+  end
+
+  def edit_message_caption(%Client{} = client, chat_id, message_id, inline_message_id, options) do
+    api_request(
+      client,
       "editMessageCaption",
       [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id] ++ options
     )
@@ -704,8 +1014,32 @@ defmodule Nadia do
   """
   @spec edit_message_reply_markup(integer | binary, integer, binary, [{atom, any}]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  def edit_message_reply_markup(chat_id, message_id, inline_message_id, options \\ []) do
-    request(
+  @spec edit_message_reply_markup(Client.t(), integer | binary, integer, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def edit_message_reply_markup(chat_id, message_id, inline_message_id) do
+    edit_message_reply_markup(chat_id, message_id, inline_message_id, [])
+  end
+
+  def edit_message_reply_markup(%Client{} = client, chat_id, message_id, inline_message_id) do
+    edit_message_reply_markup(client, chat_id, message_id, inline_message_id, [])
+  end
+
+  def edit_message_reply_markup(chat_id, message_id, inline_message_id, options) do
+    api_request(
+      "editMessageReplyMarkup",
+      [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id] ++ options
+    )
+  end
+
+  def edit_message_reply_markup(
+        %Client{} = client,
+        chat_id,
+        message_id,
+        inline_message_id,
+        options
+      ) do
+    api_request(
+      client,
       "editMessageReplyMarkup",
       [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id] ++ options
     )
@@ -737,7 +1071,26 @@ defmodule Nadia do
   """
   @spec answer_inline_query(binary, [Nadia.Model.InlineQueryResult.t()], [{atom, any}]) ::
           :ok | {:error, Error.t()}
-  def answer_inline_query(inline_query_id, results, options \\ []) do
+  @spec answer_inline_query(Client.t(), binary, [Nadia.Model.InlineQueryResult.t()], [
+          {atom, any}
+        ]) ::
+          :ok | {:error, Error.t()}
+  def answer_inline_query(inline_query_id, results),
+    do: answer_inline_query(inline_query_id, results, [])
+
+  def answer_inline_query(%Client{} = client, inline_query_id, results) do
+    answer_inline_query(client, inline_query_id, results, [])
+  end
+
+  def answer_inline_query(inline_query_id, results, options) do
+    do_answer_inline_query(nil, inline_query_id, results, options)
+  end
+
+  def answer_inline_query(%Client{} = client, inline_query_id, results, options) do
+    do_answer_inline_query(client, inline_query_id, results, options)
+  end
+
+  defp do_answer_inline_query(client, inline_query_id, results, options) do
     encoded_results =
       results
       |> Enum.map(fn result ->
@@ -747,7 +1100,11 @@ defmodule Nadia do
 
     args = [inline_query_id: inline_query_id, results: encoded_results]
 
-    request("answerInlineQuery", args ++ options)
+    if client do
+      api_request(client, "answerInlineQuery", args ++ options)
+    else
+      api_request("answerInlineQuery", args ++ options)
+    end
   end
 
   @doc """
@@ -757,8 +1114,14 @@ defmodule Nadia do
   * `name` - Name of the sticker set
   """
   @spec get_sticker_set(binary) :: {:ok, Nadia.Model.StickerSet.t()} | {:error, Error.t()}
+  @spec get_sticker_set(Client.t(), binary) ::
+          {:ok, Nadia.Model.StickerSet.t()} | {:error, Error.t()}
   def get_sticker_set(name) do
-    request("getStickerSet", name: name)
+    api_request("getStickerSet", name: name)
+  end
+
+  def get_sticker_set(%Client{} = client, name) do
+    api_request(client, "getStickerSet", name: name)
   end
 
   @doc """
@@ -775,8 +1138,18 @@ defmodule Nadia do
   from the internet.
   """
   @spec upload_sticker_file(integer, binary) :: {:ok, File.t()} | {:error, Error.t()}
+  @spec upload_sticker_file(Client.t(), integer, binary) :: {:ok, File.t()} | {:error, Error.t()}
   def upload_sticker_file(user_id, png_sticker) do
-    request("uploadStickerFile", [user_id: user_id, png_sticker: png_sticker], :png_sticker)
+    api_request("uploadStickerFile", [user_id: user_id, png_sticker: png_sticker], :png_sticker)
+  end
+
+  def upload_sticker_file(%Client{} = client, user_id, png_sticker) do
+    api_request(
+      client,
+      "uploadStickerFile",
+      [user_id: user_id, png_sticker: png_sticker],
+      :png_sticker
+    )
   end
 
   @doc """
@@ -804,8 +1177,36 @@ defmodule Nadia do
   """
   @spec create_new_sticker_set(integer, binary, binary, binary, binary, [{atom, any}]) ::
           :ok | {:error, Error.t()}
-  def create_new_sticker_set(user_id, name, title, png_sticker, emojis, options \\ []) do
-    request(
+  @spec create_new_sticker_set(Client.t(), integer, binary, binary, binary, binary, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def create_new_sticker_set(user_id, name, title, png_sticker, emojis) do
+    create_new_sticker_set(user_id, name, title, png_sticker, emojis, [])
+  end
+
+  def create_new_sticker_set(%Client{} = client, user_id, name, title, png_sticker, emojis) do
+    create_new_sticker_set(client, user_id, name, title, png_sticker, emojis, [])
+  end
+
+  def create_new_sticker_set(user_id, name, title, png_sticker, emojis, options) do
+    api_request(
+      "createNewStickerSet",
+      [user_id: user_id, name: name, title: title, png_sticker: png_sticker, emojis: emojis] ++
+        options,
+      :png_sticker
+    )
+  end
+
+  def create_new_sticker_set(
+        %Client{} = client,
+        user_id,
+        name,
+        title,
+        png_sticker,
+        emojis,
+        options
+      ) do
+    api_request(
+      client,
       "createNewStickerSet",
       [user_id: user_id, name: name, title: title, png_sticker: png_sticker, emojis: emojis] ++
         options,
@@ -832,8 +1233,27 @@ defmodule Nadia do
   """
   @spec add_sticker_to_set(integer, binary, binary, binary, [{atom, any}]) ::
           :ok | {:error, Error.t()}
-  def add_sticker_to_set(user_id, name, png_sticker, emojis, options \\ []) do
-    request(
+  @spec add_sticker_to_set(Client.t(), integer, binary, binary, binary, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def add_sticker_to_set(user_id, name, png_sticker, emojis) do
+    add_sticker_to_set(user_id, name, png_sticker, emojis, [])
+  end
+
+  def add_sticker_to_set(%Client{} = client, user_id, name, png_sticker, emojis) do
+    add_sticker_to_set(client, user_id, name, png_sticker, emojis, [])
+  end
+
+  def add_sticker_to_set(user_id, name, png_sticker, emojis, options) do
+    api_request(
+      "addStickerToSet",
+      [user_id: user_id, name: name, png_sticker: png_sticker, emojis: emojis] ++ options,
+      :png_sticker
+    )
+  end
+
+  def add_sticker_to_set(%Client{} = client, user_id, name, png_sticker, emojis, options) do
+    api_request(
+      client,
       "addStickerToSet",
       [user_id: user_id, name: name, png_sticker: png_sticker, emojis: emojis] ++ options,
       :png_sticker
@@ -849,8 +1269,13 @@ defmodule Nadia do
   * `position` - New sticker position in the set, zero-based
   """
   @spec set_sticker_position_in_set(binary, integer) :: :ok | {:error, Error.t()}
+  @spec set_sticker_position_in_set(Client.t(), binary, integer) :: :ok | {:error, Error.t()}
   def set_sticker_position_in_set(sticker, position) do
-    request("setStickerPositionInSet", sticker: sticker, position: position)
+    api_request("setStickerPositionInSet", sticker: sticker, position: position)
+  end
+
+  def set_sticker_position_in_set(%Client{} = client, sticker, position) do
+    api_request(client, "setStickerPositionInSet", sticker: sticker, position: position)
   end
 
   @doc """
@@ -860,8 +1285,13 @@ defmodule Nadia do
   * `sticker` - File identifier of the sticker
   """
   @spec delete_sticker_from_set(binary) :: :ok | {:error, Error.t()}
+  @spec delete_sticker_from_set(Client.t(), binary) :: :ok | {:error, Error.t()}
   def delete_sticker_from_set(sticker) do
-    request("deleteStickerFromSet", sticker: sticker)
+    api_request("deleteStickerFromSet", sticker: sticker)
+  end
+
+  def delete_sticker_from_set(%Client{} = client, sticker) do
+    api_request(client, "deleteStickerFromSet", sticker: sticker)
   end
 
   @doc """
@@ -880,8 +1310,20 @@ defmodule Nadia do
   """
   @spec pin_chat_message(integer | binary, integer | binary, [{atom, any}]) ::
           :ok | {:error, Error.t()}
-  def pin_chat_message(chat_id, message_id, options \\ []) do
-    request("pinChatMessage", [chat_id: chat_id, message_id: message_id] ++ options)
+  @spec pin_chat_message(Client.t(), integer | binary, integer | binary, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def pin_chat_message(chat_id, message_id), do: pin_chat_message(chat_id, message_id, [])
+
+  def pin_chat_message(%Client{} = client, chat_id, message_id) do
+    pin_chat_message(client, chat_id, message_id, [])
+  end
+
+  def pin_chat_message(chat_id, message_id, options) do
+    api_request("pinChatMessage", [chat_id: chat_id, message_id: message_id] ++ options)
+  end
+
+  def pin_chat_message(%Client{} = client, chat_id, message_id, options) do
+    api_request(client, "pinChatMessage", [chat_id: chat_id, message_id: message_id] ++ options)
   end
 
   @doc """
@@ -894,7 +1336,12 @@ defmodule Nadia do
   (in the format @channelusername)
   """
   @spec unpin_chat_message(integer | binary) :: :ok | {:error, Error.t()}
+  @spec unpin_chat_message(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
   def unpin_chat_message(chat_id) do
-    request("unpinChatMessage", chat_id: chat_id)
+    api_request("unpinChatMessage", chat_id: chat_id)
+  end
+
+  def unpin_chat_message(%Client{} = client, chat_id) do
+    api_request(client, "unpinChatMessage", chat_id: chat_id)
   end
 end

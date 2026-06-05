@@ -12,6 +12,7 @@ defmodule Nadia.ParserTest do
     PhotoSize,
     UserProfilePhotos,
     Message,
+    MessageEntity,
     WebhookInfo
   }
 
@@ -107,8 +108,8 @@ defmodule Nadia.ParserTest do
                  },
                  date: 1_508_358_735,
                  entities: [
-                   %{length: 5, offset: 0, type: "bot_command"},
-                   %{length: 9, offset: 6, type: "mention"}
+                   %MessageEntity{length: 5, offset: 0, type: "bot_command"},
+                   %MessageEntity{length: 9, offset: 6, type: "mention"}
                  ],
                  message_id: 5,
                  text: "/test @my_test_bot"
@@ -125,13 +126,86 @@ defmodule Nadia.ParserTest do
                    photo: %Nadia.Model.ChatPhoto{small_file_id: "sid", big_file_id: "bid"}
                  },
                  date: 1_508_359_228,
-                 from: %Nadia.Model.User{first_name: "John", id: 440_000_000, last_name: "Doe"},
+                 from: %Nadia.Model.User{
+                   first_name: "John",
+                   id: 440_000_000,
+                   is_bot: false,
+                   language_code: "en-US",
+                   last_name: "Doe"
+                 },
                  message_id: 3,
                  text: "Test"
                },
                update_id: 790_000_001
              }
            ]
+  end
+
+  test "parse fixture-backed modern get_updates response decoded with string keys" do
+    raw_updates = response_result_fixture("get_updates_modern.json")
+
+    updates = Parser.parse_result(raw_updates, "getUpdates")
+
+    assert [
+             %Update{
+               update_id: 900_000_001,
+               edited_channel_post: %Message{} = edited_channel_post
+             },
+             %Update{
+               update_id: 900_000_002,
+               guest_message: %Message{} = guest_message
+             }
+           ] = updates
+
+    assert edited_channel_post.message_id == 10
+    assert edited_channel_post.message_thread_id == 77
+    assert edited_channel_post.business_connection_id == "business-connection-1"
+    assert edited_channel_post.guest_query_id == "guest-query-1"
+    assert edited_channel_post.chat.title == "Release Notes"
+    assert edited_channel_post.sender_chat.title == "Release Notes"
+    assert edited_channel_post.from.is_bot == false
+    assert edited_channel_post.from.language_code == "en"
+    assert edited_channel_post.from.supports_guest_queries == true
+    assert edited_channel_post.via_bot.can_manage_bots == true
+    assert edited_channel_post.guest_bot_caller_user.first_name == "Guest"
+
+    assert [
+             %MessageEntity{type: "bot_command", offset: 0, length: 5},
+             %MessageEntity{
+               type: "date_time",
+               offset: 6,
+               length: 12,
+               unix_time: 1_780_000_000,
+               date_time_format: "yyyy-MM-dd HH:mm"
+             }
+           ] = edited_channel_post.entities
+
+    assert [
+             %MessageEntity{
+               type: "custom_emoji",
+               offset: 0,
+               length: 7,
+               custom_emoji_id: "emoji-1"
+             }
+           ] = edited_channel_post.caption_entities
+
+    assert [%User{id: 4004, first_name: "New", language_code: "ja"}] =
+             edited_channel_post.new_chat_members
+
+    assert edited_channel_post.reply_markup == %{
+             "inline_keyboard" => [
+               [
+                 %{
+                   "text" => "Open",
+                   "url" => "https://example.test"
+                 }
+               ]
+             ]
+           }
+
+    assert guest_message.guest_query_id == "guest-query-2"
+    assert guest_message.guest_bot_caller_chat.title == "Caller Chat"
+    assert guest_message.sender_business_bot.is_bot == true
   end
 
   test "parse result of get_updates inline query" do
@@ -267,7 +341,12 @@ defmodule Nadia.ParserTest do
                  chat: %Nadia.Model.Chat{first_name: "John", id: 440_000_000, type: "private"},
                  date: 1_508_359_228,
                  edit_date: 1_508_360_678,
-                 from: %Nadia.Model.User{first_name: "John", id: 440_000_000},
+                 from: %Nadia.Model.User{
+                   first_name: "John",
+                   id: 440_000_000,
+                   is_bot: false,
+                   language_code: "en-US"
+                 },
                  message_id: 3,
                  text: "Edited message"
                },
@@ -300,5 +379,13 @@ defmodule Nadia.ParserTest do
              pending_update_count: 0,
              url: "https://elixir-trading-bot.herokuapp.com/"
            }
+  end
+
+  defp response_result_fixture(name) do
+    "../fixtures/telegram/responses/#{name}"
+    |> Path.expand(__DIR__)
+    |> File.read!()
+    |> Jason.decode!()
+    |> Map.fetch!("result")
   end
 end

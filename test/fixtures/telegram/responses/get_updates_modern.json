@@ -1,0 +1,116 @@
+{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 900000001,
+      "edited_channel_post": {
+        "message_id": 10,
+        "message_thread_id": 77,
+        "date": 1780000000,
+        "edit_date": 1780000060,
+        "business_connection_id": "business-connection-1",
+        "guest_query_id": "guest-query-1",
+        "chat": {
+          "id": -1001234567890,
+          "type": "channel",
+          "title": "Release Notes"
+        },
+        "sender_chat": {
+          "id": -1001234567890,
+          "type": "channel",
+          "title": "Release Notes"
+        },
+        "from": {
+          "id": 1001,
+          "is_bot": false,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "username": "ada",
+          "language_code": "en",
+          "supports_guest_queries": true,
+          "future_user_field": "ignored"
+        },
+        "via_bot": {
+          "id": 2002,
+          "is_bot": true,
+          "first_name": "Relay",
+          "username": "relay_bot",
+          "can_manage_bots": true
+        },
+        "guest_bot_caller_user": {
+          "id": 3003,
+          "is_bot": false,
+          "first_name": "Guest"
+        },
+        "text": "/ship Bot API 10.0",
+        "entities": [
+          {
+            "type": "bot_command",
+            "offset": 0,
+            "length": 5
+          },
+          {
+            "type": "date_time",
+            "offset": 6,
+            "length": 12,
+            "unix_time": 1780000000,
+            "date_time_format": "yyyy-MM-dd HH:mm"
+          }
+        ],
+        "caption": "caption",
+        "caption_entities": [
+          {
+            "type": "custom_emoji",
+            "offset": 0,
+            "length": 7,
+            "custom_emoji_id": "emoji-1"
+          }
+        ],
+        "new_chat_members": [
+          {
+            "id": 4004,
+            "is_bot": false,
+            "first_name": "New",
+            "language_code": "ja"
+          }
+        ],
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "Open",
+                "url": "https://example.test"
+              }
+            ]
+          ]
+        },
+        "future_message_field": "ignored"
+      },
+      "future_update_field": "ignored"
+    },
+    {
+      "update_id": 900000002,
+      "guest_message": {
+        "message_id": 11,
+        "date": 1780000100,
+        "guest_query_id": "guest-query-2",
+        "chat": {
+          "id": -1002222222222,
+          "type": "supergroup",
+          "title": "Guest Chat"
+        },
+        "guest_bot_caller_chat": {
+          "id": -1003333333333,
+          "type": "supergroup",
+          "title": "Caller Chat"
+        },
+        "sender_business_bot": {
+          "id": 5005,
+          "is_bot": true,
+          "first_name": "Business Bot"
+        },
+        "text": "guest message"
+      }
+    }
+  ]
+}

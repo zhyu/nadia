@@ -14,6 +14,7 @@ defmodule Nadia.Parser do
     Document,
     InlineQuery,
     ChosenInlineResult,
+    MessageEntity,
     WebhookInfo
   }
 
@@ -47,11 +48,35 @@ defmodule Nadia.Parser do
     end
   end
 
-  @keys_of_message [:message, :reply_to_message, :channel_post, :edited_message]
+  @keys_of_message [
+    :message,
+    :reply_to_message,
+    :channel_post,
+    :edited_message,
+    :edited_channel_post,
+    :business_message,
+    :edited_business_message,
+    :guest_message,
+    :pinned_message
+  ]
+
   @keys_of_inline_query [:inline_query]
   @keys_of_choosen_inline_result [:chosen_inline_result]
   @keys_of_photo [:photo, :new_chat_photo]
-  @keys_of_user [:from, :forward_from, :new_chat_participant, :left_chat_participant]
+  @keys_of_user [
+    :from,
+    :forward_from,
+    :new_chat_participant,
+    :new_chat_member,
+    :left_chat_participant,
+    :left_chat_member,
+    :via_bot,
+    :sender_business_bot,
+    :guest_bot_caller_user
+  ]
+
+  @keys_of_chat [:chat, :forward_from_chat, :sender_chat, :guest_bot_caller_chat]
+  @keys_of_message_entities [:entities, :caption_entities]
 
   defp parse(:photo, l) when is_list(l), do: Enum.map(l, &parse(PhotoSize, &1))
   defp parse(:photo, p), do: parse(ChatPhoto, p)
@@ -70,7 +95,6 @@ defmodule Nadia.Parser do
     struct(type, entries)
   end
 
-  defp parse({:chat, val}), do: {:chat, parse(Chat, val)}
   defp parse({:audio, val}), do: {:audio, parse(Audio, val)}
   defp parse({:video, val}), do: {:video, parse(Video, val)}
   defp parse({:voice, val}), do: {:voice, parse(Voice, val)}
@@ -86,10 +110,18 @@ defmodule Nadia.Parser do
   defp parse({:stickers, val}) when is_list(val),
     do: {:stickers, Enum.map(val, &parse(Sticker, &1))}
 
+  defp parse({:new_chat_members, val}) when is_list(val),
+    do: {:new_chat_members, Enum.map(val, &parse(User, &1))}
+
   defp parse({:callback_query, val}), do: {:callback_query, parse(CallbackQuery, val)}
+  defp parse({key, val}) when key in @keys_of_chat, do: {key, parse(Chat, val)}
   defp parse({key, val}) when key in @keys_of_photo, do: {key, parse(:photo, val)}
   defp parse({key, val}) when key in @keys_of_user, do: {key, parse(User, val)}
   defp parse({key, val}) when key in @keys_of_message, do: {key, parse(Message, val)}
+
+  defp parse({key, val}) when key in @keys_of_message_entities and is_list(val),
+    do: {key, Enum.map(val, &parse(MessageEntity, &1))}
+
   defp parse({key, val}) when key in @keys_of_inline_query, do: {key, parse(InlineQuery, val)}
 
   defp parse({key, val}) when key in @keys_of_choosen_inline_result,

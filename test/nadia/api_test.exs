@@ -7,7 +7,7 @@ defmodule Nadia.APITest do
   alias Nadia.Client
   alias Nadia.HTTPResponse
   alias Nadia.Model.Error
-  alias Nadia.Model.{ReplyKeyboardRemove, User}
+  alias Nadia.Model.{Message, MessageEntity, ReplyKeyboardRemove, User}
 
   defmodule BotAHTTPClient do
     @behaviour Nadia.HTTPClient
@@ -73,6 +73,47 @@ defmodule Nadia.APITest do
 
     assert {:ok, %User{id: 123, first_name: "Nadia"}} = Nadia.get_me()
     refute existing_atom?(unknown_key)
+  end
+
+  test "request decodes fixture-backed modern getUpdates response" do
+    unknown_update_key = "future_update_field"
+    unknown_message_key = "future_message_field"
+    unknown_user_key = "future_user_field"
+
+    refute existing_atom?(unknown_update_key)
+    refute existing_atom?(unknown_message_key)
+    refute existing_atom?(unknown_user_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body: response_fixture("get_updates_modern.json")
+       }}
+    )
+
+    assert {:ok, [%{edited_channel_post: %Message{} = message}, %{guest_message: guest_message}]} =
+             Nadia.get_updates()
+
+    assert message.business_connection_id == "business-connection-1"
+    assert message.from.is_bot == false
+    assert message.from.supports_guest_queries == true
+    assert message.via_bot.can_manage_bots == true
+
+    assert [
+             %MessageEntity{type: "bot_command"},
+             %MessageEntity{type: "date_time", unix_time: 1_780_000_000}
+           ] = message.entities
+
+    assert [%MessageEntity{type: "custom_emoji", custom_emoji_id: "emoji-1"}] =
+             message.caption_entities
+
+    assert guest_message.guest_bot_caller_chat.title == "Caller Chat"
+    assert guest_message.sender_business_bot.is_bot == true
+
+    refute existing_atom?(unknown_update_key)
+    refute existing_atom?(unknown_message_key)
+    refute existing_atom?(unknown_user_key)
   end
 
   test "request builds form body from keyword list params" do
@@ -319,5 +360,11 @@ defmodule Nadia.APITest do
     true
   rescue
     ArgumentError -> false
+  end
+
+  defp response_fixture(name) do
+    "../fixtures/telegram/responses/#{name}"
+    |> Path.expand(__DIR__)
+    |> File.read!()
   end
 end

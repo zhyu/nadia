@@ -9,6 +9,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
+- Expanded Telegram response parsing for selected modern `Update`, `Message`,
+  `User`, `MessageEntity`, and `PhotoSize` fields, including fixture-backed
+  `getUpdates` coverage with string-key JSON decoding and no atom creation for
+  unknown response fields.
 - Preserved explicit `false` Telegram Bot API and Telegraph API request
   parameters while continuing to omit `nil` parameters.
 - Replaced obsolete Telegram Bot API method wrappers `kick_chat_member` and

@@ -59,20 +59,23 @@ defmodule Nadia.API do
 
   defp build_request(params, file_field) when is_list(params) do
     params
-    |> Keyword.update(:reply_markup, nil, &Jason.encode!(&1))
+    |> Keyword.update(:reply_markup, nil, &encode_json_param/1)
     |> map_params(file_field)
   end
 
   defp build_request(params, file_field) when is_map(params) do
     params
-    |> Map.update(:reply_markup, nil, &Jason.encode!(&1))
+    |> Map.update(:reply_markup, nil, &encode_json_param/1)
     |> map_params(file_field)
   end
+
+  defp encode_json_param(nil), do: nil
+  defp encode_json_param(value), do: Jason.encode!(value)
 
   defp map_params(params, file_field) do
     params =
       params
-      |> Enum.filter(fn {_, v} -> v end)
+      |> Enum.reject(fn {_, v} -> is_nil(v) end)
       |> Enum.map(fn {k, v} -> {to_string(k), to_string(v)} end)
 
     file_path = file_path(params, file_field)

@@ -45,8 +45,8 @@ defmodule Nadia.Graph.API do
   defp build_request(params, file_field) do
     params =
       params
-      |> Keyword.update(:reply_markup, nil, &Jason.encode!(&1))
-      |> Stream.filter(fn {_, v} -> v end)
+      |> Keyword.update(:reply_markup, nil, &encode_json_param/1)
+      |> Stream.reject(fn {_, v} -> is_nil(v) end)
       |> Enum.map(fn {k, v} -> {to_string(k), to_string(v)} end)
 
     file_path = file_path(params, file_field)
@@ -66,6 +66,9 @@ defmodule Nadia.Graph.API do
       nil -> nil
     end
   end
+
+  defp encode_json_param(nil), do: nil
+  defp encode_json_param(value), do: Jason.encode!(value)
 
   @doc """
   Generic method to call Telegram Bot API.

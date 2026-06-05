@@ -112,24 +112,26 @@ defmodule Nadia.APITest do
            }
   end
 
-  test "request filters nil params" do
+  test "request omits nil params and preserves false params" do
     stub_telegram_result(true)
 
     assert :ok ==
-             API.request("sendMessage",
+             API.request("banChatMember",
                chat_id: 123,
-               text: "hello",
+               user_id: 456,
                parse_mode: nil,
-               disable_notification: true
+               reply_markup: nil,
+               revoke_messages: false
              )
 
-    request = assert_telegram_request("sendMessage", options: [recv_timeout: 5000])
+    request = assert_telegram_request("banChatMember", options: [recv_timeout: 5000])
     params = form_params(request)
 
     assert params["chat_id"] == "123"
-    assert params["text"] == "hello"
-    assert params["disable_notification"] == "true"
+    assert params["user_id"] == "456"
+    assert params["revoke_messages"] == "false"
     refute Map.has_key?(params, "parse_mode")
+    refute Map.has_key?(params, "reply_markup")
   end
 
   test "request builds multipart body when file field points to a local file" do
@@ -144,7 +146,13 @@ defmodule Nadia.APITest do
     assert :ok ==
              API.request(
                "sendPhoto",
-               [chat_id: 123, photo: file_path, caption: "hello"],
+               [
+                 chat_id: 123,
+                 photo: file_path,
+                 caption: "hello",
+                 has_spoiler: false,
+                 parse_mode: nil
+               ],
                :photo
              )
 
@@ -153,6 +161,8 @@ defmodule Nadia.APITest do
     assert {:multipart, parts} = request.body
     assert {"chat_id", "123"} in parts
     assert {"caption", "hello"} in parts
+    assert {"has_spoiler", "false"} in parts
+    refute Enum.any?(parts, &match?({"parse_mode", _}, &1))
 
     assert {:file, file_path, {"form-data", [{"name", "photo"}, {"filename", file_path}]}, []} in parts
   end

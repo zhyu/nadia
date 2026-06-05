@@ -9,6 +9,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
+- Preserved explicit `false` Telegram Bot API and Telegraph API request
+  parameters while continuing to omit `nil` parameters.
 - Replaced obsolete Telegram Bot API method wrappers `kick_chat_member` and
   `get_chat_members_count` with current `ban_chat_member` and
   `get_chat_member_count` wrappers.

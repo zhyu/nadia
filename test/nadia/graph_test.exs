@@ -212,6 +212,27 @@ defmodule Nadia.GraphTest do
     )
   end
 
+  test "request omits nil Telegraph params and preserves false params" do
+    stub_graph_result(%{path: "Sample-Page", title: "Sample Page"})
+
+    assert {:ok, %Page{path: "Sample-Page"}} =
+             Nadia.Graph.create_page(
+               "access-token",
+               "Sample Page",
+               ~s([{"tag":"p","children":["Hello"]}]),
+               author_url: nil,
+               return_content: false
+             )
+
+    request = assert_graph_request("createPage", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["access_token"] == "access-token"
+    assert params["title"] == "Sample Page"
+    assert params["return_content"] == "false"
+    refute Map.has_key?(params, "author_url")
+  end
+
   test "request uses configured graph base URL and timeout" do
     Application.put_env(:nadia, :graph_base_url, "https://graph.example.test")
     Application.put_env(:nadia, :recv_timeout, 12)

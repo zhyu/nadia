@@ -20,10 +20,10 @@ defmodule Nadia.Graph.API do
   end
 
   defp decode_response({:ok, %HTTPResponse{body: body}}) do
-    case Jason.decode(body, keys: :atoms) do
-      {:ok, %{ok: false, description: description}} -> {:error, description}
-      {:ok, %{ok: false, error: error}} -> {:error, error}
-      {:ok, %{result: result}} -> {:ok, result}
+    case Jason.decode(body) do
+      {:ok, %{"ok" => false, "description" => description}} -> {:error, description}
+      {:ok, %{"ok" => false, "error" => error}} -> {:error, error}
+      {:ok, %{"result" => result}} -> {:ok, result}
       {:error, error} -> {:error, error}
     end
   end

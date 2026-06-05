@@ -17,8 +17,8 @@ permissions:
   contents: read
 
 env:
-  OTP_VERSION: '28.1'
-  ELIXIR_VERSION: '1.19.5'
+  OTP_VERSION: '29.0.1'
+  ELIXIR_VERSION: '1.20.0'
 
 jobs:
   verify:

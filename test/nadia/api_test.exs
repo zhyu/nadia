@@ -51,6 +51,30 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "request ignores unknown Telegram response fields without creating atoms" do
+    unknown_key = "telegram_unknown_#{System.unique_integer([:positive])}"
+    refute existing_atom?(unknown_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body:
+           Jason.encode!(%{
+             "ok" => true,
+             "result" => %{
+               "id" => 123,
+               "first_name" => "Nadia",
+               unknown_key => "ignored"
+             }
+           })
+       }}
+    )
+
+    assert {:ok, %User{id: 123, first_name: "Nadia"}} = Nadia.get_me()
+    refute existing_atom?(unknown_key)
+  end
+
   test "request builds form body from keyword list params" do
     stub_telegram_result(true)
 
@@ -278,5 +302,12 @@ defmodule Nadia.APITest do
 
     assert API.build_file_url(client, "document/file_10") ==
              "https://files.example/bot999:file-token/document/file_10"
+  end
+
+  defp existing_atom?(name) do
+    _ = String.to_existing_atom(name)
+    true
+  rescue
+    ArgumentError -> false
   end
 end

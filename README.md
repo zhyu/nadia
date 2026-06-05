@@ -11,14 +11,14 @@ Telegram Bot API Wrapper written in Elixir ([document](https://hexdocs.pm/nadia/
 
 ## Installation
 
-Nadia requires Elixir 1.15 or later.
+Nadia requires Elixir 1.20 or later and Erlang/OTP 27 or later.
 
 Add `:nadia` to your `mix.exs` dependencies:
 
 ```elixir
 def deps do
   [
-    {:nadia, "~> 0.8.0"}
+    {:nadia, "~> 0.9.0"}
   ]
 end
 ```

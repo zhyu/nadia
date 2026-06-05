@@ -49,7 +49,6 @@ defmodule Nadia.Parser do
 
   @keys_of_message [:message, :reply_to_message, :channel_post, :edited_message]
   @keys_of_inline_query [:inline_query]
-  @keys_of_callback_query [:callback_query]
   @keys_of_choosen_inline_result [:chosen_inline_result]
   @keys_of_photo [:photo, :new_chat_photo]
   @keys_of_user [:from, :forward_from, :new_chat_participant, :left_chat_participant]
@@ -59,7 +58,18 @@ defmodule Nadia.Parser do
   defp parse(:photos, l) when is_list(l), do: Enum.map(l, &parse(:photo, &1))
   defp parse(:updates, l) when is_list(l), do: Enum.map(l, &parse(Update, &1))
   defp parse(:chat_members, l) when is_list(l), do: Enum.map(l, &parse(ChatMember, &1))
-  defp parse(type, val), do: struct(type, Enum.map(val, &parse(&1)))
+
+  defp parse(type, val) when is_map(val) do
+    fields = struct_fields(type)
+
+    entries =
+      val
+      |> Enum.flat_map(&known_struct_entry(&1, fields))
+      |> Enum.map(&parse(&1))
+
+    struct(type, entries)
+  end
+
   defp parse({:chat, val}), do: {:chat, parse(Chat, val)}
   defp parse({:audio, val}), do: {:audio, parse(Audio, val)}
   defp parse({:video, val}), do: {:video, parse(Video, val)}
@@ -71,15 +81,37 @@ defmodule Nadia.Parser do
   defp parse({:venue, val}), do: {:venue, parse(Venue, val)}
   defp parse({:thumb, val}), do: {:thumb, parse(PhotoSize, val)}
   defp parse({:photos, val}), do: {:photos, parse(:photos, val)}
+  defp parse({:user, val}), do: {:user, parse(User, val)}
+
+  defp parse({:stickers, val}) when is_list(val),
+    do: {:stickers, Enum.map(val, &parse(Sticker, &1))}
+
   defp parse({:callback_query, val}), do: {:callback_query, parse(CallbackQuery, val)}
   defp parse({key, val}) when key in @keys_of_photo, do: {key, parse(:photo, val)}
   defp parse({key, val}) when key in @keys_of_user, do: {key, parse(User, val)}
   defp parse({key, val}) when key in @keys_of_message, do: {key, parse(Message, val)}
   defp parse({key, val}) when key in @keys_of_inline_query, do: {key, parse(InlineQuery, val)}
-  defp parse({key, val}) when key in @keys_of_callback_query, do: {key, parse(CallbackQuery, val)}
 
   defp parse({key, val}) when key in @keys_of_choosen_inline_result,
     do: {key, parse(ChosenInlineResult, val)}
 
   defp parse(others), do: others
+
+  defp struct_fields(type) do
+    type
+    |> struct()
+    |> Map.keys()
+    |> Enum.reject(&(&1 == :__struct__))
+  end
+
+  defp known_struct_entry({key, val}, fields) when is_atom(key) do
+    if key in fields, do: [{key, val}], else: []
+  end
+
+  defp known_struct_entry({key, val}, fields) when is_binary(key) do
+    case Enum.find(fields, &(Atom.to_string(&1) == key)) do
+      nil -> []
+      field -> [{field, val}]
+    end
+  end
 end

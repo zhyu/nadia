@@ -17,16 +17,23 @@ defmodule Nadia.API do
 
   defp process_response(response, method) do
     case decode_response(response) do
-      {:ok, true} -> :ok
-      {:ok, %{ok: false, description: description}} -> {:error, %Error{reason: description}}
-      {:ok, result} -> {:ok, Nadia.Parser.parse_result(result, method)}
-      {:error, error} -> {:error, %Error{reason: error}}
+      {:ok, true} ->
+        :ok
+
+      {:ok, %{"ok" => false, "description" => description}} ->
+        {:error, %Error{reason: description}}
+
+      {:ok, result} ->
+        {:ok, Nadia.Parser.parse_result(result, method)}
+
+      {:error, error} ->
+        {:error, %Error{reason: error}}
     end
   end
 
   defp decode_response(response) do
     with {:ok, %HTTPResponse{body: body}} <- response,
-         {:ok, %{result: result}} <- Jason.decode(body, keys: :atoms),
+         {:ok, %{"result" => result}} <- Jason.decode(body),
          do: {:ok, result}
   end
 

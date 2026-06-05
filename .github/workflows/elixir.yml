@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 env:
-  OTP_VERSION: '28.1'
-  ELIXIR_VERSION: '1.19.5'
+  OTP_VERSION: '29.0.1'
+  ELIXIR_VERSION: '1.20.0'
 
 jobs:
   format:
@@ -38,10 +38,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - otp: '26.2.5'
-            elixir: '1.15.8'
-          - otp: '28.1'
-            elixir: '1.19.5'
+          - otp: '27.3.4.12'
+            elixir: '1.20.0'
+          - otp: '29.0.1'
+            elixir: '1.20.0'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6

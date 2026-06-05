@@ -2,13 +2,13 @@ defmodule Nadia.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/zhyu/nadia"
-  @version "0.8.0"
+  @version "0.9.0"
 
   def project do
     [
       app: :nadia,
       version: @version,
-      elixir: "~> 1.15",
+      elixir: "~> 1.20",
       package: package(),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,

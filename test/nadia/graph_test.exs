@@ -117,7 +117,7 @@ defmodule Nadia.GraphTest do
       pages: [%{path: "Sample-Page-01-13-6", title: "Sample Page"}]
     })
 
-    assert {:ok, %PageList{total_count: 1058, pages: [%{path: "Sample-Page-01-13-6"}]}} =
+    assert {:ok, %PageList{total_count: 1058, pages: [%Page{path: "Sample-Page-01-13-6"}]}} =
              Nadia.Graph.get_page_list(access_token, 0, 3)
 
     assert_graph_request("getPageList",
@@ -174,6 +174,32 @@ defmodule Nadia.GraphTest do
     )
   end
 
+  test "request ignores unknown Telegraph response fields without creating atoms" do
+    unknown_key = "telegraph_unknown_#{System.unique_integer([:positive])}"
+    refute existing_atom?(unknown_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body:
+           Jason.encode!(%{
+             "ok" => true,
+             "result" => %{
+               "path" => "Sample-Page",
+               "title" => "Sample Page",
+               unknown_key => "ignored"
+             }
+           })
+       }}
+    )
+
+    assert {:ok, %Page{path: "Sample-Page", title: "Sample Page"}} =
+             Nadia.Graph.get_page("Sample-Page")
+
+    refute existing_atom?(unknown_key)
+  end
+
   test "get_views builds a request and parses page views" do
     stub_graph_result(%{views: 40})
 
@@ -221,5 +247,12 @@ defmodule Nadia.GraphTest do
     stub_http_response({:ok, %HTTPResponse{status_code: 200, body: "not json"}})
 
     assert {:error, %Error{reason: %Jason.DecodeError{}}} = Nadia.Graph.get_page("Sample-Page")
+  end
+
+  defp existing_atom?(name) do
+    _ = String.to_existing_atom(name)
+    true
+  rescue
+    ArgumentError -> false
   end
 end

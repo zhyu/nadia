@@ -7,6 +7,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## 0.9.0 - 2026-06-04
+
 ### Added
 
 - Added `%Nadia.Client{}` for explicit bot configuration, including default and
@@ -17,14 +19,19 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   single-bot arities.
 - Added client-aware `Nadia.API.request/4`, `Nadia.API.request?/4`, and
   `Nadia.API.build_file_url/2`.
-- Added a Nadia-owned HTTP boundary with normalized `Nadia.HTTPRequest` and
-  `Nadia.HTTPResponse` structs and configurable HTTP adapters.
+- Added a Nadia-owned HTTP boundary with normalized request/response structs
+  and configurable HTTP adapters.
 - Added default-off `:telegram_live` smoke tests for two explicit bot clients.
 
 ### Changed
 
+- Raised the minimum supported Elixir version to 1.20 and aligned CI/release
+  workflows with Elixir 1.20 on current Erlang/OTP releases.
 - Promoted Req to Nadia's production HTTP transport for both Telegram Bot API
   and Telegraph API requests.
+- Decode Telegram Bot API and Telegraph API responses without creating atoms
+  from remote JSON keys; unknown response fields remain ignored until Nadia
+  explicitly models them.
 - Replaced Bot API and Telegraph cassette coverage with deterministic offline
   request/response tests.
 - Normalized Telegraph transport errors and malformed JSON responses into

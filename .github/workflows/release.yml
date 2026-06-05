@@ -96,7 +96,7 @@ jobs:
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
           MIX_ENV: docs
-        run: mix hex.publish --yes
+        run: mix hex.publish --replace --yes
 
   credential-check:
     name: Check Hex Credentials

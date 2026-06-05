@@ -1,0 +1,217 @@
+{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 900100001,
+      "message": {
+        "message_id": 20,
+        "date": 1780000200,
+        "chat": {
+          "id": -1004444444444,
+          "type": "supergroup",
+          "title": "Poll Room"
+        },
+        "poll": {
+          "id": "poll-1",
+          "question": "Pick a release window",
+          "question_entities": [
+            {
+              "type": "bold",
+              "offset": 7,
+              "length": 7
+            }
+          ],
+          "options": [
+            {
+              "persistent_id": "morning",
+              "text": "Morning",
+              "text_entities": [
+                {
+                  "type": "custom_emoji",
+                  "offset": 0,
+                  "length": 7,
+                  "custom_emoji_id": "emoji-morning"
+                }
+              ],
+              "media": {
+                "location": {
+                  "latitude": 35.6812,
+                  "longitude": 139.7671
+                }
+              },
+              "voter_count": 3,
+              "added_by_user": {
+                "id": 7001,
+                "is_bot": false,
+                "first_name": "Poll"
+              },
+              "added_by_chat": {
+                "id": -1004444444444,
+                "type": "supergroup",
+                "title": "Poll Room"
+              },
+              "addition_date": 1780000201,
+              "future_poll_option_field": "ignored"
+            },
+            {
+              "persistent_id": "evening",
+              "text": "Evening",
+              "voter_count": 5
+            }
+          ],
+          "total_voter_count": 8,
+          "is_closed": false,
+          "is_anonymous": false,
+          "type": "regular",
+          "allows_multiple_answers": true,
+          "allows_revoting": true,
+          "members_only": true,
+          "country_codes": ["JP", "US"],
+          "description": "Deployment window poll",
+          "description_entities": [
+            {
+              "type": "italic",
+              "offset": 0,
+              "length": 10
+            }
+          ],
+          "media": {
+            "photo": [
+              {
+                "file_id": "photo-1",
+                "file_unique_id": "photo-uniq-1",
+                "width": 320,
+                "height": 180,
+                "file_size": 12345
+              }
+            ]
+          },
+          "future_poll_field": "ignored"
+        }
+      }
+    },
+    {
+      "update_id": 900100002,
+      "poll": {
+        "id": "poll-2",
+        "question": "Quiz question",
+        "options": [
+          {
+            "persistent_id": "answer",
+            "text": "42",
+            "voter_count": 1
+          }
+        ],
+        "total_voter_count": 1,
+        "is_closed": true,
+        "is_anonymous": true,
+        "type": "quiz",
+        "allows_multiple_answers": false,
+        "allows_revoting": false,
+        "correct_option_ids": [0],
+        "explanation": "Because it is the answer",
+        "explanation_entities": [
+          {
+            "type": "bot_command",
+            "offset": 0,
+            "length": 7
+          }
+        ],
+        "explanation_media": {
+          "venue": {
+            "location": {
+              "latitude": 51.5074,
+              "longitude": -0.1278
+            },
+            "title": "Quiz Hall",
+            "address": "Example Street"
+          }
+        },
+        "open_period": 300,
+        "close_date": 1780000500
+      }
+    },
+    {
+      "update_id": 900100003,
+      "poll_answer": {
+        "poll_id": "poll-1",
+        "user": {
+          "id": 8001,
+          "is_bot": false,
+          "first_name": "Voter"
+        },
+        "voter_chat": {
+          "id": -1005555555555,
+          "type": "channel",
+          "title": "Voter Channel"
+        },
+        "option_ids": [0, 1],
+        "option_persistent_ids": ["morning", "evening"]
+      }
+    },
+    {
+      "update_id": 900100004,
+      "message": {
+        "message_id": 21,
+        "date": 1780000300,
+        "chat": {
+          "id": -1004444444444,
+          "type": "supergroup",
+          "title": "Poll Room"
+        },
+        "poll_option_added": {
+          "poll_message": {
+            "message_id": 20,
+            "date": 1780000200,
+            "chat": {
+              "id": -1004444444444,
+              "type": "supergroup",
+              "title": "Poll Room"
+            }
+          },
+          "option_persistent_id": "night",
+          "option_text": "Night",
+          "option_text_entities": [
+            {
+              "type": "underline",
+              "offset": 0,
+              "length": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "update_id": 900100005,
+      "message": {
+        "message_id": 22,
+        "date": 1780000400,
+        "chat": {
+          "id": -1004444444444,
+          "type": "supergroup",
+          "title": "Poll Room"
+        },
+        "poll_option_deleted": {
+          "poll_message": {
+            "message_id": 20,
+            "date": 1780000200,
+            "chat": {
+              "id": -1004444444444,
+              "type": "supergroup",
+              "title": "Poll Room"
+            }
+          },
+          "option_persistent_id": "evening",
+          "option_text": "Evening",
+          "option_text_entities": [
+            {
+              "type": "strikethrough",
+              "offset": 0,
+              "length": 7
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

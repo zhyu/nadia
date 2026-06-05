@@ -268,6 +268,8 @@ defmodule Nadia.Model do
               dice: nil,
               game: nil,
               poll: nil,
+              poll_option_added: nil,
+              poll_option_deleted: nil,
               location: nil,
               venue: nil,
               new_chat_member: nil,
@@ -345,7 +347,9 @@ defmodule Nadia.Model do
             contact: any,
             dice: any,
             game: any,
-            poll: any,
+            poll: Poll.t(),
+            poll_option_added: PollOptionAdded.t(),
+            poll_option_deleted: PollOptionDeleted.t(),
             location: any,
             venue: any,
             new_chat_member: User.t(),
@@ -388,6 +392,144 @@ defmodule Nadia.Model do
             custom_emoji_id: binary,
             unix_time: integer,
             date_time_format: binary
+          }
+  end
+
+  defmodule PollMedia do
+    defstruct animation: nil,
+              audio: nil,
+              document: nil,
+              live_photo: nil,
+              location: nil,
+              photo: [],
+              sticker: nil,
+              venue: nil,
+              video: nil
+
+    @type t :: %PollMedia{
+            animation: any,
+            audio: Audio.t(),
+            document: Document.t(),
+            live_photo: any,
+            location: Location.t(),
+            photo: [PhotoSize.t()],
+            sticker: Sticker.t(),
+            venue: Venue.t(),
+            video: Video.t()
+          }
+  end
+
+  defmodule PollOption do
+    defstruct persistent_id: nil,
+              text: nil,
+              text_entities: nil,
+              media: nil,
+              voter_count: nil,
+              added_by_user: nil,
+              added_by_chat: nil,
+              addition_date: nil
+
+    @type t :: %PollOption{
+            persistent_id: binary,
+            text: binary,
+            text_entities: [MessageEntity.t()],
+            media: PollMedia.t(),
+            voter_count: integer,
+            added_by_user: User.t(),
+            added_by_chat: Chat.t(),
+            addition_date: integer
+          }
+  end
+
+  defmodule PollAnswer do
+    defstruct poll_id: nil,
+              voter_chat: nil,
+              user: nil,
+              option_ids: [],
+              option_persistent_ids: []
+
+    @type t :: %PollAnswer{
+            poll_id: binary,
+            voter_chat: Chat.t(),
+            user: User.t(),
+            option_ids: [integer],
+            option_persistent_ids: [binary]
+          }
+  end
+
+  defmodule Poll do
+    defstruct id: nil,
+              question: nil,
+              question_entities: nil,
+              options: [],
+              total_voter_count: nil,
+              is_closed: nil,
+              is_anonymous: nil,
+              type: nil,
+              allows_multiple_answers: nil,
+              allows_revoting: nil,
+              members_only: nil,
+              country_codes: nil,
+              correct_option_ids: nil,
+              explanation: nil,
+              explanation_entities: nil,
+              explanation_media: nil,
+              open_period: nil,
+              close_date: nil,
+              description: nil,
+              description_entities: nil,
+              media: nil
+
+    @type t :: %Poll{
+            id: binary,
+            question: binary,
+            question_entities: [MessageEntity.t()],
+            options: [PollOption.t()],
+            total_voter_count: integer,
+            is_closed: boolean,
+            is_anonymous: boolean,
+            type: binary,
+            allows_multiple_answers: boolean,
+            allows_revoting: boolean,
+            members_only: boolean,
+            country_codes: [binary],
+            correct_option_ids: [integer],
+            explanation: binary,
+            explanation_entities: [MessageEntity.t()],
+            explanation_media: PollMedia.t(),
+            open_period: integer,
+            close_date: integer,
+            description: binary,
+            description_entities: [MessageEntity.t()],
+            media: PollMedia.t()
+          }
+  end
+
+  defmodule PollOptionAdded do
+    defstruct poll_message: nil,
+              option_persistent_id: nil,
+              option_text: nil,
+              option_text_entities: nil
+
+    @type t :: %PollOptionAdded{
+            poll_message: Message.t(),
+            option_persistent_id: binary,
+            option_text: binary,
+            option_text_entities: [MessageEntity.t()]
+          }
+  end
+
+  defmodule PollOptionDeleted do
+    defstruct poll_message: nil,
+              option_persistent_id: nil,
+              option_text: nil,
+              option_text_entities: nil
+
+    @type t :: %PollOptionDeleted{
+            poll_message: Message.t(),
+            option_persistent_id: binary,
+            option_text: binary,
+            option_text_entities: [MessageEntity.t()]
           }
   end
 
@@ -462,8 +604,8 @@ defmodule Nadia.Model do
             shipping_query: any,
             pre_checkout_query: any,
             purchased_paid_media: any,
-            poll: any,
-            poll_answer: any,
+            poll: Poll.t(),
+            poll_answer: PollAnswer.t(),
             my_chat_member: any,
             chat_member: any,
             chat_join_request: any,

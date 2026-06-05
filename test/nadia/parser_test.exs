@@ -5,14 +5,23 @@ defmodule Nadia.ParserTest do
 
   alias Nadia.Model.{
     Update,
+    Chat,
     InlineQuery,
     CallbackQuery,
     ChosenInlineResult,
     User,
+    Location,
     PhotoSize,
     UserProfilePhotos,
     Message,
     MessageEntity,
+    Poll,
+    PollAnswer,
+    PollMedia,
+    PollOption,
+    PollOptionAdded,
+    PollOptionDeleted,
+    Venue,
     WebhookInfo
   }
 
@@ -206,6 +215,122 @@ defmodule Nadia.ParserTest do
     assert guest_message.guest_query_id == "guest-query-2"
     assert guest_message.guest_bot_caller_chat.title == "Caller Chat"
     assert guest_message.sender_business_bot.is_bot == true
+  end
+
+  test "parse fixture-backed poll get_updates response decoded with string keys" do
+    raw_updates = response_result_fixture("get_updates_polls.json")
+
+    updates = Parser.parse_result(raw_updates, "getUpdates")
+
+    assert [
+             %Update{message: %Message{poll: %Poll{} = message_poll}},
+             %Update{poll: %Poll{} = closed_poll},
+             %Update{poll_answer: %PollAnswer{} = poll_answer},
+             %Update{message: %Message{poll_option_added: %PollOptionAdded{} = added}},
+             %Update{message: %Message{poll_option_deleted: %PollOptionDeleted{} = deleted}}
+           ] = updates
+
+    assert message_poll.id == "poll-1"
+    assert message_poll.allows_multiple_answers == true
+    assert message_poll.allows_revoting == true
+    assert message_poll.members_only == true
+    assert message_poll.country_codes == ["JP", "US"]
+
+    assert [%MessageEntity{type: "bold", offset: 7, length: 7}] =
+             message_poll.question_entities
+
+    assert [
+             %PollOption{
+               persistent_id: "morning",
+               text: "Morning",
+               voter_count: 3,
+               media: %PollMedia{location: %Location{latitude: 35.6812, longitude: 139.7671}},
+               added_by_user: %User{id: 7001, first_name: "Poll"},
+               added_by_chat: %Chat{title: "Poll Room"},
+               addition_date: 1_780_000_201,
+               text_entities: [
+                 %MessageEntity{
+                   type: "custom_emoji",
+                   offset: 0,
+                   length: 7,
+                   custom_emoji_id: "emoji-morning"
+                 }
+               ]
+             },
+             %PollOption{persistent_id: "evening", text: "Evening", voter_count: 5}
+           ] = message_poll.options
+
+    assert %PollMedia{
+             photo: [
+               %PhotoSize{
+                 file_id: "photo-1",
+                 file_unique_id: "photo-uniq-1",
+                 width: 320,
+                 height: 180,
+                 file_size: 12_345
+               }
+             ]
+           } = message_poll.media
+
+    assert [%MessageEntity{type: "italic", offset: 0, length: 10}] =
+             message_poll.description_entities
+
+    assert closed_poll.id == "poll-2"
+    assert closed_poll.correct_option_ids == [0]
+    assert closed_poll.explanation == "Because it is the answer"
+
+    assert [%MessageEntity{type: "bot_command", offset: 0, length: 7}] =
+             closed_poll.explanation_entities
+
+    assert %PollMedia{
+             venue: %Venue{
+               title: "Quiz Hall",
+               address: "Example Street",
+               location: %Location{latitude: 51.5074, longitude: -0.1278}
+             }
+           } = closed_poll.explanation_media
+
+    assert poll_answer.poll_id == "poll-1"
+    assert poll_answer.user.first_name == "Voter"
+    assert poll_answer.voter_chat.title == "Voter Channel"
+    assert poll_answer.option_ids == [0, 1]
+    assert poll_answer.option_persistent_ids == ["morning", "evening"]
+
+    assert added.poll_message.message_id == 20
+    assert added.option_persistent_id == "night"
+    assert added.option_text == "Night"
+    assert [%MessageEntity{type: "underline"}] = added.option_text_entities
+
+    assert deleted.poll_message.message_id == 20
+    assert deleted.option_persistent_id == "evening"
+    assert deleted.option_text == "Evening"
+    assert [%MessageEntity{type: "strikethrough"}] = deleted.option_text_entities
+  end
+
+  test "parse result of stop_poll" do
+    poll =
+      Parser.parse_result(
+        %{
+          "id" => "stopped-poll",
+          "question" => "Stop?",
+          "options" => [
+            %{"persistent_id" => "yes", "text" => "Yes", "voter_count" => 1}
+          ],
+          "total_voter_count" => 1,
+          "is_closed" => true,
+          "is_anonymous" => false,
+          "type" => "regular",
+          "allows_multiple_answers" => false,
+          "allows_revoting" => false
+        },
+        "stopPoll"
+      )
+
+    assert %Poll{
+             id: "stopped-poll",
+             is_closed: true,
+             options: [%PollOption{persistent_id: "yes", text: "Yes"}]
+           } = poll
   end
 
   test "parse result of get_updates inline query" do

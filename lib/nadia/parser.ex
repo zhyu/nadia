@@ -15,6 +15,12 @@ defmodule Nadia.Parser do
     InlineQuery,
     ChosenInlineResult,
     MessageEntity,
+    Poll,
+    PollAnswer,
+    PollMedia,
+    PollOption,
+    PollOptionAdded,
+    PollOptionDeleted,
     WebhookInfo
   }
 
@@ -44,6 +50,7 @@ defmodule Nadia.Parser do
       "getChatMemberCount" -> result
       "getStickerSet" -> parse(StickerSet, result)
       "uploadStickerFile" -> parse(File, result)
+      "stopPoll" -> parse(Poll, result)
       _ -> parse(Message, result)
     end
   end
@@ -72,11 +79,28 @@ defmodule Nadia.Parser do
     :left_chat_member,
     :via_bot,
     :sender_business_bot,
-    :guest_bot_caller_user
+    :guest_bot_caller_user,
+    :added_by_user
   ]
 
-  @keys_of_chat [:chat, :forward_from_chat, :sender_chat, :guest_bot_caller_chat]
-  @keys_of_message_entities [:entities, :caption_entities]
+  @keys_of_chat [
+    :chat,
+    :forward_from_chat,
+    :sender_chat,
+    :guest_bot_caller_chat,
+    :added_by_chat,
+    :voter_chat
+  ]
+
+  @keys_of_message_entities [
+    :entities,
+    :caption_entities,
+    :text_entities,
+    :question_entities,
+    :explanation_entities,
+    :description_entities,
+    :option_text_entities
+  ]
 
   defp parse(:photo, l) when is_list(l), do: Enum.map(l, &parse(PhotoSize, &1))
   defp parse(:photo, p), do: parse(ChatPhoto, p)
@@ -90,10 +114,20 @@ defmodule Nadia.Parser do
     entries =
       val
       |> Enum.flat_map(&known_struct_entry(&1, fields))
-      |> Enum.map(&parse(&1))
+      |> Enum.map(&parse(type, &1))
 
     struct(type, entries)
   end
+
+  defp parse(Poll, {:options, val}) when is_list(val),
+    do: {:options, Enum.map(val, &parse(PollOption, &1))}
+
+  defp parse(Poll, {:media, val}), do: {:media, parse(PollMedia, val)}
+  defp parse(Poll, {:explanation_media, val}), do: {:explanation_media, parse(PollMedia, val)}
+  defp parse(PollOption, {:media, val}), do: {:media, parse(PollMedia, val)}
+  defp parse(PollOptionAdded, {:poll_message, val}), do: {:poll_message, parse(Message, val)}
+  defp parse(PollOptionDeleted, {:poll_message, val}), do: {:poll_message, parse(Message, val)}
+  defp parse(_type, entry), do: parse(entry)
 
   defp parse({:audio, val}), do: {:audio, parse(Audio, val)}
   defp parse({:video, val}), do: {:video, parse(Video, val)}
@@ -106,6 +140,12 @@ defmodule Nadia.Parser do
   defp parse({:thumb, val}), do: {:thumb, parse(PhotoSize, val)}
   defp parse({:photos, val}), do: {:photos, parse(:photos, val)}
   defp parse({:user, val}), do: {:user, parse(User, val)}
+  defp parse({:poll, val}), do: {:poll, parse(Poll, val)}
+  defp parse({:poll_answer, val}), do: {:poll_answer, parse(PollAnswer, val)}
+  defp parse({:poll_option_added, val}), do: {:poll_option_added, parse(PollOptionAdded, val)}
+
+  defp parse({:poll_option_deleted, val}),
+    do: {:poll_option_deleted, parse(PollOptionDeleted, val)}
 
   defp parse({:stickers, val}) when is_list(val),
     do: {:stickers, Enum.map(val, &parse(Sticker, &1))}

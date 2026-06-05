@@ -7,6 +7,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Added
+
+- Added Telegram poll response structs and parser coverage for `Message.poll`,
+  update-level `poll` and `poll_answer` updates, poll option service messages,
+  and `stopPoll` results.
+
 ### Changed
 
 - Expanded Telegram response parsing for selected modern `Update`, `Message`,

@@ -74,8 +74,8 @@ defmodule Nadia.Behaviour do
   @callback get_file(Client.t(), binary) :: {:ok, File.t()} | {:error, Error.t()}
   @callback get_file_link(File.t()) :: {:ok, binary} | {:error, Error.t()}
   @callback get_file_link(Client.t(), File.t()) :: {:ok, binary} | {:error, Error.t()}
-  @callback kick_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
-  @callback kick_chat_member(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback ban_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback ban_chat_member(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
   @callback leave_chat(integer | binary) :: :ok | {:error, Error.t()}
   @callback leave_chat(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
   @callback unban_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
@@ -86,8 +86,8 @@ defmodule Nadia.Behaviour do
               {:ok, [ChatMember.t()]} | {:error, Error.t()}
   @callback get_chat_administrators(Client.t(), integer | binary) ::
               {:ok, [ChatMember.t()]} | {:error, Error.t()}
-  @callback get_chat_members_count(integer | binary) :: {:ok, integer} | {:error, Error.t()}
-  @callback get_chat_members_count(Client.t(), integer | binary) ::
+  @callback get_chat_member_count(integer | binary) :: {:ok, integer} | {:error, Error.t()}
+  @callback get_chat_member_count(Client.t(), integer | binary) ::
               {:ok, integer} | {:error, Error.t()}
   @callback get_chat_member(integer | binary, integer) ::
               {:ok, ChatMember.t()} | {:error, Error.t()}
@@ -154,12 +154,12 @@ defmodule Nadia.Behaviour do
                       get_webhook_info: 1,
                       get_file: 2,
                       get_file_link: 2,
-                      kick_chat_member: 3,
+                      ban_chat_member: 3,
                       leave_chat: 2,
                       unban_chat_member: 3,
                       get_chat: 2,
                       get_chat_administrators: 2,
-                      get_chat_members_count: 2,
+                      get_chat_member_count: 2,
                       get_chat_member: 3,
                       answer_callback_query: 3,
                       edit_message_text: 6,

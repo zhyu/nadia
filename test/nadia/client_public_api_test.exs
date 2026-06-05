@@ -62,9 +62,16 @@ defmodule Nadia.ClientPublicAPITest do
   test "client-aware chat and moderation wrappers build form request contracts" do
     client = client()
 
-    assert_client_call(client, "kickChatMember", [{"chat_id", "123"}, {"user_id", "456"}], fn ->
-      Nadia.kick_chat_member(client, 123, 456)
+    assert_client_call(client, "banChatMember", [{"chat_id", "123"}, {"user_id", "456"}], fn ->
+      Nadia.ban_chat_member(client, 123, 456)
     end)
+
+    assert_client_call(
+      client,
+      "banChatMember",
+      [{"chat_id", "123"}, {"user_id", "456"}, {"until_date", "1"}],
+      fn -> Nadia.ban_chat_member(client, 123, 456, until_date: 1) end
+    )
 
     assert_client_call(client, "leaveChat", [{"chat_id", "@group"}], fn ->
       Nadia.leave_chat(client, "@group")
@@ -82,8 +89,8 @@ defmodule Nadia.ClientPublicAPITest do
       Nadia.get_chat_administrators(client, "@group")
     end)
 
-    assert_client_call(client, "getChatMembersCount", [{"chat_id", "@group"}], fn ->
-      Nadia.get_chat_members_count(client, "@group")
+    assert_client_call(client, "getChatMemberCount", [{"chat_id", "@group"}], fn ->
+      Nadia.get_chat_member_count(client, "@group")
     end)
 
     assert_client_call(client, "getChatMember", [{"chat_id", "@group"}, {"user_id", "456"}], fn ->

@@ -224,8 +224,8 @@ defmodule NadiaTest do
     assert creator.user.username == "group_creator"
 
     assert {:ok, 2} =
-             assert_wrapper_call("getChatMembersCount", [{"chat_id", "@group"}], 2, fn ->
-               Nadia.get_chat_members_count("@group")
+             assert_wrapper_call("getChatMemberCount", [{"chat_id", "@group"}], 2, fn ->
+               Nadia.get_chat_member_count("@group")
              end)
   end
 
@@ -260,6 +260,14 @@ defmodule NadiaTest do
              assert_wrapper_call("leaveChat", [{"chat_id", "@group"}], true, fn ->
                Nadia.leave_chat("@group")
              end)
+
+    assert :ok =
+             assert_wrapper_call(
+               "banChatMember",
+               [{"chat_id", "666"}, {"user_id", "667"}],
+               true,
+               fn -> Nadia.ban_chat_member(666, 667) end
+             )
 
     assert :ok =
              assert_wrapper_call(

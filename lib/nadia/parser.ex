@@ -40,7 +40,7 @@ defmodule Nadia.Parser do
       "getChat" -> parse(Chat, result)
       "getChatMember" -> parse(ChatMember, result)
       "getChatAdministrators" -> parse(:chat_members, result)
-      "getChatMembersCount" -> result
+      "getChatMemberCount" -> result
       "getStickerSet" -> parse(StickerSet, result)
       "uploadStickerFile" -> parse(File, result)
       _ -> parse(Message, result)

@@ -699,28 +699,35 @@ defmodule Nadia do
   end
 
   @doc """
-  Use this method to kick a user from a group or a supergroup. In the case of supergroups,
-  the user will not be able to return to the group on their own using invite links, etc.,
-  unless unbanned first. The bot must be an administrator in the group for this to work.
-  Returns True on success.
-
-  Note: This will method only work if the ‘All Members Are Admins’ setting is off in the
-  target group. Otherwise members may only be removed by the group's creator or by the
-  member that added them.
+  Use this method to ban a user in a group, a supergroup or a channel. In the
+  case of supergroups and channels, the user will not be able to return to the
+  chat on their own using invite links, etc., unless unbanned first. The bot must
+  be an administrator in the chat for this to work and must have the appropriate
+  administrator rights. Returns True on success.
 
   Args:
-  * `chat_id` - Unique identifier for the target group or username of the target supergroup
-  (in the format @supergroupusername)
+  * `chat_id` - Unique identifier for the target group or username of the target
+  supergroup or channel (in the format @username)
   * `user_id` - Unique identifier of the target user
+  * `options` - orddict of options
   """
-  @spec kick_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
-  @spec kick_chat_member(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
-  def kick_chat_member(chat_id, user_id) do
-    api_request("kickChatMember", chat_id: chat_id, user_id: user_id)
+  @spec ban_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec ban_chat_member(integer | binary, integer, [{atom, any}]) :: :ok | {:error, Error.t()}
+  @spec ban_chat_member(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec ban_chat_member(Client.t(), integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def ban_chat_member(chat_id, user_id), do: ban_chat_member(chat_id, user_id, [])
+
+  def ban_chat_member(%Client{} = client, chat_id, user_id) do
+    ban_chat_member(client, chat_id, user_id, [])
   end
 
-  def kick_chat_member(%Client{} = client, chat_id, user_id) do
-    api_request(client, "kickChatMember", chat_id: chat_id, user_id: user_id)
+  def ban_chat_member(chat_id, user_id, options) do
+    api_request("banChatMember", [chat_id: chat_id, user_id: user_id] ++ options)
+  end
+
+  def ban_chat_member(%Client{} = client, chat_id, user_id, options) do
+    api_request(client, "banChatMember", [chat_id: chat_id, user_id: user_id] ++ options)
   end
 
   @doc """
@@ -808,15 +815,15 @@ defmodule Nadia do
   * `chat_id` - Unique identifier for the target chat or username of the target supergroup or
   channel (in the format @channelusername)
   """
-  @spec get_chat_members_count(integer | binary) :: {:ok, integer} | {:error, Error.t()}
-  @spec get_chat_members_count(Client.t(), integer | binary) ::
+  @spec get_chat_member_count(integer | binary) :: {:ok, integer} | {:error, Error.t()}
+  @spec get_chat_member_count(Client.t(), integer | binary) ::
           {:ok, integer} | {:error, Error.t()}
-  def get_chat_members_count(chat_id) do
-    api_request("getChatMembersCount", chat_id: chat_id)
+  def get_chat_member_count(chat_id) do
+    api_request("getChatMemberCount", chat_id: chat_id)
   end
 
-  def get_chat_members_count(%Client{} = client, chat_id) do
-    api_request(client, "getChatMembersCount", chat_id: chat_id)
+  def get_chat_member_count(%Client{} = client, chat_id) do
+    api_request(client, "getChatMemberCount", chat_id: chat_id)
   end
 
   @doc """

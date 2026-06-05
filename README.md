@@ -72,6 +72,34 @@ config :nadia,
   token: {:system, "ENVVAR_WITH_MYAPP_TOKEN", "default_value_if_needed"}
 ```
 
+For applications that need more than one bot, configure named bots and build
+explicit clients from those names:
+
+```elixir
+config :nadia,
+  bots: [
+    support: [
+      token: {:system, "SUPPORT_BOT_TOKEN"},
+      recv_timeout: 10
+    ],
+    alerts: [
+      token: {:system, "ALERTS_BOT_TOKEN"},
+      proxy: "http://proxy_host:proxy_port"
+    ]
+  ]
+```
+
+```elixir
+support_bot = Nadia.Client.from_config(:support)
+alerts_bot = Nadia.Client.from_config(:alerts)
+
+Nadia.send_message(support_bot, support_chat_id, "How can we help?")
+Nadia.send_message(alerts_bot, alerts_chat_id, "Alert triggered")
+```
+
+The top-level `:token` configuration remains the default client for existing
+calls such as `Nadia.get_me()` and `Nadia.send_message(chat_id, text)`.
+
 ## Usage
 
 ### `get_me`

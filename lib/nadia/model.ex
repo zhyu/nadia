@@ -268,6 +268,40 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule ChecklistTask do
+    defstruct id: nil,
+              text: nil,
+              text_entities: nil,
+              completed_by_user: nil,
+              completed_by_chat: nil,
+              completion_date: nil
+
+    @type t :: %ChecklistTask{
+            id: integer,
+            text: binary,
+            text_entities: [MessageEntity.t()],
+            completed_by_user: User.t(),
+            completed_by_chat: Chat.t(),
+            completion_date: integer
+          }
+  end
+
+  defmodule Checklist do
+    defstruct title: nil,
+              title_entities: nil,
+              tasks: [],
+              others_can_add_tasks: nil,
+              others_can_mark_tasks_as_done: nil
+
+    @type t :: %Checklist{
+            title: binary,
+            title_entities: [MessageEntity.t()],
+            tasks: [ChecklistTask.t()],
+            others_can_add_tasks: boolean,
+            others_can_mark_tasks_as_done: boolean
+          }
+  end
+
   defmodule Message do
     defstruct message_id: nil,
               message_thread_id: nil,
@@ -404,7 +438,7 @@ defmodule Nadia.Model do
             caption_entities: [MessageEntity.t()],
             show_caption_above_media: boolean,
             has_media_spoiler: boolean,
-            checklist: any,
+            checklist: Checklist.t(),
             contact: any,
             dice: any,
             game: any,

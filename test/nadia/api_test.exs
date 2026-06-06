@@ -26,6 +26,8 @@ defmodule Nadia.APITest do
     ChatBoostSourceGiveaway,
     ChatBoostSourcePremium,
     ChatBoostUpdated,
+    Checklist,
+    ChecklistTask,
     ForumTopic,
     Message,
     MessageId,
@@ -1374,6 +1376,126 @@ defmodule Nadia.APITest do
 
     assert_telegram_request("sendMessageDraft",
       body: {:form, [{"chat_id", "123"}, {"draft_id", "44"}, {"text", ""}]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "send_checklist/4 JSON-encodes checklist, preserves false options, and parses checklist messages" do
+    checklist_response = %{
+      title: "Launch",
+      title_entities: [%{type: "bold", offset: 0, length: 6}],
+      tasks: [
+        %{
+          id: 1,
+          text: "Ship F3",
+          text_entities: [%{type: "bold", offset: 0, length: 4}],
+          completed_by_user: user_result(),
+          completed_by_chat: %{id: -1_008_888_888_960, type: "supergroup", title: "Ops"},
+          completion_date: 1_780_006_000
+        }
+      ],
+      others_can_add_tasks: true,
+      others_can_mark_tasks_as_done: true
+    }
+
+    stub_telegram_result(message_result(%{message_id: 9601, checklist: checklist_response}))
+
+    checklist = [
+      title: "Launch",
+      title_entities: [[type: "bold", offset: 0, length: 6]],
+      tasks: [
+        [id: 1, text: "Ship F3", text_entities: [[type: "bold", offset: 0, length: 4]]],
+        %{id: 2, text: "Verify", parse_mode: nil}
+      ],
+      others_can_add_tasks: false,
+      others_can_mark_tasks_as_done: true
+    ]
+
+    encoded_checklist =
+      Jason.encode!(%{
+        title: "Launch",
+        title_entities: [%{type: "bold", offset: 0, length: 6}],
+        tasks: [
+          %{id: 1, text: "Ship F3", text_entities: [%{type: "bold", offset: 0, length: 4}]},
+          %{id: 2, text: "Verify"}
+        ],
+        others_can_add_tasks: false,
+        others_can_mark_tasks_as_done: true
+      })
+
+    assert {:ok,
+            %Message{
+              message_id: 9601,
+              checklist: %Checklist{
+                title: "Launch",
+                tasks: [
+                  %ChecklistTask{
+                    id: 1,
+                    text: "Ship F3",
+                    text_entities: [%MessageEntity{type: "bold"}],
+                    completed_by_user: %User{id: 456},
+                    completed_by_chat: %Chat{id: -1_008_888_888_960},
+                    completion_date: 1_780_006_000
+                  }
+                ]
+              }
+            }} =
+             Nadia.send_checklist("business-checklist-1", "@checklists", checklist,
+               protect_content: false
+             )
+
+    request =
+      assert_telegram_request("sendChecklist",
+        body:
+          {:form,
+           [
+             {"business_connection_id", "business-checklist-1"},
+             {"chat_id", "@checklists"},
+             {"checklist", encoded_checklist},
+             {"protect_content", "false"}
+           ]},
+        options: [recv_timeout: 5000]
+      )
+
+    assert Jason.decode!(form_params(request)["checklist"]) == %{
+             "title" => "Launch",
+             "title_entities" => [%{"type" => "bold", "offset" => 0, "length" => 6}],
+             "tasks" => [
+               %{
+                 "id" => 1,
+                 "text" => "Ship F3",
+                 "text_entities" => [%{"type" => "bold", "offset" => 0, "length" => 4}]
+               },
+               %{"id" => 2, "text" => "Verify"}
+             ],
+             "others_can_add_tasks" => false,
+             "others_can_mark_tasks_as_done" => true
+           }
+
+    client = Client.new(token: "999:family-f3", http_client: Nadia.HTTPCase.StubHTTPClient)
+    preencoded_checklist = ~s({"title":"Preencoded","tasks":[{"id":1,"text":"Keep"}]})
+
+    stub_telegram_result(message_result(%{message_id: 9602}))
+
+    assert {:ok, %Message{message_id: 9602}} =
+             Nadia.send_checklist(
+               client,
+               "business-checklist-2",
+               123,
+               preencoded_checklist
+             )
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-f3/sendChecklist",
+      body:
+        {:form,
+         [
+           {"business_connection_id", "business-checklist-2"},
+           {"chat_id", "123"},
+           {"checklist", preencoded_checklist}
+         ]},
+      headers: [],
       options: [recv_timeout: 5000]
     )
   end

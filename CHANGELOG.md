@@ -40,6 +40,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added Bot API send wrappers for `sendVideoNote`, `sendLivePhoto`,
   `sendMediaGroup`, `sendPaidMedia`, `sendPoll`, `sendDice`, and
   `sendMessageDraft`.
+- Added Bot API `sendChecklist` wrapper plus checklist model/parser support for
+  `Message.checklist`.
 
 ### Changed
 

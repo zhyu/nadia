@@ -22,6 +22,8 @@ defmodule Nadia.ParserTest do
     ChatBoostSourceGiveaway,
     ChatBoostSourcePremium,
     ChatBoostUpdated,
+    Checklist,
+    ChecklistTask,
     ForumTopic,
     InlineQuery,
     CallbackQuery,
@@ -861,6 +863,79 @@ defmodule Nadia.ParserTest do
              %Message{message_id: 9101, chat: %Chat{id: 123, type: "private"}},
              %Message{message_id: 9102, chat: %Chat{id: 123, type: "private"}}
            ] = messages
+  end
+
+  test "parse Message.checklist with task entities and completion actors" do
+    message =
+      Parser.parse_result(
+        %{
+          "message_id" => 9601,
+          "chat" => %{"id" => 123, "type" => "private"},
+          "checklist" => %{
+            "title" => "Launch",
+            "title_entities" => [%{"type" => "bold", "offset" => 0, "length" => 6}],
+            "tasks" => [
+              %{
+                "id" => 1,
+                "text" => "Ship F3",
+                "text_entities" => [
+                  %{
+                    "type" => "text_mention",
+                    "offset" => 0,
+                    "length" => 4,
+                    "user" => %{
+                      "id" => 9602,
+                      "is_bot" => false,
+                      "first_name" => "Mentioned"
+                    }
+                  }
+                ],
+                "completed_by_user" => %{
+                  "id" => 9603,
+                  "is_bot" => false,
+                  "first_name" => "Finisher"
+                },
+                "completed_by_chat" => %{
+                  "id" => -1_008_888_888_960,
+                  "type" => "supergroup",
+                  "title" => "Ops"
+                },
+                "completion_date" => 1_780_006_000,
+                "future_checklist_task_field" => "ignored"
+              }
+            ],
+            "others_can_add_tasks" => true,
+            "others_can_mark_tasks_as_done" => true,
+            "future_checklist_field" => "ignored"
+          }
+        },
+        "sendChecklist"
+      )
+
+    assert %Message{
+             message_id: 9601,
+             checklist: %Checklist{
+               title: "Launch",
+               title_entities: [%MessageEntity{type: "bold", offset: 0, length: 6}],
+               tasks: [
+                 %ChecklistTask{
+                   id: 1,
+                   text: "Ship F3",
+                   text_entities: [
+                     %MessageEntity{
+                       type: "text_mention",
+                       user: %User{id: 9602, first_name: "Mentioned"}
+                     }
+                   ],
+                   completed_by_user: %User{id: 9603, first_name: "Finisher"},
+                   completed_by_chat: %Chat{id: -1_008_888_888_960, title: "Ops"},
+                   completion_date: 1_780_006_000
+                 }
+               ],
+               others_can_add_tasks: true,
+               others_can_mark_tasks_as_done: true
+             }
+           } = message
   end
 
   test "parse result of get_forum_topic_icon_stickers" do

@@ -119,6 +119,18 @@ defmodule Nadia.Behaviour do
               {:ok, Message.t()} | {:error, Error.t()}
   @callback send_dice(Client.t(), integer | binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_checklist(binary, integer | binary, list | map | struct | binary) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_checklist(binary, integer | binary, list | map | struct | binary, [
+              {atom, any}
+            ]) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_checklist(Client.t(), binary, integer | binary, list | map | struct | binary) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_checklist(Client.t(), binary, integer | binary, list | map | struct | binary, [
+              {atom, any}
+            ]) ::
+              {:ok, Message.t()} | {:error, Error.t()}
   @callback send_message_draft(integer | binary, integer) :: :ok | {:error, Error.t()}
   @callback send_message_draft(integer | binary, integer, [{atom, any}]) ::
               :ok | {:error, Error.t()}
@@ -440,6 +452,8 @@ defmodule Nadia.Behaviour do
                       send_poll: 4,
                       send_dice: 2,
                       send_dice: 3,
+                      send_checklist: 4,
+                      send_checklist: 5,
                       send_message_draft: 3,
                       send_message_draft: 4,
                       send_animation: 4,

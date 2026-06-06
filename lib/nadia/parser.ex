@@ -24,6 +24,8 @@ defmodule Nadia.Parser do
     ChatBoostSourcePremium,
     ChatBoostUpdated,
     ChatMember,
+    Checklist,
+    ChecklistTask,
     Message,
     ChatPhoto,
     PhotoSize,
@@ -144,6 +146,7 @@ defmodule Nadia.Parser do
     :entities,
     :caption_entities,
     :text_entities,
+    :title_entities,
     :question_entities,
     :explanation_entities,
     :description_entities,
@@ -211,6 +214,17 @@ defmodule Nadia.Parser do
 
   defp parse(BotAccessSettings, {:added_users, val}) when is_list(val),
     do: {:added_users, Enum.map(val, &parse(User, &1))}
+
+  defp parse(Message, {:checklist, val}), do: {:checklist, parse(Checklist, val)}
+
+  defp parse(Checklist, {:tasks, val}) when is_list(val),
+    do: {:tasks, Enum.map(val, &parse(ChecklistTask, &1))}
+
+  defp parse(ChecklistTask, {:completed_by_user, val}),
+    do: {:completed_by_user, parse(User, val)}
+
+  defp parse(ChecklistTask, {:completed_by_chat, val}),
+    do: {:completed_by_chat, parse(Chat, val)}
 
   defp parse(ReactionCount, {:type, val}), do: {:type, parse(ReactionType, val)}
 

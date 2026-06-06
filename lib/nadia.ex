@@ -847,6 +847,57 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to send a checklist on behalf of a connected business account.
+  On success, the sent Message is returned.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `chat_id` - Unique identifier for the target chat or username of the target bot
+  * `checklist` - JSON-serializable checklist object or a pre-encoded JSON string
+  * `options` - orddict of options
+  """
+  @spec send_checklist(binary, integer | binary, list | map | struct | binary) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_checklist(binary, integer | binary, list | map | struct | binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_checklist(Client.t(), binary, integer | binary, list | map | struct | binary) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_checklist(Client.t(), binary, integer | binary, list | map | struct | binary, [
+          {atom, any}
+        ]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_checklist(business_connection_id, chat_id, checklist) do
+    send_checklist(business_connection_id, chat_id, checklist, [])
+  end
+
+  def send_checklist(%Client{} = client, business_connection_id, chat_id, checklist) do
+    send_checklist(client, business_connection_id, chat_id, checklist, [])
+  end
+
+  def send_checklist(business_connection_id, chat_id, checklist, options) do
+    api_request(
+      "sendChecklist",
+      [
+        business_connection_id: business_connection_id,
+        chat_id: chat_id,
+        checklist: encode_json_payload(checklist)
+      ] ++ options
+    )
+  end
+
+  def send_checklist(%Client{} = client, business_connection_id, chat_id, checklist, options) do
+    api_request(
+      client,
+      "sendChecklist",
+      [
+        business_connection_id: business_connection_id,
+        chat_id: chat_id,
+        checklist: encode_json_payload(checklist)
+      ] ++ options
+    )
+  end
+
+  @doc """
   Use this method to stream a partial message draft to a user.
   Returns `:ok` on success.
   """

@@ -989,6 +989,110 @@ defmodule Nadia.APITest do
     refute Map.has_key?(params, "reply_markup")
   end
 
+  test "existing wrappers with widened option arities build request contracts" do
+    stub_telegram_result(message_result(%{message_id: 789}))
+
+    assert {:ok, %Message{message_id: 789}} =
+             Nadia.forward_message(123, 456, 789,
+               message_thread_id: 10,
+               direct_messages_topic_id: 20,
+               video_start_timestamp: 30,
+               disable_notification: true,
+               protect_content: false,
+               message_effect_id: "effect-1",
+               suggested_post_parameters: "suggested-post-json"
+             )
+
+    assert_telegram_request("forwardMessage",
+      body:
+        {:form,
+         [
+           {"chat_id", "123"},
+           {"from_chat_id", "456"},
+           {"message_id", "789"},
+           {"message_thread_id", "10"},
+           {"direct_messages_topic_id", "20"},
+           {"video_start_timestamp", "30"},
+           {"disable_notification", "true"},
+           {"protect_content", "false"},
+           {"message_effect_id", "effect-1"},
+           {"suggested_post_parameters", "suggested-post-json"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    client = Client.new(token: "999:family-c", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    stub_telegram_result(true)
+
+    assert :ok ==
+             Nadia.send_chat_action(client, "@channel", "upload_photo",
+               business_connection_id: "business-1",
+               message_thread_id: 11
+             )
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-c/sendChatAction",
+      body:
+        {:form,
+         [
+           {"chat_id", "@channel"},
+           {"action", "upload_photo"},
+           {"business_connection_id", "business-1"},
+           {"message_thread_id", "11"}
+         ]},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.delete_webhook(drop_pending_updates: false)
+
+    assert_telegram_request("deleteWebhook",
+      body: {:form, [{"drop_pending_updates", "false"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result([%{status: "administrator", user: user_result()}])
+
+    assert {:ok, [_admin]} = Nadia.get_chat_administrators("@group", return_bots: false)
+
+    assert_telegram_request("getChatAdministrators",
+      body: {:form, [{"chat_id", "@group"}, {"return_bots", "false"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.unban_chat_member(123, 456, only_if_banned: false)
+
+    assert_telegram_request("unbanChatMember",
+      body: {:form, [{"chat_id", "123"}, {"user_id", "456"}, {"only_if_banned", "false"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(true)
+
+    assert :ok ==
+             Nadia.unpin_chat_message("@channel",
+               message_id: 654,
+               business_connection_id: "business-1"
+             )
+
+    assert_telegram_request("unpinChatMessage",
+      body:
+        {:form,
+         [
+           {"chat_id", "@channel"},
+           {"message_id", "654"},
+           {"business_connection_id", "business-1"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
   test "request builds multipart body when file field points to a local file" do
     file_path =
       Path.join(System.tmp_dir!(), "nadia-api-test-#{System.unique_integer([:positive])}.txt")
@@ -1180,5 +1284,21 @@ defmodule Nadia.APITest do
     "../fixtures/telegram/responses/#{name}"
     |> Path.expand(__DIR__)
     |> File.read!()
+  end
+
+  defp message_result(overrides) do
+    Map.merge(
+      %{
+        message_id: 1,
+        date: 1_700_000_000,
+        chat: %{id: 123, type: "private", username: "nadia_test"},
+        from: user_result()
+      },
+      overrides
+    )
+  end
+
+  defp user_result do
+    %{id: 456, first_name: "Nadia", username: "nadia_test"}
   end
 end

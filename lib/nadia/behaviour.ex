@@ -23,8 +23,15 @@ defmodule Nadia.Behaviour do
               {:ok, Message.t()} | {:error, Error.t()}
   @callback send_message(Client.t(), integer | binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-  @callback forward_message(integer, integer, integer) :: {:ok, Message.t()} | {:error, Error.t()}
+  @callback forward_message(integer | binary, integer | binary, integer) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback forward_message(integer | binary, integer | binary, integer, [{atom, any}]) ::
+              {:ok, Message.t()} | {:error, Error.t()}
   @callback forward_message(Client.t(), integer | binary, integer | binary, integer) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback forward_message(Client.t(), integer | binary, integer | binary, integer, [
+              {atom, any}
+            ]) ::
               {:ok, Message.t()} | {:error, Error.t()}
   @callback send_photo(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
   @callback send_photo(Client.t(), integer | binary, binary, [{atom, any}]) ::
@@ -62,8 +69,12 @@ defmodule Nadia.Behaviour do
               {:ok, Message.t()} | {:error, Error.t()}
   @callback send_contact(Client.t(), integer | binary, binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-  @callback send_chat_action(integer, binary) :: :ok | {:error, Error.t()}
+  @callback send_chat_action(integer | binary, binary) :: :ok | {:error, Error.t()}
+  @callback send_chat_action(integer | binary, binary, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
   @callback send_chat_action(Client.t(), integer | binary, binary) :: :ok | {:error, Error.t()}
+  @callback send_chat_action(Client.t(), integer | binary, binary, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
   @callback get_user_profile_photos(integer, [{atom, any}]) ::
               {:ok, UserProfilePhotos.t()} | {:error, Error.t()}
   @callback get_user_profile_photos(Client.t(), integer, [{atom, any}]) ::
@@ -72,7 +83,10 @@ defmodule Nadia.Behaviour do
   @callback get_updates(Client.t(), [{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
   @callback set_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
   @callback set_webhook(Client.t(), [{atom, any}]) :: :ok | {:error, Error.t()}
+  @callback delete_webhook() :: :ok | {:error, Error.t()}
+  @callback delete_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
   @callback delete_webhook(Client.t()) :: :ok | {:error, Error.t()}
+  @callback delete_webhook(Client.t(), [{atom, any}]) :: :ok | {:error, Error.t()}
   @callback get_webhook_info(Client.t()) :: {:ok, WebhookInfo.t()} | {:error, Error.t()}
   @callback get_file(binary) :: {:ok, File.t()} | {:error, Error.t()}
   @callback get_file(Client.t(), binary) :: {:ok, File.t()} | {:error, Error.t()}
@@ -83,12 +97,20 @@ defmodule Nadia.Behaviour do
   @callback leave_chat(integer | binary) :: :ok | {:error, Error.t()}
   @callback leave_chat(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
   @callback unban_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback unban_chat_member(integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
   @callback unban_chat_member(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback unban_chat_member(Client.t(), integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
   @callback get_chat(integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
   @callback get_chat(Client.t(), integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
   @callback get_chat_administrators(integer | binary) ::
               {:ok, [ChatMember.t()]} | {:error, Error.t()}
+  @callback get_chat_administrators(integer | binary, [{atom, any}]) ::
+              {:ok, [ChatMember.t()]} | {:error, Error.t()}
   @callback get_chat_administrators(Client.t(), integer | binary) ::
+              {:ok, [ChatMember.t()]} | {:error, Error.t()}
+  @callback get_chat_administrators(Client.t(), integer | binary, [{atom, any}]) ::
               {:ok, [ChatMember.t()]} | {:error, Error.t()}
   @callback get_chat_member_count(integer | binary) :: {:ok, integer} | {:error, Error.t()}
   @callback get_chat_member_count(Client.t(), integer | binary) ::
@@ -179,11 +201,16 @@ defmodule Nadia.Behaviour do
   @callback delete_sticker_from_set(Client.t(), binary) :: :ok | {:error, Error.t()}
   @callback pin_chat_message(Client.t(), integer | binary, integer | binary, [{atom, any}]) ::
               :ok | {:error, Error.t()}
+  @callback unpin_chat_message(integer | binary) :: :ok | {:error, Error.t()}
+  @callback unpin_chat_message(integer | binary, [{atom, any}]) :: :ok | {:error, Error.t()}
   @callback unpin_chat_message(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  @callback unpin_chat_message(Client.t(), integer | binary, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
 
   @optional_callbacks get_me: 1,
                       send_message: 4,
                       forward_message: 4,
+                      forward_message: 5,
                       send_photo: 4,
                       send_audio: 4,
                       send_document: 4,
@@ -195,18 +222,22 @@ defmodule Nadia.Behaviour do
                       send_venue: 7,
                       send_contact: 5,
                       send_chat_action: 3,
+                      send_chat_action: 4,
                       get_user_profile_photos: 3,
                       get_updates: 2,
                       set_webhook: 2,
                       delete_webhook: 1,
+                      delete_webhook: 2,
                       get_webhook_info: 1,
                       get_file: 2,
                       get_file_link: 2,
                       ban_chat_member: 3,
                       leave_chat: 2,
                       unban_chat_member: 3,
+                      unban_chat_member: 4,
                       get_chat: 2,
                       get_chat_administrators: 2,
+                      get_chat_administrators: 3,
                       get_chat_member_count: 2,
                       get_chat_member: 3,
                       get_user_chat_boosts: 3,
@@ -233,5 +264,6 @@ defmodule Nadia.Behaviour do
                       set_sticker_position_in_set: 3,
                       delete_sticker_from_set: 2,
                       pin_chat_message: 4,
-                      unpin_chat_message: 2
+                      unpin_chat_message: 2,
+                      unpin_chat_message: 3
 end

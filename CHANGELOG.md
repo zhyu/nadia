@@ -42,6 +42,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Replaced obsolete Telegram Bot API method wrappers `kick_chat_member` and
   `get_chat_members_count` with current `ban_chat_member` and
   `get_chat_member_count` wrappers.
+- Added option-support arities for existing Bot API wrappers
+  `forward_message`, `send_chat_action`, `delete_webhook`,
+  `get_chat_administrators`, `unban_chat_member`, and `unpin_chat_message`.
 
 ## 0.9.0 - 2026-06-05
 

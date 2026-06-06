@@ -103,29 +103,46 @@ defmodule Nadia do
   (in the format @channelusername)
   * `from_chat_id` - Unique identifier for the chat where the original message was sent
   or username of the target channel (in the format @channelusername)
-  * `:disable_notification` - Sends the message silently or without notification
   * `message_id` - Unique message identifier
+  * `options` - orddict of options
+
+  Options:
+  * `:message_thread_id` - Unique identifier for the target message thread
+  * `:direct_messages_topic_id` - Identifier of the direct messages topic
+  * `:video_start_timestamp` - New start timestamp for forwarded videos
+  * `:disable_notification` - Sends the message silently or without notification
+  * `:protect_content` - Protects the contents of the forwarded message
+  * `:message_effect_id` - Unique identifier of the message effect to be added
+  * `:suggested_post_parameters` - Suggested post parameters
   """
   @spec forward_message(integer | binary, integer | binary, integer) ::
           {:ok, Message.t()} | {:error, Error.t()}
+  @spec forward_message(integer | binary, integer | binary, integer, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   @spec forward_message(Client.t(), integer | binary, integer | binary, integer) ::
           {:ok, Message.t()} | {:error, Error.t()}
+  @spec forward_message(Client.t(), integer | binary, integer | binary, integer, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
   def forward_message(chat_id, from_chat_id, message_id) do
-    api_request(
-      "forwardMessage",
-      chat_id: chat_id,
-      from_chat_id: from_chat_id,
-      message_id: message_id
-    )
+    forward_message(chat_id, from_chat_id, message_id, [])
   end
 
   def forward_message(%Client{} = client, chat_id, from_chat_id, message_id) do
+    forward_message(client, chat_id, from_chat_id, message_id, [])
+  end
+
+  def forward_message(chat_id, from_chat_id, message_id, options) do
+    api_request(
+      "forwardMessage",
+      [chat_id: chat_id, from_chat_id: from_chat_id, message_id: message_id] ++ options
+    )
+  end
+
+  def forward_message(%Client{} = client, chat_id, from_chat_id, message_id, options) do
     api_request(
       client,
       "forwardMessage",
-      chat_id: chat_id,
-      from_chat_id: from_chat_id,
-      message_id: message_id
+      [chat_id: chat_id, from_chat_id: from_chat_id, message_id: message_id] ++ options
     )
   end
 
@@ -522,15 +539,31 @@ defmodule Nadia do
       * `record_audio` or `upload_audio` for audio files
       * `upload_document` for general files
       * `find_location` for location data
+  * `options` - orddict of options
+
+  Options:
+  * `:business_connection_id` - Unique identifier of the business connection
+  * `:message_thread_id` - Unique identifier for the target message thread
   """
   @spec send_chat_action(integer | binary, binary) :: :ok | {:error, Error.t()}
+  @spec send_chat_action(integer | binary, binary, [{atom, any}]) :: :ok | {:error, Error.t()}
   @spec send_chat_action(Client.t(), integer | binary, binary) :: :ok | {:error, Error.t()}
+  @spec send_chat_action(Client.t(), integer | binary, binary, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
   def send_chat_action(chat_id, action) do
-    api_request("sendChatAction", chat_id: chat_id, action: action)
+    send_chat_action(chat_id, action, [])
   end
 
   def send_chat_action(%Client{} = client, chat_id, action) do
-    api_request(client, "sendChatAction", chat_id: chat_id, action: action)
+    send_chat_action(client, chat_id, action, [])
+  end
+
+  def send_chat_action(chat_id, action, options) do
+    api_request("sendChatAction", [chat_id: chat_id, action: action] ++ options)
+  end
+
+  def send_chat_action(%Client{} = client, chat_id, action, options) do
+    api_request(client, "sendChatAction", [chat_id: chat_id, action: action] ++ options)
   end
 
   @doc """
@@ -657,12 +690,22 @@ defmodule Nadia do
   Use this method to remove webhook integration if you decide to switch back to `Nadia.get_updates/1`.
   Returns `:ok` on success.
 
-  Requires no parameters.
+  Args:
+  * `options` - orddict of options
+
+  Options:
+  * `:drop_pending_updates` - Pass True to drop all pending updates
   """
   @spec delete_webhook() :: :ok | {:error, Error.t()}
+  @spec delete_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
   @spec delete_webhook(Client.t()) :: :ok | {:error, Error.t()}
-  def delete_webhook(), do: api_request("deleteWebhook")
-  def delete_webhook(%Client{} = client), do: api_request(client, "deleteWebhook")
+  @spec delete_webhook(Client.t(), [{atom, any}]) :: :ok | {:error, Error.t()}
+  def delete_webhook(), do: delete_webhook([])
+  def delete_webhook(%Client{} = client), do: delete_webhook(client, [])
+  def delete_webhook(options), do: api_request("deleteWebhook", options)
+
+  def delete_webhook(%Client{} = client, options),
+    do: api_request(client, "deleteWebhook", options)
 
   @doc """
   Use this method to get current webhook status. Requires no parameters.
@@ -770,15 +813,31 @@ defmodule Nadia do
   * `chat_id` - Unique identifier for the target group or username of the target supergroup
   (in the format @supergroupusername)
   * `user_id` - Unique identifier of the target user
+  * `options` - orddict of options
+
+  Options:
+  * `:only_if_banned` - Do nothing if the user is not banned
   """
   @spec unban_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec unban_chat_member(integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
   @spec unban_chat_member(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec unban_chat_member(Client.t(), integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
   def unban_chat_member(chat_id, user_id) do
-    api_request("unbanChatMember", chat_id: chat_id, user_id: user_id)
+    unban_chat_member(chat_id, user_id, [])
   end
 
   def unban_chat_member(%Client{} = client, chat_id, user_id) do
-    api_request(client, "unbanChatMember", chat_id: chat_id, user_id: user_id)
+    unban_chat_member(client, chat_id, user_id, [])
+  end
+
+  def unban_chat_member(chat_id, user_id, options) do
+    api_request("unbanChatMember", [chat_id: chat_id, user_id: user_id] ++ options)
+  end
+
+  def unban_chat_member(%Client{} = client, chat_id, user_id, options) do
+    api_request(client, "unbanChatMember", [chat_id: chat_id, user_id: user_id] ++ options)
   end
 
   @doc """
@@ -809,16 +868,32 @@ defmodule Nadia do
   Args:
   * `chat_id` - Unique identifier for the target chat or username of the target supergroup or
   channel (in the format @channelusername)
+  * `options` - orddict of options
+
+  Options:
+  * `:return_bots` - Pass True to include bots in the returned administrator list
   """
   @spec get_chat_administrators(integer | binary) :: {:ok, [ChatMember.t()]} | {:error, Error.t()}
+  @spec get_chat_administrators(integer | binary, [{atom, any}]) ::
+          {:ok, [ChatMember.t()]} | {:error, Error.t()}
   @spec get_chat_administrators(Client.t(), integer | binary) ::
           {:ok, [ChatMember.t()]} | {:error, Error.t()}
+  @spec get_chat_administrators(Client.t(), integer | binary, [{atom, any}]) ::
+          {:ok, [ChatMember.t()]} | {:error, Error.t()}
   def get_chat_administrators(chat_id) do
-    api_request("getChatAdministrators", chat_id: chat_id)
+    get_chat_administrators(chat_id, [])
   end
 
   def get_chat_administrators(%Client{} = client, chat_id) do
-    api_request(client, "getChatAdministrators", chat_id: chat_id)
+    get_chat_administrators(client, chat_id, [])
+  end
+
+  def get_chat_administrators(chat_id, options) do
+    api_request("getChatAdministrators", [chat_id: chat_id] ++ options)
+  end
+
+  def get_chat_administrators(%Client{} = client, chat_id, options) do
+    api_request(client, "getChatAdministrators", [chat_id: chat_id] ++ options)
   end
 
   @doc """
@@ -1751,14 +1826,30 @@ defmodule Nadia do
   Args:
   * `chat_id` - Unique identifier for the target chat or username of the target channel
   (in the format @channelusername)
+  * `options` - orddict of options
+
+  Options:
+  * `:business_connection_id` - Unique identifier of the business connection
+  * `:message_id` - Identifier of the message to unpin
   """
   @spec unpin_chat_message(integer | binary) :: :ok | {:error, Error.t()}
+  @spec unpin_chat_message(integer | binary, [{atom, any}]) :: :ok | {:error, Error.t()}
   @spec unpin_chat_message(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  @spec unpin_chat_message(Client.t(), integer | binary, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
   def unpin_chat_message(chat_id) do
-    api_request("unpinChatMessage", chat_id: chat_id)
+    unpin_chat_message(chat_id, [])
   end
 
   def unpin_chat_message(%Client{} = client, chat_id) do
-    api_request(client, "unpinChatMessage", chat_id: chat_id)
+    unpin_chat_message(client, chat_id, [])
+  end
+
+  def unpin_chat_message(chat_id, options) do
+    api_request("unpinChatMessage", [chat_id: chat_id] ++ options)
+  end
+
+  def unpin_chat_message(%Client{} = client, chat_id, options) do
+    api_request(client, "unpinChatMessage", [chat_id: chat_id] ++ options)
   end
 end

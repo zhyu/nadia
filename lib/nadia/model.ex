@@ -152,6 +152,22 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule ForumTopic do
+    defstruct message_thread_id: nil,
+              name: nil,
+              icon_color: nil,
+              icon_custom_emoji_id: nil,
+              is_name_implicit: nil
+
+    @type t :: %ForumTopic{
+            message_thread_id: integer,
+            name: binary,
+            icon_color: integer,
+            icon_custom_emoji_id: binary,
+            is_name_implicit: boolean
+          }
+  end
+
   defmodule MaskPosition do
     defstruct point: nil, x_shift: nil, y_shift: nil, scale: nil
 

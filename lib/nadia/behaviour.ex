@@ -8,8 +8,10 @@ defmodule Nadia.Behaviour do
     ChatMember,
     Error,
     File,
+    ForumTopic,
     Message,
     SentGuestMessage,
+    Sticker,
     Update,
     User,
     UserChatBoosts,
@@ -190,6 +192,55 @@ defmodule Nadia.Behaviour do
               :ok | {:error, Error.t()}
   @callback delete_chat_sticker_set(integer | binary) :: :ok | {:error, Error.t()}
   @callback delete_chat_sticker_set(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  @callback get_forum_topic_icon_stickers() :: {:ok, [Sticker.t()]} | {:error, Error.t()}
+  @callback get_forum_topic_icon_stickers(Client.t()) ::
+              {:ok, [Sticker.t()]} | {:error, Error.t()}
+  @callback create_forum_topic(integer | binary, binary) ::
+              {:ok, ForumTopic.t()} | {:error, Error.t()}
+  @callback create_forum_topic(integer | binary, binary, [{atom, any}]) ::
+              {:ok, ForumTopic.t()} | {:error, Error.t()}
+  @callback create_forum_topic(Client.t(), integer | binary, binary) ::
+              {:ok, ForumTopic.t()} | {:error, Error.t()}
+  @callback create_forum_topic(Client.t(), integer | binary, binary, [{atom, any}]) ::
+              {:ok, ForumTopic.t()} | {:error, Error.t()}
+  @callback edit_forum_topic(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback edit_forum_topic(integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback edit_forum_topic(Client.t(), integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback edit_forum_topic(Client.t(), integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback close_forum_topic(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback close_forum_topic(Client.t(), integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback reopen_forum_topic(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback reopen_forum_topic(Client.t(), integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback delete_forum_topic(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback delete_forum_topic(Client.t(), integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback unpin_all_forum_topic_messages(integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback unpin_all_forum_topic_messages(Client.t(), integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback edit_general_forum_topic(integer | binary, binary) :: :ok | {:error, Error.t()}
+  @callback edit_general_forum_topic(Client.t(), integer | binary, binary) ::
+              :ok | {:error, Error.t()}
+  @callback close_general_forum_topic(integer | binary) :: :ok | {:error, Error.t()}
+  @callback close_general_forum_topic(Client.t(), integer | binary) ::
+              :ok | {:error, Error.t()}
+  @callback reopen_general_forum_topic(integer | binary) :: :ok | {:error, Error.t()}
+  @callback reopen_general_forum_topic(Client.t(), integer | binary) ::
+              :ok | {:error, Error.t()}
+  @callback hide_general_forum_topic(integer | binary) :: :ok | {:error, Error.t()}
+  @callback hide_general_forum_topic(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  @callback unhide_general_forum_topic(integer | binary) :: :ok | {:error, Error.t()}
+  @callback unhide_general_forum_topic(Client.t(), integer | binary) ::
+              :ok | {:error, Error.t()}
+  @callback unpin_all_general_forum_topic_messages(integer | binary) ::
+              :ok | {:error, Error.t()}
+  @callback unpin_all_general_forum_topic_messages(Client.t(), integer | binary) ::
+              :ok | {:error, Error.t()}
   @callback get_chat(integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
   @callback get_chat(Client.t(), integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
   @callback get_chat_administrators(integer | binary) ::
@@ -343,6 +394,21 @@ defmodule Nadia.Behaviour do
                       unpin_all_chat_messages: 2,
                       set_chat_sticker_set: 3,
                       delete_chat_sticker_set: 2,
+                      get_forum_topic_icon_stickers: 1,
+                      create_forum_topic: 3,
+                      create_forum_topic: 4,
+                      edit_forum_topic: 3,
+                      edit_forum_topic: 4,
+                      close_forum_topic: 3,
+                      reopen_forum_topic: 3,
+                      delete_forum_topic: 3,
+                      unpin_all_forum_topic_messages: 3,
+                      edit_general_forum_topic: 3,
+                      close_general_forum_topic: 2,
+                      reopen_general_forum_topic: 2,
+                      hide_general_forum_topic: 2,
+                      unhide_general_forum_topic: 2,
+                      unpin_all_general_forum_topic_messages: 2,
                       get_chat: 2,
                       get_chat_administrators: 2,
                       get_chat_administrators: 3,

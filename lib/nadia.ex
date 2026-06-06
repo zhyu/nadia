@@ -25,8 +25,10 @@ defmodule Nadia do
     BusinessConnection,
     Error,
     File,
+    ForumTopic,
     Message,
     SentGuestMessage,
+    Sticker,
     Update,
     User,
     UserChatBoosts,
@@ -1196,6 +1198,231 @@ defmodule Nadia do
 
   def delete_chat_sticker_set(%Client{} = client, chat_id) do
     api_request(client, "deleteChatStickerSet", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to get custom emoji stickers that can be used as forum topic icons.
+  Returns an array of Sticker objects.
+  """
+  @spec get_forum_topic_icon_stickers() :: {:ok, [Sticker.t()]} | {:error, Error.t()}
+  @spec get_forum_topic_icon_stickers(Client.t()) :: {:ok, [Sticker.t()]} | {:error, Error.t()}
+  def get_forum_topic_icon_stickers, do: api_request("getForumTopicIconStickers")
+
+  def get_forum_topic_icon_stickers(%Client{} = client) do
+    api_request(client, "getForumTopicIconStickers")
+  end
+
+  @doc """
+  Use this method to create a topic in a forum supergroup chat or private chat.
+  Returns information about the created topic as a ForumTopic object.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target supergroup
+  * `name` - Topic name
+  * `options` - orddict of options
+
+  Options:
+  * `:icon_color` - Color of the topic icon in RGB format
+  * `:icon_custom_emoji_id` - Unique identifier of the custom emoji shown as the topic icon
+  """
+  @spec create_forum_topic(integer | binary, binary) ::
+          {:ok, ForumTopic.t()} | {:error, Error.t()}
+  @spec create_forum_topic(integer | binary, binary, [{atom, any}]) ::
+          {:ok, ForumTopic.t()} | {:error, Error.t()}
+  @spec create_forum_topic(Client.t(), integer | binary, binary) ::
+          {:ok, ForumTopic.t()} | {:error, Error.t()}
+  @spec create_forum_topic(Client.t(), integer | binary, binary, [{atom, any}]) ::
+          {:ok, ForumTopic.t()} | {:error, Error.t()}
+  def create_forum_topic(chat_id, name), do: create_forum_topic(chat_id, name, [])
+
+  def create_forum_topic(%Client{} = client, chat_id, name) do
+    create_forum_topic(client, chat_id, name, [])
+  end
+
+  def create_forum_topic(chat_id, name, options) do
+    api_request("createForumTopic", [chat_id: chat_id, name: name] ++ options)
+  end
+
+  def create_forum_topic(%Client{} = client, chat_id, name, options) do
+    api_request(client, "createForumTopic", [chat_id: chat_id, name: name] ++ options)
+  end
+
+  @doc """
+  Use this method to edit name and icon of a forum topic. Returns True on success.
+  """
+  @spec edit_forum_topic(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec edit_forum_topic(integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  @spec edit_forum_topic(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec edit_forum_topic(Client.t(), integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def edit_forum_topic(chat_id, message_thread_id) do
+    edit_forum_topic(chat_id, message_thread_id, [])
+  end
+
+  def edit_forum_topic(%Client{} = client, chat_id, message_thread_id) do
+    edit_forum_topic(client, chat_id, message_thread_id, [])
+  end
+
+  def edit_forum_topic(chat_id, message_thread_id, options) do
+    api_request(
+      "editForumTopic",
+      [chat_id: chat_id, message_thread_id: message_thread_id] ++ options
+    )
+  end
+
+  def edit_forum_topic(%Client{} = client, chat_id, message_thread_id, options) do
+    api_request(
+      client,
+      "editForumTopic",
+      [chat_id: chat_id, message_thread_id: message_thread_id] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to close an open forum topic. Returns True on success.
+  """
+  @spec close_forum_topic(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec close_forum_topic(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
+  def close_forum_topic(chat_id, message_thread_id) do
+    api_request("closeForumTopic", chat_id: chat_id, message_thread_id: message_thread_id)
+  end
+
+  def close_forum_topic(%Client{} = client, chat_id, message_thread_id) do
+    api_request(client, "closeForumTopic", chat_id: chat_id, message_thread_id: message_thread_id)
+  end
+
+  @doc """
+  Use this method to reopen a closed forum topic. Returns True on success.
+  """
+  @spec reopen_forum_topic(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec reopen_forum_topic(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
+  def reopen_forum_topic(chat_id, message_thread_id) do
+    api_request("reopenForumTopic", chat_id: chat_id, message_thread_id: message_thread_id)
+  end
+
+  def reopen_forum_topic(%Client{} = client, chat_id, message_thread_id) do
+    api_request(client, "reopenForumTopic",
+      chat_id: chat_id,
+      message_thread_id: message_thread_id
+    )
+  end
+
+  @doc """
+  Use this method to delete a forum topic and all its messages. Returns True on success.
+  """
+  @spec delete_forum_topic(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec delete_forum_topic(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
+  def delete_forum_topic(chat_id, message_thread_id) do
+    api_request("deleteForumTopic", chat_id: chat_id, message_thread_id: message_thread_id)
+  end
+
+  def delete_forum_topic(%Client{} = client, chat_id, message_thread_id) do
+    api_request(client, "deleteForumTopic",
+      chat_id: chat_id,
+      message_thread_id: message_thread_id
+    )
+  end
+
+  @doc """
+  Use this method to clear the list of pinned messages in a forum topic. Returns True on success.
+  """
+  @spec unpin_all_forum_topic_messages(integer | binary, integer) ::
+          :ok | {:error, Error.t()}
+  @spec unpin_all_forum_topic_messages(Client.t(), integer | binary, integer) ::
+          :ok | {:error, Error.t()}
+  def unpin_all_forum_topic_messages(chat_id, message_thread_id) do
+    api_request("unpinAllForumTopicMessages",
+      chat_id: chat_id,
+      message_thread_id: message_thread_id
+    )
+  end
+
+  def unpin_all_forum_topic_messages(%Client{} = client, chat_id, message_thread_id) do
+    api_request(client, "unpinAllForumTopicMessages",
+      chat_id: chat_id,
+      message_thread_id: message_thread_id
+    )
+  end
+
+  @doc """
+  Use this method to edit the name of the General forum topic. Returns True on success.
+  """
+  @spec edit_general_forum_topic(integer | binary, binary) :: :ok | {:error, Error.t()}
+  @spec edit_general_forum_topic(Client.t(), integer | binary, binary) ::
+          :ok | {:error, Error.t()}
+  def edit_general_forum_topic(chat_id, name) do
+    api_request("editGeneralForumTopic", chat_id: chat_id, name: name)
+  end
+
+  def edit_general_forum_topic(%Client{} = client, chat_id, name) do
+    api_request(client, "editGeneralForumTopic", chat_id: chat_id, name: name)
+  end
+
+  @doc """
+  Use this method to close an open General forum topic. Returns True on success.
+  """
+  @spec close_general_forum_topic(integer | binary) :: :ok | {:error, Error.t()}
+  @spec close_general_forum_topic(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  def close_general_forum_topic(chat_id) do
+    api_request("closeGeneralForumTopic", chat_id: chat_id)
+  end
+
+  def close_general_forum_topic(%Client{} = client, chat_id) do
+    api_request(client, "closeGeneralForumTopic", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to reopen a closed General forum topic. Returns True on success.
+  """
+  @spec reopen_general_forum_topic(integer | binary) :: :ok | {:error, Error.t()}
+  @spec reopen_general_forum_topic(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  def reopen_general_forum_topic(chat_id) do
+    api_request("reopenGeneralForumTopic", chat_id: chat_id)
+  end
+
+  def reopen_general_forum_topic(%Client{} = client, chat_id) do
+    api_request(client, "reopenGeneralForumTopic", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to hide the General forum topic. Returns True on success.
+  """
+  @spec hide_general_forum_topic(integer | binary) :: :ok | {:error, Error.t()}
+  @spec hide_general_forum_topic(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  def hide_general_forum_topic(chat_id) do
+    api_request("hideGeneralForumTopic", chat_id: chat_id)
+  end
+
+  def hide_general_forum_topic(%Client{} = client, chat_id) do
+    api_request(client, "hideGeneralForumTopic", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to unhide the General forum topic. Returns True on success.
+  """
+  @spec unhide_general_forum_topic(integer | binary) :: :ok | {:error, Error.t()}
+  @spec unhide_general_forum_topic(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  def unhide_general_forum_topic(chat_id) do
+    api_request("unhideGeneralForumTopic", chat_id: chat_id)
+  end
+
+  def unhide_general_forum_topic(%Client{} = client, chat_id) do
+    api_request(client, "unhideGeneralForumTopic", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to clear pinned messages in the General forum topic. Returns True on success.
+  """
+  @spec unpin_all_general_forum_topic_messages(integer | binary) :: :ok | {:error, Error.t()}
+  @spec unpin_all_general_forum_topic_messages(Client.t(), integer | binary) ::
+          :ok | {:error, Error.t()}
+  def unpin_all_general_forum_topic_messages(chat_id) do
+    api_request("unpinAllGeneralForumTopicMessages", chat_id: chat_id)
+  end
+
+  def unpin_all_general_forum_topic_messages(%Client{} = client, chat_id) do
+    api_request(client, "unpinAllGeneralForumTopicMessages", chat_id: chat_id)
   end
 
   @doc """

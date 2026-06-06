@@ -26,6 +26,7 @@ defmodule Nadia.APITest do
     ChatBoostSourceGiveaway,
     ChatBoostSourcePremium,
     ChatBoostUpdated,
+    ForumTopic,
     Message,
     MessageEntity,
     ManagedBotCreated,
@@ -1274,6 +1275,173 @@ defmodule Nadia.APITest do
 
     assert_telegram_request("deleteChatStickerSet",
       body: {:form, [{"chat_id", "@moderated"}]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "get_forum_topic_icon_stickers parses sticker arrays and supports explicit clients" do
+    client = Client.new(token: "999:family-e", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    stub_telegram_result([
+      %{
+        file_id: "topic-icon-sticker-1",
+        width: 512,
+        height: 512,
+        emoji: "\u{1F4AC}",
+        file_size: 2048
+      }
+    ])
+
+    assert {:ok, [%Sticker{file_id: "topic-icon-sticker-1", emoji: "\u{1F4AC}"}]} =
+             Nadia.get_forum_topic_icon_stickers()
+
+    assert_telegram_request("getForumTopicIconStickers",
+      body: {:form, []},
+      options: [recv_timeout: 5000]
+    )
+
+    assert {:ok, [%Sticker{file_id: "topic-icon-sticker-1", emoji: "\u{1F4AC}"}]} =
+             Nadia.get_forum_topic_icon_stickers(client)
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-e/getForumTopicIconStickers",
+      body: {:form, []},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "create_forum_topic/3 builds request and parses forum topics" do
+    stub_telegram_result(%{
+      message_thread_id: 321,
+      name: "Release Notes",
+      icon_color: 7_322_096,
+      icon_custom_emoji_id: "emoji-topic-1",
+      is_name_implicit: true
+    })
+
+    assert {:ok,
+            %ForumTopic{
+              message_thread_id: 321,
+              name: "Release Notes",
+              icon_color: 7_322_096,
+              icon_custom_emoji_id: "emoji-topic-1",
+              is_name_implicit: true
+            }} =
+             Nadia.create_forum_topic("@forum", "Release Notes",
+               icon_color: 7_322_096,
+               icon_custom_emoji_id: "emoji-topic-1"
+             )
+
+    assert_telegram_request("createForumTopic",
+      body:
+        {:form,
+         [
+           {"chat_id", "@forum"},
+           {"name", "Release Notes"},
+           {"icon_color", "7322096"},
+           {"icon_custom_emoji_id", "emoji-topic-1"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "forum topic true-return wrappers build request contracts" do
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.edit_forum_topic("@forum", 321)
+
+    assert_telegram_request("editForumTopic",
+      body: {:form, [{"chat_id", "@forum"}, {"message_thread_id", "321"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok ==
+             Nadia.edit_forum_topic("@forum", 321,
+               name: "Release Discussion",
+               icon_custom_emoji_id: ""
+             )
+
+    assert_telegram_request("editForumTopic",
+      body:
+        {:form,
+         [
+           {"chat_id", "@forum"},
+           {"message_thread_id", "321"},
+           {"name", "Release Discussion"},
+           {"icon_custom_emoji_id", ""}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.close_forum_topic("@forum", 321)
+
+    assert_telegram_request("closeForumTopic",
+      body: {:form, [{"chat_id", "@forum"}, {"message_thread_id", "321"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.reopen_forum_topic("@forum", 321)
+
+    assert_telegram_request("reopenForumTopic",
+      body: {:form, [{"chat_id", "@forum"}, {"message_thread_id", "321"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.delete_forum_topic("@forum", 321)
+
+    assert_telegram_request("deleteForumTopic",
+      body: {:form, [{"chat_id", "@forum"}, {"message_thread_id", "321"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.unpin_all_forum_topic_messages("@forum", 321)
+
+    assert_telegram_request("unpinAllForumTopicMessages",
+      body: {:form, [{"chat_id", "@forum"}, {"message_thread_id", "321"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.edit_general_forum_topic("@forum", "General Chat")
+
+    assert_telegram_request("editGeneralForumTopic",
+      body: {:form, [{"chat_id", "@forum"}, {"name", "General Chat"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.close_general_forum_topic("@forum")
+
+    assert_telegram_request("closeGeneralForumTopic",
+      body: {:form, [{"chat_id", "@forum"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.reopen_general_forum_topic("@forum")
+
+    assert_telegram_request("reopenGeneralForumTopic",
+      body: {:form, [{"chat_id", "@forum"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.hide_general_forum_topic("@forum")
+
+    assert_telegram_request("hideGeneralForumTopic",
+      body: {:form, [{"chat_id", "@forum"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.unhide_general_forum_topic("@forum")
+
+    assert_telegram_request("unhideGeneralForumTopic",
+      body: {:form, [{"chat_id", "@forum"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.unpin_all_general_forum_topic_messages("@forum")
+
+    assert_telegram_request("unpinAllGeneralForumTopicMessages",
+      body: {:form, [{"chat_id", "@forum"}]},
       options: [recv_timeout: 5000]
     )
   end

@@ -33,6 +33,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added Bot API wrappers for chat administration, membership restrictions,
   join-request moderation, chat metadata, pinned-message, and chat sticker-set
   maintenance.
+- Added Bot API forum topic wrappers, `%Nadia.Model.ForumTopic{}`, and parser
+  coverage for `createForumTopic` and `getForumTopicIconStickers` results.
 
 ### Changed
 

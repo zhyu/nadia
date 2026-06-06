@@ -12,6 +12,7 @@ defmodule Nadia.Parser do
     BusinessMessagesDeleted,
     BusinessOpeningHours,
     BusinessOpeningHoursInterval,
+    ForumTopic,
     User,
     Chat,
     ChatBoost,
@@ -81,6 +82,8 @@ defmodule Nadia.Parser do
       "getChatMemberCount" -> result
       "getStickerSet" -> parse(StickerSet, result)
       "uploadStickerFile" -> parse(File, result)
+      "getForumTopicIconStickers" -> parse(:stickers, result)
+      "createForumTopic" -> parse(ForumTopic, result)
       "sendPaidMedia" -> parse(Message, result)
       "stopPoll" -> parse(Poll, result)
       "getUserChatBoosts" -> parse(UserChatBoosts, result)
@@ -148,6 +151,7 @@ defmodule Nadia.Parser do
   defp parse(:updates, l) when is_list(l), do: Enum.map(l, &parse(Update, &1))
   defp parse(:chat_members, l) when is_list(l), do: Enum.map(l, &parse(ChatMember, &1))
   defp parse(:messages, l) when is_list(l), do: Enum.map(l, &parse(Message, &1))
+  defp parse(:stickers, l) when is_list(l), do: Enum.map(l, &parse(Sticker, &1))
 
   defp parse(type, val) when is_map(val) do
     fields = struct_fields(type)
@@ -262,8 +266,7 @@ defmodule Nadia.Parser do
   defp parse({:message_reaction_count, val}),
     do: {:message_reaction_count, parse(MessageReactionCountUpdated, val)}
 
-  defp parse({:stickers, val}) when is_list(val),
-    do: {:stickers, Enum.map(val, &parse(Sticker, &1))}
+  defp parse({:stickers, val}) when is_list(val), do: {:stickers, parse(:stickers, val)}
 
   defp parse({:new_chat_members, val}) when is_list(val),
     do: {:new_chat_members, Enum.map(val, &parse(User, &1))}

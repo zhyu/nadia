@@ -22,6 +22,7 @@ defmodule Nadia.ParserTest do
     ChatBoostSourceGiveaway,
     ChatBoostSourcePremium,
     ChatBoostUpdated,
+    ForumTopic,
     InlineQuery,
     CallbackQuery,
     ChosenInlineResult,
@@ -780,6 +781,55 @@ defmodule Nadia.ParserTest do
                %User{id: 12005, first_name: "Allowed Auditor", language_code: "en"}
              ]
            } = settings
+  end
+
+  test "parse result of create_forum_topic" do
+    forum_topic =
+      Parser.parse_result(
+        %{
+          "message_thread_id" => 321,
+          "name" => "Release Notes",
+          "icon_color" => 7_322_096,
+          "icon_custom_emoji_id" => "emoji-topic-1",
+          "is_name_implicit" => true,
+          "future_forum_topic_field" => "ignored"
+        },
+        "createForumTopic"
+      )
+
+    assert %ForumTopic{
+             message_thread_id: 321,
+             name: "Release Notes",
+             icon_color: 7_322_096,
+             icon_custom_emoji_id: "emoji-topic-1",
+             is_name_implicit: true
+           } = forum_topic
+  end
+
+  test "parse result of get_forum_topic_icon_stickers" do
+    stickers =
+      Parser.parse_result(
+        [
+          %{
+            "file_id" => "topic-icon-sticker-1",
+            "width" => 512,
+            "height" => 512,
+            "emoji" => "\u{1F4AC}",
+            "future_sticker_field" => "ignored"
+          }
+        ],
+        "getForumTopicIconStickers"
+      )
+
+    assert [
+             %Sticker{
+               file_id: "topic-icon-sticker-1",
+               width: 512,
+               height: 512,
+               emoji: "\u{1F4AC}"
+             }
+           ] =
+             stickers
   end
 
   test "parse result of stop_poll" do

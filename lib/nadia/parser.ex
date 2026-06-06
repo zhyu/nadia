@@ -86,7 +86,10 @@ defmodule Nadia.Parser do
       "getUserChatBoosts" -> parse(UserChatBoosts, result)
       "getBusinessConnection" -> parse(BusinessConnection, result)
       "answerGuestQuery" -> parse(SentGuestMessage, result)
+      "getManagedBotToken" -> result
+      "replaceManagedBotToken" -> result
       "getManagedBotAccessSettings" -> parse(BotAccessSettings, result)
+      "getUserPersonalChatMessages" -> parse(:messages, result)
       _ -> parse(Message, result)
     end
   end
@@ -144,6 +147,7 @@ defmodule Nadia.Parser do
   defp parse(:photos, l) when is_list(l), do: Enum.map(l, &parse(:photo, &1))
   defp parse(:updates, l) when is_list(l), do: Enum.map(l, &parse(Update, &1))
   defp parse(:chat_members, l) when is_list(l), do: Enum.map(l, &parse(ChatMember, &1))
+  defp parse(:messages, l) when is_list(l), do: Enum.map(l, &parse(Message, &1))
 
   defp parse(type, val) when is_map(val) do
     fields = struct_fields(type)

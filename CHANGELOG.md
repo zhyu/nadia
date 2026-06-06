@@ -26,6 +26,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added Telegram business and guest-query response structs and parser coverage
   for `business_connection`, `deleted_business_messages`, business chat profile
   fields, and `answerGuestQuery` results.
+- Added Bot API wrappers for guest queries, business connections, managed bot
+  token/access settings, user chat boosts, and user personal chat messages.
 
 ### Changed
 

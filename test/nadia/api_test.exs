@@ -7,6 +7,7 @@ defmodule Nadia.APITest do
   alias Nadia.Client
   alias Nadia.HTTPResponse
   alias Nadia.Model.Error
+  alias Nadia.Model.InlineQueryResult
 
   alias Nadia.Model.{
     BotAccessSettings,
@@ -613,6 +614,215 @@ defmodule Nadia.APITest do
 
     refute existing_atom?(unknown_settings_key)
     refute existing_atom?(unknown_added_user_key)
+  end
+
+  test "answer_guest_query/3 builds request and parses sent guest messages" do
+    result = %InlineQueryResult.Article{
+      id: "guest-article-1",
+      title: "Guest reply"
+    }
+
+    stub_telegram_result(%{inline_message_id: "inline-guest-message-wrapper-1"})
+
+    assert {:ok, %SentGuestMessage{inline_message_id: "inline-guest-message-wrapper-1"}} =
+             Nadia.answer_guest_query("guest-query-wrapper-1", result, future_option: "ready")
+
+    request =
+      assert_telegram_request("answerGuestQuery",
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params["guest_query_id"] == "guest-query-wrapper-1"
+    assert params["future_option"] == "ready"
+
+    assert %{
+             "type" => "article",
+             "id" => "guest-article-1",
+             "title" => "Guest reply"
+           } = Jason.decode!(params["result"])
+  end
+
+  test "get_user_chat_boosts/2 builds request and parses user chat boosts" do
+    stub_telegram_result(%{
+      boosts: [
+        %{
+          boost_id: "boost-wrapper-1",
+          add_date: 1_780_010_000,
+          expiration_date: 1_782_602_000,
+          source: %{
+            source: "premium",
+            user: %{
+              id: 10006,
+              is_bot: false,
+              first_name: "Wrapper Booster"
+            }
+          }
+        }
+      ]
+    })
+
+    assert {:ok,
+            %UserChatBoosts{
+              boosts: [
+                %ChatBoost{
+                  boost_id: "boost-wrapper-1",
+                  source: %ChatBoostSourcePremium{
+                    user: %User{id: 10006, first_name: "Wrapper Booster"}
+                  }
+                }
+              ]
+            }} = Nadia.get_user_chat_boosts(-1_008_888_888_889, 10006)
+
+    assert_telegram_request("getUserChatBoosts",
+      body: {:form, [{"chat_id", "-1008888888889"}, {"user_id", "10006"}]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "get_business_connection/2 explicit client builds request and parses connection" do
+    client =
+      Client.new(
+        token: "999:family-a",
+        http_client: Nadia.HTTPCase.StubHTTPClient
+      )
+
+    stub_telegram_result(%{
+      id: "business-wrapper-1",
+      user: %{
+        id: 13007,
+        is_bot: false,
+        first_name: "Explicit Owner"
+      },
+      user_chat_id: 777_000_444,
+      date: 1_780_004_700,
+      rights: %{can_reply: true},
+      is_enabled: true
+    })
+
+    assert {:ok,
+            %BusinessConnection{
+              id: "business-wrapper-1",
+              user: %User{id: 13007, first_name: "Explicit Owner"},
+              rights: %BusinessBotRights{can_reply: true},
+              is_enabled: true
+            }} = Nadia.get_business_connection(client, "business-wrapper-1")
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-a/getBusinessConnection",
+      body: {:form, [{"business_connection_id", "business-wrapper-1"}]},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "managed bot token wrappers build requests and return string tokens" do
+    stub_telegram_result("123:old-managed-token")
+
+    assert {:ok, "123:old-managed-token"} = Nadia.get_managed_bot_token(12001)
+
+    assert_telegram_request("getManagedBotToken",
+      body: {:form, [{"user_id", "12001"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result("123:new-managed-token")
+
+    assert {:ok, "123:new-managed-token"} = Nadia.replace_managed_bot_token(12001)
+
+    assert_telegram_request("replaceManagedBotToken",
+      body: {:form, [{"user_id", "12001"}]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "managed bot access settings wrappers build requests and parse settings" do
+    stub_telegram_result(%{
+      is_access_restricted: true,
+      added_users: [
+        %{
+          id: 12004,
+          is_bot: false,
+          first_name: "Allowed Manager",
+          can_manage_bots: true
+        }
+      ]
+    })
+
+    assert {:ok,
+            %BotAccessSettings{
+              is_access_restricted: true,
+              added_users: [
+                %User{id: 12004, first_name: "Allowed Manager", can_manage_bots: true}
+              ]
+            }} = Nadia.get_managed_bot_access_settings(12004)
+
+    assert_telegram_request("getManagedBotAccessSettings",
+      body: {:form, [{"user_id", "12004"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(true)
+
+    assert :ok ==
+             Nadia.set_managed_bot_access_settings(12004, true, added_user_ids: [12004, 12005])
+
+    assert_telegram_request("setManagedBotAccessSettings",
+      body:
+        {:form,
+         [
+           {"user_id", "12004"},
+           {"is_access_restricted", "true"},
+           {"added_user_ids", "[12004,12005]"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.set_managed_bot_access_settings(12004, false)
+
+    assert_telegram_request("setManagedBotAccessSettings",
+      body: {:form, [{"user_id", "12004"}, {"is_access_restricted", "false"}]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "get_user_personal_chat_messages/2 parses message arrays with nested chat and user" do
+    stub_telegram_result([
+      %{
+        message_id: 91,
+        date: 1_780_005_000,
+        chat: %{
+          id: 13008,
+          type: "private",
+          first_name: "Personal Chat"
+        },
+        from: %{
+          id: 13009,
+          is_bot: false,
+          first_name: "Profile Owner"
+        },
+        text: "profile hello"
+      }
+    ])
+
+    assert {:ok,
+            [
+              %Message{
+                message_id: 91,
+                text: "profile hello",
+                chat: %Chat{id: 13008, type: "private", first_name: "Personal Chat"},
+                from: %User{id: 13009, is_bot: false, first_name: "Profile Owner"}
+              }
+            ]} = Nadia.get_user_personal_chat_messages(13009, 1)
+
+    assert_telegram_request("getUserPersonalChatMessages",
+      body: {:form, [{"user_id", "13009"}, {"limit", "1"}]},
+      options: [recv_timeout: 5000]
+    )
   end
 
   test "request builds form body from keyword list params" do

@@ -19,7 +19,20 @@ defmodule Nadia do
   """
 
   alias Nadia.Client
-  alias Nadia.Model.{User, Message, Update, UserProfilePhotos, File, Error, WebhookInfo}
+
+  alias Nadia.Model.{
+    BotAccessSettings,
+    BusinessConnection,
+    Error,
+    File,
+    Message,
+    SentGuestMessage,
+    Update,
+    User,
+    UserChatBoosts,
+    UserProfilePhotos,
+    WebhookInfo
+  }
 
   import Nadia.API
 
@@ -847,6 +860,158 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to get the list of boosts added to a chat by a user.
+  Returns a UserChatBoosts object.
+
+  Args:
+  * `chat_id` - Unique identifier for the chat or username of the channel
+  * `user_id` - Unique identifier of the target user
+  """
+  @spec get_user_chat_boosts(integer | binary, integer) ::
+          {:ok, UserChatBoosts.t()} | {:error, Error.t()}
+  @spec get_user_chat_boosts(Client.t(), integer | binary, integer) ::
+          {:ok, UserChatBoosts.t()} | {:error, Error.t()}
+  def get_user_chat_boosts(chat_id, user_id) do
+    api_request("getUserChatBoosts", chat_id: chat_id, user_id: user_id)
+  end
+
+  def get_user_chat_boosts(%Client{} = client, chat_id, user_id) do
+    api_request(client, "getUserChatBoosts", chat_id: chat_id, user_id: user_id)
+  end
+
+  @doc """
+  Use this method to get information about the connection of the bot with a business account.
+  Returns a BusinessConnection object.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  """
+  @spec get_business_connection(binary) :: {:ok, BusinessConnection.t()} | {:error, Error.t()}
+  @spec get_business_connection(Client.t(), binary) ::
+          {:ok, BusinessConnection.t()} | {:error, Error.t()}
+  def get_business_connection(business_connection_id) do
+    api_request("getBusinessConnection", business_connection_id: business_connection_id)
+  end
+
+  def get_business_connection(%Client{} = client, business_connection_id) do
+    api_request(client, "getBusinessConnection", business_connection_id: business_connection_id)
+  end
+
+  @doc """
+  Use this method to get the token of a managed bot.
+  Returns the token as a string.
+
+  Args:
+  * `user_id` - User identifier of the managed bot whose token will be returned
+  """
+  @spec get_managed_bot_token(integer) :: {:ok, binary} | {:error, Error.t()}
+  @spec get_managed_bot_token(Client.t(), integer) :: {:ok, binary} | {:error, Error.t()}
+  def get_managed_bot_token(user_id) do
+    api_request("getManagedBotToken", user_id: user_id)
+  end
+
+  def get_managed_bot_token(%Client{} = client, user_id) do
+    api_request(client, "getManagedBotToken", user_id: user_id)
+  end
+
+  @doc """
+  Use this method to revoke the current token of a managed bot and generate a new one.
+  Returns the new token as a string.
+
+  Args:
+  * `user_id` - User identifier of the managed bot whose token will be replaced
+  """
+  @spec replace_managed_bot_token(integer) :: {:ok, binary} | {:error, Error.t()}
+  @spec replace_managed_bot_token(Client.t(), integer) :: {:ok, binary} | {:error, Error.t()}
+  def replace_managed_bot_token(user_id) do
+    api_request("replaceManagedBotToken", user_id: user_id)
+  end
+
+  def replace_managed_bot_token(%Client{} = client, user_id) do
+    api_request(client, "replaceManagedBotToken", user_id: user_id)
+  end
+
+  @doc """
+  Use this method to get the access settings of a managed bot.
+  Returns a BotAccessSettings object.
+
+  Args:
+  * `user_id` - User identifier of the managed bot whose access settings will be returned
+  """
+  @spec get_managed_bot_access_settings(integer) ::
+          {:ok, BotAccessSettings.t()} | {:error, Error.t()}
+  @spec get_managed_bot_access_settings(Client.t(), integer) ::
+          {:ok, BotAccessSettings.t()} | {:error, Error.t()}
+  def get_managed_bot_access_settings(user_id) do
+    api_request("getManagedBotAccessSettings", user_id: user_id)
+  end
+
+  def get_managed_bot_access_settings(%Client{} = client, user_id) do
+    api_request(client, "getManagedBotAccessSettings", user_id: user_id)
+  end
+
+  @doc """
+  Use this method to change the access settings of a managed bot.
+  Returns True on success.
+
+  Args:
+  * `user_id` - User identifier of the managed bot whose access settings will be changed
+  * `is_access_restricted` - Pass true if only selected users can access the bot
+  * `options` - orddict of options
+
+  Options:
+  * `:added_user_ids` - Array of user identifiers allowed to access the bot
+  """
+  @spec set_managed_bot_access_settings(integer, boolean, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  @spec set_managed_bot_access_settings(Client.t(), integer, boolean, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def set_managed_bot_access_settings(user_id, is_access_restricted) do
+    set_managed_bot_access_settings(user_id, is_access_restricted, [])
+  end
+
+  def set_managed_bot_access_settings(%Client{} = client, user_id, is_access_restricted) do
+    set_managed_bot_access_settings(client, user_id, is_access_restricted, [])
+  end
+
+  def set_managed_bot_access_settings(user_id, is_access_restricted, options) do
+    api_request(
+      "setManagedBotAccessSettings",
+      [user_id: user_id, is_access_restricted: is_access_restricted] ++
+        encode_added_user_ids(options)
+    )
+  end
+
+  def set_managed_bot_access_settings(%Client{} = client, user_id, is_access_restricted, options) do
+    api_request(
+      client,
+      "setManagedBotAccessSettings",
+      [user_id: user_id, is_access_restricted: is_access_restricted] ++
+        encode_added_user_ids(options)
+    )
+  end
+
+  @doc """
+  Use this method to get the last messages from the personal chat of a given user.
+  On success, an array of Message objects is returned.
+
+  Args:
+  * `user_id` - Unique identifier for the target user
+  * `limit` - The maximum number of messages to return
+  """
+  @spec get_user_personal_chat_messages(integer, integer) ::
+          {:ok, [Message.t()]} | {:error, Error.t()}
+  @spec get_user_personal_chat_messages(Client.t(), integer, integer) ::
+          {:ok, [Message.t()]} | {:error, Error.t()}
+  def get_user_personal_chat_messages(user_id, limit) do
+    api_request("getUserPersonalChatMessages", user_id: user_id, limit: limit)
+  end
+
+  def get_user_personal_chat_messages(%Client{} = client, user_id, limit) do
+    api_request(client, "getUserPersonalChatMessages", user_id: user_id, limit: limit)
+  end
+
+  @doc """
   Use this method to send answers to callback queries sent from inline keyboards.
   The answer will be displayed to the user as a notification at the top of the chat
   screen or as an alert. On success, True is returned.
@@ -875,6 +1040,34 @@ defmodule Nadia do
 
   def answer_callback_query(%Client{} = client, callback_query_id, options) do
     api_request(client, "answerCallbackQuery", [callback_query_id: callback_query_id] ++ options)
+  end
+
+  @doc """
+  Use this method to reply to a received guest message.
+  On success, a SentGuestMessage object is returned.
+
+  Args:
+  * `guest_query_id` - Unique identifier for the query to be answered
+  * `result` - An inline query result describing the message to be sent
+  * `options` - orddict of options
+  """
+  @spec answer_guest_query(binary, Nadia.Model.InlineQueryResult.t(), [{atom, any}]) ::
+          {:ok, SentGuestMessage.t()} | {:error, Error.t()}
+  @spec answer_guest_query(Client.t(), binary, Nadia.Model.InlineQueryResult.t(), [{atom, any}]) ::
+          {:ok, SentGuestMessage.t()} | {:error, Error.t()}
+  def answer_guest_query(guest_query_id, result),
+    do: answer_guest_query(guest_query_id, result, [])
+
+  def answer_guest_query(%Client{} = client, guest_query_id, result) do
+    answer_guest_query(client, guest_query_id, result, [])
+  end
+
+  def answer_guest_query(guest_query_id, result, options) do
+    do_answer_guest_query(nil, guest_query_id, result, options)
+  end
+
+  def answer_guest_query(%Client{} = client, guest_query_id, result, options) do
+    do_answer_guest_query(client, guest_query_id, result, options)
   end
 
   @doc """
@@ -1097,12 +1290,20 @@ defmodule Nadia do
     do_answer_inline_query(client, inline_query_id, results, options)
   end
 
+  defp do_answer_guest_query(client, guest_query_id, result, options) do
+    args = [guest_query_id: guest_query_id, result: encode_inline_query_result(result)]
+
+    if client do
+      api_request(client, "answerGuestQuery", args ++ options)
+    else
+      api_request("answerGuestQuery", args ++ options)
+    end
+  end
+
   defp do_answer_inline_query(client, inline_query_id, results, options) do
     encoded_results =
       results
-      |> Enum.map(fn result ->
-        for {k, v} <- Map.from_struct(result), v != nil, into: %{}, do: {k, v}
-      end)
+      |> Enum.map(&inline_query_result_map/1)
       |> Jason.encode!()
 
     args = [inline_query_id: inline_query_id, results: encoded_results]
@@ -1112,6 +1313,20 @@ defmodule Nadia do
     else
       api_request("answerInlineQuery", args ++ options)
     end
+  end
+
+  defp encode_inline_query_result(result) do
+    result
+    |> inline_query_result_map()
+    |> Jason.encode!()
+  end
+
+  defp inline_query_result_map(result) do
+    for {k, v} <- Map.from_struct(result), v != nil, into: %{}, do: {k, v}
+  end
+
+  defp encode_added_user_ids(options) do
+    Keyword.update(options, :added_user_ids, nil, &Jason.encode!/1)
   end
 
   @doc """

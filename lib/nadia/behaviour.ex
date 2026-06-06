@@ -2,13 +2,17 @@ defmodule Nadia.Behaviour do
   alias Nadia.Client
 
   alias Nadia.Model.{
+    BotAccessSettings,
+    BusinessConnection,
     Chat,
     ChatMember,
     Error,
     File,
     Message,
+    SentGuestMessage,
     Update,
     User,
+    UserChatBoosts,
     UserProfilePhotos,
     WebhookInfo
   }
@@ -93,9 +97,38 @@ defmodule Nadia.Behaviour do
               {:ok, ChatMember.t()} | {:error, Error.t()}
   @callback get_chat_member(Client.t(), integer | binary, integer) ::
               {:ok, ChatMember.t()} | {:error, Error.t()}
+  @callback get_user_chat_boosts(integer | binary, integer) ::
+              {:ok, UserChatBoosts.t()} | {:error, Error.t()}
+  @callback get_user_chat_boosts(Client.t(), integer | binary, integer) ::
+              {:ok, UserChatBoosts.t()} | {:error, Error.t()}
+  @callback get_business_connection(binary) :: {:ok, BusinessConnection.t()} | {:error, Error.t()}
+  @callback get_business_connection(Client.t(), binary) ::
+              {:ok, BusinessConnection.t()} | {:error, Error.t()}
+  @callback get_managed_bot_token(integer) :: {:ok, binary} | {:error, Error.t()}
+  @callback get_managed_bot_token(Client.t(), integer) :: {:ok, binary} | {:error, Error.t()}
+  @callback replace_managed_bot_token(integer) :: {:ok, binary} | {:error, Error.t()}
+  @callback replace_managed_bot_token(Client.t(), integer) :: {:ok, binary} | {:error, Error.t()}
+  @callback get_managed_bot_access_settings(integer) ::
+              {:ok, BotAccessSettings.t()} | {:error, Error.t()}
+  @callback get_managed_bot_access_settings(Client.t(), integer) ::
+              {:ok, BotAccessSettings.t()} | {:error, Error.t()}
+  @callback set_managed_bot_access_settings(integer, boolean, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback set_managed_bot_access_settings(Client.t(), integer, boolean, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback get_user_personal_chat_messages(integer, integer) ::
+              {:ok, [Message.t()]} | {:error, Error.t()}
+  @callback get_user_personal_chat_messages(Client.t(), integer, integer) ::
+              {:ok, [Message.t()]} | {:error, Error.t()}
   @callback answer_callback_query(binary, [{atom, any}]) :: :ok | {:error, Error.t()}
   @callback answer_callback_query(Client.t(), binary, [{atom, any}]) ::
               :ok | {:error, Error.t()}
+  @callback answer_guest_query(binary, Nadia.Model.InlineQueryResult.t(), [{atom, any}]) ::
+              {:ok, SentGuestMessage.t()} | {:error, Error.t()}
+  @callback answer_guest_query(Client.t(), binary, Nadia.Model.InlineQueryResult.t(), [
+              {atom, any}
+            ]) ::
+              {:ok, SentGuestMessage.t()} | {:error, Error.t()}
   @callback edit_message_text(integer | binary, integer, binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
   @callback edit_message_text(Client.t(), integer | binary, integer, binary, binary, [{atom, any}]) ::
@@ -161,7 +194,15 @@ defmodule Nadia.Behaviour do
                       get_chat_administrators: 2,
                       get_chat_member_count: 2,
                       get_chat_member: 3,
+                      get_user_chat_boosts: 3,
+                      get_business_connection: 2,
+                      get_managed_bot_token: 2,
+                      replace_managed_bot_token: 2,
+                      get_managed_bot_access_settings: 2,
+                      set_managed_bot_access_settings: 4,
+                      get_user_personal_chat_messages: 3,
                       answer_callback_query: 3,
+                      answer_guest_query: 4,
                       edit_message_text: 6,
                       edit_message_caption: 5,
                       edit_message_reply_markup: 5,

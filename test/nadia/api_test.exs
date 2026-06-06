@@ -825,6 +825,111 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "delete_messages/2 builds request with JSON message id array" do
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.delete_messages(-1_008_888_888_890, [10, 11, 12])
+
+    assert_telegram_request("deleteMessages",
+      body: {:form, [{"chat_id", "-1008888888890"}, {"message_ids", "[10,11,12]"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    client =
+      Client.new(
+        token: "999:family-b",
+        http_client: Nadia.HTTPCase.StubHTTPClient
+      )
+
+    assert :ok == Nadia.delete_messages(client, "@cleanup_channel", [20, 21])
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-b/deleteMessages",
+      body: {:form, [{"chat_id", "@cleanup_channel"}, {"message_ids", "[20,21]"}]},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "delete_message_reaction/3 passes user and actor chat selectors" do
+    stub_telegram_result(true)
+
+    assert :ok ==
+             Nadia.delete_message_reaction(-1_008_888_888_891, 44,
+               user_id: 10010,
+               actor_chat_id: -1_008_888_888_892
+             )
+
+    assert_telegram_request("deleteMessageReaction",
+      body:
+        {:form,
+         [
+           {"chat_id", "-1008888888891"},
+           {"message_id", "44"},
+           {"user_id", "10010"},
+           {"actor_chat_id", "-1008888888892"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "delete_all_message_reactions/2 passes user and actor chat selectors" do
+    stub_telegram_result(true)
+
+    assert :ok ==
+             Nadia.delete_all_message_reactions("@reaction_room",
+               user_id: 10011,
+               actor_chat_id: -1_008_888_888_893
+             )
+
+    assert_telegram_request("deleteAllMessageReactions",
+      body:
+        {:form,
+         [
+           {"chat_id", "@reaction_room"},
+           {"user_id", "10011"},
+           {"actor_chat_id", "-1008888888893"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "set_message_reaction/3 encodes reaction payload and preserves false is_big" do
+    stub_telegram_result(true)
+
+    reactions = [
+      %ReactionType{type: "emoji", emoji: "\u{1F44D}"},
+      [type: "custom_emoji", custom_emoji_id: "emoji-custom-1"],
+      %{type: "emoji", emoji: "\u{1F525}"}
+    ]
+
+    encoded_reactions =
+      Jason.encode!([
+        %{type: "emoji", emoji: "\u{1F44D}"},
+        %{type: "custom_emoji", custom_emoji_id: "emoji-custom-1"},
+        %{type: "emoji", emoji: "\u{1F525}"}
+      ])
+
+    assert :ok ==
+             Nadia.set_message_reaction(-1_008_888_888_894, 55,
+               reaction: reactions,
+               is_big: false
+             )
+
+    assert_telegram_request("setMessageReaction",
+      body:
+        {:form,
+         [
+           {"chat_id", "-1008888888894"},
+           {"message_id", "55"},
+           {"reaction", encoded_reactions},
+           {"is_big", "false"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
   test "request builds form body from keyword list params" do
     stub_telegram_result(true)
 

@@ -1151,6 +1151,151 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to delete multiple messages simultaneously.
+  Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `message_ids` - List of message identifiers to delete
+  """
+  @spec delete_messages(integer | binary, [integer]) :: :ok | {:error, Error.t()}
+  @spec delete_messages(Client.t(), integer | binary, [integer]) :: :ok | {:error, Error.t()}
+  def delete_messages(chat_id, message_ids) do
+    api_request(
+      "deleteMessages",
+      chat_id: chat_id,
+      message_ids: encode_message_ids(message_ids)
+    )
+  end
+
+  def delete_messages(%Client{} = client, chat_id, message_ids) do
+    api_request(
+      client,
+      "deleteMessages",
+      chat_id: chat_id,
+      message_ids: encode_message_ids(message_ids)
+    )
+  end
+
+  @doc """
+  Use this method to remove a reaction from a message.
+  Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target supergroup
+  (in the format @username)
+  * `message_id` - Identifier of the target message
+  * `options` - orddict of options
+
+  Options:
+  * `:user_id` - Identifier of the user whose reaction will be removed
+  * `:actor_chat_id` - Identifier of the chat whose reaction will be removed
+  """
+  @spec delete_message_reaction(integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  @spec delete_message_reaction(Client.t(), integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def delete_message_reaction(chat_id, message_id),
+    do: delete_message_reaction(chat_id, message_id, [])
+
+  def delete_message_reaction(%Client{} = client, chat_id, message_id) do
+    delete_message_reaction(client, chat_id, message_id, [])
+  end
+
+  def delete_message_reaction(chat_id, message_id, options) do
+    api_request(
+      "deleteMessageReaction",
+      [chat_id: chat_id, message_id: message_id] ++ options
+    )
+  end
+
+  def delete_message_reaction(%Client{} = client, chat_id, message_id, options) do
+    api_request(
+      client,
+      "deleteMessageReaction",
+      [chat_id: chat_id, message_id: message_id] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to remove recent reactions added by a given user or chat.
+  Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target supergroup
+  (in the format @username)
+  * `options` - orddict of options
+
+  Options:
+  * `:user_id` - Identifier of the user whose reactions will be removed
+  * `:actor_chat_id` - Identifier of the chat whose reactions will be removed
+  """
+  @spec delete_all_message_reactions(integer | binary, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  @spec delete_all_message_reactions(Client.t(), integer | binary, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def delete_all_message_reactions(chat_id), do: delete_all_message_reactions(chat_id, [])
+
+  def delete_all_message_reactions(%Client{} = client, chat_id) do
+    delete_all_message_reactions(client, chat_id, [])
+  end
+
+  def delete_all_message_reactions(chat_id, options) do
+    api_request(
+      "deleteAllMessageReactions",
+      [chat_id: chat_id] ++ options
+    )
+  end
+
+  def delete_all_message_reactions(%Client{} = client, chat_id, options) do
+    api_request(
+      client,
+      "deleteAllMessageReactions",
+      [chat_id: chat_id] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to change the chosen reactions on a message.
+  Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `message_id` - Identifier of the target message
+  * `options` - orddict of options
+
+  Options:
+  * `:reaction` - List of reaction types to set on the message
+  * `:is_big` - Pass True to set the reaction with a big animation
+  """
+  @spec set_message_reaction(integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  @spec set_message_reaction(Client.t(), integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def set_message_reaction(chat_id, message_id), do: set_message_reaction(chat_id, message_id, [])
+
+  def set_message_reaction(%Client{} = client, chat_id, message_id) do
+    set_message_reaction(client, chat_id, message_id, [])
+  end
+
+  def set_message_reaction(chat_id, message_id, options) do
+    api_request(
+      "setMessageReaction",
+      [chat_id: chat_id, message_id: message_id] ++ encode_reaction_option(options)
+    )
+  end
+
+  def set_message_reaction(%Client{} = client, chat_id, message_id, options) do
+    api_request(
+      client,
+      "setMessageReaction",
+      [chat_id: chat_id, message_id: message_id] ++ encode_reaction_option(options)
+    )
+  end
+
+  @doc """
   Use this method to edit captions of messages sent by the bot or via
   the bot (for inline bots). On success, the edited Message is returned.
 
@@ -1327,6 +1472,56 @@ defmodule Nadia do
 
   defp encode_added_user_ids(options) do
     Keyword.update(options, :added_user_ids, nil, &Jason.encode!/1)
+  end
+
+  defp encode_message_ids(message_ids), do: Jason.encode!(message_ids)
+
+  defp encode_reaction_option(options) do
+    Keyword.update(options, :reaction, nil, &encode_reaction_types/1)
+  end
+
+  defp encode_reaction_types(nil), do: nil
+
+  defp encode_reaction_types(reaction) when is_list(reaction) do
+    reaction
+    |> normalize_reaction_types()
+    |> Jason.encode!()
+  end
+
+  defp encode_reaction_types(reaction) do
+    [reaction]
+    |> normalize_reaction_types()
+    |> Jason.encode!()
+  end
+
+  defp normalize_reaction_types([]), do: []
+
+  defp normalize_reaction_types(reaction) when is_list(reaction) do
+    if Keyword.keyword?(reaction) do
+      [reaction_type_map(reaction)]
+    else
+      Enum.map(reaction, &reaction_type_map/1)
+    end
+  end
+
+  defp reaction_type_map(reaction) when is_list(reaction) do
+    reaction
+    |> Map.new()
+    |> reject_nil_values()
+  end
+
+  defp reaction_type_map(%_{} = reaction) do
+    reaction
+    |> Map.from_struct()
+    |> reject_nil_values()
+  end
+
+  defp reaction_type_map(reaction) when is_map(reaction) do
+    reject_nil_values(reaction)
+  end
+
+  defp reject_nil_values(map) do
+    for {key, value} <- map, value != nil, into: %{}, do: {key, value}
   end
 
   @doc """

@@ -120,6 +120,21 @@ defmodule Nadia.Behaviour do
               {:ok, [Message.t()]} | {:error, Error.t()}
   @callback get_user_personal_chat_messages(Client.t(), integer, integer) ::
               {:ok, [Message.t()]} | {:error, Error.t()}
+  @callback delete_messages(integer | binary, [integer]) :: :ok | {:error, Error.t()}
+  @callback delete_messages(Client.t(), integer | binary, [integer]) ::
+              :ok | {:error, Error.t()}
+  @callback delete_message_reaction(integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback delete_message_reaction(Client.t(), integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback delete_all_message_reactions(integer | binary, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback delete_all_message_reactions(Client.t(), integer | binary, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback set_message_reaction(integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback set_message_reaction(Client.t(), integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
   @callback answer_callback_query(binary, [{atom, any}]) :: :ok | {:error, Error.t()}
   @callback answer_callback_query(Client.t(), binary, [{atom, any}]) ::
               :ok | {:error, Error.t()}
@@ -201,6 +216,10 @@ defmodule Nadia.Behaviour do
                       get_managed_bot_access_settings: 2,
                       set_managed_bot_access_settings: 4,
                       get_user_personal_chat_messages: 3,
+                      delete_messages: 3,
+                      delete_message_reaction: 4,
+                      delete_all_message_reactions: 3,
+                      set_message_reaction: 4,
                       answer_callback_query: 3,
                       answer_guest_query: 4,
                       edit_message_text: 6,

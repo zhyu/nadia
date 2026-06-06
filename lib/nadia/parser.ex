@@ -25,6 +25,13 @@ defmodule Nadia.Parser do
     MessageEntity,
     MessageReactionCountUpdated,
     MessageReactionUpdated,
+    PaidMedia,
+    PaidMediaInfo,
+    PaidMediaLivePhoto,
+    PaidMediaPhoto,
+    PaidMediaPreview,
+    PaidMediaPurchased,
+    PaidMediaVideo,
     Poll,
     PollAnswer,
     PollMedia,
@@ -63,6 +70,7 @@ defmodule Nadia.Parser do
       "getChatMemberCount" -> result
       "getStickerSet" -> parse(StickerSet, result)
       "uploadStickerFile" -> parse(File, result)
+      "sendPaidMedia" -> parse(Message, result)
       "stopPoll" -> parse(Poll, result)
       "getUserChatBoosts" -> parse(UserChatBoosts, result)
       _ -> parse(Message, result)
@@ -150,6 +158,20 @@ defmodule Nadia.Parser do
   defp parse(UserChatBoosts, {:boosts, val}) when is_list(val),
     do: {:boosts, Enum.map(val, &parse(ChatBoost, &1))}
 
+  defp parse(Message, {:paid_media, val}), do: {:paid_media, parse(PaidMediaInfo, val)}
+
+  defp parse(Update, {:purchased_paid_media, val}),
+    do: {:purchased_paid_media, parse(PaidMediaPurchased, val)}
+
+  defp parse(PaidMediaInfo, {:paid_media, val}) when is_list(val),
+    do: {:paid_media, Enum.map(val, &parse_paid_media/1)}
+
+  defp parse(PaidMediaPhoto, {:photo, val}) when is_list(val),
+    do: {:photo, Enum.map(val, &parse(PhotoSize, &1))}
+
+  defp parse(PaidMediaVideo, {:video, val}), do: {:video, parse(Video, val)}
+  defp parse(PaidMediaLivePhoto, {:live_photo, val}), do: {:live_photo, val}
+
   defp parse(ReactionCount, {:type, val}), do: {:type, parse(ReactionType, val)}
 
   defp parse(MessageReactionUpdated, {:old_reaction, val}) when is_list(val),
@@ -225,6 +247,18 @@ defmodule Nadia.Parser do
   end
 
   defp parse_chat_boost_source(val), do: val
+
+  defp parse_paid_media(%{} = val) do
+    case Map.get(val, :type) || Map.get(val, "type") do
+      "photo" -> parse(PaidMediaPhoto, val)
+      "preview" -> parse(PaidMediaPreview, val)
+      "video" -> parse(PaidMediaVideo, val)
+      "live_photo" -> parse(PaidMediaLivePhoto, val)
+      _ -> parse(PaidMedia, val)
+    end
+  end
+
+  defp parse_paid_media(val), do: val
 
   defp struct_fields(type) do
     type

@@ -1,0 +1,83 @@
+{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 900400001,
+      "message": {
+        "message_id": 50,
+        "date": 1780002000,
+        "chat": {
+          "id": -1006666666666,
+          "type": "supergroup",
+          "title": "Paid Media Room"
+        },
+        "paid_media": {
+          "star_count": 42,
+          "paid_media": [
+            {
+              "type": "photo",
+              "photo": [
+                {
+                  "file_id": "paid-photo-1",
+                  "file_unique_id": "paid-photo-uniq-1",
+                  "width": 1280,
+                  "height": 720,
+                  "file_size": 54321
+                }
+              ],
+              "future_paid_media_photo_field": "ignored"
+            },
+            {
+              "type": "preview",
+              "width": 640,
+              "height": 360,
+              "duration": 15,
+              "future_paid_media_preview_field": "ignored"
+            },
+            {
+              "type": "video",
+              "video": {
+                "file_id": "paid-video-1",
+                "width": 1920,
+                "height": 1080,
+                "duration": 24,
+                "mime_type": "video/mp4",
+                "file_size": 1234567
+              },
+              "future_paid_media_video_field": "ignored"
+            },
+            {
+              "type": "live_photo",
+              "live_photo": {
+                "file_id": "paid-live-photo-1",
+                "duration": 3,
+                "future_live_photo_field": "preserved-raw"
+              },
+              "future_paid_media_live_photo_field": "ignored"
+            },
+            {
+              "type": "future_paid_media",
+              "future_paid_media_item_field": "ignored"
+            }
+          ],
+          "future_paid_media_info_field": "ignored"
+        },
+        "future_paid_media_message_field": "ignored"
+      },
+      "future_paid_media_update_field": "ignored"
+    },
+    {
+      "update_id": 900400002,
+      "purchased_paid_media": {
+        "from": {
+          "id": 11001,
+          "is_bot": false,
+          "first_name": "Media Buyer",
+          "language_code": "en"
+        },
+        "paid_media_payload": "paid-media-payload-1",
+        "future_paid_media_purchase_field": "ignored"
+      }
+    }
+  ]
+}

@@ -19,11 +19,20 @@ defmodule Nadia.APITest do
     Message,
     MessageEntity,
     MessageReactionUpdated,
+    PaidMedia,
+    PaidMediaInfo,
+    PaidMediaLivePhoto,
+    PaidMediaPhoto,
+    PaidMediaPreview,
+    PaidMediaPurchased,
+    PaidMediaVideo,
+    PhotoSize,
     ReactionCount,
     ReactionType,
     ReplyKeyboardRemove,
     User,
-    UserChatBoosts
+    UserChatBoosts,
+    Video
   }
 
   defmodule BotAHTTPClient do
@@ -236,6 +245,68 @@ defmodule Nadia.APITest do
     refute existing_atom?(unknown_source_key)
     refute existing_atom?(unknown_removed_key)
     refute existing_atom?(unknown_boost_added_key)
+  end
+
+  test "request decodes fixture-backed paid media getUpdates response" do
+    unknown_update_key = "future_paid_media_update_field"
+    unknown_message_key = "future_paid_media_message_field"
+    unknown_info_key = "future_paid_media_info_field"
+    unknown_item_key = "future_paid_media_item_field"
+    unknown_purchase_key = "future_paid_media_purchase_field"
+    unknown_live_photo_key = "future_live_photo_field"
+
+    refute existing_atom?(unknown_update_key)
+    refute existing_atom?(unknown_message_key)
+    refute existing_atom?(unknown_info_key)
+    refute existing_atom?(unknown_item_key)
+    refute existing_atom?(unknown_purchase_key)
+    refute existing_atom?(unknown_live_photo_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body: response_fixture("get_updates_paid_media.json")
+       }}
+    )
+
+    assert {:ok,
+            [
+              %{message: %Message{paid_media: %PaidMediaInfo{} = paid_media_info}},
+              %{purchased_paid_media: %PaidMediaPurchased{} = purchased_paid_media}
+            ]} = Nadia.get_updates()
+
+    assert paid_media_info.star_count == 42
+
+    assert [
+             %PaidMediaPhoto{photo: [%PhotoSize{file_id: "paid-photo-1"}]},
+             %PaidMediaPreview{type: "preview", width: 640, height: 360, duration: 15},
+             %PaidMediaVideo{video: %Video{file_id: "paid-video-1"}},
+             %PaidMediaLivePhoto{
+               type: "live_photo",
+               live_photo: %{
+                 "file_id" => "paid-live-photo-1",
+                 "future_live_photo_field" => "preserved-raw"
+               }
+             },
+             %PaidMedia{type: "future_paid_media"}
+           ] = paid_media_info.paid_media
+
+    assert purchased_paid_media.from == %User{
+             id: 11001,
+             is_bot: false,
+             first_name: "Media Buyer",
+             language_code: "en"
+           }
+
+    assert purchased_paid_media.paid_media_payload == "paid-media-payload-1"
+
+    refute existing_atom?(unknown_update_key)
+    refute existing_atom?(unknown_message_key)
+    refute existing_atom?(unknown_info_key)
+    refute existing_atom?(unknown_item_key)
+    refute existing_atom?(unknown_purchase_key)
+    refute existing_atom?(unknown_live_photo_key)
   end
 
   test "request? parses getUserChatBoosts into modeled results" do

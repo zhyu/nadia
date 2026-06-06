@@ -17,6 +17,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added Telegram chat boost response structs and parser coverage for
   `chat_boost`, `removed_chat_boost`, `Message.boost_added`, and
   `getUserChatBoosts` results.
+- Added Telegram paid media response structs and parser coverage for
+  `Message.paid_media`, `purchased_paid_media` updates, and `sendPaidMedia`
+  results.
+- Added Telegram paid media response structs and parser coverage for
+  `Message.paid_media`, `purchased_paid_media` updates, and `sendPaidMedia`
+  results.
 - Added Telegram chat boost response structs and parser coverage for
   `chat_boost`, `removed_chat_boost`, `Message.boost_added`, and
   `getUserChatBoosts` results.

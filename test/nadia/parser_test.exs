@@ -25,6 +25,13 @@ defmodule Nadia.ParserTest do
     MessageEntity,
     MessageReactionCountUpdated,
     MessageReactionUpdated,
+    PaidMedia,
+    PaidMediaInfo,
+    PaidMediaLivePhoto,
+    PaidMediaPhoto,
+    PaidMediaPreview,
+    PaidMediaPurchased,
+    PaidMediaVideo,
     Poll,
     PollAnswer,
     PollMedia,
@@ -34,6 +41,7 @@ defmodule Nadia.ParserTest do
     ReactionCount,
     ReactionType,
     UserChatBoosts,
+    Video,
     Venue,
     WebhookInfo
   }
@@ -420,6 +428,71 @@ defmodule Nadia.ParserTest do
            } = removed_boost.source
 
     assert boost_added.boost_count == 4
+  end
+
+  test "parse fixture-backed paid media get_updates response decoded with string keys" do
+    raw_updates = response_result_fixture("get_updates_paid_media.json")
+
+    updates = Parser.parse_result(raw_updates, "getUpdates")
+
+    assert [
+             %Update{
+               update_id: 900_400_001,
+               message: %Message{paid_media: %PaidMediaInfo{} = paid_media_info}
+             },
+             %Update{
+               update_id: 900_400_002,
+               purchased_paid_media: %PaidMediaPurchased{} = purchased_paid_media
+             }
+           ] = updates
+
+    assert paid_media_info.star_count == 42
+
+    assert [
+             %PaidMediaPhoto{
+               type: "photo",
+               photo: [
+                 %PhotoSize{
+                   file_id: "paid-photo-1",
+                   file_unique_id: "paid-photo-uniq-1",
+                   width: 1280,
+                   height: 720,
+                   file_size: 54_321
+                 }
+               ]
+             },
+             %PaidMediaPreview{type: "preview", width: 640, height: 360, duration: 15},
+             %PaidMediaVideo{
+               type: "video",
+               video: %Video{
+                 file_id: "paid-video-1",
+                 width: 1920,
+                 height: 1080,
+                 duration: 24,
+                 mime_type: "video/mp4",
+                 file_size: 1_234_567
+               }
+             },
+             %PaidMediaLivePhoto{} = paid_media_live_photo,
+             %PaidMedia{type: "future_paid_media"}
+           ] = paid_media_info.paid_media
+
+    assert paid_media_live_photo.type == "live_photo"
+
+    assert paid_media_live_photo.live_photo == %{
+             "file_id" => "paid-live-photo-1",
+             "duration" => 3,
+             "future_live_photo_field" => "preserved-raw"
+           }
+
+    assert purchased_paid_media.from == %User{
+             id: 11001,
+             is_bot: false,
+             first_name: "Media Buyer",
+             language_code: "en"
+           }
+
+    assert purchased_paid_media.paid_media_payload == "paid-media-payload-1"
   end
 
   test "parse result of get_user_chat_boosts" do

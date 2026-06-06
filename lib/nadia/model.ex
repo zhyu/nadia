@@ -333,7 +333,7 @@ defmodule Nadia.Model do
             audio: Audio.t(),
             document: Document.t(),
             live_photo: any,
-            paid_media: any,
+            paid_media: PaidMediaInfo.t(),
             photo: [PhotoSize.t()],
             story: any,
             sticker: any,
@@ -370,6 +370,73 @@ defmodule Nadia.Model do
             pinned_message: Message.t(),
             reply_markup: any,
             web_app_data: any
+          }
+  end
+
+  defmodule PaidMediaInfo do
+    defstruct star_count: nil, paid_media: []
+
+    @type t :: %PaidMediaInfo{
+            star_count: integer,
+            paid_media: [PaidMedia.t()]
+          }
+  end
+
+  defmodule PaidMedia do
+    defstruct type: nil
+
+    @type t ::
+            %PaidMedia{type: binary}
+            | PaidMediaPhoto.t()
+            | PaidMediaPreview.t()
+            | PaidMediaVideo.t()
+            | PaidMediaLivePhoto.t()
+  end
+
+  defmodule PaidMediaPhoto do
+    defstruct type: nil, photo: []
+
+    @type t :: %PaidMediaPhoto{
+            type: binary,
+            photo: [PhotoSize.t()]
+          }
+  end
+
+  defmodule PaidMediaPreview do
+    defstruct type: nil, width: nil, height: nil, duration: nil
+
+    @type t :: %PaidMediaPreview{
+            type: binary,
+            width: integer,
+            height: integer,
+            duration: integer
+          }
+  end
+
+  defmodule PaidMediaVideo do
+    defstruct type: nil, video: nil
+
+    @type t :: %PaidMediaVideo{
+            type: binary,
+            video: Video.t()
+          }
+  end
+
+  defmodule PaidMediaLivePhoto do
+    defstruct type: nil, live_photo: nil
+
+    @type t :: %PaidMediaLivePhoto{
+            type: binary,
+            live_photo: any
+          }
+  end
+
+  defmodule PaidMediaPurchased do
+    defstruct from: nil, paid_media_payload: nil
+
+    @type t :: %PaidMediaPurchased{
+            from: User.t(),
+            paid_media_payload: binary
           }
   end
 
@@ -746,7 +813,7 @@ defmodule Nadia.Model do
             callback_query: CallbackQuery.t(),
             shipping_query: any,
             pre_checkout_query: any,
-            purchased_paid_media: any,
+            purchased_paid_media: PaidMediaPurchased.t(),
             poll: Poll.t(),
             poll_answer: PollAnswer.t(),
             my_chat_member: any,

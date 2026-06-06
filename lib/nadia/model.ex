@@ -395,6 +395,56 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule ReactionType do
+    defstruct type: nil, emoji: nil, custom_emoji_id: nil
+
+    @type t :: %ReactionType{
+            type: binary,
+            emoji: binary,
+            custom_emoji_id: binary
+          }
+  end
+
+  defmodule ReactionCount do
+    defstruct type: nil, total_count: nil
+
+    @type t :: %ReactionCount{
+            type: ReactionType.t(),
+            total_count: integer
+          }
+  end
+
+  defmodule MessageReactionUpdated do
+    defstruct chat: nil,
+              message_id: nil,
+              user: nil,
+              actor_chat: nil,
+              date: nil,
+              old_reaction: [],
+              new_reaction: []
+
+    @type t :: %MessageReactionUpdated{
+            chat: Chat.t(),
+            message_id: integer,
+            user: User.t(),
+            actor_chat: Chat.t(),
+            date: integer,
+            old_reaction: [ReactionType.t()],
+            new_reaction: [ReactionType.t()]
+          }
+  end
+
+  defmodule MessageReactionCountUpdated do
+    defstruct chat: nil, message_id: nil, date: nil, reactions: []
+
+    @type t :: %MessageReactionCountUpdated{
+            chat: Chat.t(),
+            message_id: integer,
+            date: integer,
+            reactions: [ReactionCount.t()]
+          }
+  end
+
   defmodule PollMedia do
     defstruct animation: nil,
               audio: nil,
@@ -596,8 +646,8 @@ defmodule Nadia.Model do
             edited_business_message: Message.t(),
             deleted_business_messages: any,
             guest_message: Message.t(),
-            message_reaction: any,
-            message_reaction_count: any,
+            message_reaction: MessageReactionUpdated.t(),
+            message_reaction_count: MessageReactionCountUpdated.t(),
             inline_query: InlineQuery.t(),
             chosen_inline_result: ChosenInlineResult.t(),
             callback_query: CallbackQuery.t(),

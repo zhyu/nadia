@@ -7,7 +7,16 @@ defmodule Nadia.APITest do
   alias Nadia.Client
   alias Nadia.HTTPResponse
   alias Nadia.Model.Error
-  alias Nadia.Model.{Message, MessageEntity, ReplyKeyboardRemove, User}
+
+  alias Nadia.Model.{
+    Message,
+    MessageEntity,
+    MessageReactionUpdated,
+    ReactionCount,
+    ReactionType,
+    ReplyKeyboardRemove,
+    User
+  }
 
   defmodule BotAHTTPClient do
     @behaviour Nadia.HTTPClient
@@ -114,6 +123,49 @@ defmodule Nadia.APITest do
     refute existing_atom?(unknown_update_key)
     refute existing_atom?(unknown_message_key)
     refute existing_atom?(unknown_user_key)
+  end
+
+  test "request decodes fixture-backed reaction getUpdates response" do
+    unknown_update_key = "future_reaction_update_field"
+    unknown_reaction_key = "future_message_reaction_field"
+    unknown_count_key = "future_reaction_count_field"
+
+    refute existing_atom?(unknown_update_key)
+    refute existing_atom?(unknown_reaction_key)
+    refute existing_atom?(unknown_count_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body: response_fixture("get_updates_reactions.json")
+       }}
+    )
+
+    assert {:ok,
+            [
+              %{message_reaction: %MessageReactionUpdated{} = message_reaction},
+              %{message_reaction_count: reaction_count}
+            ]} = Nadia.get_updates()
+
+    assert message_reaction.chat.title == "Reaction Room"
+    assert message_reaction.actor_chat.title == "Anonymous Channel"
+
+    assert [%ReactionType{type: "emoji", emoji: "\u{1F44D}"}] =
+             message_reaction.old_reaction
+
+    assert [
+             %ReactionCount{
+               type: %ReactionType{type: "emoji", emoji: "\u{2764}\u{FE0F}"},
+               total_count: 4
+             },
+             %ReactionCount{type: %ReactionType{type: "custom_emoji"}, total_count: 2},
+             %ReactionCount{type: %ReactionType{type: "paid"}, total_count: 1}
+           ] = reaction_count.reactions
+
+    refute existing_atom?(unknown_update_key)
+    refute existing_atom?(unknown_reaction_key)
+    refute existing_atom?(unknown_count_key)
   end
 
   test "request builds form body from keyword list params" do

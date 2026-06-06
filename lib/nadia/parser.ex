@@ -15,12 +15,16 @@ defmodule Nadia.Parser do
     InlineQuery,
     ChosenInlineResult,
     MessageEntity,
+    MessageReactionCountUpdated,
+    MessageReactionUpdated,
     Poll,
     PollAnswer,
     PollMedia,
     PollOption,
     PollOptionAdded,
     PollOptionDeleted,
+    ReactionCount,
+    ReactionType,
     WebhookInfo
   }
 
@@ -89,7 +93,8 @@ defmodule Nadia.Parser do
     :sender_chat,
     :guest_bot_caller_chat,
     :added_by_chat,
-    :voter_chat
+    :voter_chat,
+    :actor_chat
   ]
 
   @keys_of_message_entities [
@@ -127,6 +132,18 @@ defmodule Nadia.Parser do
   defp parse(PollOption, {:media, val}), do: {:media, parse(PollMedia, val)}
   defp parse(PollOptionAdded, {:poll_message, val}), do: {:poll_message, parse(Message, val)}
   defp parse(PollOptionDeleted, {:poll_message, val}), do: {:poll_message, parse(Message, val)}
+
+  defp parse(ReactionCount, {:type, val}), do: {:type, parse(ReactionType, val)}
+
+  defp parse(MessageReactionUpdated, {:old_reaction, val}) when is_list(val),
+    do: {:old_reaction, Enum.map(val, &parse(ReactionType, &1))}
+
+  defp parse(MessageReactionUpdated, {:new_reaction, val}) when is_list(val),
+    do: {:new_reaction, Enum.map(val, &parse(ReactionType, &1))}
+
+  defp parse(MessageReactionCountUpdated, {:reactions, val}) when is_list(val),
+    do: {:reactions, Enum.map(val, &parse(ReactionCount, &1))}
+
   defp parse(_type, entry), do: parse(entry)
 
   defp parse({:audio, val}), do: {:audio, parse(Audio, val)}
@@ -146,6 +163,12 @@ defmodule Nadia.Parser do
 
   defp parse({:poll_option_deleted, val}),
     do: {:poll_option_deleted, parse(PollOptionDeleted, val)}
+
+  defp parse({:message_reaction, val}),
+    do: {:message_reaction, parse(MessageReactionUpdated, val)}
+
+  defp parse({:message_reaction_count, val}),
+    do: {:message_reaction_count, parse(MessageReactionCountUpdated, val)}
 
   defp parse({:stickers, val}) when is_list(val),
     do: {:stickers, Enum.map(val, &parse(Sticker, &1))}

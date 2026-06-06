@@ -15,12 +15,16 @@ defmodule Nadia.ParserTest do
     UserProfilePhotos,
     Message,
     MessageEntity,
+    MessageReactionCountUpdated,
+    MessageReactionUpdated,
     Poll,
     PollAnswer,
     PollMedia,
     PollOption,
     PollOptionAdded,
     PollOptionDeleted,
+    ReactionCount,
+    ReactionType,
     Venue,
     WebhookInfo
   }
@@ -305,6 +309,52 @@ defmodule Nadia.ParserTest do
     assert deleted.option_persistent_id == "evening"
     assert deleted.option_text == "Evening"
     assert [%MessageEntity{type: "strikethrough"}] = deleted.option_text_entities
+  end
+
+  test "parse fixture-backed reaction get_updates response decoded with string keys" do
+    raw_updates = response_result_fixture("get_updates_reactions.json")
+
+    updates = Parser.parse_result(raw_updates, "getUpdates")
+
+    assert [
+             %Update{
+               update_id: 900_200_001,
+               message_reaction: %MessageReactionUpdated{} = message_reaction
+             },
+             %Update{
+               update_id: 900_200_002,
+               message_reaction_count: %MessageReactionCountUpdated{} = reaction_count
+             }
+           ] = updates
+
+    assert message_reaction.chat.title == "Reaction Room"
+    assert message_reaction.message_id == 30
+    assert message_reaction.user.first_name == "Reactor"
+    assert message_reaction.actor_chat.title == "Anonymous Channel"
+    assert message_reaction.date == 1_780_000_600
+
+    assert [%ReactionType{type: "emoji", emoji: "\u{1F44D}"}] =
+             message_reaction.old_reaction
+
+    assert [
+             %ReactionType{type: "custom_emoji", custom_emoji_id: "custom-reaction-1"},
+             %ReactionType{type: "paid"}
+           ] = message_reaction.new_reaction
+
+    assert reaction_count.chat.title == "Reaction Room"
+    assert reaction_count.message_id == 30
+
+    assert [
+             %ReactionCount{
+               type: %ReactionType{type: "emoji", emoji: "\u{2764}\u{FE0F}"},
+               total_count: 4
+             },
+             %ReactionCount{
+               type: %ReactionType{type: "custom_emoji", custom_emoji_id: "custom-reaction-2"},
+               total_count: 2
+             },
+             %ReactionCount{type: %ReactionType{type: "paid"}, total_count: 1}
+           ] = reaction_count.reactions
   end
 
   test "parse result of stop_poll" do

@@ -1,0 +1,79 @@
+{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 900200001,
+      "message_reaction": {
+        "chat": {
+          "id": -1006666666666,
+          "type": "supergroup",
+          "title": "Reaction Room"
+        },
+        "message_id": 30,
+        "user": {
+          "id": 9001,
+          "is_bot": false,
+          "first_name": "Reactor"
+        },
+        "actor_chat": {
+          "id": -1007777777777,
+          "type": "channel",
+          "title": "Anonymous Channel"
+        },
+        "date": 1780000600,
+        "old_reaction": [
+          {
+            "type": "emoji",
+            "emoji": "\ud83d\udc4d"
+          }
+        ],
+        "new_reaction": [
+          {
+            "type": "custom_emoji",
+            "custom_emoji_id": "custom-reaction-1"
+          },
+          {
+            "type": "paid"
+          }
+        ],
+        "future_message_reaction_field": "ignored"
+      },
+      "future_reaction_update_field": "ignored"
+    },
+    {
+      "update_id": 900200002,
+      "message_reaction_count": {
+        "chat": {
+          "id": -1006666666666,
+          "type": "supergroup",
+          "title": "Reaction Room"
+        },
+        "message_id": 30,
+        "date": 1780000660,
+        "reactions": [
+          {
+            "type": {
+              "type": "emoji",
+              "emoji": "\u2764\ufe0f"
+            },
+            "total_count": 4
+          },
+          {
+            "type": {
+              "type": "custom_emoji",
+              "custom_emoji_id": "custom-reaction-2"
+            },
+            "total_count": 2
+          },
+          {
+            "type": {
+              "type": "paid"
+            },
+            "total_count": 1
+          }
+        ],
+        "future_reaction_count_field": "ignored"
+      }
+    }
+  ]
+}

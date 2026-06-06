@@ -58,7 +58,10 @@ defmodule Nadia.Model do
               username: nil,
               first_name: nil,
               last_name: nil,
-              photo: nil
+              photo: nil,
+              business_intro: nil,
+              business_location: nil,
+              business_opening_hours: nil
 
     @type t :: %Chat{
             id: integer,
@@ -67,7 +70,10 @@ defmodule Nadia.Model do
             username: binary,
             first_name: binary,
             last_name: binary,
-            photo: ChatPhoto.t()
+            photo: ChatPhoto.t(),
+            business_intro: BusinessIntro.t(),
+            business_location: BusinessLocation.t(),
+            business_opening_hours: BusinessOpeningHours.t()
           }
   end
 
@@ -206,6 +212,43 @@ defmodule Nadia.Model do
             title: binary,
             address: binary,
             foursquare_id: binary
+          }
+  end
+
+  defmodule BusinessIntro do
+    defstruct title: nil, message: nil, sticker: nil
+
+    @type t :: %BusinessIntro{
+            title: binary,
+            message: binary,
+            sticker: Sticker.t()
+          }
+  end
+
+  defmodule BusinessLocation do
+    defstruct address: nil, location: nil
+
+    @type t :: %BusinessLocation{
+            address: binary,
+            location: Location.t()
+          }
+  end
+
+  defmodule BusinessOpeningHoursInterval do
+    defstruct opening_minute: nil, closing_minute: nil
+
+    @type t :: %BusinessOpeningHoursInterval{
+            opening_minute: integer,
+            closing_minute: integer
+          }
+  end
+
+  defmodule BusinessOpeningHours do
+    defstruct time_zone_name: nil, opening_hours: []
+
+    @type t :: %BusinessOpeningHours{
+            time_zone_name: binary,
+            opening_hours: [BusinessOpeningHoursInterval.t()]
           }
   end
 
@@ -439,6 +482,76 @@ defmodule Nadia.Model do
     @type t :: %PaidMediaPurchased{
             from: User.t(),
             paid_media_payload: binary
+          }
+  end
+
+  defmodule BusinessBotRights do
+    defstruct can_reply: nil,
+              can_read_messages: nil,
+              can_delete_sent_messages: nil,
+              can_delete_all_messages: nil,
+              can_edit_name: nil,
+              can_edit_bio: nil,
+              can_edit_profile_photo: nil,
+              can_edit_username: nil,
+              can_change_gift_settings: nil,
+              can_view_gifts_and_stars: nil,
+              can_convert_gifts_to_stars: nil,
+              can_transfer_and_upgrade_gifts: nil,
+              can_transfer_stars: nil,
+              can_manage_stories: nil
+
+    @type t :: %BusinessBotRights{
+            can_reply: boolean,
+            can_read_messages: boolean,
+            can_delete_sent_messages: boolean,
+            can_delete_all_messages: boolean,
+            can_edit_name: boolean,
+            can_edit_bio: boolean,
+            can_edit_profile_photo: boolean,
+            can_edit_username: boolean,
+            can_change_gift_settings: boolean,
+            can_view_gifts_and_stars: boolean,
+            can_convert_gifts_to_stars: boolean,
+            can_transfer_and_upgrade_gifts: boolean,
+            can_transfer_stars: boolean,
+            can_manage_stories: boolean
+          }
+  end
+
+  defmodule BusinessConnection do
+    defstruct id: nil,
+              user: nil,
+              user_chat_id: nil,
+              date: nil,
+              rights: nil,
+              is_enabled: nil
+
+    @type t :: %BusinessConnection{
+            id: binary,
+            user: User.t(),
+            user_chat_id: integer,
+            date: integer,
+            rights: BusinessBotRights.t(),
+            is_enabled: boolean
+          }
+  end
+
+  defmodule BusinessMessagesDeleted do
+    defstruct business_connection_id: nil, chat: nil, message_ids: []
+
+    @type t :: %BusinessMessagesDeleted{
+            business_connection_id: binary,
+            chat: Chat.t(),
+            message_ids: [integer]
+          }
+  end
+
+  defmodule SentGuestMessage do
+    defstruct inline_message_id: nil
+
+    @type t :: %SentGuestMessage{
+            inline_message_id: binary
           }
   end
 
@@ -829,10 +942,10 @@ defmodule Nadia.Model do
             edited_message: Message.t(),
             channel_post: Message.t(),
             edited_channel_post: Message.t(),
-            business_connection: any,
+            business_connection: BusinessConnection.t(),
             business_message: Message.t(),
             edited_business_message: Message.t(),
-            deleted_business_messages: any,
+            deleted_business_messages: BusinessMessagesDeleted.t(),
             guest_message: Message.t(),
             message_reaction: MessageReactionUpdated.t(),
             message_reaction_count: MessageReactionCountUpdated.t(),

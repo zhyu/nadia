@@ -1,0 +1,145 @@
+{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 900600001,
+      "business_connection": {
+        "id": "business-connection-2",
+        "user": {
+          "id": 13001,
+          "is_bot": false,
+          "first_name": "Business Owner",
+          "username": "owner",
+          "can_connect_to_business": true
+        },
+        "user_chat_id": 777000111,
+        "date": 1780004000,
+        "rights": {
+          "can_reply": true,
+          "can_read_messages": true,
+          "can_delete_sent_messages": true,
+          "can_delete_all_messages": true,
+          "can_edit_name": true,
+          "can_edit_bio": true,
+          "can_edit_profile_photo": true,
+          "can_edit_username": true,
+          "can_change_gift_settings": true,
+          "can_view_gifts_and_stars": true,
+          "can_convert_gifts_to_stars": true,
+          "can_transfer_and_upgrade_gifts": true,
+          "can_transfer_stars": true,
+          "can_manage_stories": true,
+          "future_business_rights_field": "ignored"
+        },
+        "is_enabled": true,
+        "future_business_connection_field": "ignored"
+      },
+      "future_business_update_field": "ignored"
+    },
+    {
+      "update_id": 900600002,
+      "deleted_business_messages": {
+        "business_connection_id": "business-connection-2",
+        "chat": {
+          "id": -1006666666666,
+          "type": "supergroup",
+          "title": "Business Chat",
+          "business_intro": {
+            "title": "Welcome",
+            "message": "We are open.",
+            "sticker": {
+              "file_id": "intro-sticker-1",
+              "width": 512,
+              "height": 512,
+              "emoji": "wave",
+              "file_size": 2048,
+              "thumbnail": {
+                "file_id": "intro-sticker-thumb-1",
+                "width": 128,
+                "height": 128,
+                "file_size": 512
+              }
+            },
+            "future_business_intro_field": "ignored"
+          },
+          "business_location": {
+            "address": "1 Market Street",
+            "location": {
+              "latitude": 37.7749,
+              "longitude": -122.4194
+            },
+            "future_business_location_field": "ignored"
+          },
+          "business_opening_hours": {
+            "time_zone_name": "America/Los_Angeles",
+            "opening_hours": [
+              {
+                "opening_minute": 540,
+                "closing_minute": 1020,
+                "future_business_interval_field": "ignored"
+              },
+              {
+                "opening_minute": 1980,
+                "closing_minute": 2460
+              }
+            ],
+            "future_business_opening_hours_field": "ignored"
+          },
+          "future_business_chat_field": "ignored"
+        },
+        "message_ids": [70, 71],
+        "future_deleted_business_messages_field": "ignored"
+      }
+    },
+    {
+      "update_id": 900600003,
+      "business_message": {
+        "message_id": 72,
+        "date": 1780004100,
+        "business_connection_id": "business-connection-2",
+        "chat": {
+          "id": 13002,
+          "type": "private",
+          "first_name": "Buyer"
+        },
+        "from": {
+          "id": 13002,
+          "is_bot": false,
+          "first_name": "Buyer"
+        },
+        "text": "business hello",
+        "future_business_message_field": "ignored"
+      }
+    },
+    {
+      "update_id": 900600004,
+      "edited_business_message": {
+        "message_id": 73,
+        "date": 1780004200,
+        "edit_date": 1780004210,
+        "business_connection_id": "business-connection-2",
+        "chat": {
+          "id": 13003,
+          "type": "private",
+          "first_name": "Editor"
+        },
+        "text": "edited business hello"
+      }
+    },
+    {
+      "update_id": 900600005,
+      "guest_message": {
+        "message_id": 74,
+        "date": 1780004300,
+        "guest_query_id": "guest-query-business-1",
+        "chat": {
+          "id": 13004,
+          "type": "private",
+          "first_name": "Guest"
+        },
+        "text": "guest hello",
+        "future_guest_message_field": "ignored"
+      }
+    }
+  ]
+}

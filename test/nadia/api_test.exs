@@ -10,6 +10,14 @@ defmodule Nadia.APITest do
 
   alias Nadia.Model.{
     BotAccessSettings,
+    BusinessBotRights,
+    BusinessConnection,
+    BusinessIntro,
+    BusinessLocation,
+    BusinessMessagesDeleted,
+    BusinessOpeningHours,
+    BusinessOpeningHoursInterval,
+    Chat,
     ChatBoost,
     ChatBoostAdded,
     ChatBoostRemoved,
@@ -21,6 +29,7 @@ defmodule Nadia.APITest do
     MessageEntity,
     ManagedBotCreated,
     ManagedBotUpdated,
+    Location,
     MessageReactionUpdated,
     PaidMedia,
     PaidMediaInfo,
@@ -33,6 +42,8 @@ defmodule Nadia.APITest do
     ReactionCount,
     ReactionType,
     ReplyKeyboardRemove,
+    SentGuestMessage,
+    Sticker,
     User,
     UserChatBoosts,
     Video
@@ -356,6 +367,158 @@ defmodule Nadia.APITest do
     refute existing_atom?(unknown_updated_key)
     refute existing_atom?(unknown_user_key)
     refute existing_atom?(unknown_bot_key)
+  end
+
+  test "request decodes fixture-backed business/guest getUpdates response" do
+    unknown_update_key = "future_business_update_field"
+    unknown_connection_key = "future_business_connection_field"
+    unknown_rights_key = "future_business_rights_field"
+    unknown_chat_key = "future_business_chat_field"
+    unknown_guest_message_key = "future_guest_message_field"
+
+    refute existing_atom?(unknown_update_key)
+    refute existing_atom?(unknown_connection_key)
+    refute existing_atom?(unknown_rights_key)
+    refute existing_atom?(unknown_chat_key)
+    refute existing_atom?(unknown_guest_message_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body: response_fixture("get_updates_business_guest.json")
+       }}
+    )
+
+    assert {:ok,
+            [
+              %{business_connection: %BusinessConnection{} = business_connection},
+              %{deleted_business_messages: %BusinessMessagesDeleted{} = deleted_messages},
+              %{business_message: %Message{} = business_message},
+              %{edited_business_message: %Message{} = edited_business_message},
+              %{guest_message: %Message{} = guest_message}
+            ]} = Nadia.get_updates()
+
+    assert business_connection.user.first_name == "Business Owner"
+    assert business_connection.rights.can_reply == true
+    assert business_connection.rights.can_manage_stories == true
+
+    assert %Chat{
+             business_intro: %BusinessIntro{
+               sticker: %Sticker{file_id: "intro-sticker-1", file_size: 2048}
+             },
+             business_location: %BusinessLocation{
+               location: %Location{latitude: 37.7749, longitude: -122.4194}
+             },
+             business_opening_hours: %BusinessOpeningHours{
+               opening_hours: [
+                 %BusinessOpeningHoursInterval{opening_minute: 540},
+                 %BusinessOpeningHoursInterval{closing_minute: 2460}
+               ]
+             }
+           } = deleted_messages.chat
+
+    assert deleted_messages.message_ids == [70, 71]
+    assert business_message.text == "business hello"
+    assert edited_business_message.text == "edited business hello"
+    assert guest_message.guest_query_id == "guest-query-business-1"
+
+    refute existing_atom?(unknown_update_key)
+    refute existing_atom?(unknown_connection_key)
+    refute existing_atom?(unknown_rights_key)
+    refute existing_atom?(unknown_chat_key)
+    refute existing_atom?(unknown_guest_message_key)
+  end
+
+  test "request? parses getBusinessConnection into modeled results" do
+    unknown_connection_key = "future_business_connection_api_field"
+    unknown_rights_key = "future_business_rights_api_field"
+
+    refute existing_atom?(unknown_connection_key)
+    refute existing_atom?(unknown_rights_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body:
+           Jason.encode!(%{
+             "ok" => true,
+             "result" => %{
+               "id" => "business-direct-api-1",
+               "user" => %{
+                 "id" => 13006,
+                 "is_bot" => false,
+                 "first_name" => "API Owner",
+                 "can_connect_to_business" => true
+               },
+               "user_chat_id" => 777_000_333,
+               "date" => 1_780_004_500,
+               "rights" => %{
+                 "can_reply" => true,
+                 "can_read_messages" => true,
+                 unknown_rights_key => "ignored"
+               },
+               "is_enabled" => true,
+               unknown_connection_key => "ignored"
+             }
+           })
+       }}
+    )
+
+    assert %BusinessConnection{
+             id: "business-direct-api-1",
+             user: %User{id: 13006, first_name: "API Owner", can_connect_to_business: true},
+             user_chat_id: 777_000_333,
+             rights: %BusinessBotRights{can_reply: true, can_read_messages: true},
+             is_enabled: true
+           } =
+             API.request?("getBusinessConnection",
+               business_connection_id: "business-direct-api-1"
+             )
+
+    assert_telegram_request("getBusinessConnection",
+      body: {:form, [{"business_connection_id", "business-direct-api-1"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    refute existing_atom?(unknown_connection_key)
+    refute existing_atom?(unknown_rights_key)
+  end
+
+  test "request? parses answerGuestQuery into modeled results" do
+    unknown_sent_guest_key = "future_sent_guest_message_api_field"
+
+    refute existing_atom?(unknown_sent_guest_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body:
+           Jason.encode!(%{
+             "ok" => true,
+             "result" => %{
+               "inline_message_id" => "inline-guest-message-api-1",
+               unknown_sent_guest_key => "ignored"
+             }
+           })
+       }}
+    )
+
+    assert %SentGuestMessage{inline_message_id: "inline-guest-message-api-1"} =
+             API.request?("answerGuestQuery",
+               guest_query_id: "guest-query-api-1",
+               result: "{\"type\":\"article\"}"
+             )
+
+    assert_telegram_request("answerGuestQuery",
+      body:
+        {:form, [{"guest_query_id", "guest-query-api-1"}, {"result", "{\"type\":\"article\"}"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    refute existing_atom?(unknown_sent_guest_key)
   end
 
   test "request? parses getUserChatBoosts into modeled results" do

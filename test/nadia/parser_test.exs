@@ -6,6 +6,13 @@ defmodule Nadia.ParserTest do
   alias Nadia.Model.{
     Update,
     BotAccessSettings,
+    BusinessBotRights,
+    BusinessConnection,
+    BusinessIntro,
+    BusinessLocation,
+    BusinessMessagesDeleted,
+    BusinessOpeningHours,
+    BusinessOpeningHoursInterval,
     Chat,
     ChatBoost,
     ChatBoostAdded,
@@ -43,6 +50,8 @@ defmodule Nadia.ParserTest do
     PollOptionDeleted,
     ReactionCount,
     ReactionType,
+    SentGuestMessage,
+    Sticker,
     UserChatBoosts,
     Video,
     Venue,
@@ -542,6 +551,154 @@ defmodule Nadia.ParserTest do
              username: "updated_managed_bot",
              supports_inline_queries: true
            }
+  end
+
+  test "parse fixture-backed business/guest get_updates response decoded with string keys" do
+    raw_updates = response_result_fixture("get_updates_business_guest.json")
+
+    updates = Parser.parse_result(raw_updates, "getUpdates")
+
+    assert [
+             %Update{
+               update_id: 900_600_001,
+               business_connection: %BusinessConnection{} = business_connection
+             },
+             %Update{
+               update_id: 900_600_002,
+               deleted_business_messages: %BusinessMessagesDeleted{} = deleted_business_messages
+             },
+             %Update{
+               update_id: 900_600_003,
+               business_message: %Message{} = business_message
+             },
+             %Update{
+               update_id: 900_600_004,
+               edited_business_message: %Message{} = edited_business_message
+             },
+             %Update{
+               update_id: 900_600_005,
+               guest_message: %Message{} = guest_message
+             }
+           ] = updates
+
+    assert business_connection.id == "business-connection-2"
+
+    assert business_connection.user == %User{
+             id: 13001,
+             is_bot: false,
+             first_name: "Business Owner",
+             username: "owner",
+             can_connect_to_business: true
+           }
+
+    assert business_connection.user_chat_id == 777_000_111
+    assert business_connection.date == 1_780_004_000
+    assert business_connection.is_enabled == true
+
+    assert %BusinessBotRights{
+             can_reply: true,
+             can_read_messages: true,
+             can_delete_sent_messages: true,
+             can_delete_all_messages: true,
+             can_edit_name: true,
+             can_edit_bio: true,
+             can_edit_profile_photo: true,
+             can_edit_username: true,
+             can_change_gift_settings: true,
+             can_view_gifts_and_stars: true,
+             can_convert_gifts_to_stars: true,
+             can_transfer_and_upgrade_gifts: true,
+             can_transfer_stars: true,
+             can_manage_stories: true
+           } = business_connection.rights
+
+    assert deleted_business_messages.business_connection_id == "business-connection-2"
+    assert deleted_business_messages.message_ids == [70, 71]
+
+    assert %Chat{
+             title: "Business Chat",
+             business_intro: %BusinessIntro{
+               title: "Welcome",
+               message: "We are open.",
+               sticker: %Sticker{
+                 file_id: "intro-sticker-1",
+                 width: 512,
+                 height: 512,
+                 emoji: "wave",
+                 file_size: 2048
+               }
+             },
+             business_location: %BusinessLocation{
+               address: "1 Market Street",
+               location: %Location{latitude: 37.7749, longitude: -122.4194}
+             },
+             business_opening_hours: %BusinessOpeningHours{
+               time_zone_name: "America/Los_Angeles",
+               opening_hours: [
+                 %BusinessOpeningHoursInterval{opening_minute: 540, closing_minute: 1020},
+                 %BusinessOpeningHoursInterval{opening_minute: 1980, closing_minute: 2460}
+               ]
+             }
+           } = deleted_business_messages.chat
+
+    assert business_message.business_connection_id == "business-connection-2"
+    assert business_message.from == %User{id: 13002, is_bot: false, first_name: "Buyer"}
+    assert business_message.text == "business hello"
+
+    assert edited_business_message.business_connection_id == "business-connection-2"
+    assert edited_business_message.edit_date == 1_780_004_210
+    assert edited_business_message.text == "edited business hello"
+
+    assert guest_message.guest_query_id == "guest-query-business-1"
+    assert guest_message.chat == %Chat{id: 13004, type: "private", first_name: "Guest"}
+    assert guest_message.text == "guest hello"
+  end
+
+  test "parse result of get_business_connection" do
+    connection =
+      Parser.parse_result(
+        %{
+          "id" => "business-direct-1",
+          "user" => %{
+            "id" => 13005,
+            "is_bot" => false,
+            "first_name" => "Direct Owner",
+            "can_connect_to_business" => true
+          },
+          "user_chat_id" => 777_000_222,
+          "date" => 1_780_004_400,
+          "rights" => %{
+            "can_reply" => true,
+            "can_read_messages" => true,
+            "future_business_rights_field" => "ignored"
+          },
+          "is_enabled" => false,
+          "future_business_connection_field" => "ignored"
+        },
+        "getBusinessConnection"
+      )
+
+    assert %BusinessConnection{
+             id: "business-direct-1",
+             user: %User{id: 13005, first_name: "Direct Owner", can_connect_to_business: true},
+             user_chat_id: 777_000_222,
+             date: 1_780_004_400,
+             rights: %BusinessBotRights{can_reply: true, can_read_messages: true},
+             is_enabled: false
+           } = connection
+  end
+
+  test "parse result of answer_guest_query" do
+    sent_guest_message =
+      Parser.parse_result(
+        %{
+          "inline_message_id" => "inline-guest-message-1",
+          "future_sent_guest_message_field" => "ignored"
+        },
+        "answerGuestQuery"
+      )
+
+    assert %SentGuestMessage{inline_message_id: "inline-guest-message-1"} = sent_guest_message
   end
 
   test "parse result of get_user_chat_boosts" do

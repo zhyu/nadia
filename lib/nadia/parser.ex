@@ -5,6 +5,13 @@ defmodule Nadia.Parser do
 
   alias Nadia.Model.{
     BotAccessSettings,
+    BusinessBotRights,
+    BusinessConnection,
+    BusinessIntro,
+    BusinessLocation,
+    BusinessMessagesDeleted,
+    BusinessOpeningHours,
+    BusinessOpeningHoursInterval,
     User,
     Chat,
     ChatBoost,
@@ -43,6 +50,7 @@ defmodule Nadia.Parser do
     PollOptionDeleted,
     ReactionCount,
     ReactionType,
+    SentGuestMessage,
     UserChatBoosts,
     WebhookInfo
   }
@@ -76,6 +84,8 @@ defmodule Nadia.Parser do
       "sendPaidMedia" -> parse(Message, result)
       "stopPoll" -> parse(Poll, result)
       "getUserChatBoosts" -> parse(UserChatBoosts, result)
+      "getBusinessConnection" -> parse(BusinessConnection, result)
+      "answerGuestQuery" -> parse(SentGuestMessage, result)
       "getManagedBotAccessSettings" -> parse(BotAccessSettings, result)
       _ -> parse(Message, result)
     end
@@ -176,6 +186,11 @@ defmodule Nadia.Parser do
   defp parse(PaidMediaVideo, {:video, val}), do: {:video, parse(Video, val)}
   defp parse(PaidMediaLivePhoto, {:live_photo, val}), do: {:live_photo, val}
 
+  defp parse(BusinessConnection, {:rights, val}), do: {:rights, parse(BusinessBotRights, val)}
+
+  defp parse(BusinessOpeningHours, {:opening_hours, val}) when is_list(val),
+    do: {:opening_hours, Enum.map(val, &parse(BusinessOpeningHoursInterval, &1))}
+
   defp parse(ManagedBotCreated, {:bot, val}), do: {:bot, parse(User, val)}
   defp parse(ManagedBotUpdated, {:user, val}), do: {:user, parse(User, val)}
   defp parse(ManagedBotUpdated, {:bot, val}), do: {:bot, parse(User, val)}
@@ -213,6 +228,18 @@ defmodule Nadia.Parser do
 
   defp parse({:poll_option_deleted, val}),
     do: {:poll_option_deleted, parse(PollOptionDeleted, val)}
+
+  defp parse({:business_connection, val}),
+    do: {:business_connection, parse(BusinessConnection, val)}
+
+  defp parse({:deleted_business_messages, val}),
+    do: {:deleted_business_messages, parse(BusinessMessagesDeleted, val)}
+
+  defp parse({:business_intro, val}), do: {:business_intro, parse(BusinessIntro, val)}
+  defp parse({:business_location, val}), do: {:business_location, parse(BusinessLocation, val)}
+
+  defp parse({:business_opening_hours, val}),
+    do: {:business_opening_hours, parse(BusinessOpeningHours, val)}
 
   defp parse({:boost_added, val}), do: {:boost_added, parse(ChatBoostAdded, val)}
   defp parse({:chat_boost, val}), do: {:chat_boost, parse(ChatBoostUpdated, val)}

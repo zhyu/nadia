@@ -843,6 +843,26 @@ defmodule Nadia.ParserTest do
     assert [%MessageId{message_id: 9001}, %MessageId{message_id: 9002}] = forward_message_ids
   end
 
+  test "parse result of send_media_group" do
+    messages =
+      Parser.parse_result(
+        [
+          %{"message_id" => 9101, "chat" => %{"id" => 123, "type" => "private"}},
+          %{
+            "message_id" => 9102,
+            "chat" => %{"id" => 123, "type" => "private"},
+            "future_message_field" => "ignored"
+          }
+        ],
+        "sendMediaGroup"
+      )
+
+    assert [
+             %Message{message_id: 9101, chat: %Chat{id: 123, type: "private"}},
+             %Message{message_id: 9102, chat: %Chat{id: 123, type: "private"}}
+           ] = messages
+  end
+
   test "parse result of get_forum_topic_icon_stickers" do
     stickers =
       Parser.parse_result(

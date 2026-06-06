@@ -1184,6 +1184,200 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "send_media_group/3 JSON-encodes media arrays and parses message arrays" do
+    stub_telegram_result([
+      message_result(%{message_id: 9101}),
+      message_result(%{message_id: 9102})
+    ])
+
+    media = [
+      %{type: "photo", media: "photo-file-id", caption: nil},
+      [type: "video", media: "video-file-id", supports_streaming: false]
+    ]
+
+    encoded_media =
+      Jason.encode!([
+        %{type: "photo", media: "photo-file-id"},
+        %{type: "video", media: "video-file-id", supports_streaming: false}
+      ])
+
+    assert {:ok, [%Message{message_id: 9101}, %Message{message_id: 9102}]} =
+             Nadia.send_media_group("@album", media, protect_content: false)
+
+    request =
+      assert_telegram_request("sendMediaGroup",
+        body:
+          {:form,
+           [
+             {"chat_id", "@album"},
+             {"media", encoded_media},
+             {"protect_content", "false"}
+           ]},
+        options: [recv_timeout: 5000]
+      )
+
+    assert Jason.decode!(form_params(request)["media"]) == [
+             %{"type" => "photo", "media" => "photo-file-id"},
+             %{"type" => "video", "media" => "video-file-id", "supports_streaming" => false}
+           ]
+
+    client = Client.new(token: "999:family-f2", http_client: Nadia.HTTPCase.StubHTTPClient)
+    preencoded_media = ~s([{"type":"photo","media":"already-json"}])
+
+    stub_telegram_result([message_result(%{message_id: 9103})])
+
+    assert {:ok, [%Message{message_id: 9103}]} =
+             Nadia.send_media_group(client, "@album", preencoded_media)
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-f2/sendMediaGroup",
+      body: {:form, [{"chat_id", "@album"}, {"media", preencoded_media}]},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "send_paid_media/4 JSON-encodes media arrays and parses messages" do
+    stub_telegram_result(message_result(%{message_id: 9201}))
+
+    media = [
+      [type: "photo", media: "paid-photo-file-id"],
+      %{type: "preview", width: 320, height: nil}
+    ]
+
+    encoded_media =
+      Jason.encode!([
+        %{type: "photo", media: "paid-photo-file-id"},
+        %{type: "preview", width: 320}
+      ])
+
+    assert {:ok, %Message{message_id: 9201}} =
+             Nadia.send_paid_media(123, 25, media,
+               payload: "paid-payload-1",
+               allow_paid_broadcast: false
+             )
+
+    request =
+      assert_telegram_request("sendPaidMedia",
+        body:
+          {:form,
+           [
+             {"chat_id", "123"},
+             {"star_count", "25"},
+             {"media", encoded_media},
+             {"payload", "paid-payload-1"},
+             {"allow_paid_broadcast", "false"}
+           ]},
+        options: [recv_timeout: 5000]
+      )
+
+    assert Jason.decode!(form_params(request)["media"]) == [
+             %{"type" => "photo", "media" => "paid-photo-file-id"},
+             %{"type" => "preview", "width" => 320}
+           ]
+  end
+
+  test "send_poll/3 JSON-encodes poll options and preserves false booleans" do
+    stub_telegram_result(message_result(%{message_id: 9301}))
+
+    poll_options = [
+      [text: "Yes"],
+      %{text: "No", text_parse_mode: nil}
+    ]
+
+    encoded_options = Jason.encode!([%{text: "Yes"}, %{text: "No"}])
+
+    assert {:ok, %Message{message_id: 9301}} =
+             Nadia.send_poll("@polls", "Ship F2?",
+               options: poll_options,
+               is_anonymous: false,
+               allows_multiple_answers: false
+             )
+
+    request =
+      assert_telegram_request("sendPoll",
+        body:
+          {:form,
+           [
+             {"chat_id", "@polls"},
+             {"question", "Ship F2?"},
+             {"options", encoded_options},
+             {"is_anonymous", "false"},
+             {"allows_multiple_answers", "false"}
+           ]},
+        options: [recv_timeout: 5000]
+      )
+
+    assert Jason.decode!(form_params(request)["options"]) == [
+             %{"text" => "Yes"},
+             %{"text" => "No"}
+           ]
+  end
+
+  test "send video note and live photo wrappers build media file field requests" do
+    stub_telegram_result(message_result(%{message_id: 9401}))
+
+    assert {:ok, %Message{message_id: 9401}} =
+             Nadia.send_video_note(123, "video-note-file-id",
+               duration: 7,
+               thumbnail: "thumbnail-file-id"
+             )
+
+    assert_telegram_request("sendVideoNote",
+      body:
+        {:form,
+         [
+           {"chat_id", "123"},
+           {"video_note", "video-note-file-id"},
+           {"duration", "7"},
+           {"thumbnail", "thumbnail-file-id"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(message_result(%{message_id: 9402}))
+
+    assert {:ok, %Message{message_id: 9402}} =
+             Nadia.send_live_photo("@live", "live-photo-file-id", "cover-photo-file-id",
+               caption: "a moment",
+               show_caption_above_media: false
+             )
+
+    assert_telegram_request("sendLivePhoto",
+      body:
+        {:form,
+         [
+           {"chat_id", "@live"},
+           {"live_photo", "live-photo-file-id"},
+           {"photo", "cover-photo-file-id"},
+           {"caption", "a moment"},
+           {"show_caption_above_media", "false"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "send_dice and send_message_draft parse message and true responses" do
+    stub_telegram_result(message_result(%{message_id: 9501}))
+
+    assert {:ok, %Message{message_id: 9501}} = Nadia.send_dice("@games", emoji: "dice")
+
+    assert_telegram_request("sendDice",
+      body: {:form, [{"chat_id", "@games"}, {"emoji", "dice"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.send_message_draft(123, 44, text: "", parse_mode: nil)
+
+    assert_telegram_request("sendMessageDraft",
+      body: {:form, [{"chat_id", "123"}, {"draft_id", "44"}, {"text", ""}]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
   test "chat administration membership wrappers build request contracts" do
     stub_telegram_result(true)
 

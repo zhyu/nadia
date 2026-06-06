@@ -85,6 +85,7 @@ defmodule Nadia.Parser do
       "uploadStickerFile" -> parse(File, result)
       "getForumTopicIconStickers" -> parse(:stickers, result)
       "createForumTopic" -> parse(ForumTopic, result)
+      "sendMediaGroup" -> parse(:messages, result)
       "sendPaidMedia" -> parse(Message, result)
       "stopPoll" -> parse(Poll, result)
       "getUserChatBoosts" -> parse(UserChatBoosts, result)

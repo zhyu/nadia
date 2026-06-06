@@ -75,6 +75,47 @@ defmodule Nadia do
 
   defp encode_permissions(permissions), do: permissions
 
+  defp encode_json_payload(nil), do: nil
+  defp encode_json_payload(payload) when is_binary(payload), do: payload
+
+  defp encode_json_payload(payload) do
+    payload
+    |> json_payload_value()
+    |> Jason.encode!()
+  end
+
+  defp json_payload_value(payload) when is_list(payload) do
+    if Keyword.keyword?(payload) do
+      payload
+      |> Map.new()
+      |> json_payload_value()
+    else
+      Enum.map(payload, &json_payload_value/1)
+    end
+  end
+
+  defp json_payload_value(%_{} = payload) do
+    payload
+    |> Map.from_struct()
+    |> json_payload_value()
+  end
+
+  defp json_payload_value(payload) when is_map(payload) do
+    payload
+    |> reject_nil_values()
+    |> Map.new(fn {key, value} -> {key, json_payload_value(value)} end)
+  end
+
+  defp json_payload_value(payload), do: payload
+
+  defp encode_poll_options(params) when is_list(params) do
+    Keyword.update(params, :options, nil, &encode_json_payload/1)
+  end
+
+  defp encode_poll_options(params) when is_map(params) do
+    Map.update(params, :options, nil, &encode_json_payload/1)
+  end
+
   @doc """
   A simple method for testing your bot's auth token. Requires no parameters.
   Returns basic information about the bot in form of a User object.
@@ -581,6 +622,253 @@ defmodule Nadia do
 
   def send_voice(%Client{} = client, chat_id, voice, options) do
     api_request(client, "sendVoice", [chat_id: chat_id, voice: voice] ++ options, :voice)
+  end
+
+  @doc """
+  Use this method to send video messages.
+  On success, the sent Message is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `video_note` - Video note to send. Either a `file_id` to resend a video note that is
+  already on the Telegram servers, or a `file_path` to upload a new video note
+  * `options` - orddict of options
+  """
+  @spec send_video_note(integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_video_note(Client.t(), integer | binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_video_note(chat_id, video_note), do: send_video_note(chat_id, video_note, [])
+
+  def send_video_note(%Client{} = client, chat_id, video_note) do
+    send_video_note(client, chat_id, video_note, [])
+  end
+
+  def send_video_note(chat_id, video_note, options) do
+    api_request(
+      "sendVideoNote",
+      [chat_id: chat_id, video_note: video_note] ++ options,
+      :video_note
+    )
+  end
+
+  def send_video_note(%Client{} = client, chat_id, video_note, options) do
+    api_request(
+      client,
+      "sendVideoNote",
+      [chat_id: chat_id, video_note: video_note] ++ options,
+      :video_note
+    )
+  end
+
+  @doc """
+  Use this method to send live photos.
+  On success, the sent Message is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `live_photo` - Live photo media to send
+  * `photo` - Cover photo to send as a regular Telegram parameter
+  * `options` - orddict of options
+  """
+  @spec send_live_photo(integer | binary, binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_live_photo(Client.t(), integer | binary, binary, binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_live_photo(chat_id, live_photo, photo) do
+    send_live_photo(chat_id, live_photo, photo, [])
+  end
+
+  def send_live_photo(%Client{} = client, chat_id, live_photo, photo) do
+    send_live_photo(client, chat_id, live_photo, photo, [])
+  end
+
+  def send_live_photo(chat_id, live_photo, photo, options) do
+    api_request(
+      "sendLivePhoto",
+      [chat_id: chat_id, live_photo: live_photo, photo: photo] ++ options,
+      :live_photo
+    )
+  end
+
+  def send_live_photo(%Client{} = client, chat_id, live_photo, photo, options) do
+    api_request(
+      client,
+      "sendLivePhoto",
+      [chat_id: chat_id, live_photo: live_photo, photo: photo] ++ options,
+      :live_photo
+    )
+  end
+
+  @doc """
+  Use this method to send an album of photos, videos, documents or audios.
+  On success, an array of sent Messages is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `media` - JSON-serializable media array or a pre-encoded JSON string
+  * `options` - orddict of options
+  """
+  @spec send_media_group(integer | binary, list | map | struct | binary, [{atom, any}]) ::
+          {:ok, [Message.t()]} | {:error, Error.t()}
+  @spec send_media_group(Client.t(), integer | binary, list | map | struct | binary, [
+          {atom, any}
+        ]) ::
+          {:ok, [Message.t()]} | {:error, Error.t()}
+  def send_media_group(chat_id, media), do: send_media_group(chat_id, media, [])
+
+  def send_media_group(%Client{} = client, chat_id, media) do
+    send_media_group(client, chat_id, media, [])
+  end
+
+  def send_media_group(chat_id, media, options) do
+    api_request(
+      "sendMediaGroup",
+      [chat_id: chat_id, media: encode_json_payload(media)] ++ options
+    )
+  end
+
+  def send_media_group(%Client{} = client, chat_id, media, options) do
+    api_request(
+      client,
+      "sendMediaGroup",
+      [chat_id: chat_id, media: encode_json_payload(media)] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to send paid media.
+  On success, the sent Message is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `star_count` - Amount of Telegram Stars to be paid for the media
+  * `media` - JSON-serializable paid media array or a pre-encoded JSON string
+  * `options` - orddict of options
+  """
+  @spec send_paid_media(integer | binary, integer, list | map | struct | binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_paid_media(Client.t(), integer | binary, integer, list | map | struct | binary, [
+          {atom, any}
+        ]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_paid_media(chat_id, star_count, media) do
+    send_paid_media(chat_id, star_count, media, [])
+  end
+
+  def send_paid_media(%Client{} = client, chat_id, star_count, media) do
+    send_paid_media(client, chat_id, star_count, media, [])
+  end
+
+  def send_paid_media(chat_id, star_count, media, options) do
+    api_request(
+      "sendPaidMedia",
+      [chat_id: chat_id, star_count: star_count, media: encode_json_payload(media)] ++ options
+    )
+  end
+
+  def send_paid_media(%Client{} = client, chat_id, star_count, media, options) do
+    api_request(
+      client,
+      "sendPaidMedia",
+      [chat_id: chat_id, star_count: star_count, media: encode_json_payload(media)] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to send a native poll.
+  On success, the sent Message is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `question` - Poll question
+  * `params` - orddict or map of Telegram parameters, including required `:options`
+  """
+  @spec send_poll(integer | binary, binary, [{atom, any}] | map) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_poll(Client.t(), integer | binary, binary, [{atom, any}] | map) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_poll(chat_id, question, params) when is_list(params) do
+    api_request(
+      "sendPoll",
+      [chat_id: chat_id, question: question] ++ encode_poll_options(params)
+    )
+  end
+
+  def send_poll(chat_id, question, params) when is_map(params) do
+    api_request(
+      "sendPoll",
+      params
+      |> encode_poll_options()
+      |> Map.put(:chat_id, chat_id)
+      |> Map.put(:question, question)
+    )
+  end
+
+  def send_poll(%Client{} = client, chat_id, question, params) when is_list(params) do
+    api_request(
+      client,
+      "sendPoll",
+      [chat_id: chat_id, question: question] ++ encode_poll_options(params)
+    )
+  end
+
+  def send_poll(%Client{} = client, chat_id, question, params) when is_map(params) do
+    api_request(
+      client,
+      "sendPoll",
+      params
+      |> encode_poll_options()
+      |> Map.put(:chat_id, chat_id)
+      |> Map.put(:question, question)
+    )
+  end
+
+  @doc """
+  Use this method to send an animated emoji that will display a random value.
+  On success, the sent Message is returned.
+  """
+  @spec send_dice(integer | binary) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_dice(integer | binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_dice(Client.t(), integer | binary) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_dice(Client.t(), integer | binary, [{atom, any}]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_dice(chat_id), do: send_dice(chat_id, [])
+  def send_dice(%Client{} = client, chat_id), do: send_dice(client, chat_id, [])
+  def send_dice(chat_id, options), do: api_request("sendDice", [chat_id: chat_id] ++ options)
+
+  def send_dice(%Client{} = client, chat_id, options) do
+    api_request(client, "sendDice", [chat_id: chat_id] ++ options)
+  end
+
+  @doc """
+  Use this method to stream a partial message draft to a user.
+  Returns `:ok` on success.
+  """
+  @spec send_message_draft(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec send_message_draft(integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  @spec send_message_draft(Client.t(), integer | binary, integer) ::
+          :ok | {:error, Error.t()}
+  @spec send_message_draft(Client.t(), integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def send_message_draft(chat_id, draft_id), do: send_message_draft(chat_id, draft_id, [])
+
+  def send_message_draft(%Client{} = client, chat_id, draft_id) do
+    send_message_draft(client, chat_id, draft_id, [])
+  end
+
+  def send_message_draft(chat_id, draft_id, options) do
+    api_request("sendMessageDraft", [chat_id: chat_id, draft_id: draft_id] ++ options)
+  end
+
+  def send_message_draft(%Client{} = client, chat_id, draft_id, options) do
+    api_request(client, "sendMessageDraft", [chat_id: chat_id, draft_id: draft_id] ++ options)
   end
 
   @doc """

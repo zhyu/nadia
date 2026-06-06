@@ -37,6 +37,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   coverage for `createForumTopic` and `getForumTopicIconStickers` results.
 - Added Bot API copy/forward wrappers for `copyMessage`, `copyMessages`, and
   `forwardMessages`, plus `%Nadia.Model.MessageId{}` parser/model support.
+- Added Bot API send wrappers for `sendVideoNote`, `sendLivePhoto`,
+  `sendMediaGroup`, `sendPaidMedia`, `sendPoll`, `sendDice`, and
+  `sendMessageDraft`.
 
 ### Changed
 

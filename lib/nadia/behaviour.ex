@@ -102,6 +102,94 @@ defmodule Nadia.Behaviour do
   @callback unban_chat_member(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
   @callback unban_chat_member(Client.t(), integer | binary, integer, [{atom, any}]) ::
               :ok | {:error, Error.t()}
+  @callback restrict_chat_member(integer | binary, integer, map | keyword | struct | binary) ::
+              :ok | {:error, Error.t()}
+  @callback restrict_chat_member(
+              integer | binary,
+              integer,
+              map | keyword | struct | binary,
+              [{atom, any}]
+            ) ::
+              :ok | {:error, Error.t()}
+  @callback restrict_chat_member(
+              Client.t(),
+              integer | binary,
+              integer,
+              map | keyword | struct | binary
+            ) ::
+              :ok | {:error, Error.t()}
+  @callback restrict_chat_member(
+              Client.t(),
+              integer | binary,
+              integer,
+              map | keyword | struct | binary,
+              [{atom, any}]
+            ) ::
+              :ok | {:error, Error.t()}
+  @callback promote_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback promote_chat_member(integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback promote_chat_member(Client.t(), integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback promote_chat_member(Client.t(), integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback set_chat_administrator_custom_title(integer | binary, integer, binary) ::
+              :ok | {:error, Error.t()}
+  @callback set_chat_administrator_custom_title(Client.t(), integer | binary, integer, binary) ::
+              :ok | {:error, Error.t()}
+  @callback set_chat_member_tag(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback set_chat_member_tag(integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback set_chat_member_tag(Client.t(), integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback set_chat_member_tag(Client.t(), integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback ban_chat_sender_chat(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback ban_chat_sender_chat(Client.t(), integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback unban_chat_sender_chat(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback unban_chat_sender_chat(Client.t(), integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback set_chat_permissions(integer | binary, map | keyword | struct | binary) ::
+              :ok | {:error, Error.t()}
+  @callback set_chat_permissions(
+              integer | binary,
+              map | keyword | struct | binary,
+              [{atom, any}]
+            ) ::
+              :ok | {:error, Error.t()}
+  @callback set_chat_permissions(Client.t(), integer | binary, map | keyword | struct | binary) ::
+              :ok | {:error, Error.t()}
+  @callback set_chat_permissions(
+              Client.t(),
+              integer | binary,
+              map | keyword | struct | binary,
+              [{atom, any}]
+            ) ::
+              :ok | {:error, Error.t()}
+  @callback approve_chat_join_request(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback approve_chat_join_request(Client.t(), integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback decline_chat_join_request(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @callback decline_chat_join_request(Client.t(), integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback delete_chat_photo(integer | binary) :: :ok | {:error, Error.t()}
+  @callback delete_chat_photo(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  @callback set_chat_title(integer | binary, binary) :: :ok | {:error, Error.t()}
+  @callback set_chat_title(Client.t(), integer | binary, binary) :: :ok | {:error, Error.t()}
+  @callback set_chat_description(integer | binary) :: :ok | {:error, Error.t()}
+  @callback set_chat_description(integer | binary, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback set_chat_description(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  @callback set_chat_description(Client.t(), integer | binary, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback unpin_all_chat_messages(integer | binary) :: :ok | {:error, Error.t()}
+  @callback unpin_all_chat_messages(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  @callback set_chat_sticker_set(integer | binary, binary) :: :ok | {:error, Error.t()}
+  @callback set_chat_sticker_set(Client.t(), integer | binary, binary) ::
+              :ok | {:error, Error.t()}
+  @callback delete_chat_sticker_set(integer | binary) :: :ok | {:error, Error.t()}
+  @callback delete_chat_sticker_set(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
   @callback get_chat(integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
   @callback get_chat(Client.t(), integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
   @callback get_chat_administrators(integer | binary) ::
@@ -235,6 +323,26 @@ defmodule Nadia.Behaviour do
                       leave_chat: 2,
                       unban_chat_member: 3,
                       unban_chat_member: 4,
+                      restrict_chat_member: 4,
+                      restrict_chat_member: 5,
+                      promote_chat_member: 3,
+                      promote_chat_member: 4,
+                      set_chat_administrator_custom_title: 4,
+                      set_chat_member_tag: 3,
+                      set_chat_member_tag: 4,
+                      ban_chat_sender_chat: 3,
+                      unban_chat_sender_chat: 3,
+                      set_chat_permissions: 3,
+                      set_chat_permissions: 4,
+                      approve_chat_join_request: 3,
+                      decline_chat_join_request: 3,
+                      delete_chat_photo: 2,
+                      set_chat_title: 3,
+                      set_chat_description: 2,
+                      set_chat_description: 3,
+                      unpin_all_chat_messages: 2,
+                      set_chat_sticker_set: 3,
+                      delete_chat_sticker_set: 2,
                       get_chat: 2,
                       get_chat_administrators: 2,
                       get_chat_administrators: 3,

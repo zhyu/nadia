@@ -50,6 +50,28 @@ defmodule Nadia do
     request(client, method, options, file_field)
   end
 
+  defp encode_permissions(permissions) when is_list(permissions) do
+    permissions
+    |> Map.new()
+    |> reject_nil_values()
+    |> Jason.encode!()
+  end
+
+  defp encode_permissions(%_{} = permissions) do
+    permissions
+    |> Map.from_struct()
+    |> reject_nil_values()
+    |> Jason.encode!()
+  end
+
+  defp encode_permissions(permissions) when is_map(permissions) do
+    permissions
+    |> reject_nil_values()
+    |> Jason.encode!()
+  end
+
+  defp encode_permissions(permissions), do: permissions
+
   @doc """
   A simple method for testing your bot's auth token. Requires no parameters.
   Returns basic information about the bot in form of a User object.
@@ -838,6 +860,342 @@ defmodule Nadia do
 
   def unban_chat_member(%Client{} = client, chat_id, user_id, options) do
     api_request(client, "unbanChatMember", [chat_id: chat_id, user_id: user_id] ++ options)
+  end
+
+  @doc """
+  Use this method to restrict a user in a supergroup. Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target supergroup
+  (in the format @supergroupusername)
+  * `user_id` - Unique identifier of the target user
+  * `permissions` - New user permissions
+  * `options` - orddict of options
+  """
+  @spec restrict_chat_member(integer | binary, integer, map | keyword | struct | binary) ::
+          :ok | {:error, Error.t()}
+  @spec restrict_chat_member(
+          integer | binary,
+          integer,
+          map | keyword | struct | binary,
+          [{atom, any}]
+        ) :: :ok | {:error, Error.t()}
+  @spec restrict_chat_member(
+          Client.t(),
+          integer | binary,
+          integer,
+          map | keyword | struct | binary
+        ) ::
+          :ok | {:error, Error.t()}
+  @spec restrict_chat_member(
+          Client.t(),
+          integer | binary,
+          integer,
+          map | keyword | struct | binary,
+          [{atom, any}]
+        ) :: :ok | {:error, Error.t()}
+  def restrict_chat_member(chat_id, user_id, permissions) do
+    restrict_chat_member(chat_id, user_id, permissions, [])
+  end
+
+  def restrict_chat_member(%Client{} = client, chat_id, user_id, permissions) do
+    restrict_chat_member(client, chat_id, user_id, permissions, [])
+  end
+
+  def restrict_chat_member(chat_id, user_id, permissions, options) do
+    api_request(
+      "restrictChatMember",
+      [chat_id: chat_id, user_id: user_id, permissions: encode_permissions(permissions)] ++
+        options
+    )
+  end
+
+  def restrict_chat_member(%Client{} = client, chat_id, user_id, permissions, options) do
+    api_request(
+      client,
+      "restrictChatMember",
+      [chat_id: chat_id, user_id: user_id, permissions: encode_permissions(permissions)] ++
+        options
+    )
+  end
+
+  @doc """
+  Use this method to promote or demote a user in a supergroup or a channel.
+  Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  * `user_id` - Unique identifier of the target user
+  * `options` - orddict of options
+  """
+  @spec promote_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec promote_chat_member(integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  @spec promote_chat_member(Client.t(), integer | binary, integer) ::
+          :ok | {:error, Error.t()}
+  @spec promote_chat_member(Client.t(), integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def promote_chat_member(chat_id, user_id), do: promote_chat_member(chat_id, user_id, [])
+
+  def promote_chat_member(%Client{} = client, chat_id, user_id) do
+    promote_chat_member(client, chat_id, user_id, [])
+  end
+
+  def promote_chat_member(chat_id, user_id, options) do
+    api_request("promoteChatMember", [chat_id: chat_id, user_id: user_id] ++ options)
+  end
+
+  def promote_chat_member(%Client{} = client, chat_id, user_id, options) do
+    api_request(client, "promoteChatMember", [chat_id: chat_id, user_id: user_id] ++ options)
+  end
+
+  @doc """
+  Use this method to set a custom title for an administrator in a supergroup.
+  Returns True on success.
+  """
+  @spec set_chat_administrator_custom_title(integer | binary, integer, binary) ::
+          :ok | {:error, Error.t()}
+  @spec set_chat_administrator_custom_title(Client.t(), integer | binary, integer, binary) ::
+          :ok | {:error, Error.t()}
+  def set_chat_administrator_custom_title(chat_id, user_id, custom_title) do
+    api_request(
+      "setChatAdministratorCustomTitle",
+      chat_id: chat_id,
+      user_id: user_id,
+      custom_title: custom_title
+    )
+  end
+
+  def set_chat_administrator_custom_title(%Client{} = client, chat_id, user_id, custom_title) do
+    api_request(
+      client,
+      "setChatAdministratorCustomTitle",
+      chat_id: chat_id,
+      user_id: user_id,
+      custom_title: custom_title
+    )
+  end
+
+  @doc """
+  Use this method to change the tag of a user in a direct messages chat. Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat
+  * `user_id` - Unique identifier of the target user
+  * `options` - orddict of options
+  """
+  @spec set_chat_member_tag(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec set_chat_member_tag(integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  @spec set_chat_member_tag(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec set_chat_member_tag(Client.t(), integer | binary, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def set_chat_member_tag(chat_id, user_id), do: set_chat_member_tag(chat_id, user_id, [])
+
+  def set_chat_member_tag(%Client{} = client, chat_id, user_id) do
+    set_chat_member_tag(client, chat_id, user_id, [])
+  end
+
+  def set_chat_member_tag(chat_id, user_id, options) do
+    api_request("setChatMemberTag", [chat_id: chat_id, user_id: user_id] ++ options)
+  end
+
+  def set_chat_member_tag(%Client{} = client, chat_id, user_id, options) do
+    api_request(client, "setChatMemberTag", [chat_id: chat_id, user_id: user_id] ++ options)
+  end
+
+  @doc """
+  Use this method to ban a channel chat in a supergroup or a channel. Returns True on success.
+  """
+  @spec ban_chat_sender_chat(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec ban_chat_sender_chat(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
+  def ban_chat_sender_chat(chat_id, sender_chat_id) do
+    api_request("banChatSenderChat", chat_id: chat_id, sender_chat_id: sender_chat_id)
+  end
+
+  def ban_chat_sender_chat(%Client{} = client, chat_id, sender_chat_id) do
+    api_request(client, "banChatSenderChat", chat_id: chat_id, sender_chat_id: sender_chat_id)
+  end
+
+  @doc """
+  Use this method to unban a previously banned channel chat. Returns True on success.
+  """
+  @spec unban_chat_sender_chat(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec unban_chat_sender_chat(Client.t(), integer | binary, integer) :: :ok | {:error, Error.t()}
+  def unban_chat_sender_chat(chat_id, sender_chat_id) do
+    api_request("unbanChatSenderChat", chat_id: chat_id, sender_chat_id: sender_chat_id)
+  end
+
+  def unban_chat_sender_chat(%Client{} = client, chat_id, sender_chat_id) do
+    api_request(client, "unbanChatSenderChat", chat_id: chat_id, sender_chat_id: sender_chat_id)
+  end
+
+  @doc """
+  Use this method to set default chat permissions for all members. Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target supergroup
+  * `permissions` - New default chat permissions
+  * `options` - orddict of options
+  """
+  @spec set_chat_permissions(integer | binary, map | keyword | struct | binary) ::
+          :ok | {:error, Error.t()}
+  @spec set_chat_permissions(integer | binary, map | keyword | struct | binary, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  @spec set_chat_permissions(Client.t(), integer | binary, map | keyword | struct | binary) ::
+          :ok | {:error, Error.t()}
+  @spec set_chat_permissions(
+          Client.t(),
+          integer | binary,
+          map | keyword | struct | binary,
+          [{atom, any}]
+        ) :: :ok | {:error, Error.t()}
+  def set_chat_permissions(chat_id, permissions),
+    do: set_chat_permissions(chat_id, permissions, [])
+
+  def set_chat_permissions(%Client{} = client, chat_id, permissions) do
+    set_chat_permissions(client, chat_id, permissions, [])
+  end
+
+  def set_chat_permissions(chat_id, permissions, options) do
+    api_request(
+      "setChatPermissions",
+      [chat_id: chat_id, permissions: encode_permissions(permissions)] ++ options
+    )
+  end
+
+  def set_chat_permissions(%Client{} = client, chat_id, permissions, options) do
+    api_request(
+      client,
+      "setChatPermissions",
+      [chat_id: chat_id, permissions: encode_permissions(permissions)] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to approve a chat join request. Returns True on success.
+  """
+  @spec approve_chat_join_request(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec approve_chat_join_request(Client.t(), integer | binary, integer) ::
+          :ok | {:error, Error.t()}
+  def approve_chat_join_request(chat_id, user_id) do
+    api_request("approveChatJoinRequest", chat_id: chat_id, user_id: user_id)
+  end
+
+  def approve_chat_join_request(%Client{} = client, chat_id, user_id) do
+    api_request(client, "approveChatJoinRequest", chat_id: chat_id, user_id: user_id)
+  end
+
+  @doc """
+  Use this method to decline a chat join request. Returns True on success.
+  """
+  @spec decline_chat_join_request(integer | binary, integer) :: :ok | {:error, Error.t()}
+  @spec decline_chat_join_request(Client.t(), integer | binary, integer) ::
+          :ok | {:error, Error.t()}
+  def decline_chat_join_request(chat_id, user_id) do
+    api_request("declineChatJoinRequest", chat_id: chat_id, user_id: user_id)
+  end
+
+  def decline_chat_join_request(%Client{} = client, chat_id, user_id) do
+    api_request(client, "declineChatJoinRequest", chat_id: chat_id, user_id: user_id)
+  end
+
+  @doc """
+  Use this method to delete a chat photo. Returns True on success.
+  """
+  @spec delete_chat_photo(integer | binary) :: :ok | {:error, Error.t()}
+  @spec delete_chat_photo(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  def delete_chat_photo(chat_id) do
+    api_request("deleteChatPhoto", chat_id: chat_id)
+  end
+
+  def delete_chat_photo(%Client{} = client, chat_id) do
+    api_request(client, "deleteChatPhoto", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to change the title of a chat. Returns True on success.
+  """
+  @spec set_chat_title(integer | binary, binary) :: :ok | {:error, Error.t()}
+  @spec set_chat_title(Client.t(), integer | binary, binary) :: :ok | {:error, Error.t()}
+  def set_chat_title(chat_id, title) do
+    api_request("setChatTitle", chat_id: chat_id, title: title)
+  end
+
+  def set_chat_title(%Client{} = client, chat_id, title) do
+    api_request(client, "setChatTitle", chat_id: chat_id, title: title)
+  end
+
+  @doc """
+  Use this method to change the description of a chat. Returns True on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  * `options` - orddict of options
+  """
+  @spec set_chat_description(integer | binary) :: :ok | {:error, Error.t()}
+  @spec set_chat_description(integer | binary, [{atom, any}]) :: :ok | {:error, Error.t()}
+  @spec set_chat_description(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  @spec set_chat_description(Client.t(), integer | binary, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def set_chat_description(chat_id) do
+    set_chat_description(chat_id, [])
+  end
+
+  def set_chat_description(%Client{} = client, chat_id) do
+    set_chat_description(client, chat_id, [])
+  end
+
+  def set_chat_description(chat_id, options) do
+    api_request("setChatDescription", [chat_id: chat_id] ++ options)
+  end
+
+  def set_chat_description(%Client{} = client, chat_id, options) do
+    api_request(client, "setChatDescription", [chat_id: chat_id] ++ options)
+  end
+
+  @doc """
+  Use this method to clear the list of pinned messages in a chat. Returns True on success.
+  """
+  @spec unpin_all_chat_messages(integer | binary) :: :ok | {:error, Error.t()}
+  @spec unpin_all_chat_messages(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  def unpin_all_chat_messages(chat_id) do
+    api_request("unpinAllChatMessages", chat_id: chat_id)
+  end
+
+  def unpin_all_chat_messages(%Client{} = client, chat_id) do
+    api_request(client, "unpinAllChatMessages", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to set a new group sticker set for a supergroup. Returns True on success.
+  """
+  @spec set_chat_sticker_set(integer | binary, binary) :: :ok | {:error, Error.t()}
+  @spec set_chat_sticker_set(Client.t(), integer | binary, binary) :: :ok | {:error, Error.t()}
+  def set_chat_sticker_set(chat_id, sticker_set_name) do
+    api_request("setChatStickerSet", chat_id: chat_id, sticker_set_name: sticker_set_name)
+  end
+
+  def set_chat_sticker_set(%Client{} = client, chat_id, sticker_set_name) do
+    api_request(
+      client,
+      "setChatStickerSet",
+      chat_id: chat_id,
+      sticker_set_name: sticker_set_name
+    )
+  end
+
+  @doc """
+  Use this method to delete a group sticker set from a supergroup. Returns True on success.
+  """
+  @spec delete_chat_sticker_set(integer | binary) :: :ok | {:error, Error.t()}
+  @spec delete_chat_sticker_set(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  def delete_chat_sticker_set(chat_id) do
+    api_request("deleteChatStickerSet", chat_id: chat_id)
+  end
+
+  def delete_chat_sticker_set(%Client{} = client, chat_id) do
+    api_request(client, "deleteChatStickerSet", chat_id: chat_id)
   end
 
   @doc """

@@ -30,6 +30,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   token/access settings, user chat boosts, and user personal chat messages.
 - Added Bot API wrappers for bulk message deletion and message reaction
   maintenance.
+- Added Bot API wrappers for chat administration, membership restrictions,
+  join-request moderation, chat metadata, pinned-message, and chat sticker-set
+  maintenance.
 
 ### Changed
 

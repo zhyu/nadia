@@ -70,6 +70,10 @@ defmodule Nadia.APITest do
     end
   end
 
+  defmodule ChatPermissions do
+    defstruct [:can_send_messages, :can_send_polls]
+  end
+
   test "request_with_map" do
     stub_telegram_result([])
 
@@ -1089,6 +1093,187 @@ defmodule Nadia.APITest do
            {"message_id", "654"},
            {"business_connection_id", "business-1"}
          ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "chat administration membership wrappers build request contracts" do
+    stub_telegram_result(true)
+
+    restrict_permissions = [can_send_messages: true, can_invite_users: false]
+    encoded_restrict_permissions = Jason.encode!(Map.new(restrict_permissions))
+
+    assert :ok ==
+             Nadia.restrict_chat_member("@moderated", 42, restrict_permissions,
+               use_independent_chat_permissions: true,
+               until_date: 1_710_000_000
+             )
+
+    request =
+      assert_telegram_request("restrictChatMember",
+        body:
+          {:form,
+           [
+             {"chat_id", "@moderated"},
+             {"user_id", "42"},
+             {"permissions", encoded_restrict_permissions},
+             {"use_independent_chat_permissions", "true"},
+             {"until_date", "1710000000"}
+           ]},
+        options: [recv_timeout: 5000]
+      )
+
+    assert Jason.decode!(form_params(request)["permissions"]) == %{
+             "can_send_messages" => true,
+             "can_invite_users" => false
+           }
+
+    assert :ok ==
+             Nadia.promote_chat_member("@moderated", 42,
+               can_manage_chat: false,
+               can_delete_messages: true,
+               can_invite_users: false
+             )
+
+    assert_telegram_request("promoteChatMember",
+      body:
+        {:form,
+         [
+           {"chat_id", "@moderated"},
+           {"user_id", "42"},
+           {"can_manage_chat", "false"},
+           {"can_delete_messages", "true"},
+           {"can_invite_users", "false"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.set_chat_administrator_custom_title("@moderated", 42, "Ops Lead")
+
+    assert_telegram_request("setChatAdministratorCustomTitle",
+      body: {:form, [{"chat_id", "@moderated"}, {"user_id", "42"}, {"custom_title", "Ops Lead"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.set_chat_member_tag("@direct", 42, tag: "priority")
+
+    assert_telegram_request("setChatMemberTag",
+      body: {:form, [{"chat_id", "@direct"}, {"user_id", "42"}, {"tag", "priority"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.ban_chat_sender_chat("@moderated", -100_123)
+
+    assert_telegram_request("banChatSenderChat",
+      body: {:form, [{"chat_id", "@moderated"}, {"sender_chat_id", "-100123"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.unban_chat_sender_chat("@moderated", -100_123)
+
+    assert_telegram_request("unbanChatSenderChat",
+      body: {:form, [{"chat_id", "@moderated"}, {"sender_chat_id", "-100123"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    permissions = %ChatPermissions{can_send_messages: true, can_send_polls: false}
+    encoded_permissions = Jason.encode!(Map.from_struct(permissions))
+
+    assert :ok ==
+             Nadia.set_chat_permissions("@moderated", permissions,
+               use_independent_chat_permissions: false
+             )
+
+    request =
+      assert_telegram_request("setChatPermissions",
+        body:
+          {:form,
+           [
+             {"chat_id", "@moderated"},
+             {"permissions", encoded_permissions},
+             {"use_independent_chat_permissions", "false"}
+           ]},
+        options: [recv_timeout: 5000]
+      )
+
+    decoded_permissions = Jason.decode!(form_params(request)["permissions"])
+
+    assert decoded_permissions == %{
+             "can_send_messages" => true,
+             "can_send_polls" => false
+           }
+
+    refute Map.has_key?(decoded_permissions, "can_invite_users")
+  end
+
+  test "chat join and settings true-return wrappers build request contracts" do
+    stub_telegram_result(true)
+
+    client = Client.new(token: "999:family-d", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    assert :ok == Nadia.approve_chat_join_request(client, "@moderated", 42)
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-d/approveChatJoinRequest",
+      body: {:form, [{"chat_id", "@moderated"}, {"user_id", "42"}]},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.decline_chat_join_request("@moderated", 43)
+
+    assert_telegram_request("declineChatJoinRequest",
+      body: {:form, [{"chat_id", "@moderated"}, {"user_id", "43"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.delete_chat_photo("@moderated")
+
+    assert_telegram_request("deleteChatPhoto",
+      body: {:form, [{"chat_id", "@moderated"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.set_chat_title("@moderated", "Moderation Room")
+
+    assert_telegram_request("setChatTitle",
+      body: {:form, [{"chat_id", "@moderated"}, {"title", "Moderation Room"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.set_chat_description("@moderated")
+
+    assert_telegram_request("setChatDescription",
+      body: {:form, [{"chat_id", "@moderated"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.set_chat_description("@moderated", description: "Quiet ops channel")
+
+    assert_telegram_request("setChatDescription",
+      body: {:form, [{"chat_id", "@moderated"}, {"description", "Quiet ops channel"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.unpin_all_chat_messages("@moderated")
+
+    assert_telegram_request("unpinAllChatMessages",
+      body: {:form, [{"chat_id", "@moderated"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.set_chat_sticker_set("@moderated", "nadia_mods_by_bot")
+
+    assert_telegram_request("setChatStickerSet",
+      body: {:form, [{"chat_id", "@moderated"}, {"sticker_set_name", "nadia_mods_by_bot"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.delete_chat_sticker_set("@moderated")
+
+    assert_telegram_request("deleteChatStickerSet",
+      body: {:form, [{"chat_id", "@moderated"}]},
       options: [recv_timeout: 5000]
     )
   end

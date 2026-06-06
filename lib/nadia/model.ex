@@ -273,6 +273,7 @@ defmodule Nadia.Model do
               location: nil,
               venue: nil,
               boost_added: nil,
+              managed_bot_created: nil,
               new_chat_member: nil,
               new_chat_members: [],
               left_chat_member: nil,
@@ -354,6 +355,7 @@ defmodule Nadia.Model do
             location: any,
             venue: any,
             boost_added: ChatBoostAdded.t(),
+            managed_bot_created: ManagedBotCreated.t(),
             new_chat_member: User.t(),
             new_chat_members: [User.t()],
             left_chat_member: User.t(),
@@ -437,6 +439,32 @@ defmodule Nadia.Model do
     @type t :: %PaidMediaPurchased{
             from: User.t(),
             paid_media_payload: binary
+          }
+  end
+
+  defmodule ManagedBotCreated do
+    defstruct bot: nil
+
+    @type t :: %ManagedBotCreated{
+            bot: User.t()
+          }
+  end
+
+  defmodule ManagedBotUpdated do
+    defstruct user: nil, bot: nil
+
+    @type t :: %ManagedBotUpdated{
+            user: User.t(),
+            bot: User.t()
+          }
+  end
+
+  defmodule BotAccessSettings do
+    defstruct is_access_restricted: nil, added_users: []
+
+    @type t :: %BotAccessSettings{
+            is_access_restricted: boolean,
+            added_users: [User.t()]
           }
   end
 
@@ -821,7 +849,7 @@ defmodule Nadia.Model do
             chat_join_request: any,
             chat_boost: ChatBoostUpdated.t(),
             removed_chat_boost: ChatBoostRemoved.t(),
-            managed_bot: any
+            managed_bot: ManagedBotUpdated.t()
           }
   end
 

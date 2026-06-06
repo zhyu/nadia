@@ -9,6 +9,7 @@ defmodule Nadia.APITest do
   alias Nadia.Model.Error
 
   alias Nadia.Model.{
+    BotAccessSettings,
     ChatBoost,
     ChatBoostAdded,
     ChatBoostRemoved,
@@ -18,6 +19,8 @@ defmodule Nadia.APITest do
     ChatBoostUpdated,
     Message,
     MessageEntity,
+    ManagedBotCreated,
+    ManagedBotUpdated,
     MessageReactionUpdated,
     PaidMedia,
     PaidMediaInfo,
@@ -309,6 +312,52 @@ defmodule Nadia.APITest do
     refute existing_atom?(unknown_live_photo_key)
   end
 
+  test "request decodes fixture-backed managed bot getUpdates response" do
+    unknown_update_key = "future_managed_bot_update_field"
+    unknown_message_key = "future_managed_bot_message_field"
+    unknown_created_key = "future_managed_bot_created_field"
+    unknown_created_bot_key = "future_managed_bot_created_bot_field"
+    unknown_updated_key = "future_managed_bot_updated_field"
+    unknown_user_key = "future_managed_bot_user_field"
+    unknown_bot_key = "future_managed_bot_bot_field"
+
+    refute existing_atom?(unknown_update_key)
+    refute existing_atom?(unknown_message_key)
+    refute existing_atom?(unknown_created_key)
+    refute existing_atom?(unknown_created_bot_key)
+    refute existing_atom?(unknown_updated_key)
+    refute existing_atom?(unknown_user_key)
+    refute existing_atom?(unknown_bot_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body: response_fixture("get_updates_managed_bots.json")
+       }}
+    )
+
+    assert {:ok,
+            [
+              %{message: %Message{managed_bot_created: %ManagedBotCreated{} = created}},
+              %{managed_bot: %ManagedBotUpdated{} = updated}
+            ]} = Nadia.get_updates()
+
+    assert created.bot.username == "created_managed_bot"
+    assert created.bot.supports_inline_queries == true
+    assert updated.user.can_manage_bots == true
+    assert updated.bot.username == "updated_managed_bot"
+    assert updated.bot.supports_inline_queries == true
+
+    refute existing_atom?(unknown_update_key)
+    refute existing_atom?(unknown_message_key)
+    refute existing_atom?(unknown_created_key)
+    refute existing_atom?(unknown_created_bot_key)
+    refute existing_atom?(unknown_updated_key)
+    refute existing_atom?(unknown_user_key)
+    refute existing_atom?(unknown_bot_key)
+  end
+
   test "request? parses getUserChatBoosts into modeled results" do
     stub_http_response(
       {:ok,
@@ -354,6 +403,53 @@ defmodule Nadia.APITest do
       body: {:form, [{"chat_id", "-1008888888888"}, {"user_id", "10005"}]},
       options: [recv_timeout: 5000]
     )
+  end
+
+  test "request? parses getManagedBotAccessSettings into modeled results" do
+    unknown_settings_key = "future_bot_access_settings_field"
+    unknown_added_user_key = "future_bot_access_added_user_field"
+
+    refute existing_atom?(unknown_settings_key)
+    refute existing_atom?(unknown_added_user_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body:
+           Jason.encode!(%{
+             "ok" => true,
+             "result" => %{
+               "is_access_restricted" => true,
+               "added_users" => [
+                 %{
+                   "id" => 12004,
+                   "is_bot" => false,
+                   "first_name" => "Allowed Manager",
+                   "can_manage_bots" => true,
+                   unknown_added_user_key => "ignored"
+                 }
+               ],
+               unknown_settings_key => "ignored"
+             }
+           })
+       }}
+    )
+
+    assert %BotAccessSettings{
+             is_access_restricted: true,
+             added_users: [
+               %User{id: 12004, first_name: "Allowed Manager", can_manage_bots: true}
+             ]
+           } = API.request?("getManagedBotAccessSettings", user_id: 12004)
+
+    assert_telegram_request("getManagedBotAccessSettings",
+      body: {:form, [{"user_id", "12004"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    refute existing_atom?(unknown_settings_key)
+    refute existing_atom?(unknown_added_user_key)
   end
 
   test "request builds form body from keyword list params" do

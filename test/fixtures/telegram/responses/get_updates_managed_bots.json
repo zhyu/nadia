@@ -1,0 +1,52 @@
+{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 900500001,
+      "message": {
+        "message_id": 60,
+        "date": 1780003000,
+        "chat": {
+          "id": -1005555555555,
+          "type": "supergroup",
+          "title": "Managed Bot Room"
+        },
+        "managed_bot_created": {
+          "bot": {
+            "id": 12001,
+            "is_bot": true,
+            "first_name": "Created Managed Bot",
+            "username": "created_managed_bot",
+            "supports_inline_queries": true,
+            "future_managed_bot_created_bot_field": "ignored"
+          },
+          "future_managed_bot_created_field": "ignored"
+        },
+        "future_managed_bot_message_field": "ignored"
+      },
+      "future_managed_bot_update_field": "ignored"
+    },
+    {
+      "update_id": 900500002,
+      "managed_bot": {
+        "user": {
+          "id": 12002,
+          "is_bot": false,
+          "first_name": "Bot Manager",
+          "username": "bot_manager",
+          "can_manage_bots": true,
+          "future_managed_bot_user_field": "ignored"
+        },
+        "bot": {
+          "id": 12003,
+          "is_bot": true,
+          "first_name": "Updated Managed Bot",
+          "username": "updated_managed_bot",
+          "supports_inline_queries": true,
+          "future_managed_bot_bot_field": "ignored"
+        },
+        "future_managed_bot_updated_field": "ignored"
+      }
+    }
+  ]
+}

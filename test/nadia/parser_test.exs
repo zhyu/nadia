@@ -5,6 +5,7 @@ defmodule Nadia.ParserTest do
 
   alias Nadia.Model.{
     Update,
+    BotAccessSettings,
     Chat,
     ChatBoost,
     ChatBoostAdded,
@@ -23,6 +24,8 @@ defmodule Nadia.ParserTest do
     UserProfilePhotos,
     Message,
     MessageEntity,
+    ManagedBotCreated,
+    ManagedBotUpdated,
     MessageReactionCountUpdated,
     MessageReactionUpdated,
     PaidMedia,
@@ -495,6 +498,52 @@ defmodule Nadia.ParserTest do
     assert purchased_paid_media.paid_media_payload == "paid-media-payload-1"
   end
 
+  test "parse fixture-backed managed bot get_updates response decoded with string keys" do
+    raw_updates = response_result_fixture("get_updates_managed_bots.json")
+
+    updates = Parser.parse_result(raw_updates, "getUpdates")
+
+    assert [
+             %Update{
+               update_id: 900_500_001,
+               message:
+                 %Message{
+                   managed_bot_created: %ManagedBotCreated{} = managed_bot_created
+                 } = message
+             },
+             %Update{
+               update_id: 900_500_002,
+               managed_bot: %ManagedBotUpdated{} = managed_bot_updated
+             }
+           ] = updates
+
+    assert message.chat.title == "Managed Bot Room"
+
+    assert managed_bot_created.bot == %User{
+             id: 12001,
+             is_bot: true,
+             first_name: "Created Managed Bot",
+             username: "created_managed_bot",
+             supports_inline_queries: true
+           }
+
+    assert managed_bot_updated.user == %User{
+             id: 12002,
+             is_bot: false,
+             first_name: "Bot Manager",
+             username: "bot_manager",
+             can_manage_bots: true
+           }
+
+    assert managed_bot_updated.bot == %User{
+             id: 12003,
+             is_bot: true,
+             first_name: "Updated Managed Bot",
+             username: "updated_managed_bot",
+             supports_inline_queries: true
+           }
+  end
+
   test "parse result of get_user_chat_boosts" do
     user_chat_boosts =
       Parser.parse_result(
@@ -542,6 +591,38 @@ defmodule Nadia.ParserTest do
                }
              ]
            } = user_chat_boosts
+  end
+
+  test "parse result of get_managed_bot_access_settings" do
+    settings =
+      Parser.parse_result(
+        %{
+          "is_access_restricted" => true,
+          "added_users" => [
+            %{
+              "id" => 12004,
+              "is_bot" => false,
+              "first_name" => "Allowed Manager",
+              "can_manage_bots" => true
+            },
+            %{
+              "id" => 12005,
+              "is_bot" => false,
+              "first_name" => "Allowed Auditor",
+              "language_code" => "en"
+            }
+          ]
+        },
+        "getManagedBotAccessSettings"
+      )
+
+    assert %BotAccessSettings{
+             is_access_restricted: true,
+             added_users: [
+               %User{id: 12004, first_name: "Allowed Manager", can_manage_bots: true},
+               %User{id: 12005, first_name: "Allowed Auditor", language_code: "en"}
+             ]
+           } = settings
   end
 
   test "parse result of stop_poll" do

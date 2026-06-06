@@ -4,6 +4,7 @@ defmodule Nadia.Parser do
   """
 
   alias Nadia.Model.{
+    BotAccessSettings,
     User,
     Chat,
     ChatBoost,
@@ -23,6 +24,8 @@ defmodule Nadia.Parser do
     InlineQuery,
     ChosenInlineResult,
     MessageEntity,
+    ManagedBotCreated,
+    ManagedBotUpdated,
     MessageReactionCountUpdated,
     MessageReactionUpdated,
     PaidMedia,
@@ -73,6 +76,7 @@ defmodule Nadia.Parser do
       "sendPaidMedia" -> parse(Message, result)
       "stopPoll" -> parse(Poll, result)
       "getUserChatBoosts" -> parse(UserChatBoosts, result)
+      "getManagedBotAccessSettings" -> parse(BotAccessSettings, result)
       _ -> parse(Message, result)
     end
   end
@@ -172,6 +176,13 @@ defmodule Nadia.Parser do
   defp parse(PaidMediaVideo, {:video, val}), do: {:video, parse(Video, val)}
   defp parse(PaidMediaLivePhoto, {:live_photo, val}), do: {:live_photo, val}
 
+  defp parse(ManagedBotCreated, {:bot, val}), do: {:bot, parse(User, val)}
+  defp parse(ManagedBotUpdated, {:user, val}), do: {:user, parse(User, val)}
+  defp parse(ManagedBotUpdated, {:bot, val}), do: {:bot, parse(User, val)}
+
+  defp parse(BotAccessSettings, {:added_users, val}) when is_list(val),
+    do: {:added_users, Enum.map(val, &parse(User, &1))}
+
   defp parse(ReactionCount, {:type, val}), do: {:type, parse(ReactionType, val)}
 
   defp parse(MessageReactionUpdated, {:old_reaction, val}) when is_list(val),
@@ -205,6 +216,11 @@ defmodule Nadia.Parser do
 
   defp parse({:boost_added, val}), do: {:boost_added, parse(ChatBoostAdded, val)}
   defp parse({:chat_boost, val}), do: {:chat_boost, parse(ChatBoostUpdated, val)}
+
+  defp parse({:managed_bot_created, val}),
+    do: {:managed_bot_created, parse(ManagedBotCreated, val)}
+
+  defp parse({:managed_bot, val}), do: {:managed_bot, parse(ManagedBotUpdated, val)}
 
   defp parse({:removed_chat_boost, val}),
     do: {:removed_chat_boost, parse(ChatBoostRemoved, val)}

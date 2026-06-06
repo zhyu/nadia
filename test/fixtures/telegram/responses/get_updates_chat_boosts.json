@@ -1,0 +1,95 @@
+{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 900300001,
+      "chat_boost": {
+        "chat": {
+          "id": -1008888888888,
+          "type": "supergroup",
+          "title": "Boost Room"
+        },
+        "boost": {
+          "boost_id": "boost-premium-1",
+          "add_date": 1780001000,
+          "expiration_date": 1782593000,
+          "source": {
+            "source": "premium",
+            "user": {
+              "id": 10001,
+              "is_bot": false,
+              "first_name": "Premium Booster"
+            },
+            "future_chat_boost_source_field": "ignored"
+          },
+          "future_chat_boost_field": "ignored"
+        },
+        "future_chat_boost_update_field": "ignored"
+      },
+      "future_chat_boost_outer_field": "ignored"
+    },
+    {
+      "update_id": 900300002,
+      "chat_boost": {
+        "chat": {
+          "id": -1008888888888,
+          "type": "supergroup",
+          "title": "Boost Room"
+        },
+        "boost": {
+          "boost_id": "boost-giveaway-1",
+          "add_date": 1780001100,
+          "expiration_date": 1782593100,
+          "source": {
+            "source": "giveaway",
+            "giveaway_message_id": 44,
+            "user": {
+              "id": 10002,
+              "is_bot": false,
+              "first_name": "Giveaway Winner"
+            },
+            "prize_star_count": 250,
+            "is_unclaimed": true
+          }
+        }
+      }
+    },
+    {
+      "update_id": 900300003,
+      "removed_chat_boost": {
+        "chat": {
+          "id": -1008888888888,
+          "type": "supergroup",
+          "title": "Boost Room"
+        },
+        "boost_id": "boost-gift-code-1",
+        "remove_date": 1780001200,
+        "source": {
+          "source": "gift_code",
+          "user": {
+            "id": 10003,
+            "is_bot": false,
+            "first_name": "Gift Code Booster"
+          }
+        },
+        "future_removed_chat_boost_field": "ignored"
+      }
+    },
+    {
+      "update_id": 900300004,
+      "message": {
+        "message_id": 45,
+        "date": 1780001300,
+        "chat": {
+          "id": -1008888888888,
+          "type": "supergroup",
+          "title": "Boost Room"
+        },
+        "boost_added": {
+          "boost_count": 4,
+          "future_boost_added_field": "ignored"
+        }
+      }
+    }
+  ]
+}

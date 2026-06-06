@@ -272,6 +272,7 @@ defmodule Nadia.Model do
               poll_option_deleted: nil,
               location: nil,
               venue: nil,
+              boost_added: nil,
               new_chat_member: nil,
               new_chat_members: [],
               left_chat_member: nil,
@@ -352,6 +353,7 @@ defmodule Nadia.Model do
             poll_option_deleted: PollOptionDeleted.t(),
             location: any,
             venue: any,
+            boost_added: ChatBoostAdded.t(),
             new_chat_member: User.t(),
             new_chat_members: [User.t()],
             left_chat_member: User.t(),
@@ -368,6 +370,97 @@ defmodule Nadia.Model do
             pinned_message: Message.t(),
             reply_markup: any,
             web_app_data: any
+          }
+  end
+
+  defmodule ChatBoostSource do
+    defstruct source: nil
+
+    @type t ::
+            %ChatBoostSource{source: binary}
+            | ChatBoostSourcePremium.t()
+            | ChatBoostSourceGiftCode.t()
+            | ChatBoostSourceGiveaway.t()
+  end
+
+  defmodule ChatBoostSourcePremium do
+    defstruct source: nil, user: nil
+
+    @type t :: %ChatBoostSourcePremium{
+            source: binary,
+            user: User.t()
+          }
+  end
+
+  defmodule ChatBoostSourceGiftCode do
+    defstruct source: nil, user: nil
+
+    @type t :: %ChatBoostSourceGiftCode{
+            source: binary,
+            user: User.t()
+          }
+  end
+
+  defmodule ChatBoostSourceGiveaway do
+    defstruct source: nil,
+              giveaway_message_id: nil,
+              user: nil,
+              prize_star_count: nil,
+              is_unclaimed: nil
+
+    @type t :: %ChatBoostSourceGiveaway{
+            source: binary,
+            giveaway_message_id: integer,
+            user: User.t(),
+            prize_star_count: integer,
+            is_unclaimed: boolean
+          }
+  end
+
+  defmodule ChatBoost do
+    defstruct boost_id: nil, add_date: nil, expiration_date: nil, source: nil
+
+    @type t :: %ChatBoost{
+            boost_id: binary,
+            add_date: integer,
+            expiration_date: integer,
+            source: ChatBoostSource.t()
+          }
+  end
+
+  defmodule ChatBoostUpdated do
+    defstruct chat: nil, boost: nil
+
+    @type t :: %ChatBoostUpdated{
+            chat: Chat.t(),
+            boost: ChatBoost.t()
+          }
+  end
+
+  defmodule ChatBoostRemoved do
+    defstruct chat: nil, boost_id: nil, remove_date: nil, source: nil
+
+    @type t :: %ChatBoostRemoved{
+            chat: Chat.t(),
+            boost_id: binary,
+            remove_date: integer,
+            source: ChatBoostSource.t()
+          }
+  end
+
+  defmodule UserChatBoosts do
+    defstruct boosts: []
+
+    @type t :: %UserChatBoosts{
+            boosts: [ChatBoost.t()]
+          }
+  end
+
+  defmodule ChatBoostAdded do
+    defstruct boost_count: nil
+
+    @type t :: %ChatBoostAdded{
+            boost_count: integer
           }
   end
 
@@ -659,8 +752,8 @@ defmodule Nadia.Model do
             my_chat_member: any,
             chat_member: any,
             chat_join_request: any,
-            chat_boost: any,
-            removed_chat_boost: any,
+            chat_boost: ChatBoostUpdated.t(),
+            removed_chat_boost: ChatBoostRemoved.t(),
             managed_bot: any
           }
   end

@@ -6,6 +6,14 @@ defmodule Nadia.Parser do
   alias Nadia.Model.{
     User,
     Chat,
+    ChatBoost,
+    ChatBoostAdded,
+    ChatBoostRemoved,
+    ChatBoostSource,
+    ChatBoostSourceGiftCode,
+    ChatBoostSourceGiveaway,
+    ChatBoostSourcePremium,
+    ChatBoostUpdated,
     ChatMember,
     Message,
     ChatPhoto,
@@ -25,6 +33,7 @@ defmodule Nadia.Parser do
     PollOptionDeleted,
     ReactionCount,
     ReactionType,
+    UserChatBoosts,
     WebhookInfo
   }
 
@@ -55,6 +64,7 @@ defmodule Nadia.Parser do
       "getStickerSet" -> parse(StickerSet, result)
       "uploadStickerFile" -> parse(File, result)
       "stopPoll" -> parse(Poll, result)
+      "getUserChatBoosts" -> parse(UserChatBoosts, result)
       _ -> parse(Message, result)
     end
   end
@@ -133,6 +143,13 @@ defmodule Nadia.Parser do
   defp parse(PollOptionAdded, {:poll_message, val}), do: {:poll_message, parse(Message, val)}
   defp parse(PollOptionDeleted, {:poll_message, val}), do: {:poll_message, parse(Message, val)}
 
+  defp parse(ChatBoost, {:source, val}), do: {:source, parse_chat_boost_source(val)}
+  defp parse(ChatBoostUpdated, {:boost, val}), do: {:boost, parse(ChatBoost, val)}
+  defp parse(ChatBoostRemoved, {:source, val}), do: {:source, parse_chat_boost_source(val)}
+
+  defp parse(UserChatBoosts, {:boosts, val}) when is_list(val),
+    do: {:boosts, Enum.map(val, &parse(ChatBoost, &1))}
+
   defp parse(ReactionCount, {:type, val}), do: {:type, parse(ReactionType, val)}
 
   defp parse(MessageReactionUpdated, {:old_reaction, val}) when is_list(val),
@@ -164,6 +181,12 @@ defmodule Nadia.Parser do
   defp parse({:poll_option_deleted, val}),
     do: {:poll_option_deleted, parse(PollOptionDeleted, val)}
 
+  defp parse({:boost_added, val}), do: {:boost_added, parse(ChatBoostAdded, val)}
+  defp parse({:chat_boost, val}), do: {:chat_boost, parse(ChatBoostUpdated, val)}
+
+  defp parse({:removed_chat_boost, val}),
+    do: {:removed_chat_boost, parse(ChatBoostRemoved, val)}
+
   defp parse({:message_reaction, val}),
     do: {:message_reaction, parse(MessageReactionUpdated, val)}
 
@@ -191,6 +214,17 @@ defmodule Nadia.Parser do
     do: {key, parse(ChosenInlineResult, val)}
 
   defp parse(others), do: others
+
+  defp parse_chat_boost_source(%{} = val) do
+    case Map.get(val, :source) || Map.get(val, "source") do
+      "premium" -> parse(ChatBoostSourcePremium, val)
+      "gift_code" -> parse(ChatBoostSourceGiftCode, val)
+      "giveaway" -> parse(ChatBoostSourceGiveaway, val)
+      _ -> parse(ChatBoostSource, val)
+    end
+  end
+
+  defp parse_chat_boost_source(val), do: val
 
   defp struct_fields(type) do
     type

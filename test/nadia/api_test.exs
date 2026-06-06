@@ -9,13 +9,21 @@ defmodule Nadia.APITest do
   alias Nadia.Model.Error
 
   alias Nadia.Model.{
+    ChatBoost,
+    ChatBoostAdded,
+    ChatBoostRemoved,
+    ChatBoostSourceGiftCode,
+    ChatBoostSourceGiveaway,
+    ChatBoostSourcePremium,
+    ChatBoostUpdated,
     Message,
     MessageEntity,
     MessageReactionUpdated,
     ReactionCount,
     ReactionType,
     ReplyKeyboardRemove,
-    User
+    User,
+    UserChatBoosts
   }
 
   defmodule BotAHTTPClient do
@@ -166,6 +174,115 @@ defmodule Nadia.APITest do
     refute existing_atom?(unknown_update_key)
     refute existing_atom?(unknown_reaction_key)
     refute existing_atom?(unknown_count_key)
+  end
+
+  test "request decodes fixture-backed chat boost getUpdates response" do
+    unknown_update_key = "future_chat_boost_outer_field"
+    unknown_boost_update_key = "future_chat_boost_update_field"
+    unknown_boost_key = "future_chat_boost_field"
+    unknown_source_key = "future_chat_boost_source_field"
+    unknown_removed_key = "future_removed_chat_boost_field"
+    unknown_boost_added_key = "future_boost_added_field"
+
+    refute existing_atom?(unknown_update_key)
+    refute existing_atom?(unknown_boost_update_key)
+    refute existing_atom?(unknown_boost_key)
+    refute existing_atom?(unknown_source_key)
+    refute existing_atom?(unknown_removed_key)
+    refute existing_atom?(unknown_boost_added_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body: response_fixture("get_updates_chat_boosts.json")
+       }}
+    )
+
+    assert {:ok,
+            [
+              %{chat_boost: %ChatBoostUpdated{} = premium_update},
+              %{chat_boost: %ChatBoostUpdated{} = giveaway_update},
+              %{removed_chat_boost: %ChatBoostRemoved{} = removed_boost},
+              %{message: %Message{boost_added: %ChatBoostAdded{} = boost_added}}
+            ]} = Nadia.get_updates()
+
+    assert premium_update.boost.boost_id == "boost-premium-1"
+
+    assert %ChatBoostSourcePremium{
+             source: "premium",
+             user: %User{id: 10001, first_name: "Premium Booster"}
+           } = premium_update.boost.source
+
+    assert %ChatBoostSourceGiveaway{
+             source: "giveaway",
+             giveaway_message_id: 44,
+             prize_star_count: 250,
+             is_unclaimed: true
+           } = giveaway_update.boost.source
+
+    assert removed_boost.boost_id == "boost-gift-code-1"
+
+    assert %ChatBoostSourceGiftCode{
+             source: "gift_code",
+             user: %User{id: 10003, first_name: "Gift Code Booster"}
+           } = removed_boost.source
+
+    assert boost_added.boost_count == 4
+
+    refute existing_atom?(unknown_update_key)
+    refute existing_atom?(unknown_boost_update_key)
+    refute existing_atom?(unknown_boost_key)
+    refute existing_atom?(unknown_source_key)
+    refute existing_atom?(unknown_removed_key)
+    refute existing_atom?(unknown_boost_added_key)
+  end
+
+  test "request? parses getUserChatBoosts into modeled results" do
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body:
+           Jason.encode!(%{
+             "ok" => true,
+             "result" => %{
+               "boosts" => [
+                 %{
+                   "boost_id" => "boost-direct-api-1",
+                   "add_date" => 1_780_001_600,
+                   "expiration_date" => 1_782_593_600,
+                   "source" => %{
+                     "source" => "premium",
+                     "user" => %{
+                       "id" => 10005,
+                       "is_bot" => false,
+                       "first_name" => "API Booster"
+                     }
+                   }
+                 }
+               ]
+             }
+           })
+       }}
+    )
+
+    assert %UserChatBoosts{
+             boosts: [
+               %ChatBoost{
+                 boost_id: "boost-direct-api-1",
+                 source: %ChatBoostSourcePremium{
+                   source: "premium",
+                   user: %User{id: 10005, first_name: "API Booster"}
+                 }
+               }
+             ]
+           } = API.request?("getUserChatBoosts", chat_id: -1_008_888_888_888, user_id: 10005)
+
+    assert_telegram_request("getUserChatBoosts",
+      body: {:form, [{"chat_id", "-1008888888888"}, {"user_id", "10005"}]},
+      options: [recv_timeout: 5000]
+    )
   end
 
   test "request builds form body from keyword list params" do

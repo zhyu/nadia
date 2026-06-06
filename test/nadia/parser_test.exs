@@ -6,6 +6,14 @@ defmodule Nadia.ParserTest do
   alias Nadia.Model.{
     Update,
     Chat,
+    ChatBoost,
+    ChatBoostAdded,
+    ChatBoostRemoved,
+    ChatBoostSource,
+    ChatBoostSourceGiftCode,
+    ChatBoostSourceGiveaway,
+    ChatBoostSourcePremium,
+    ChatBoostUpdated,
     InlineQuery,
     CallbackQuery,
     ChosenInlineResult,
@@ -25,6 +33,7 @@ defmodule Nadia.ParserTest do
     PollOptionDeleted,
     ReactionCount,
     ReactionType,
+    UserChatBoosts,
     Venue,
     WebhookInfo
   }
@@ -355,6 +364,111 @@ defmodule Nadia.ParserTest do
              },
              %ReactionCount{type: %ReactionType{type: "paid"}, total_count: 1}
            ] = reaction_count.reactions
+  end
+
+  test "parse fixture-backed chat boost get_updates response decoded with string keys" do
+    raw_updates = response_result_fixture("get_updates_chat_boosts.json")
+
+    updates = Parser.parse_result(raw_updates, "getUpdates")
+
+    assert [
+             %Update{
+               update_id: 900_300_001,
+               chat_boost: %ChatBoostUpdated{} = premium_update
+             },
+             %Update{
+               update_id: 900_300_002,
+               chat_boost: %ChatBoostUpdated{} = giveaway_update
+             },
+             %Update{
+               update_id: 900_300_003,
+               removed_chat_boost: %ChatBoostRemoved{} = removed_boost
+             },
+             %Update{
+               update_id: 900_300_004,
+               message: %Message{boost_added: %ChatBoostAdded{} = boost_added}
+             }
+           ] = updates
+
+    assert premium_update.chat.title == "Boost Room"
+    assert premium_update.boost.boost_id == "boost-premium-1"
+    assert premium_update.boost.add_date == 1_780_001_000
+    assert premium_update.boost.expiration_date == 1_782_593_000
+
+    assert %ChatBoostSourcePremium{
+             source: "premium",
+             user: %User{id: 10001, first_name: "Premium Booster"}
+           } = premium_update.boost.source
+
+    assert giveaway_update.boost.boost_id == "boost-giveaway-1"
+
+    assert %ChatBoostSourceGiveaway{
+             source: "giveaway",
+             giveaway_message_id: 44,
+             user: %User{id: 10002, first_name: "Giveaway Winner"},
+             prize_star_count: 250,
+             is_unclaimed: true
+           } = giveaway_update.boost.source
+
+    assert removed_boost.chat.title == "Boost Room"
+    assert removed_boost.boost_id == "boost-gift-code-1"
+    assert removed_boost.remove_date == 1_780_001_200
+
+    assert %ChatBoostSourceGiftCode{
+             source: "gift_code",
+             user: %User{id: 10003, first_name: "Gift Code Booster"}
+           } = removed_boost.source
+
+    assert boost_added.boost_count == 4
+  end
+
+  test "parse result of get_user_chat_boosts" do
+    user_chat_boosts =
+      Parser.parse_result(
+        %{
+          "boosts" => [
+            %{
+              "boost_id" => "boost-direct-1",
+              "add_date" => 1_780_001_400,
+              "expiration_date" => 1_782_593_400,
+              "source" => %{
+                "source" => "premium",
+                "user" => %{
+                  "id" => 10004,
+                  "is_bot" => false,
+                  "first_name" => "Direct Booster"
+                }
+              }
+            },
+            %{
+              "boost_id" => "boost-direct-future",
+              "add_date" => 1_780_001_500,
+              "expiration_date" => 1_782_593_500,
+              "source" => %{
+                "source" => "future_source",
+                "future_chat_boost_source_field" => "ignored"
+              }
+            }
+          ]
+        },
+        "getUserChatBoosts"
+      )
+
+    assert %UserChatBoosts{
+             boosts: [
+               %ChatBoost{
+                 boost_id: "boost-direct-1",
+                 source: %ChatBoostSourcePremium{
+                   source: "premium",
+                   user: %User{id: 10004, first_name: "Direct Booster"}
+                 }
+               },
+               %ChatBoost{
+                 boost_id: "boost-direct-future",
+                 source: %ChatBoostSource{source: "future_source"}
+               }
+             ]
+           } = user_chat_boosts
   end
 
   test "parse result of stop_poll" do

@@ -31,6 +31,7 @@ defmodule Nadia.ParserTest do
     PhotoSize,
     UserProfilePhotos,
     Message,
+    MessageId,
     MessageEntity,
     ManagedBotCreated,
     ManagedBotUpdated,
@@ -804,6 +805,42 @@ defmodule Nadia.ParserTest do
              icon_custom_emoji_id: "emoji-topic-1",
              is_name_implicit: true
            } = forum_topic
+  end
+
+  test "parse result of copy_message" do
+    message_id =
+      Parser.parse_result(
+        %{
+          "message_id" => 8801,
+          "future_message_id_field" => "ignored"
+        },
+        "copyMessage"
+      )
+
+    assert %MessageId{message_id: 8801} = message_id
+  end
+
+  test "parse result of copy_messages and forward_messages" do
+    copy_message_ids =
+      Parser.parse_result(
+        [
+          %{"message_id" => 8901, "future_message_id_field" => "ignored"},
+          %{"message_id" => 8902}
+        ],
+        "copyMessages"
+      )
+
+    forward_message_ids =
+      Parser.parse_result(
+        [
+          %{"message_id" => 9001},
+          %{"message_id" => 9002, "future_message_id_field" => "ignored"}
+        ],
+        "forwardMessages"
+      )
+
+    assert [%MessageId{message_id: 8901}, %MessageId{message_id: 8902}] = copy_message_ids
+    assert [%MessageId{message_id: 9001}, %MessageId{message_id: 9002}] = forward_message_ids
   end
 
   test "parse result of get_forum_topic_icon_stickers" do

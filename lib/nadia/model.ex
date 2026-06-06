@@ -434,6 +434,12 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule MessageId do
+    defstruct message_id: nil
+
+    @type t :: %MessageId{message_id: integer}
+  end
+
   defmodule PaidMediaInfo do
     defstruct star_count: nil, paid_media: []
 

@@ -27,6 +27,7 @@ defmodule Nadia do
     File,
     ForumTopic,
     Message,
+    MessageId,
     SentGuestMessage,
     Sticker,
     Update,
@@ -167,6 +168,184 @@ defmodule Nadia do
       client,
       "forwardMessage",
       [chat_id: chat_id, from_chat_id: from_chat_id, message_id: message_id] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to forward multiple messages of any kind.
+  On success, an array of MessageId objects is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `from_chat_id` - Unique identifier for the chat where the original messages were sent
+  or username of the target channel (in the format @channelusername)
+  * `message_ids` - List of message identifiers
+  * `options` - orddict of options
+
+  Options:
+  * `:message_thread_id` - Unique identifier for the target message thread
+  * `:direct_messages_topic_id` - Identifier of the direct messages topic
+  * `:disable_notification` - Sends the messages silently or without notification
+  * `:protect_content` - Protects the contents of the forwarded messages
+  """
+  @spec forward_messages(integer | binary, integer | binary, [integer]) ::
+          {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @spec forward_messages(integer | binary, integer | binary, [integer], [{atom, any}]) ::
+          {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @spec forward_messages(Client.t(), integer | binary, integer | binary, [integer]) ::
+          {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @spec forward_messages(Client.t(), integer | binary, integer | binary, [integer], [
+          {atom, any}
+        ]) ::
+          {:ok, [MessageId.t()]} | {:error, Error.t()}
+  def forward_messages(chat_id, from_chat_id, message_ids) do
+    forward_messages(chat_id, from_chat_id, message_ids, [])
+  end
+
+  def forward_messages(%Client{} = client, chat_id, from_chat_id, message_ids) do
+    forward_messages(client, chat_id, from_chat_id, message_ids, [])
+  end
+
+  def forward_messages(chat_id, from_chat_id, message_ids, options) do
+    api_request(
+      "forwardMessages",
+      [
+        chat_id: chat_id,
+        from_chat_id: from_chat_id,
+        message_ids: encode_message_ids(message_ids)
+      ] ++ options
+    )
+  end
+
+  def forward_messages(%Client{} = client, chat_id, from_chat_id, message_ids, options) do
+    api_request(
+      client,
+      "forwardMessages",
+      [
+        chat_id: chat_id,
+        from_chat_id: from_chat_id,
+        message_ids: encode_message_ids(message_ids)
+      ] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to copy messages of any kind.
+  On success, the MessageId of the sent message is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `from_chat_id` - Unique identifier for the chat where the original message was sent
+  or username of the target channel (in the format @channelusername)
+  * `message_id` - Unique message identifier
+  * `options` - orddict of options
+
+  Options:
+  * `:message_thread_id` - Unique identifier for the target message thread
+  * `:direct_messages_topic_id` - Identifier of the direct messages topic
+  * `:video_start_timestamp` - New start timestamp for copied videos
+  * `:caption` - New caption for media
+  * `:parse_mode` - Mode for parsing entities in the new caption
+  * `:caption_entities` - JSON-serialized list of caption entities
+  * `:show_caption_above_media` - Pass True to show the caption above media
+  * `:disable_notification` - Sends the message silently or without notification
+  * `:protect_content` - Protects the contents of the sent message
+  * `:allow_paid_broadcast` - Allows paid broadcast throughput
+  * `:message_effect_id` - Unique identifier of the message effect to be added
+  * `:suggested_post_parameters` - Suggested post parameters
+  * `:reply_parameters` - Description of the message to reply to
+  * `:reply_markup` - Additional interface options
+  """
+  @spec copy_message(integer | binary, integer | binary, integer) ::
+          {:ok, MessageId.t()} | {:error, Error.t()}
+  @spec copy_message(integer | binary, integer | binary, integer, [{atom, any}]) ::
+          {:ok, MessageId.t()} | {:error, Error.t()}
+  @spec copy_message(Client.t(), integer | binary, integer | binary, integer) ::
+          {:ok, MessageId.t()} | {:error, Error.t()}
+  @spec copy_message(Client.t(), integer | binary, integer | binary, integer, [{atom, any}]) ::
+          {:ok, MessageId.t()} | {:error, Error.t()}
+  def copy_message(chat_id, from_chat_id, message_id) do
+    copy_message(chat_id, from_chat_id, message_id, [])
+  end
+
+  def copy_message(%Client{} = client, chat_id, from_chat_id, message_id) do
+    copy_message(client, chat_id, from_chat_id, message_id, [])
+  end
+
+  def copy_message(chat_id, from_chat_id, message_id, options) do
+    api_request(
+      "copyMessage",
+      [chat_id: chat_id, from_chat_id: from_chat_id, message_id: message_id] ++ options
+    )
+  end
+
+  def copy_message(%Client{} = client, chat_id, from_chat_id, message_id, options) do
+    api_request(
+      client,
+      "copyMessage",
+      [chat_id: chat_id, from_chat_id: from_chat_id, message_id: message_id] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to copy multiple messages of any kind.
+  On success, an array of MessageId objects is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  (in the format @channelusername)
+  * `from_chat_id` - Unique identifier for the chat where the original messages were sent
+  or username of the target channel (in the format @channelusername)
+  * `message_ids` - List of message identifiers
+  * `options` - orddict of options
+
+  Options:
+  * `:message_thread_id` - Unique identifier for the target message thread
+  * `:direct_messages_topic_id` - Identifier of the direct messages topic
+  * `:disable_notification` - Sends the messages silently or without notification
+  * `:protect_content` - Protects the contents of the sent messages
+  * `:remove_caption` - Pass True to copy the messages without their captions
+  """
+  @spec copy_messages(integer | binary, integer | binary, [integer]) ::
+          {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @spec copy_messages(integer | binary, integer | binary, [integer], [{atom, any}]) ::
+          {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @spec copy_messages(Client.t(), integer | binary, integer | binary, [integer]) ::
+          {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @spec copy_messages(Client.t(), integer | binary, integer | binary, [integer], [
+          {atom, any}
+        ]) ::
+          {:ok, [MessageId.t()]} | {:error, Error.t()}
+  def copy_messages(chat_id, from_chat_id, message_ids) do
+    copy_messages(chat_id, from_chat_id, message_ids, [])
+  end
+
+  def copy_messages(%Client{} = client, chat_id, from_chat_id, message_ids) do
+    copy_messages(client, chat_id, from_chat_id, message_ids, [])
+  end
+
+  def copy_messages(chat_id, from_chat_id, message_ids, options) do
+    api_request(
+      "copyMessages",
+      [
+        chat_id: chat_id,
+        from_chat_id: from_chat_id,
+        message_ids: encode_message_ids(message_ids)
+      ] ++ options
+    )
+  end
+
+  def copy_messages(%Client{} = client, chat_id, from_chat_id, message_ids, options) do
+    api_request(
+      client,
+      "copyMessages",
+      [
+        chat_id: chat_id,
+        from_chat_id: from_chat_id,
+        message_ids: encode_message_ids(message_ids)
+      ] ++ options
     )
   end
 

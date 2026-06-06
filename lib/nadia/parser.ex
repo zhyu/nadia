@@ -34,6 +34,7 @@ defmodule Nadia.Parser do
     MessageEntity,
     ManagedBotCreated,
     ManagedBotUpdated,
+    MessageId,
     MessageReactionCountUpdated,
     MessageReactionUpdated,
     PaidMedia,
@@ -93,6 +94,9 @@ defmodule Nadia.Parser do
       "replaceManagedBotToken" -> result
       "getManagedBotAccessSettings" -> parse(BotAccessSettings, result)
       "getUserPersonalChatMessages" -> parse(:messages, result)
+      "copyMessage" -> parse(MessageId, result)
+      "copyMessages" -> parse(:message_ids, result)
+      "forwardMessages" -> parse(:message_ids, result)
       _ -> parse(Message, result)
     end
   end
@@ -151,6 +155,7 @@ defmodule Nadia.Parser do
   defp parse(:updates, l) when is_list(l), do: Enum.map(l, &parse(Update, &1))
   defp parse(:chat_members, l) when is_list(l), do: Enum.map(l, &parse(ChatMember, &1))
   defp parse(:messages, l) when is_list(l), do: Enum.map(l, &parse(Message, &1))
+  defp parse(:message_ids, l) when is_list(l), do: Enum.map(l, &parse(MessageId, &1))
   defp parse(:stickers, l) when is_list(l), do: Enum.map(l, &parse(Sticker, &1))
 
   defp parse(type, val) when is_map(val) do

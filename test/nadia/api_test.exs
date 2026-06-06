@@ -28,6 +28,7 @@ defmodule Nadia.APITest do
     ChatBoostUpdated,
     ForumTopic,
     Message,
+    MessageId,
     MessageEntity,
     ManagedBotCreated,
     ManagedBotUpdated,
@@ -1093,6 +1094,91 @@ defmodule Nadia.APITest do
            {"chat_id", "@channel"},
            {"message_id", "654"},
            {"business_connection_id", "business-1"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "copy_message/4 builds request, preserves false options, and parses message ids" do
+    stub_telegram_result(%{message_id: 8801, future_message_id_field: "ignored"})
+
+    assert {:ok, %MessageId{message_id: 8801}} =
+             Nadia.copy_message("@copy_target", -1_008_888_888_900, 41,
+               protect_content: false,
+               caption: "fresh caption"
+             )
+
+    assert_telegram_request("copyMessage",
+      body:
+        {:form,
+         [
+           {"chat_id", "@copy_target"},
+           {"from_chat_id", "-1008888888900"},
+           {"message_id", "41"},
+           {"protect_content", "false"},
+           {"caption", "fresh caption"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "copy_messages/4 JSON-encodes message ids and supports explicit clients" do
+    stub_telegram_result([%{message_id: 8901}, %{message_id: 8902}])
+
+    assert {:ok, [%MessageId{message_id: 8901}, %MessageId{message_id: 8902}]} =
+             Nadia.copy_messages(123, 456, [10, 11], remove_caption: false)
+
+    assert_telegram_request("copyMessages",
+      body:
+        {:form,
+         [
+           {"chat_id", "123"},
+           {"from_chat_id", "456"},
+           {"message_ids", "[10,11]"},
+           {"remove_caption", "false"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    client = Client.new(token: "999:family-f1", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    assert {:ok, [%MessageId{message_id: 8901}, %MessageId{message_id: 8902}]} =
+             Nadia.copy_messages(client, "@copy_target", "@copy_source", [12, 14])
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-f1/copyMessages",
+      body:
+        {:form,
+         [
+           {"chat_id", "@copy_target"},
+           {"from_chat_id", "@copy_source"},
+           {"message_ids", "[12,14]"}
+         ]},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "forward_messages/4 JSON-encodes message ids and parses message id arrays" do
+    stub_telegram_result([%{message_id: 9001}, %{message_id: 9002}])
+
+    assert {:ok, [%MessageId{message_id: 9001}, %MessageId{message_id: 9002}]} =
+             Nadia.forward_messages(
+               -1_008_888_888_901,
+               -1_008_888_888_902,
+               [20, 22],
+               protect_content: false
+             )
+
+    assert_telegram_request("forwardMessages",
+      body:
+        {:form,
+         [
+           {"chat_id", "-1008888888901"},
+           {"from_chat_id", "-1008888888902"},
+           {"message_ids", "[20,22]"},
+           {"protect_content", "false"}
          ]},
       options: [recv_timeout: 5000]
     )

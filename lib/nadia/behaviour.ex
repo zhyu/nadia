@@ -10,6 +10,7 @@ defmodule Nadia.Behaviour do
     File,
     ForumTopic,
     Message,
+    MessageId,
     SentGuestMessage,
     Sticker,
     Update,
@@ -35,6 +36,36 @@ defmodule Nadia.Behaviour do
               {atom, any}
             ]) ::
               {:ok, Message.t()} | {:error, Error.t()}
+  @callback forward_messages(integer | binary, integer | binary, [integer]) ::
+              {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @callback forward_messages(integer | binary, integer | binary, [integer], [{atom, any}]) ::
+              {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @callback forward_messages(Client.t(), integer | binary, integer | binary, [integer]) ::
+              {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @callback forward_messages(Client.t(), integer | binary, integer | binary, [integer], [
+              {atom, any}
+            ]) ::
+              {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @callback copy_message(integer | binary, integer | binary, integer) ::
+              {:ok, MessageId.t()} | {:error, Error.t()}
+  @callback copy_message(integer | binary, integer | binary, integer, [{atom, any}]) ::
+              {:ok, MessageId.t()} | {:error, Error.t()}
+  @callback copy_message(Client.t(), integer | binary, integer | binary, integer) ::
+              {:ok, MessageId.t()} | {:error, Error.t()}
+  @callback copy_message(Client.t(), integer | binary, integer | binary, integer, [
+              {atom, any}
+            ]) ::
+              {:ok, MessageId.t()} | {:error, Error.t()}
+  @callback copy_messages(integer | binary, integer | binary, [integer]) ::
+              {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @callback copy_messages(integer | binary, integer | binary, [integer], [{atom, any}]) ::
+              {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @callback copy_messages(Client.t(), integer | binary, integer | binary, [integer]) ::
+              {:ok, [MessageId.t()]} | {:error, Error.t()}
+  @callback copy_messages(Client.t(), integer | binary, integer | binary, [integer], [
+              {atom, any}
+            ]) ::
+              {:ok, [MessageId.t()]} | {:error, Error.t()}
   @callback send_photo(integer, binary, [{atom, any}]) :: {:ok, Message.t()} | {:error, Error.t()}
   @callback send_photo(Client.t(), integer | binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -350,6 +381,12 @@ defmodule Nadia.Behaviour do
                       send_message: 4,
                       forward_message: 4,
                       forward_message: 5,
+                      forward_messages: 4,
+                      forward_messages: 5,
+                      copy_message: 4,
+                      copy_message: 5,
+                      copy_messages: 4,
+                      copy_messages: 5,
                       send_photo: 4,
                       send_audio: 4,
                       send_document: 4,

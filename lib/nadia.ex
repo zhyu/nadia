@@ -28,6 +28,7 @@ defmodule Nadia do
     ForumTopic,
     Message,
     MessageId,
+    Poll,
     SentGuestMessage,
     Sticker,
     Update,
@@ -2565,6 +2566,251 @@ defmodule Nadia do
       client,
       "editMessageReplyMarkup",
       [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to edit animation, audio, document, live photo, photo, or video
+  messages, or to add media to text messages. On success, the edited Message is
+  returned, or `:ok` is returned when editing an inline message.
+
+  Args:
+  * `media` - JSON-serializable media object or a pre-encoded JSON string
+  * `options` - orddict of options
+  """
+  @spec edit_message_media(list | map | struct | binary, [{atom, any}]) ::
+          :ok | {:ok, Message.t()} | {:error, Error.t()}
+  @spec edit_message_media(Client.t(), list | map | struct | binary, [{atom, any}]) ::
+          :ok | {:ok, Message.t()} | {:error, Error.t()}
+
+  def edit_message_media(media, options) when not is_struct(media, Client) do
+    api_request("editMessageMedia", [media: encode_json_payload(media)] ++ options)
+  end
+
+  def edit_message_media(%Client{} = client, media, options) do
+    api_request(client, "editMessageMedia", [media: encode_json_payload(media)] ++ options)
+  end
+
+  @doc """
+  Use this method to edit live location messages. On success, the edited Message
+  is returned, or `:ok` is returned when editing an inline message.
+
+  Args:
+  * `latitude` - Latitude of new location
+  * `longitude` - Longitude of new location
+  * `options` - orddict of options
+  """
+  @spec edit_message_live_location(float, float, [{atom, any}]) ::
+          :ok | {:ok, Message.t()} | {:error, Error.t()}
+  @spec edit_message_live_location(Client.t(), float, float, [{atom, any}]) ::
+          :ok | {:ok, Message.t()} | {:error, Error.t()}
+  def edit_message_live_location(latitude, longitude, options) do
+    api_request("editMessageLiveLocation", [latitude: latitude, longitude: longitude] ++ options)
+  end
+
+  def edit_message_live_location(%Client{} = client, latitude, longitude, options) do
+    api_request(
+      client,
+      "editMessageLiveLocation",
+      [latitude: latitude, longitude: longitude] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to stop updating a live location message before `live_period`
+  expires. On success, the edited Message is returned, or `:ok` is returned
+  when editing an inline message.
+
+  Args:
+  * `options` - orddict of options
+  """
+  @spec stop_message_live_location([{atom, any}]) ::
+          :ok | {:ok, Message.t()} | {:error, Error.t()}
+  @spec stop_message_live_location(Client.t(), [{atom, any}]) ::
+          :ok | {:ok, Message.t()} | {:error, Error.t()}
+  def stop_message_live_location(options) do
+    api_request("stopMessageLiveLocation", options)
+  end
+
+  def stop_message_live_location(%Client{} = client, options) do
+    api_request(client, "stopMessageLiveLocation", options)
+  end
+
+  @doc """
+  Use this method to edit a checklist on behalf of a connected business account.
+  On success, the edited Message is returned.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `chat_id` - Unique identifier for the target chat or username of the target bot
+  * `message_id` - Unique identifier for the target message
+  * `checklist` - JSON-serializable checklist object or a pre-encoded JSON string
+  * `options` - orddict of options
+  """
+  @spec edit_message_checklist(binary, integer | binary, integer, list | map | struct | binary) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec edit_message_checklist(binary, integer | binary, integer, list | map | struct | binary, [
+          {atom, any}
+        ]) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec edit_message_checklist(
+          Client.t(),
+          binary,
+          integer | binary,
+          integer,
+          list | map | struct | binary
+        ) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec edit_message_checklist(
+          Client.t(),
+          binary,
+          integer | binary,
+          integer,
+          list | map | struct | binary,
+          [{atom, any}]
+        ) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def edit_message_checklist(business_connection_id, chat_id, message_id, checklist) do
+    edit_message_checklist(business_connection_id, chat_id, message_id, checklist, [])
+  end
+
+  def edit_message_checklist(
+        %Client{} = client,
+        business_connection_id,
+        chat_id,
+        message_id,
+        checklist
+      ) do
+    edit_message_checklist(client, business_connection_id, chat_id, message_id, checklist, [])
+  end
+
+  def edit_message_checklist(business_connection_id, chat_id, message_id, checklist, options) do
+    api_request(
+      "editMessageChecklist",
+      [
+        business_connection_id: business_connection_id,
+        chat_id: chat_id,
+        message_id: message_id,
+        checklist: encode_json_payload(checklist)
+      ] ++ options
+    )
+  end
+
+  def edit_message_checklist(
+        %Client{} = client,
+        business_connection_id,
+        chat_id,
+        message_id,
+        checklist,
+        options
+      ) do
+    api_request(
+      client,
+      "editMessageChecklist",
+      [
+        business_connection_id: business_connection_id,
+        chat_id: chat_id,
+        message_id: message_id,
+        checklist: encode_json_payload(checklist)
+      ] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to stop a poll which was sent by the bot. On success, the
+  stopped Poll is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  * `message_id` - Identifier of the original message with the poll
+  * `options` - orddict of options
+  """
+  @spec stop_poll(integer | binary, integer) :: {:ok, Poll.t()} | {:error, Error.t()}
+  @spec stop_poll(integer | binary, integer, [{atom, any}]) ::
+          {:ok, Poll.t()} | {:error, Error.t()}
+  @spec stop_poll(Client.t(), integer | binary, integer) ::
+          {:ok, Poll.t()} | {:error, Error.t()}
+  @spec stop_poll(Client.t(), integer | binary, integer, [{atom, any}]) ::
+          {:ok, Poll.t()} | {:error, Error.t()}
+  def stop_poll(chat_id, message_id), do: stop_poll(chat_id, message_id, [])
+
+  def stop_poll(%Client{} = client, chat_id, message_id) do
+    stop_poll(client, chat_id, message_id, [])
+  end
+
+  def stop_poll(chat_id, message_id, options) do
+    api_request("stopPoll", [chat_id: chat_id, message_id: message_id] ++ options)
+  end
+
+  def stop_poll(%Client{} = client, chat_id, message_id, options) do
+    api_request(client, "stopPoll", [chat_id: chat_id, message_id: message_id] ++ options)
+  end
+
+  @doc """
+  Use this method to approve a suggested post in a direct messages chat.
+  Returns `:ok` on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target direct messages chat
+  * `message_id` - Identifier of a suggested post message to approve
+  * `options` - orddict of options
+  """
+  @spec approve_suggested_post(integer, integer) :: :ok | {:error, Error.t()}
+  @spec approve_suggested_post(integer, integer, [{atom, any}]) :: :ok | {:error, Error.t()}
+  @spec approve_suggested_post(Client.t(), integer, integer) :: :ok | {:error, Error.t()}
+  @spec approve_suggested_post(Client.t(), integer, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def approve_suggested_post(chat_id, message_id) do
+    approve_suggested_post(chat_id, message_id, [])
+  end
+
+  def approve_suggested_post(%Client{} = client, chat_id, message_id) do
+    approve_suggested_post(client, chat_id, message_id, [])
+  end
+
+  def approve_suggested_post(chat_id, message_id, options) do
+    api_request("approveSuggestedPost", [chat_id: chat_id, message_id: message_id] ++ options)
+  end
+
+  def approve_suggested_post(%Client{} = client, chat_id, message_id, options) do
+    api_request(
+      client,
+      "approveSuggestedPost",
+      [chat_id: chat_id, message_id: message_id] ++ options
+    )
+  end
+
+  @doc """
+  Use this method to decline a suggested post in a direct messages chat.
+  Returns `:ok` on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target direct messages chat
+  * `message_id` - Identifier of a suggested post message to decline
+  * `options` - orddict of options
+  """
+  @spec decline_suggested_post(integer, integer) :: :ok | {:error, Error.t()}
+  @spec decline_suggested_post(integer, integer, [{atom, any}]) :: :ok | {:error, Error.t()}
+  @spec decline_suggested_post(Client.t(), integer, integer) :: :ok | {:error, Error.t()}
+  @spec decline_suggested_post(Client.t(), integer, integer, [{atom, any}]) ::
+          :ok | {:error, Error.t()}
+  def decline_suggested_post(chat_id, message_id) do
+    decline_suggested_post(chat_id, message_id, [])
+  end
+
+  def decline_suggested_post(%Client{} = client, chat_id, message_id) do
+    decline_suggested_post(client, chat_id, message_id, [])
+  end
+
+  def decline_suggested_post(chat_id, message_id, options) do
+    api_request("declineSuggestedPost", [chat_id: chat_id, message_id: message_id] ++ options)
+  end
+
+  def decline_suggested_post(%Client{} = client, chat_id, message_id, options) do
+    api_request(
+      client,
+      "declineSuggestedPost",
+      [chat_id: chat_id, message_id: message_id] ++ options
     )
   end
 

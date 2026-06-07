@@ -44,6 +44,7 @@ defmodule Nadia.APITest do
     PaidMediaPurchased,
     PaidMediaVideo,
     PhotoSize,
+    Poll,
     ReactionCount,
     ReactionType,
     ReplyKeyboardRemove,
@@ -1494,6 +1495,283 @@ defmodule Nadia.APITest do
            {"business_connection_id", "business-checklist-2"},
            {"chat_id", "123"},
            {"checklist", preencoded_checklist}
+         ]},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "edit_message_media/2 JSON-encodes media and handles edit return shapes" do
+    stub_telegram_result(message_result(%{message_id: 9701}))
+
+    media = [
+      type: "photo",
+      media: "photo-file-id",
+      caption: nil,
+      show_caption_above_media: false
+    ]
+
+    encoded_media =
+      Jason.encode!(%{
+        type: "photo",
+        media: "photo-file-id",
+        show_caption_above_media: false
+      })
+
+    assert {:ok, %Message{message_id: 9701}} =
+             Nadia.edit_message_media(media,
+               chat_id: "@updates",
+               message_id: 71,
+               inline_message_id: nil,
+               business_connection_id: "business-g-1"
+             )
+
+    request =
+      assert_telegram_request("editMessageMedia",
+        body:
+          {:form,
+           [
+             {"media", encoded_media},
+             {"chat_id", "@updates"},
+             {"message_id", "71"},
+             {"business_connection_id", "business-g-1"}
+           ]},
+        options: [recv_timeout: 5000]
+      )
+
+    assert Jason.decode!(form_params(request)["media"]) == %{
+             "type" => "photo",
+             "media" => "photo-file-id",
+             "show_caption_above_media" => false
+           }
+
+    client = Client.new(token: "999:family-g", http_client: Nadia.HTTPCase.StubHTTPClient)
+    preencoded_media = ~s({"type":"video","media":"already-json"})
+
+    stub_telegram_result(true)
+
+    assert :ok =
+             Nadia.edit_message_media(client, preencoded_media, inline_message_id: "inline-g-1")
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-g/editMessageMedia",
+      body: {:form, [{"media", preencoded_media}, {"inline_message_id", "inline-g-1"}]},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "live location update wrappers build request contracts" do
+    stub_telegram_result(message_result(%{message_id: 9711}))
+
+    assert {:ok, %Message{message_id: 9711}} =
+             Nadia.edit_message_live_location(35.68, 139.76,
+               chat_id: "@geo",
+               message_id: 33,
+               business_connection_id: "business-g-2",
+               live_period: 3600
+             )
+
+    assert_telegram_request("editMessageLiveLocation",
+      body:
+        {:form,
+         [
+           {"latitude", "35.68"},
+           {"longitude", "139.76"},
+           {"chat_id", "@geo"},
+           {"message_id", "33"},
+           {"business_connection_id", "business-g-2"},
+           {"live_period", "3600"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    reply_markup = %{inline_keyboard: [[%{text: "Track", callback_data: "track"}]]}
+    encoded_reply_markup = Jason.encode!(reply_markup)
+
+    stub_telegram_result(message_result(%{message_id: 9712}))
+
+    assert {:ok, %Message{message_id: 9712}} =
+             Nadia.stop_message_live_location(
+               inline_message_id: "inline-live-g",
+               business_connection_id: "business-g-2",
+               reply_markup: reply_markup
+             )
+
+    assert_telegram_request("stopMessageLiveLocation",
+      body:
+        {:form,
+         [
+           {"inline_message_id", "inline-live-g"},
+           {"business_connection_id", "business-g-2"},
+           {"reply_markup", encoded_reply_markup}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "edit_message_checklist/5 JSON-encodes checklist and parses checklist messages" do
+    checklist_response = %{
+      title: "Launch update",
+      tasks: [
+        %{
+          id: 1,
+          text: "Review",
+          completed_by_user: user_result()
+        }
+      ],
+      others_can_add_tasks: false,
+      others_can_mark_tasks_as_done: true
+    }
+
+    stub_telegram_result(message_result(%{message_id: 9721, checklist: checklist_response}))
+
+    checklist = [
+      title: "Launch update",
+      tasks: [
+        [id: 1, text: "Review", parse_mode: nil],
+        %{id: 2, text: "Ship", text_entities: [[type: "bold", offset: 0, length: 4]]}
+      ],
+      others_can_add_tasks: false,
+      others_can_mark_tasks_as_done: true
+    ]
+
+    encoded_checklist =
+      Jason.encode!(%{
+        title: "Launch update",
+        tasks: [
+          %{id: 1, text: "Review"},
+          %{id: 2, text: "Ship", text_entities: [%{type: "bold", offset: 0, length: 4}]}
+        ],
+        others_can_add_tasks: false,
+        others_can_mark_tasks_as_done: true
+      })
+
+    reply_markup = %{inline_keyboard: [[%{text: "Done", callback_data: "done"}]]}
+    encoded_reply_markup = Jason.encode!(reply_markup)
+
+    assert {:ok,
+            %Message{
+              message_id: 9721,
+              checklist: %Checklist{
+                title: "Launch update",
+                tasks: [
+                  %ChecklistTask{
+                    id: 1,
+                    text: "Review",
+                    completed_by_user: %User{id: 456}
+                  }
+                ],
+                others_can_add_tasks: false,
+                others_can_mark_tasks_as_done: true
+              }
+            }} =
+             Nadia.edit_message_checklist(
+               "business-g-3",
+               "@checklists",
+               88,
+               checklist,
+               reply_markup: reply_markup
+             )
+
+    request =
+      assert_telegram_request("editMessageChecklist",
+        body:
+          {:form,
+           [
+             {"business_connection_id", "business-g-3"},
+             {"chat_id", "@checklists"},
+             {"message_id", "88"},
+             {"checklist", encoded_checklist},
+             {"reply_markup", encoded_reply_markup}
+           ]},
+        options: [recv_timeout: 5000]
+      )
+
+    assert Jason.decode!(form_params(request)["checklist"]) == %{
+             "title" => "Launch update",
+             "tasks" => [
+               %{"id" => 1, "text" => "Review"},
+               %{
+                 "id" => 2,
+                 "text" => "Ship",
+                 "text_entities" => [%{"type" => "bold", "offset" => 0, "length" => 4}]
+               }
+             ],
+             "others_can_add_tasks" => false,
+             "others_can_mark_tasks_as_done" => true
+           }
+  end
+
+  test "stop_poll/3 builds request and parses stopped polls" do
+    reply_markup = %{inline_keyboard: [[%{text: "Close", callback_data: "close"}]]}
+    encoded_reply_markup = Jason.encode!(reply_markup)
+
+    stub_telegram_result(%{
+      id: "poll-g-1",
+      question: "Stop?",
+      options: [%{persistent_id: "yes", text: "Yes", voter_count: 1}],
+      total_voter_count: 1,
+      is_closed: true,
+      is_anonymous: false,
+      type: "regular",
+      allows_multiple_answers: false,
+      allows_revoting: false
+    })
+
+    assert {:ok, %Poll{id: "poll-g-1", is_closed: true, options: [option]}} =
+             Nadia.stop_poll("@polls", 44,
+               business_connection_id: "business-g-4",
+               reply_markup: reply_markup
+             )
+
+    assert option.text == "Yes"
+
+    assert_telegram_request("stopPoll",
+      body:
+        {:form,
+         [
+           {"chat_id", "@polls"},
+           {"message_id", "44"},
+           {"business_connection_id", "business-g-4"},
+           {"reply_markup", encoded_reply_markup}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "suggested post approval wrappers return ok and pass optional params" do
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.approve_suggested_post(777, 91, send_date: 1_780_100_000)
+
+    assert_telegram_request("approveSuggestedPost",
+      body:
+        {:form,
+         [
+           {"chat_id", "777"},
+           {"message_id", "91"},
+           {"send_date", "1780100000"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    client = Client.new(token: "999:family-g-posts", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.decline_suggested_post(client, 777, 92, comment: "Needs changes")
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-g-posts/declineSuggestedPost",
+      body:
+        {:form,
+         [
+           {"chat_id", "777"},
+           {"message_id", "92"},
+           {"comment", "Needs changes"}
          ]},
       headers: [],
       options: [recv_timeout: 5000]

@@ -11,6 +11,7 @@ defmodule Nadia.Behaviour do
     ForumTopic,
     Message,
     MessageId,
+    Poll,
     SentGuestMessage,
     Sticker,
     Update,
@@ -402,6 +403,71 @@ defmodule Nadia.Behaviour do
               {atom, any}
             ]) ::
               {:ok, Message.t()} | {:error, Error.t()}
+  @callback edit_message_media(list | map | struct | binary, [{atom, any}]) ::
+              :ok | {:ok, Message.t()} | {:error, Error.t()}
+  @callback edit_message_media(Client.t(), list | map | struct | binary, [{atom, any}]) ::
+              :ok | {:ok, Message.t()} | {:error, Error.t()}
+  @callback edit_message_live_location(float, float, [{atom, any}]) ::
+              :ok | {:ok, Message.t()} | {:error, Error.t()}
+  @callback edit_message_live_location(Client.t(), float, float, [{atom, any}]) ::
+              :ok | {:ok, Message.t()} | {:error, Error.t()}
+  @callback stop_message_live_location([{atom, any}]) ::
+              :ok | {:ok, Message.t()} | {:error, Error.t()}
+  @callback stop_message_live_location(Client.t(), [{atom, any}]) ::
+              :ok | {:ok, Message.t()} | {:error, Error.t()}
+  @callback edit_message_checklist(
+              binary,
+              integer | binary,
+              integer,
+              list | map | struct | binary
+            ) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback edit_message_checklist(
+              binary,
+              integer | binary,
+              integer,
+              list | map | struct | binary,
+              [{atom, any}]
+            ) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback edit_message_checklist(
+              Client.t(),
+              binary,
+              integer | binary,
+              integer,
+              list | map | struct | binary
+            ) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback edit_message_checklist(
+              Client.t(),
+              binary,
+              integer | binary,
+              integer,
+              list | map | struct | binary,
+              [{atom, any}]
+            ) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback stop_poll(integer | binary, integer) :: {:ok, Poll.t()} | {:error, Error.t()}
+  @callback stop_poll(integer | binary, integer, [{atom, any}]) ::
+              {:ok, Poll.t()} | {:error, Error.t()}
+  @callback stop_poll(Client.t(), integer | binary, integer) ::
+              {:ok, Poll.t()} | {:error, Error.t()}
+  @callback stop_poll(Client.t(), integer | binary, integer, [{atom, any}]) ::
+              {:ok, Poll.t()} | {:error, Error.t()}
+  @callback approve_suggested_post(integer, integer) :: :ok | {:error, Error.t()}
+  @callback approve_suggested_post(integer, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback approve_suggested_post(Client.t(), integer, integer) ::
+              :ok | {:error, Error.t()}
+  @callback approve_suggested_post(Client.t(), integer, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback decline_suggested_post(integer, integer) :: :ok | {:error, Error.t()}
+  @callback decline_suggested_post(integer, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback decline_suggested_post(Client.t(), integer, integer) ::
+              :ok | {:error, Error.t()}
+  @callback decline_suggested_post(Client.t(), integer, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
   @callback answer_inline_query(binary, [Nadia.Model.InlineQueryResult.t()], [{atom, any}]) ::
               :ok | {:error, Error.t()}
   @callback answer_inline_query(Client.t(), binary, [Nadia.Model.InlineQueryResult.t()], [
@@ -530,6 +596,18 @@ defmodule Nadia.Behaviour do
                       edit_message_text: 6,
                       edit_message_caption: 5,
                       edit_message_reply_markup: 5,
+                      edit_message_media: 2,
+                      edit_message_media: 3,
+                      edit_message_live_location: 4,
+                      stop_message_live_location: 2,
+                      edit_message_checklist: 5,
+                      edit_message_checklist: 6,
+                      stop_poll: 3,
+                      stop_poll: 4,
+                      approve_suggested_post: 3,
+                      approve_suggested_post: 4,
+                      decline_suggested_post: 3,
+                      decline_suggested_post: 4,
                       answer_inline_query: 4,
                       get_sticker_set: 2,
                       upload_sticker_file: 3,

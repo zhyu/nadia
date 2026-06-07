@@ -39,6 +39,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added Bot API wrappers and response structs for object-returning bot settings
   getters, including commands, profile names/descriptions, menu buttons, and
   default administrator rights.
+- Added Bot API wrappers and response structs for bot profile photos and Mini
+  App prepared inline messages and keyboard buttons.
 - Added Bot API forum topic wrappers, `%Nadia.Model.ForumTopic{}`, and parser
   coverage for `createForumTopic` and `getForumTopicIconStickers` results.
 - Added Bot API copy/forward wrappers for `copyMessage`, `copyMessages`, and

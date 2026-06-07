@@ -34,6 +34,7 @@ defmodule Nadia.APITest do
     Checklist,
     ChecklistTask,
     ForumTopic,
+    KeyboardButton,
     Message,
     MessageId,
     MessageEntity,
@@ -51,6 +52,8 @@ defmodule Nadia.APITest do
     PaidMediaVideo,
     PhotoSize,
     Poll,
+    PreparedInlineMessage,
+    PreparedKeyboardButton,
     ReactionCount,
     ReactionType,
     ReplyKeyboardRemove,
@@ -915,6 +918,111 @@ defmodule Nadia.APITest do
              "id" => "guest-article-1",
              "title" => "Guest reply"
            } = Jason.decode!(params["result"])
+  end
+
+  test "set_my_profile_photo/1 explicit client JSON-encodes profile photo objects" do
+    client =
+      Client.new(
+        token: "999:family-h3",
+        http_client: Nadia.HTTPCase.StubHTTPClient
+      )
+
+    photo = [
+      type: "static",
+      photo: "profile-photo-file-id",
+      main_frame_timestamp: nil
+    ]
+
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.set_my_profile_photo(client, photo)
+
+    request =
+      assert_http_request(
+        method: :post,
+        url: "https://api.telegram.org/bot999:family-h3/setMyProfilePhoto",
+        headers: [],
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert %{
+             "type" => "static",
+             "photo" => "profile-photo-file-id"
+           } = Jason.decode!(params["photo"])
+
+    refute Map.has_key?(Jason.decode!(params["photo"]), "main_frame_timestamp")
+  end
+
+  test "save_prepared_inline_message/3 builds request and parses prepared inline messages" do
+    result = %InlineQueryResult.Article{
+      id: "prepared-article-1",
+      title: "Prepared reply",
+      hide_url: false
+    }
+
+    stub_telegram_result(%{
+      id: "prepared-inline-message-1",
+      expiration_date: 1_800_000_001
+    })
+
+    assert {:ok,
+            %PreparedInlineMessage{
+              id: "prepared-inline-message-1",
+              expiration_date: 1_800_000_001
+            }} =
+             Nadia.save_prepared_inline_message(10001, result,
+               allow_user_chats: false,
+               allow_bot_chats: true
+             )
+
+    request =
+      assert_telegram_request("savePreparedInlineMessage",
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params["user_id"] == "10001"
+    assert params["allow_user_chats"] == "false"
+    assert params["allow_bot_chats"] == "true"
+
+    assert %{
+             "type" => "article",
+             "id" => "prepared-article-1",
+             "title" => "Prepared reply",
+             "hide_url" => false
+           } = Jason.decode!(params["result"])
+  end
+
+  test "save_prepared_keyboard_button/2 builds request and parses prepared keyboard buttons" do
+    button = %KeyboardButton{
+      text: "Share location",
+      request_contact: nil,
+      request_location: false
+    }
+
+    stub_telegram_result(%{id: "prepared-keyboard-button-1"})
+
+    assert {:ok, %PreparedKeyboardButton{id: "prepared-keyboard-button-1"}} =
+             Nadia.save_prepared_keyboard_button(10002, button)
+
+    request =
+      assert_telegram_request("savePreparedKeyboardButton",
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params["user_id"] == "10002"
+
+    assert %{
+             "text" => "Share location",
+             "request_location" => false
+           } = Jason.decode!(params["button"])
+
+    refute Map.has_key?(Jason.decode!(params["button"]), "request_contact")
   end
 
   test "get_user_chat_boosts/2 builds request and parses user chat boosts" do

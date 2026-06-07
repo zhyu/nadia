@@ -61,6 +61,8 @@ defmodule Nadia.Parser do
     PollOption,
     PollOptionAdded,
     PollOptionDeleted,
+    PreparedInlineMessage,
+    PreparedKeyboardButton,
     ReactionCount,
     ReactionType,
     SentGuestMessage,
@@ -102,6 +104,8 @@ defmodule Nadia.Parser do
       "getUserChatBoosts" -> parse(UserChatBoosts, result)
       "getBusinessConnection" -> parse(BusinessConnection, result)
       "answerGuestQuery" -> parse(SentGuestMessage, result)
+      "savePreparedInlineMessage" -> parse(PreparedInlineMessage, result)
+      "savePreparedKeyboardButton" -> parse(PreparedKeyboardButton, result)
       "getManagedBotToken" -> result
       "replaceManagedBotToken" -> result
       "getManagedBotAccessSettings" -> parse(BotAccessSettings, result)

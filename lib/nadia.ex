@@ -35,6 +35,8 @@ defmodule Nadia do
     Message,
     MessageId,
     Poll,
+    PreparedInlineMessage,
+    PreparedKeyboardButton,
     SentGuestMessage,
     Sticker,
     Update,
@@ -326,6 +328,21 @@ defmodule Nadia do
 
   def get_my_short_description(%Client{} = client, options) do
     api_request(client, "getMyShortDescription", options)
+  end
+
+  @doc """
+  Use this method to change the bot's profile photo.
+  Returns `:ok` on success.
+  """
+  @spec set_my_profile_photo(list | map | struct | binary) :: :ok | {:error, Error.t()}
+  @spec set_my_profile_photo(Client.t(), list | map | struct | binary) ::
+          :ok | {:error, Error.t()}
+  def set_my_profile_photo(photo) do
+    api_request("setMyProfilePhoto", photo: encode_json_payload(photo))
+  end
+
+  def set_my_profile_photo(%Client{} = client, photo) do
+    api_request(client, "setMyProfilePhoto", photo: encode_json_payload(photo))
   end
 
   @doc """
@@ -2579,6 +2596,77 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to store a message that can be sent by a user of a Mini App.
+  On success, a PreparedInlineMessage object is returned.
+
+  Args:
+  * `user_id` - Unique identifier of the target user that can use the prepared message
+  * `result` - An inline query result describing the message to be sent
+  * `options` - orddict of options
+  """
+  @spec save_prepared_inline_message(integer, Nadia.Model.InlineQueryResult.t()) ::
+          {:ok, PreparedInlineMessage.t()} | {:error, Error.t()}
+  @spec save_prepared_inline_message(
+          integer,
+          Nadia.Model.InlineQueryResult.t(),
+          [{atom, any}] | map
+        ) ::
+          {:ok, PreparedInlineMessage.t()} | {:error, Error.t()}
+  @spec save_prepared_inline_message(Client.t(), integer, Nadia.Model.InlineQueryResult.t()) ::
+          {:ok, PreparedInlineMessage.t()} | {:error, Error.t()}
+  @spec save_prepared_inline_message(
+          Client.t(),
+          integer,
+          Nadia.Model.InlineQueryResult.t(),
+          [{atom, any}] | map
+        ) ::
+          {:ok, PreparedInlineMessage.t()} | {:error, Error.t()}
+  def save_prepared_inline_message(user_id, result) do
+    save_prepared_inline_message(user_id, result, [])
+  end
+
+  def save_prepared_inline_message(%Client{} = client, user_id, result) do
+    save_prepared_inline_message(client, user_id, result, [])
+  end
+
+  def save_prepared_inline_message(user_id, result, options) do
+    do_save_prepared_inline_message(nil, user_id, result, options)
+  end
+
+  def save_prepared_inline_message(%Client{} = client, user_id, result, options) do
+    do_save_prepared_inline_message(client, user_id, result, options)
+  end
+
+  @doc """
+  Use this method to store a keyboard button that can be used by a user within a Mini App.
+  On success, a PreparedKeyboardButton object is returned.
+
+  Args:
+  * `user_id` - Unique identifier of the target user that can use the button
+  * `button` - JSON-serializable keyboard button object or a pre-encoded JSON string
+  """
+  @spec save_prepared_keyboard_button(integer, list | map | struct | binary) ::
+          {:ok, PreparedKeyboardButton.t()} | {:error, Error.t()}
+  @spec save_prepared_keyboard_button(Client.t(), integer, list | map | struct | binary) ::
+          {:ok, PreparedKeyboardButton.t()} | {:error, Error.t()}
+  def save_prepared_keyboard_button(user_id, button) do
+    api_request(
+      "savePreparedKeyboardButton",
+      user_id: user_id,
+      button: encode_json_payload(button)
+    )
+  end
+
+  def save_prepared_keyboard_button(%Client{} = client, user_id, button) do
+    api_request(
+      client,
+      "savePreparedKeyboardButton",
+      user_id: user_id,
+      button: encode_json_payload(button)
+    )
+  end
+
+  @doc """
   Use this method to edit text messages sent by the bot or via the bot (for inline bots).
   On success, the edited Message is returned
 
@@ -3195,6 +3283,16 @@ defmodule Nadia do
       api_request(client, "answerGuestQuery", args ++ options)
     else
       api_request("answerGuestQuery", args ++ options)
+    end
+  end
+
+  defp do_save_prepared_inline_message(client, user_id, result, options) do
+    args = [user_id: user_id, result: encode_inline_query_result(result)]
+
+    if client do
+      api_request(client, "savePreparedInlineMessage", request_options(args, options))
+    else
+      api_request("savePreparedInlineMessage", request_options(args, options))
     end
   end
 

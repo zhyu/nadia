@@ -710,6 +710,23 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule PreparedInlineMessage do
+    defstruct id: nil, expiration_date: nil
+
+    @type t :: %PreparedInlineMessage{
+            id: binary,
+            expiration_date: integer
+          }
+  end
+
+  defmodule PreparedKeyboardButton do
+    defstruct id: nil
+
+    @type t :: %PreparedKeyboardButton{
+            id: binary
+          }
+  end
+
   defmodule ManagedBotCreated do
     defstruct bot: nil
 

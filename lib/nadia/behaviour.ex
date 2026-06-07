@@ -18,6 +18,8 @@ defmodule Nadia.Behaviour do
     Message,
     MessageId,
     Poll,
+    PreparedInlineMessage,
+    PreparedKeyboardButton,
     SentGuestMessage,
     Sticker,
     Update,
@@ -81,6 +83,9 @@ defmodule Nadia.Behaviour do
               {:ok, BotShortDescription.t()} | {:error, Error.t()}
   @callback get_my_short_description(Client.t(), [{atom, any}] | map) ::
               {:ok, BotShortDescription.t()} | {:error, Error.t()}
+  @callback set_my_profile_photo(list | map | struct | binary) :: :ok | {:error, Error.t()}
+  @callback set_my_profile_photo(Client.t(), list | map | struct | binary) ::
+              :ok | {:error, Error.t()}
   @callback remove_my_profile_photo() :: :ok | {:error, Error.t()}
   @callback remove_my_profile_photo([{atom, any}] | map) :: :ok | {:error, Error.t()}
   @callback remove_my_profile_photo(Client.t()) :: :ok | {:error, Error.t()}
@@ -483,6 +488,31 @@ defmodule Nadia.Behaviour do
               {atom, any}
             ]) ::
               {:ok, SentGuestMessage.t()} | {:error, Error.t()}
+  @callback save_prepared_inline_message(integer, Nadia.Model.InlineQueryResult.t()) ::
+              {:ok, PreparedInlineMessage.t()} | {:error, Error.t()}
+  @callback save_prepared_inline_message(
+              integer,
+              Nadia.Model.InlineQueryResult.t(),
+              [{atom, any}] | map
+            ) ::
+              {:ok, PreparedInlineMessage.t()} | {:error, Error.t()}
+  @callback save_prepared_inline_message(
+              Client.t(),
+              integer,
+              Nadia.Model.InlineQueryResult.t()
+            ) ::
+              {:ok, PreparedInlineMessage.t()} | {:error, Error.t()}
+  @callback save_prepared_inline_message(
+              Client.t(),
+              integer,
+              Nadia.Model.InlineQueryResult.t(),
+              [{atom, any}] | map
+            ) ::
+              {:ok, PreparedInlineMessage.t()} | {:error, Error.t()}
+  @callback save_prepared_keyboard_button(integer, list | map | struct | binary) ::
+              {:ok, PreparedKeyboardButton.t()} | {:error, Error.t()}
+  @callback save_prepared_keyboard_button(Client.t(), integer, list | map | struct | binary) ::
+              {:ok, PreparedKeyboardButton.t()} | {:error, Error.t()}
   @callback edit_message_text(integer | binary, integer, binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
   @callback edit_message_text(Client.t(), integer | binary, integer, binary, binary, [{atom, any}]) ::
@@ -621,6 +651,8 @@ defmodule Nadia.Behaviour do
                       get_my_short_description: 0,
                       get_my_short_description: 1,
                       get_my_short_description: 2,
+                      set_my_profile_photo: 1,
+                      set_my_profile_photo: 2,
                       remove_my_profile_photo: 0,
                       remove_my_profile_photo: 1,
                       remove_my_profile_photo: 2,
@@ -736,6 +768,11 @@ defmodule Nadia.Behaviour do
                       set_message_reaction: 4,
                       answer_callback_query: 3,
                       answer_guest_query: 4,
+                      save_prepared_inline_message: 2,
+                      save_prepared_inline_message: 3,
+                      save_prepared_inline_message: 4,
+                      save_prepared_keyboard_button: 2,
+                      save_prepared_keyboard_button: 3,
                       edit_message_text: 6,
                       edit_message_caption: 5,
                       edit_message_reply_markup: 5,

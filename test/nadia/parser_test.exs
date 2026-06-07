@@ -59,6 +59,8 @@ defmodule Nadia.ParserTest do
     PollOption,
     PollOptionAdded,
     PollOptionDeleted,
+    PreparedInlineMessage,
+    PreparedKeyboardButton,
     ReactionCount,
     ReactionType,
     SentGuestMessage,
@@ -809,6 +811,37 @@ defmodule Nadia.ParserTest do
       )
 
     assert %SentGuestMessage{inline_message_id: "inline-guest-message-1"} = sent_guest_message
+  end
+
+  test "parse result of save_prepared_inline_message" do
+    prepared_inline_message =
+      Parser.parse_result(
+        %{
+          "id" => "prepared-inline-message-1",
+          "expiration_date" => 1_800_000_001,
+          "future_prepared_inline_message_field" => "ignored"
+        },
+        "savePreparedInlineMessage"
+      )
+
+    assert %PreparedInlineMessage{
+             id: "prepared-inline-message-1",
+             expiration_date: 1_800_000_001
+           } = prepared_inline_message
+  end
+
+  test "parse result of save_prepared_keyboard_button" do
+    prepared_keyboard_button =
+      Parser.parse_result(
+        %{
+          "id" => "prepared-keyboard-button-1",
+          "future_prepared_keyboard_button_field" => "ignored"
+        },
+        "savePreparedKeyboardButton"
+      )
+
+    assert %PreparedKeyboardButton{id: "prepared-keyboard-button-1"} =
+             prepared_keyboard_button
   end
 
   test "parse result of get_user_chat_boosts" do

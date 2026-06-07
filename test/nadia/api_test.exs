@@ -101,6 +101,158 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "bot lifecycle and settings true-return wrappers build request contracts" do
+    stub_telegram_result(true)
+
+    client = Client.new(token: "999:family-h1", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    assert :ok == Nadia.log_out()
+
+    assert_telegram_request("logOut",
+      body: {:form, []},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.close(client)
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-h1/close",
+      body: {:form, []},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.set_my_name(name: "Nadia", language_code: "en")
+
+    assert_telegram_request("setMyName",
+      body: {:form, [{"name", "Nadia"}, {"language_code", "en"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.set_my_description(description: "A helpful bot", language_code: "en")
+
+    assert_telegram_request("setMyDescription",
+      body: {:form, [{"description", "A helpful bot"}, {"language_code", "en"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok ==
+             Nadia.set_my_short_description(short_description: "Helpful", language_code: "en")
+
+    assert_telegram_request("setMyShortDescription",
+      body: {:form, [{"short_description", "Helpful"}, {"language_code", "en"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.remove_my_profile_photo()
+
+    assert_telegram_request("removeMyProfilePhoto",
+      body: {:form, []},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok ==
+             Nadia.set_user_emoji_status(321,
+               emoji_status_custom_emoji_id: "",
+               emoji_status_expiration_date: 1_800_000_000
+             )
+
+    assert_telegram_request("setUserEmojiStatus",
+      body:
+        {:form,
+         [
+           {"user_id", "321"},
+           {"emoji_status_custom_emoji_id", ""},
+           {"emoji_status_expiration_date", "1800000000"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "bot command and menu settings wrappers JSON-encode object form fields" do
+    stub_telegram_result(true)
+
+    commands = [
+      [command: "start", description: "Start the bot", future_nil: nil],
+      %{command: "help", description: "Show help", future_nil: nil}
+    ]
+
+    assert :ok ==
+             Nadia.set_my_commands(commands,
+               scope: [type: "chat", chat_id: 123, future_nil: nil],
+               language_code: "en"
+             )
+
+    request = assert_telegram_request("setMyCommands", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["language_code"] == "en"
+
+    assert Jason.decode!(params["commands"]) == [
+             %{"command" => "start", "description" => "Start the bot"},
+             %{"command" => "help", "description" => "Show help"}
+           ]
+
+    assert Jason.decode!(params["scope"]) == %{"chat_id" => 123, "type" => "chat"}
+
+    assert :ok ==
+             Nadia.delete_my_commands(%{
+               scope: %{type: "all_private_chats", future_nil: nil},
+               language_code: "ja"
+             })
+
+    request = assert_telegram_request("deleteMyCommands", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["language_code"] == "ja"
+    assert Jason.decode!(params["scope"]) == %{"type" => "all_private_chats"}
+
+    assert :ok ==
+             Nadia.set_chat_menu_button(
+               chat_id: 42,
+               menu_button: [
+                 type: "web_app",
+                 text: "Open",
+                 web_app: [url: "https://example.test/app", future_nil: nil],
+                 future_nil: nil
+               ]
+             )
+
+    request = assert_telegram_request("setChatMenuButton", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["chat_id"] == "42"
+
+    assert Jason.decode!(params["menu_button"]) == %{
+             "type" => "web_app",
+             "text" => "Open",
+             "web_app" => %{"url" => "https://example.test/app"}
+           }
+
+    assert :ok ==
+             Nadia.set_my_default_administrator_rights(
+               rights: %{
+                 can_manage_chat: true,
+                 can_delete_messages: nil,
+                 can_invite_users: false
+               },
+               for_channels: false
+             )
+
+    request =
+      assert_telegram_request("setMyDefaultAdministratorRights", options: [recv_timeout: 5000])
+
+    params = form_params(request)
+
+    assert params["for_channels"] == "false"
+
+    assert Jason.decode!(params["rights"]) == %{
+             "can_manage_chat" => true,
+             "can_invite_users" => false
+           }
+  end
+
   test "request ignores unknown Telegram response fields without creating atoms" do
     unknown_key = "telegram_unknown_#{System.unique_integer([:positive])}"
     refute existing_atom?(unknown_key)

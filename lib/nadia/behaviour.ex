@@ -661,6 +661,10 @@ defmodule Nadia.Behaviour do
               :ok | {:error, Error.t()}
   @callback get_sticker_set(Client.t(), binary) ::
               {:ok, Nadia.Model.StickerSet.t()} | {:error, Error.t()}
+  @callback get_custom_emoji_stickers([binary] | binary) ::
+              {:ok, [Sticker.t()]} | {:error, Error.t()}
+  @callback get_custom_emoji_stickers(Client.t(), [binary] | binary) ::
+              {:ok, [Sticker.t()]} | {:error, Error.t()}
   @callback upload_sticker_file(Client.t(), integer, binary) ::
               {:ok, File.t()} | {:error, Error.t()}
   @callback create_new_sticker_set(Client.t(), integer, binary, binary, binary, binary, [
@@ -669,9 +673,51 @@ defmodule Nadia.Behaviour do
               :ok | {:error, Error.t()}
   @callback add_sticker_to_set(Client.t(), integer, binary, binary, binary, [{atom, any}]) ::
               :ok | {:error, Error.t()}
+  @callback replace_sticker_in_set(integer, binary, binary, list | map | struct | binary) ::
+              :ok | {:error, Error.t()}
+  @callback replace_sticker_in_set(
+              Client.t(),
+              integer,
+              binary,
+              binary,
+              list | map | struct | binary
+            ) ::
+              :ok | {:error, Error.t()}
+  @callback set_sticker_emoji_list(binary, [binary] | binary) :: :ok | {:error, Error.t()}
+  @callback set_sticker_emoji_list(Client.t(), binary, [binary] | binary) ::
+              :ok | {:error, Error.t()}
+  @callback set_sticker_keywords(binary) :: :ok | {:error, Error.t()}
+  @callback set_sticker_keywords(binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  @callback set_sticker_keywords(Client.t(), binary) :: :ok | {:error, Error.t()}
+  @callback set_sticker_keywords(Client.t(), binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback set_sticker_mask_position(binary) :: :ok | {:error, Error.t()}
+  @callback set_sticker_mask_position(binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback set_sticker_mask_position(Client.t(), binary) :: :ok | {:error, Error.t()}
+  @callback set_sticker_mask_position(Client.t(), binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback set_sticker_set_title(binary, binary) :: :ok | {:error, Error.t()}
+  @callback set_sticker_set_title(Client.t(), binary, binary) :: :ok | {:error, Error.t()}
+  @callback set_sticker_set_thumbnail(binary, integer) :: :ok | {:error, Error.t()}
+  @callback set_sticker_set_thumbnail(binary, integer, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback set_sticker_set_thumbnail(Client.t(), binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback set_sticker_set_thumbnail(Client.t(), binary, integer, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback set_custom_emoji_sticker_set_thumbnail(binary) :: :ok | {:error, Error.t()}
+  @callback set_custom_emoji_sticker_set_thumbnail(binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback set_custom_emoji_sticker_set_thumbnail(Client.t(), binary) ::
+              :ok | {:error, Error.t()}
+  @callback set_custom_emoji_sticker_set_thumbnail(Client.t(), binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
   @callback set_sticker_position_in_set(Client.t(), binary, integer) ::
               :ok | {:error, Error.t()}
   @callback delete_sticker_from_set(Client.t(), binary) :: :ok | {:error, Error.t()}
+  @callback delete_sticker_set(binary) :: :ok | {:error, Error.t()}
+  @callback delete_sticker_set(Client.t(), binary) :: :ok | {:error, Error.t()}
   @callback pin_chat_message(Client.t(), integer | binary, integer | binary, [{atom, any}]) ::
               :ok | {:error, Error.t()}
   @callback unpin_chat_message(integer | binary) :: :ok | {:error, Error.t()}
@@ -874,11 +920,33 @@ defmodule Nadia.Behaviour do
                       decline_suggested_post: 4,
                       answer_inline_query: 4,
                       get_sticker_set: 2,
+                      get_custom_emoji_stickers: 1,
+                      get_custom_emoji_stickers: 2,
                       upload_sticker_file: 3,
                       create_new_sticker_set: 7,
                       add_sticker_to_set: 6,
+                      replace_sticker_in_set: 4,
+                      replace_sticker_in_set: 5,
+                      set_sticker_emoji_list: 2,
+                      set_sticker_emoji_list: 3,
+                      set_sticker_keywords: 1,
+                      set_sticker_keywords: 2,
+                      set_sticker_keywords: 3,
+                      set_sticker_mask_position: 1,
+                      set_sticker_mask_position: 2,
+                      set_sticker_mask_position: 3,
+                      set_sticker_set_title: 2,
+                      set_sticker_set_title: 3,
+                      set_sticker_set_thumbnail: 2,
+                      set_sticker_set_thumbnail: 3,
+                      set_sticker_set_thumbnail: 4,
+                      set_custom_emoji_sticker_set_thumbnail: 1,
+                      set_custom_emoji_sticker_set_thumbnail: 2,
+                      set_custom_emoji_sticker_set_thumbnail: 3,
                       set_sticker_position_in_set: 3,
                       delete_sticker_from_set: 2,
+                      delete_sticker_set: 1,
+                      delete_sticker_set: 2,
                       pin_chat_message: 4,
                       unpin_chat_message: 2,
                       unpin_chat_message: 3

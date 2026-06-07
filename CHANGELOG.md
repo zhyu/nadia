@@ -45,6 +45,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   App prepared inline messages and keyboard buttons.
 - Added Bot API forum topic wrappers, `%Nadia.Model.ForumTopic{}`, and parser
   coverage for `createForumTopic` and `getForumTopicIconStickers` results.
+- Added Bot API wrappers for modern sticker set and custom emoji sticker
+  maintenance, including `getCustomEmojiStickers` parser coverage.
 - Added Bot API copy/forward wrappers for `copyMessage`, `copyMessages`, and
   `forwardMessages`, plus `%Nadia.Model.MessageId{}` parser/model support.
 - Added Bot API send wrappers for `sendVideoNote`, `sendLivePhoto`,

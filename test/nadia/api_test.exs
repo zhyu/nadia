@@ -2511,6 +2511,185 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "get_custom_emoji_stickers JSON-encodes ids, parses stickers, and supports explicit clients" do
+    client = Client.new(token: "999:family-k", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    stub_telegram_result([
+      %{
+        file_id: "custom-emoji-sticker-1",
+        width: 512,
+        height: 512,
+        emoji: "\u{1F680}",
+        file_size: 2048
+      }
+    ])
+
+    assert {:ok, [%Sticker{file_id: "custom-emoji-sticker-1", emoji: "\u{1F680}"}]} =
+             Nadia.get_custom_emoji_stickers(["custom-emoji-1", "custom-emoji-2"])
+
+    request = assert_telegram_request("getCustomEmojiStickers", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert Jason.decode!(params["custom_emoji_ids"]) == ["custom-emoji-1", "custom-emoji-2"]
+    assert Map.keys(params) == ["custom_emoji_ids"]
+
+    assert {:ok, [%Sticker{file_id: "custom-emoji-sticker-1", emoji: "\u{1F680}"}]} =
+             Nadia.get_custom_emoji_stickers(client, ["custom-emoji-3"])
+
+    request =
+      assert_http_request(
+        method: :post,
+        url: "https://api.telegram.org/bot999:family-k/getCustomEmojiStickers",
+        headers: [],
+        options: [recv_timeout: 5000]
+      )
+
+    assert Jason.decode!(form_params(request)["custom_emoji_ids"]) == ["custom-emoji-3"]
+  end
+
+  test "modern sticker maintenance wrappers build request contracts" do
+    stub_telegram_result(true)
+
+    input_sticker = [
+      sticker: "new-sticker-file-id",
+      format: "static",
+      emoji_list: ["\u{1F680}", "\u{2728}"],
+      mask_position: [point: "forehead", x_shift: 0.1, y_shift: nil, scale: 1.0],
+      keywords: nil
+    ]
+
+    assert :ok ==
+             Nadia.replace_sticker_in_set(
+               12001,
+               "nadia_modern_by_bot",
+               "old-sticker-file-id",
+               input_sticker
+             )
+
+    request = assert_telegram_request("replaceStickerInSet", options: [recv_timeout: 5000])
+    params = form_params(request)
+    decoded_sticker = Jason.decode!(params["sticker"])
+
+    assert params["user_id"] == "12001"
+    assert params["name"] == "nadia_modern_by_bot"
+    assert params["old_sticker"] == "old-sticker-file-id"
+
+    assert decoded_sticker == %{
+             "sticker" => "new-sticker-file-id",
+             "format" => "static",
+             "emoji_list" => ["\u{1F680}", "\u{2728}"],
+             "mask_position" => %{"point" => "forehead", "x_shift" => 0.1, "scale" => 1.0}
+           }
+
+    refute Map.has_key?(decoded_sticker, "keywords")
+    refute Map.has_key?(decoded_sticker["mask_position"], "y_shift")
+
+    assert :ok == Nadia.set_sticker_emoji_list("new-sticker-file-id", ["\u{1F680}", "\u{2728}"])
+
+    request = assert_telegram_request("setStickerEmojiList", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["sticker"] == "new-sticker-file-id"
+    assert Jason.decode!(params["emoji_list"]) == ["\u{1F680}", "\u{2728}"]
+    assert MapSet.new(Map.keys(params)) == MapSet.new(["emoji_list", "sticker"])
+
+    assert :ok ==
+             Nadia.set_sticker_keywords("new-sticker-file-id",
+               keywords: ["launch", "spark"],
+               future_nil: nil
+             )
+
+    request = assert_telegram_request("setStickerKeywords", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["sticker"] == "new-sticker-file-id"
+    assert Jason.decode!(params["keywords"]) == ["launch", "spark"]
+    refute Map.has_key?(params, "future_nil")
+
+    assert :ok == Nadia.set_sticker_keywords("new-sticker-file-id", keywords: [])
+
+    request = assert_telegram_request("setStickerKeywords", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["sticker"] == "new-sticker-file-id"
+    assert Jason.decode!(params["keywords"]) == []
+
+    assert :ok == Nadia.set_sticker_keywords("new-sticker-file-id", keywords: nil)
+
+    request = assert_telegram_request("setStickerKeywords", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["sticker"] == "new-sticker-file-id"
+    refute Map.has_key?(params, "keywords")
+
+    mask_position = [point: "eyes", x_shift: 0.0, y_shift: nil, scale: 1.25]
+
+    assert :ok ==
+             Nadia.set_sticker_mask_position("mask-sticker-file-id",
+               mask_position: mask_position,
+               future_nil: nil
+             )
+
+    request = assert_telegram_request("setStickerMaskPosition", options: [recv_timeout: 5000])
+    params = form_params(request)
+    decoded_mask_position = Jason.decode!(params["mask_position"])
+
+    assert params["sticker"] == "mask-sticker-file-id"
+    assert decoded_mask_position == %{"point" => "eyes", "x_shift" => 0.0, "scale" => 1.25}
+    refute Map.has_key?(decoded_mask_position, "y_shift")
+    refute Map.has_key?(params, "future_nil")
+
+    assert :ok == Nadia.set_sticker_mask_position("mask-sticker-file-id", mask_position: nil)
+
+    request = assert_telegram_request("setStickerMaskPosition", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["sticker"] == "mask-sticker-file-id"
+    refute Map.has_key?(params, "mask_position")
+
+    assert :ok == Nadia.set_sticker_set_title("nadia_modern_by_bot", "Nadia Modern")
+
+    assert_telegram_request("setStickerSetTitle",
+      body: {:form, [{"name", "nadia_modern_by_bot"}, {"title", "Nadia Modern"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok ==
+             Nadia.set_sticker_set_thumbnail("nadia_modern_by_bot", 12001,
+               thumbnail: "attach://thumbnail",
+               format: "static"
+             )
+
+    assert_telegram_request("setStickerSetThumbnail",
+      body:
+        {:form,
+         [
+           {"name", "nadia_modern_by_bot"},
+           {"user_id", "12001"},
+           {"thumbnail", "attach://thumbnail"},
+           {"format", "static"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok ==
+             Nadia.set_custom_emoji_sticker_set_thumbnail("nadia_custom_by_bot",
+               custom_emoji_id: "custom-emoji-1"
+             )
+
+    assert_telegram_request("setCustomEmojiStickerSetThumbnail",
+      body: {:form, [{"name", "nadia_custom_by_bot"}, {"custom_emoji_id", "custom-emoji-1"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.delete_sticker_set("nadia_modern_by_bot")
+
+    assert_telegram_request("deleteStickerSet",
+      body: {:form, [{"name", "nadia_modern_by_bot"}]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
   test "create_forum_topic/3 builds request and parses forum topics" do
     stub_telegram_result(%{
       message_thread_id: 321,

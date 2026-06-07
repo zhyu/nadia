@@ -95,6 +95,7 @@ defmodule Nadia.Parser do
       "getChatAdministrators" -> parse(:chat_members, result)
       "getChatMemberCount" -> result
       "getStickerSet" -> parse(StickerSet, result)
+      "getCustomEmojiStickers" -> parse(:stickers, result)
       "uploadStickerFile" -> parse(File, result)
       "getForumTopicIconStickers" -> parse(:stickers, result)
       "createForumTopic" -> parse(ForumTopic, result)

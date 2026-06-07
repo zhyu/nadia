@@ -1103,6 +1103,34 @@ defmodule Nadia.ParserTest do
              stickers
   end
 
+  test "parse result of get_custom_emoji_stickers" do
+    stickers =
+      Parser.parse_result(
+        [
+          %{
+            "file_id" => "custom-emoji-sticker-1",
+            "width" => 512,
+            "height" => 512,
+            "emoji" => "\u{1F680}",
+            "set_name" => "nadia_custom_by_bot",
+            "future_sticker_field" => "ignored"
+          }
+        ],
+        "getCustomEmojiStickers"
+      )
+
+    assert [
+             %Sticker{
+               file_id: "custom-emoji-sticker-1",
+               width: 512,
+               height: 512,
+               emoji: "\u{1F680}",
+               set_name: "nadia_custom_by_bot"
+             }
+           ] =
+             stickers
+  end
+
   test "parse result of stop_poll" do
     poll =
       Parser.parse_result(

@@ -93,6 +93,17 @@ defmodule Nadia do
     |> Jason.encode!()
   end
 
+  defp encode_json_array_payload(nil), do: nil
+  defp encode_json_array_payload(payload) when is_binary(payload), do: payload
+
+  defp encode_json_array_payload(payload) when is_list(payload) do
+    payload
+    |> Enum.map(&json_payload_value/1)
+    |> Jason.encode!()
+  end
+
+  defp encode_json_array_payload(payload), do: encode_json_payload(payload)
+
   defp json_payload_value(payload) when is_list(payload) do
     if Keyword.keyword?(payload) do
       payload
@@ -3693,6 +3704,14 @@ defmodule Nadia do
     Map.update(options, key, nil, &encode_json_payload/1)
   end
 
+  defp encode_json_array_option(options, key) when is_list(options) do
+    Keyword.update(options, key, nil, &encode_json_array_payload/1)
+  end
+
+  defp encode_json_array_option(options, key) when is_map(options) do
+    Map.update(options, key, nil, &encode_json_array_payload/1)
+  end
+
   defp encode_added_user_ids(options) do
     Keyword.update(options, :added_user_ids, nil, &Jason.encode!/1)
   end
@@ -3762,6 +3781,32 @@ defmodule Nadia do
 
   def get_sticker_set(%Client{} = client, name) do
     api_request(client, "getStickerSet", name: name)
+  end
+
+  @doc """
+  Use this method to get information about custom emoji stickers by their identifiers.
+  Returns an array of Sticker objects.
+
+  Args:
+  * `custom_emoji_ids` - List of custom emoji identifiers
+  """
+  @spec get_custom_emoji_stickers([binary] | binary) ::
+          {:ok, [Sticker.t()]} | {:error, Error.t()}
+  @spec get_custom_emoji_stickers(Client.t(), [binary] | binary) ::
+          {:ok, [Sticker.t()]} | {:error, Error.t()}
+  def get_custom_emoji_stickers(custom_emoji_ids) do
+    api_request(
+      "getCustomEmojiStickers",
+      custom_emoji_ids: encode_json_array_payload(custom_emoji_ids)
+    )
+  end
+
+  def get_custom_emoji_stickers(%Client{} = client, custom_emoji_ids) do
+    api_request(
+      client,
+      "getCustomEmojiStickers",
+      custom_emoji_ids: encode_json_array_payload(custom_emoji_ids)
+    )
   end
 
   @doc """
@@ -3901,6 +3946,244 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to replace an existing sticker in a sticker set with a new one.
+  Returns True on success.
+
+  Args:
+  * `user_id` - User identifier of the sticker set owner
+  * `name` - Sticker set name
+  * `old_sticker` - File identifier of the replaced sticker
+  * `sticker` - InputSticker object for the new sticker
+  """
+  @spec replace_sticker_in_set(integer, binary, binary, list | map | struct | binary) ::
+          :ok | {:error, Error.t()}
+  @spec replace_sticker_in_set(
+          Client.t(),
+          integer,
+          binary,
+          binary,
+          list | map | struct | binary
+        ) ::
+          :ok | {:error, Error.t()}
+  def replace_sticker_in_set(user_id, name, old_sticker, sticker) do
+    api_request(
+      "replaceStickerInSet",
+      user_id: user_id,
+      name: name,
+      old_sticker: old_sticker,
+      sticker: encode_json_payload(sticker)
+    )
+  end
+
+  def replace_sticker_in_set(%Client{} = client, user_id, name, old_sticker, sticker) do
+    api_request(
+      client,
+      "replaceStickerInSet",
+      user_id: user_id,
+      name: name,
+      old_sticker: old_sticker,
+      sticker: encode_json_payload(sticker)
+    )
+  end
+
+  @doc """
+  Use this method to change the list of emoji assigned to a regular or custom emoji sticker.
+  Returns True on success.
+
+  Args:
+  * `sticker` - File identifier of the sticker
+  * `emoji_list` - List of emoji associated with the sticker
+  """
+  @spec set_sticker_emoji_list(binary, [binary] | binary) :: :ok | {:error, Error.t()}
+  @spec set_sticker_emoji_list(Client.t(), binary, [binary] | binary) ::
+          :ok | {:error, Error.t()}
+  def set_sticker_emoji_list(sticker, emoji_list) do
+    api_request(
+      "setStickerEmojiList",
+      sticker: sticker,
+      emoji_list: encode_json_array_payload(emoji_list)
+    )
+  end
+
+  def set_sticker_emoji_list(%Client{} = client, sticker, emoji_list) do
+    api_request(
+      client,
+      "setStickerEmojiList",
+      sticker: sticker,
+      emoji_list: encode_json_array_payload(emoji_list)
+    )
+  end
+
+  @doc """
+  Use this method to change search keywords assigned to a regular or custom emoji sticker.
+  Returns True on success.
+
+  Args:
+  * `sticker` - File identifier of the sticker
+
+  Options:
+  * `keywords` - List of 0-20 search keywords for the sticker
+  """
+  @spec set_sticker_keywords(binary) :: :ok | {:error, Error.t()}
+  @spec set_sticker_keywords(binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  @spec set_sticker_keywords(Client.t(), binary) :: :ok | {:error, Error.t()}
+  @spec set_sticker_keywords(Client.t(), binary, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  def set_sticker_keywords(sticker), do: set_sticker_keywords(sticker, [])
+
+  def set_sticker_keywords(%Client{} = client, sticker) do
+    set_sticker_keywords(client, sticker, [])
+  end
+
+  def set_sticker_keywords(sticker, options) do
+    api_request(
+      "setStickerKeywords",
+      request_options([sticker: sticker], encode_json_array_option(options, :keywords))
+    )
+  end
+
+  def set_sticker_keywords(%Client{} = client, sticker, options) do
+    api_request(
+      client,
+      "setStickerKeywords",
+      request_options([sticker: sticker], encode_json_array_option(options, :keywords))
+    )
+  end
+
+  @doc """
+  Use this method to change the mask position of a mask sticker.
+  Returns True on success.
+
+  Args:
+  * `sticker` - File identifier of the sticker
+
+  Options:
+  * `mask_position` - A `Nadia.Model.MaskPosition` object for the sticker
+  """
+  @spec set_sticker_mask_position(binary) :: :ok | {:error, Error.t()}
+  @spec set_sticker_mask_position(binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  @spec set_sticker_mask_position(Client.t(), binary) :: :ok | {:error, Error.t()}
+  @spec set_sticker_mask_position(Client.t(), binary, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  def set_sticker_mask_position(sticker), do: set_sticker_mask_position(sticker, [])
+
+  def set_sticker_mask_position(%Client{} = client, sticker) do
+    set_sticker_mask_position(client, sticker, [])
+  end
+
+  def set_sticker_mask_position(sticker, options) do
+    api_request(
+      "setStickerMaskPosition",
+      request_options([sticker: sticker], encode_json_option(options, :mask_position))
+    )
+  end
+
+  def set_sticker_mask_position(%Client{} = client, sticker, options) do
+    api_request(
+      client,
+      "setStickerMaskPosition",
+      request_options([sticker: sticker], encode_json_option(options, :mask_position))
+    )
+  end
+
+  @doc """
+  Use this method to set the title of a created sticker set.
+  Returns True on success.
+
+  Args:
+  * `name` - Sticker set name
+  * `title` - Sticker set title
+  """
+  @spec set_sticker_set_title(binary, binary) :: :ok | {:error, Error.t()}
+  @spec set_sticker_set_title(Client.t(), binary, binary) :: :ok | {:error, Error.t()}
+  def set_sticker_set_title(name, title) do
+    api_request("setStickerSetTitle", name: name, title: title)
+  end
+
+  def set_sticker_set_title(%Client{} = client, name, title) do
+    api_request(client, "setStickerSetTitle", name: name, title: title)
+  end
+
+  @doc """
+  Use this method to set the thumbnail of a regular or mask sticker set.
+  Returns True on success.
+
+  Args:
+  * `name` - Sticker set name
+  * `user_id` - User identifier of the sticker set owner
+
+  Options:
+  * `thumbnail` - Sticker set thumbnail as a file identifier, URL, or attach reference
+  * `format` - Format of the thumbnail
+  """
+  @spec set_sticker_set_thumbnail(binary, integer) :: :ok | {:error, Error.t()}
+  @spec set_sticker_set_thumbnail(binary, integer, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  @spec set_sticker_set_thumbnail(Client.t(), binary, integer) :: :ok | {:error, Error.t()}
+  @spec set_sticker_set_thumbnail(Client.t(), binary, integer, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  def set_sticker_set_thumbnail(name, user_id), do: set_sticker_set_thumbnail(name, user_id, [])
+
+  def set_sticker_set_thumbnail(%Client{} = client, name, user_id) do
+    set_sticker_set_thumbnail(client, name, user_id, [])
+  end
+
+  def set_sticker_set_thumbnail(name, user_id, options) do
+    api_request(
+      "setStickerSetThumbnail",
+      request_options([name: name, user_id: user_id], options)
+    )
+  end
+
+  def set_sticker_set_thumbnail(%Client{} = client, name, user_id, options) do
+    api_request(
+      client,
+      "setStickerSetThumbnail",
+      request_options([name: name, user_id: user_id], options)
+    )
+  end
+
+  @doc """
+  Use this method to set the thumbnail of a custom emoji sticker set.
+  Returns True on success.
+
+  Args:
+  * `name` - Sticker set name
+
+  Options:
+  * `custom_emoji_id` - Custom emoji identifier to use as thumbnail
+  """
+  @spec set_custom_emoji_sticker_set_thumbnail(binary) :: :ok | {:error, Error.t()}
+  @spec set_custom_emoji_sticker_set_thumbnail(binary, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  @spec set_custom_emoji_sticker_set_thumbnail(Client.t(), binary) ::
+          :ok | {:error, Error.t()}
+  @spec set_custom_emoji_sticker_set_thumbnail(Client.t(), binary, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  def set_custom_emoji_sticker_set_thumbnail(name) do
+    set_custom_emoji_sticker_set_thumbnail(name, [])
+  end
+
+  def set_custom_emoji_sticker_set_thumbnail(%Client{} = client, name) do
+    set_custom_emoji_sticker_set_thumbnail(client, name, [])
+  end
+
+  def set_custom_emoji_sticker_set_thumbnail(name, options) do
+    api_request(
+      "setCustomEmojiStickerSetThumbnail",
+      request_options([name: name], options)
+    )
+  end
+
+  def set_custom_emoji_sticker_set_thumbnail(%Client{} = client, name, options) do
+    api_request(
+      client,
+      "setCustomEmojiStickerSetThumbnail",
+      request_options([name: name], options)
+    )
+  end
+
+  @doc """
   Use this method to move a sticker in a set created by the bot to a specific position.
   Returns True on success.
 
@@ -3932,6 +4215,23 @@ defmodule Nadia do
 
   def delete_sticker_from_set(%Client{} = client, sticker) do
     api_request(client, "deleteStickerFromSet", sticker: sticker)
+  end
+
+  @doc """
+  Use this method to delete a sticker set created by the bot.
+  Returns True on success.
+
+  Args:
+  * `name` - Sticker set name
+  """
+  @spec delete_sticker_set(binary) :: :ok | {:error, Error.t()}
+  @spec delete_sticker_set(Client.t(), binary) :: :ok | {:error, Error.t()}
+  def delete_sticker_set(name) do
+    api_request("deleteStickerSet", name: name)
+  end
+
+  def delete_sticker_set(%Client{} = client, name) do
+    api_request(client, "deleteStickerSet", name: name)
   end
 
   @doc """

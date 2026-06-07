@@ -448,6 +448,67 @@ defmodule Nadia.Behaviour do
   @callback get_business_connection(binary) :: {:ok, BusinessConnection.t()} | {:error, Error.t()}
   @callback get_business_connection(Client.t(), binary) ::
               {:ok, BusinessConnection.t()} | {:error, Error.t()}
+  @callback read_business_message(binary, integer, integer) :: :ok | {:error, Error.t()}
+  @callback read_business_message(Client.t(), binary, integer, integer) ::
+              :ok | {:error, Error.t()}
+  @callback delete_business_messages(binary, [integer]) :: :ok | {:error, Error.t()}
+  @callback delete_business_messages(Client.t(), binary, [integer]) ::
+              :ok | {:error, Error.t()}
+  @callback set_business_account_name(binary, binary) :: :ok | {:error, Error.t()}
+  @callback set_business_account_name(binary, binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback set_business_account_name(Client.t(), binary, binary) ::
+              :ok | {:error, Error.t()}
+  @callback set_business_account_name(Client.t(), binary, binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback set_business_account_username(binary) :: :ok | {:error, Error.t()}
+  @callback set_business_account_username(binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback set_business_account_username(Client.t(), binary) ::
+              :ok | {:error, Error.t()}
+  @callback set_business_account_username(Client.t(), binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback set_business_account_bio(binary) :: :ok | {:error, Error.t()}
+  @callback set_business_account_bio(binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  @callback set_business_account_bio(Client.t(), binary) :: :ok | {:error, Error.t()}
+  @callback set_business_account_bio(Client.t(), binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback set_business_account_profile_photo(binary, list | map | struct | binary) ::
+              :ok | {:error, Error.t()}
+  @callback set_business_account_profile_photo(
+              binary,
+              list | map | struct | binary,
+              [{atom, any}] | map
+            ) :: :ok | {:error, Error.t()}
+  @callback set_business_account_profile_photo(
+              Client.t(),
+              binary,
+              list | map | struct | binary
+            ) :: :ok | {:error, Error.t()}
+  @callback set_business_account_profile_photo(
+              Client.t(),
+              binary,
+              list | map | struct | binary,
+              [{atom, any}] | map
+            ) :: :ok | {:error, Error.t()}
+  @callback remove_business_account_profile_photo(binary) :: :ok | {:error, Error.t()}
+  @callback remove_business_account_profile_photo(binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback remove_business_account_profile_photo(Client.t(), binary) ::
+              :ok | {:error, Error.t()}
+  @callback remove_business_account_profile_photo(Client.t(), binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback set_business_account_gift_settings(binary, boolean, list | map | struct | binary) ::
+              :ok | {:error, Error.t()}
+  @callback set_business_account_gift_settings(
+              Client.t(),
+              binary,
+              boolean,
+              list | map | struct | binary
+            ) :: :ok | {:error, Error.t()}
+  @callback transfer_business_account_stars(binary, integer) :: :ok | {:error, Error.t()}
+  @callback transfer_business_account_stars(Client.t(), binary, integer) ::
+              :ok | {:error, Error.t()}
   @callback get_managed_bot_token(integer) :: {:ok, binary} | {:error, Error.t()}
   @callback get_managed_bot_token(Client.t(), integer) :: {:ok, binary} | {:error, Error.t()}
   @callback replace_managed_bot_token(integer) :: {:ok, binary} | {:error, Error.t()}
@@ -757,6 +818,29 @@ defmodule Nadia.Behaviour do
                       get_chat_member: 3,
                       get_user_chat_boosts: 3,
                       get_business_connection: 2,
+                      read_business_message: 3,
+                      read_business_message: 4,
+                      delete_business_messages: 2,
+                      delete_business_messages: 3,
+                      set_business_account_name: 2,
+                      set_business_account_name: 3,
+                      set_business_account_name: 4,
+                      set_business_account_username: 1,
+                      set_business_account_username: 2,
+                      set_business_account_username: 3,
+                      set_business_account_bio: 1,
+                      set_business_account_bio: 2,
+                      set_business_account_bio: 3,
+                      set_business_account_profile_photo: 2,
+                      set_business_account_profile_photo: 3,
+                      set_business_account_profile_photo: 4,
+                      remove_business_account_profile_photo: 1,
+                      remove_business_account_profile_photo: 2,
+                      remove_business_account_profile_photo: 3,
+                      set_business_account_gift_settings: 3,
+                      set_business_account_gift_settings: 4,
+                      transfer_business_account_stars: 2,
+                      transfer_business_account_stars: 3,
                       get_managed_bot_token: 2,
                       replace_managed_bot_token: 2,
                       get_managed_bot_access_settings: 2,

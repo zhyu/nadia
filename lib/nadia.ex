@@ -2423,6 +2423,365 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to mark an incoming message as read on behalf of a business account.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `chat_id` - Unique identifier of the chat in which the message was received
+  * `message_id` - Unique identifier of the message to mark as read
+  """
+  @spec read_business_message(binary, integer, integer) :: :ok | {:error, Error.t()}
+  @spec read_business_message(Client.t(), binary, integer, integer) ::
+          :ok | {:error, Error.t()}
+  def read_business_message(business_connection_id, chat_id, message_id) do
+    api_request(
+      "readBusinessMessage",
+      business_connection_id: business_connection_id,
+      chat_id: chat_id,
+      message_id: message_id
+    )
+  end
+
+  def read_business_message(%Client{} = client, business_connection_id, chat_id, message_id) do
+    api_request(
+      client,
+      "readBusinessMessage",
+      business_connection_id: business_connection_id,
+      chat_id: chat_id,
+      message_id: message_id
+    )
+  end
+
+  @doc """
+  Use this method to delete messages on behalf of a business account.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `message_ids` - List of message identifiers to delete
+  """
+  @spec delete_business_messages(binary, [integer]) :: :ok | {:error, Error.t()}
+  @spec delete_business_messages(Client.t(), binary, [integer]) :: :ok | {:error, Error.t()}
+  def delete_business_messages(business_connection_id, message_ids) do
+    api_request(
+      "deleteBusinessMessages",
+      business_connection_id: business_connection_id,
+      message_ids: encode_message_ids(message_ids)
+    )
+  end
+
+  def delete_business_messages(%Client{} = client, business_connection_id, message_ids) do
+    api_request(
+      client,
+      "deleteBusinessMessages",
+      business_connection_id: business_connection_id,
+      message_ids: encode_message_ids(message_ids)
+    )
+  end
+
+  @doc """
+  Use this method to change the first and last name of a managed business account.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `first_name` - New first name of the business account
+  * `options` - orddict of options
+
+  Options:
+  * `:last_name` - New last name of the business account
+  """
+  @spec set_business_account_name(binary, binary) :: :ok | {:error, Error.t()}
+  @spec set_business_account_name(binary, binary, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  @spec set_business_account_name(Client.t(), binary, binary) :: :ok | {:error, Error.t()}
+  @spec set_business_account_name(Client.t(), binary, binary, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  def set_business_account_name(business_connection_id, first_name) do
+    set_business_account_name(business_connection_id, first_name, [])
+  end
+
+  def set_business_account_name(%Client{} = client, business_connection_id, first_name) do
+    set_business_account_name(client, business_connection_id, first_name, [])
+  end
+
+  def set_business_account_name(business_connection_id, first_name, options) do
+    api_request(
+      "setBusinessAccountName",
+      request_options(
+        [business_connection_id: business_connection_id, first_name: first_name],
+        options
+      )
+    )
+  end
+
+  def set_business_account_name(%Client{} = client, business_connection_id, first_name, options) do
+    api_request(
+      client,
+      "setBusinessAccountName",
+      request_options(
+        [business_connection_id: business_connection_id, first_name: first_name],
+        options
+      )
+    )
+  end
+
+  @doc """
+  Use this method to change the username of a managed business account.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `options` - orddict of options
+
+  Options:
+  * `:username` - New username of the business account
+  """
+  @spec set_business_account_username(binary) :: :ok | {:error, Error.t()}
+  @spec set_business_account_username(binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  @spec set_business_account_username(Client.t(), binary) :: :ok | {:error, Error.t()}
+  @spec set_business_account_username(Client.t(), binary, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  def set_business_account_username(business_connection_id) do
+    set_business_account_username(business_connection_id, [])
+  end
+
+  def set_business_account_username(%Client{} = client, business_connection_id) do
+    set_business_account_username(client, business_connection_id, [])
+  end
+
+  def set_business_account_username(business_connection_id, options) do
+    api_request(
+      "setBusinessAccountUsername",
+      request_options([business_connection_id: business_connection_id], options)
+    )
+  end
+
+  def set_business_account_username(%Client{} = client, business_connection_id, options) do
+    api_request(
+      client,
+      "setBusinessAccountUsername",
+      request_options([business_connection_id: business_connection_id], options)
+    )
+  end
+
+  @doc """
+  Use this method to change the bio of a managed business account.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `options` - orddict of options
+
+  Options:
+  * `:bio` - New bio of the business account
+  """
+  @spec set_business_account_bio(binary) :: :ok | {:error, Error.t()}
+  @spec set_business_account_bio(binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  @spec set_business_account_bio(Client.t(), binary) :: :ok | {:error, Error.t()}
+  @spec set_business_account_bio(Client.t(), binary, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  def set_business_account_bio(business_connection_id) do
+    set_business_account_bio(business_connection_id, [])
+  end
+
+  def set_business_account_bio(%Client{} = client, business_connection_id) do
+    set_business_account_bio(client, business_connection_id, [])
+  end
+
+  def set_business_account_bio(business_connection_id, options) do
+    api_request(
+      "setBusinessAccountBio",
+      request_options([business_connection_id: business_connection_id], options)
+    )
+  end
+
+  def set_business_account_bio(%Client{} = client, business_connection_id, options) do
+    api_request(
+      client,
+      "setBusinessAccountBio",
+      request_options([business_connection_id: business_connection_id], options)
+    )
+  end
+
+  @doc """
+  Use this method to change the profile photo of a managed business account.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `photo` - JSON-serializable profile photo object or a pre-encoded JSON string
+  * `options` - orddict of options
+
+  Options:
+  * `:is_public` - Pass true to set the public profile photo
+  """
+  @spec set_business_account_profile_photo(binary, list | map | struct | binary) ::
+          :ok | {:error, Error.t()}
+  @spec set_business_account_profile_photo(
+          binary,
+          list | map | struct | binary,
+          [{atom, any}] | map
+        ) :: :ok | {:error, Error.t()}
+  @spec set_business_account_profile_photo(Client.t(), binary, list | map | struct | binary) ::
+          :ok | {:error, Error.t()}
+  @spec set_business_account_profile_photo(
+          Client.t(),
+          binary,
+          list | map | struct | binary,
+          [{atom, any}] | map
+        ) :: :ok | {:error, Error.t()}
+  def set_business_account_profile_photo(business_connection_id, photo) do
+    set_business_account_profile_photo(business_connection_id, photo, [])
+  end
+
+  def set_business_account_profile_photo(%Client{} = client, business_connection_id, photo) do
+    set_business_account_profile_photo(client, business_connection_id, photo, [])
+  end
+
+  def set_business_account_profile_photo(business_connection_id, photo, options) do
+    api_request(
+      "setBusinessAccountProfilePhoto",
+      request_options(
+        [business_connection_id: business_connection_id, photo: encode_json_payload(photo)],
+        options
+      )
+    )
+  end
+
+  def set_business_account_profile_photo(
+        %Client{} = client,
+        business_connection_id,
+        photo,
+        options
+      ) do
+    api_request(
+      client,
+      "setBusinessAccountProfilePhoto",
+      request_options(
+        [business_connection_id: business_connection_id, photo: encode_json_payload(photo)],
+        options
+      )
+    )
+  end
+
+  @doc """
+  Use this method to remove the current profile photo of a managed business account.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `options` - orddict of options
+
+  Options:
+  * `:is_public` - Pass true to remove the public profile photo
+  """
+  @spec remove_business_account_profile_photo(binary) :: :ok | {:error, Error.t()}
+  @spec remove_business_account_profile_photo(binary, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  @spec remove_business_account_profile_photo(Client.t(), binary) :: :ok | {:error, Error.t()}
+  @spec remove_business_account_profile_photo(Client.t(), binary, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  def remove_business_account_profile_photo(business_connection_id) do
+    remove_business_account_profile_photo(business_connection_id, [])
+  end
+
+  def remove_business_account_profile_photo(%Client{} = client, business_connection_id) do
+    remove_business_account_profile_photo(client, business_connection_id, [])
+  end
+
+  def remove_business_account_profile_photo(business_connection_id, options) do
+    api_request(
+      "removeBusinessAccountProfilePhoto",
+      request_options([business_connection_id: business_connection_id], options)
+    )
+  end
+
+  def remove_business_account_profile_photo(%Client{} = client, business_connection_id, options) do
+    api_request(
+      client,
+      "removeBusinessAccountProfilePhoto",
+      request_options([business_connection_id: business_connection_id], options)
+    )
+  end
+
+  @doc """
+  Use this method to change the gift settings of a managed business account.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `show_gift_button` - Whether the gift button must always be shown in the input field
+  * `accepted_gift_types` - JSON-serializable accepted gift types object or pre-encoded JSON
+  """
+  @spec set_business_account_gift_settings(
+          binary,
+          boolean,
+          list | map | struct | binary
+        ) :: :ok | {:error, Error.t()}
+  @spec set_business_account_gift_settings(
+          Client.t(),
+          binary,
+          boolean,
+          list | map | struct | binary
+        ) :: :ok | {:error, Error.t()}
+  def set_business_account_gift_settings(
+        business_connection_id,
+        show_gift_button,
+        accepted_gift_types
+      ) do
+    api_request(
+      "setBusinessAccountGiftSettings",
+      business_connection_id: business_connection_id,
+      show_gift_button: show_gift_button,
+      accepted_gift_types: encode_json_payload(accepted_gift_types)
+    )
+  end
+
+  def set_business_account_gift_settings(
+        %Client{} = client,
+        business_connection_id,
+        show_gift_button,
+        accepted_gift_types
+      ) do
+    api_request(
+      client,
+      "setBusinessAccountGiftSettings",
+      business_connection_id: business_connection_id,
+      show_gift_button: show_gift_button,
+      accepted_gift_types: encode_json_payload(accepted_gift_types)
+    )
+  end
+
+  @doc """
+  Use this method to transfer Telegram Stars from a business account balance to the bot.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `star_count` - Number of Telegram Stars to transfer
+  """
+  @spec transfer_business_account_stars(binary, integer) :: :ok | {:error, Error.t()}
+  @spec transfer_business_account_stars(Client.t(), binary, integer) :: :ok | {:error, Error.t()}
+  def transfer_business_account_stars(business_connection_id, star_count) do
+    api_request(
+      "transferBusinessAccountStars",
+      business_connection_id: business_connection_id,
+      star_count: star_count
+    )
+  end
+
+  def transfer_business_account_stars(%Client{} = client, business_connection_id, star_count) do
+    api_request(
+      client,
+      "transferBusinessAccountStars",
+      business_connection_id: business_connection_id,
+      star_count: star_count
+    )
+  end
+
+  @doc """
   Use this method to get the token of a managed bot.
   Returns the token as a string.
 

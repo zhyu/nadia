@@ -1099,6 +1099,153 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "business account true-return wrappers build request contracts" do
+    stub_telegram_result(true)
+
+    client =
+      Client.new(
+        token: "999:family-i1",
+        http_client: Nadia.HTTPCase.StubHTTPClient
+      )
+
+    assert :ok == Nadia.read_business_message(client, "business-i1", 7_000_001, 91)
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-i1/readBusinessMessage",
+      body:
+        {:form,
+         [
+           {"business_connection_id", "business-i1"},
+           {"chat_id", "7000001"},
+           {"message_id", "91"}
+         ]},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.delete_business_messages("business-i1", [101, 102, 103])
+
+    request =
+      assert_telegram_request("deleteBusinessMessages",
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params["business_connection_id"] == "business-i1"
+    assert Jason.decode!(params["message_ids"]) == [101, 102, 103]
+
+    assert :ok == Nadia.set_business_account_name("business-i1", "Ada", last_name: "Lovelace")
+
+    assert_telegram_request("setBusinessAccountName",
+      body:
+        {:form,
+         [
+           {"business_connection_id", "business-i1"},
+           {"first_name", "Ada"},
+           {"last_name", "Lovelace"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.set_business_account_username("business-i1", username: nil)
+
+    request =
+      assert_telegram_request("setBusinessAccountUsername",
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params["business_connection_id"] == "business-i1"
+    refute Map.has_key?(params, "username")
+
+    assert :ok == Nadia.set_business_account_bio("business-i1", bio: "Making useful things.")
+
+    assert_telegram_request("setBusinessAccountBio",
+      body:
+        {:form, [{"business_connection_id", "business-i1"}, {"bio", "Making useful things."}]},
+      options: [recv_timeout: 5000]
+    )
+
+    photo = [
+      type: "static",
+      photo: "business-profile-photo-id",
+      main_frame_timestamp: nil
+    ]
+
+    assert :ok ==
+             Nadia.set_business_account_profile_photo("business-i1", photo, is_public: false)
+
+    request =
+      assert_telegram_request("setBusinessAccountProfilePhoto",
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+    decoded_photo = Jason.decode!(params["photo"])
+
+    assert params["business_connection_id"] == "business-i1"
+    assert params["is_public"] == "false"
+
+    assert %{
+             "type" => "static",
+             "photo" => "business-profile-photo-id"
+           } = decoded_photo
+
+    refute Map.has_key?(decoded_photo, "main_frame_timestamp")
+
+    assert :ok == Nadia.remove_business_account_profile_photo("business-i1", is_public: true)
+
+    assert_telegram_request("removeBusinessAccountProfilePhoto",
+      body: {:form, [{"business_connection_id", "business-i1"}, {"is_public", "true"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    accepted_gift_types = [
+      unlimited_gifts: true,
+      limited_gifts: nil,
+      unique_gifts: false,
+      premium_subscription: true,
+      gifts_from_channels: nil
+    ]
+
+    assert :ok ==
+             Nadia.set_business_account_gift_settings(
+               "business-i1",
+               true,
+               accepted_gift_types
+             )
+
+    request =
+      assert_telegram_request("setBusinessAccountGiftSettings",
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+    decoded_accepted_gift_types = Jason.decode!(params["accepted_gift_types"])
+
+    assert params["business_connection_id"] == "business-i1"
+    assert params["show_gift_button"] == "true"
+
+    assert %{
+             "unlimited_gifts" => true,
+             "unique_gifts" => false,
+             "premium_subscription" => true
+           } = decoded_accepted_gift_types
+
+    refute Map.has_key?(decoded_accepted_gift_types, "limited_gifts")
+    refute Map.has_key?(decoded_accepted_gift_types, "gifts_from_channels")
+
+    assert :ok == Nadia.transfer_business_account_stars("business-i1", 250)
+
+    assert_telegram_request("transferBusinessAccountStars",
+      body: {:form, [{"business_connection_id", "business-i1"}, {"star_count", "250"}]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
   test "managed bot token wrappers build requests and return string tokens" do
     stub_telegram_result("123:old-managed-token")
 

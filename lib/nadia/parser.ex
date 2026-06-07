@@ -5,6 +5,10 @@ defmodule Nadia.Parser do
 
   alias Nadia.Model.{
     BotAccessSettings,
+    BotCommand,
+    BotDescription,
+    BotName,
+    BotShortDescription,
     BusinessBotRights,
     BusinessConnection,
     BusinessIntro,
@@ -23,10 +27,15 @@ defmodule Nadia.Parser do
     ChatBoostSourceGiveaway,
     ChatBoostSourcePremium,
     ChatBoostUpdated,
+    ChatAdministratorRights,
     ChatMember,
     Checklist,
     ChecklistTask,
     Message,
+    MenuButton,
+    MenuButtonCommands,
+    MenuButtonDefault,
+    MenuButtonWebApp,
     ChatPhoto,
     PhotoSize,
     Audio,
@@ -97,6 +106,12 @@ defmodule Nadia.Parser do
       "replaceManagedBotToken" -> result
       "getManagedBotAccessSettings" -> parse(BotAccessSettings, result)
       "getUserPersonalChatMessages" -> parse(:messages, result)
+      "getMyCommands" -> parse(:bot_commands, result)
+      "getMyName" -> parse(BotName, result)
+      "getMyDescription" -> parse(BotDescription, result)
+      "getMyShortDescription" -> parse(BotShortDescription, result)
+      "getChatMenuButton" -> parse_menu_button(result)
+      "getMyDefaultAdministratorRights" -> parse(ChatAdministratorRights, result)
       "copyMessage" -> parse(MessageId, result)
       "copyMessages" -> parse(:message_ids, result)
       "forwardMessages" -> parse(:message_ids, result)
@@ -161,6 +176,7 @@ defmodule Nadia.Parser do
   defp parse(:messages, l) when is_list(l), do: Enum.map(l, &parse(Message, &1))
   defp parse(:message_ids, l) when is_list(l), do: Enum.map(l, &parse(MessageId, &1))
   defp parse(:stickers, l) when is_list(l), do: Enum.map(l, &parse(Sticker, &1))
+  defp parse(:bot_commands, l) when is_list(l), do: Enum.map(l, &parse(BotCommand, &1))
 
   defp parse(type, val) when is_map(val) do
     fields = struct_fields(type)
@@ -329,6 +345,17 @@ defmodule Nadia.Parser do
   end
 
   defp parse_paid_media(val), do: val
+
+  defp parse_menu_button(%{} = val) do
+    case Map.get(val, :type) || Map.get(val, "type") do
+      "commands" -> parse(MenuButtonCommands, val)
+      "web_app" -> parse(MenuButtonWebApp, val)
+      "default" -> parse(MenuButtonDefault, val)
+      _ -> parse(MenuButton, val)
+    end
+  end
+
+  defp parse_menu_button(val), do: val
 
   defp struct_fields(type) do
     type

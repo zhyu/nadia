@@ -11,6 +11,10 @@ defmodule Nadia.APITest do
 
   alias Nadia.Model.{
     BotAccessSettings,
+    BotCommand,
+    BotDescription,
+    BotName,
+    BotShortDescription,
     BusinessBotRights,
     BusinessConnection,
     BusinessIntro,
@@ -19,6 +23,7 @@ defmodule Nadia.APITest do
     BusinessOpeningHours,
     BusinessOpeningHoursInterval,
     Chat,
+    ChatAdministratorRights,
     ChatBoost,
     ChatBoostAdded,
     ChatBoostRemoved,
@@ -35,6 +40,7 @@ defmodule Nadia.APITest do
     ManagedBotCreated,
     ManagedBotUpdated,
     Location,
+    MenuButtonWebApp,
     MessageReactionUpdated,
     PaidMedia,
     PaidMediaInfo,
@@ -251,6 +257,112 @@ defmodule Nadia.APITest do
              "can_manage_chat" => true,
              "can_invite_users" => false
            }
+  end
+
+  test "bot settings getter wrappers build request contracts and parse modeled results" do
+    stub_telegram_result([
+      %{command: "start", description: "Start the bot", future_field: "ignored"},
+      %{command: "help", description: "Show help"}
+    ])
+
+    assert {:ok,
+            [
+              %BotCommand{command: "start", description: "Start the bot"},
+              %BotCommand{command: "help", description: "Show help"}
+            ]} =
+             Nadia.get_my_commands(
+               scope: [type: "chat", chat_id: 123, future_nil: nil],
+               language_code: "en"
+             )
+
+    request = assert_telegram_request("getMyCommands", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["language_code"] == "en"
+    assert Jason.decode!(params["scope"]) == %{"chat_id" => 123, "type" => "chat"}
+
+    stub_telegram_result(%{name: "Nadia"})
+
+    assert {:ok, %BotName{name: "Nadia"}} = Nadia.get_my_name(language_code: "ja")
+
+    assert_telegram_request("getMyName",
+      body: {:form, [{"language_code", "ja"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    client = Client.new(token: "999:family-h2", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    stub_telegram_result(%{description: "A helpful bot"})
+
+    assert {:ok, %BotDescription{description: "A helpful bot"}} =
+             Nadia.get_my_description(client, language_code: "en")
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-h2/getMyDescription",
+      body: {:form, [{"language_code", "en"}]},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(%{short_description: "Helpful"})
+
+    assert {:ok, %BotShortDescription{short_description: "Helpful"}} =
+             Nadia.get_my_short_description()
+
+    assert_telegram_request("getMyShortDescription",
+      body: {:form, []},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(%{
+      type: "web_app",
+      text: "Open",
+      web_app: %{url: "https://example.test/app"}
+    })
+
+    assert {:ok,
+            %MenuButtonWebApp{
+              type: "web_app",
+              text: "Open",
+              web_app: %{"url" => "https://example.test/app"}
+            }} = Nadia.get_chat_menu_button(chat_id: 42)
+
+    assert_telegram_request("getChatMenuButton",
+      body: {:form, [{"chat_id", "42"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(%{
+      is_anonymous: false,
+      can_manage_chat: true,
+      can_delete_messages: true,
+      can_manage_video_chats: true,
+      can_restrict_members: true,
+      can_promote_members: false,
+      can_change_info: true,
+      can_invite_users: true,
+      can_post_stories: true,
+      can_edit_stories: true,
+      can_delete_stories: true,
+      can_post_messages: true,
+      can_edit_messages: true,
+      can_pin_messages: nil,
+      can_manage_topics: nil,
+      can_manage_direct_messages: true,
+      can_manage_tags: nil
+    })
+
+    assert {:ok,
+            %ChatAdministratorRights{
+              can_manage_chat: true,
+              can_manage_direct_messages: true
+            }} = Nadia.get_my_default_administrator_rights(%{for_channels: true})
+
+    assert_telegram_request("getMyDefaultAdministratorRights",
+      body: {:form, [{"for_channels", "true"}]},
+      options: [recv_timeout: 5000]
+    )
   end
 
   test "request ignores unknown Telegram response fields without creating atoms" do

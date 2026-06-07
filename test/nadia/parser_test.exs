@@ -6,6 +6,10 @@ defmodule Nadia.ParserTest do
   alias Nadia.Model.{
     Update,
     BotAccessSettings,
+    BotCommand,
+    BotDescription,
+    BotName,
+    BotShortDescription,
     BusinessBotRights,
     BusinessConnection,
     BusinessIntro,
@@ -14,6 +18,7 @@ defmodule Nadia.ParserTest do
     BusinessOpeningHours,
     BusinessOpeningHoursInterval,
     Chat,
+    ChatAdministratorRights,
     ChatBoost,
     ChatBoostAdded,
     ChatBoostRemoved,
@@ -37,6 +42,8 @@ defmodule Nadia.ParserTest do
     MessageEntity,
     ManagedBotCreated,
     ManagedBotUpdated,
+    MenuButton,
+    MenuButtonWebApp,
     MessageReactionCountUpdated,
     MessageReactionUpdated,
     PaidMedia,
@@ -70,6 +77,105 @@ defmodule Nadia.ParserTest do
       )
 
     assert me == %User{id: 666, first_name: "Nadia", last_name: nil, username: "nadia_bot"}
+  end
+
+  test "parse result of get_my_commands" do
+    commands =
+      Parser.parse_result(
+        [
+          %{
+            "command" => "start",
+            "description" => "Start the bot",
+            "future_field" => "ignored"
+          },
+          %{"command" => "help", "description" => "Show help"}
+        ],
+        "getMyCommands"
+      )
+
+    assert commands == [
+             %BotCommand{command: "start", description: "Start the bot"},
+             %BotCommand{command: "help", description: "Show help"}
+           ]
+  end
+
+  test "parse result of bot name and description getters" do
+    assert Parser.parse_result(%{"name" => "Nadia"}, "getMyName") == %BotName{name: "Nadia"}
+
+    assert Parser.parse_result(%{"description" => "A helpful bot"}, "getMyDescription") ==
+             %BotDescription{description: "A helpful bot"}
+
+    assert Parser.parse_result(%{"short_description" => "Helpful"}, "getMyShortDescription") ==
+             %BotShortDescription{short_description: "Helpful"}
+  end
+
+  test "parse result of get_chat_menu_button" do
+    web_app_button =
+      Parser.parse_result(
+        %{
+          "type" => "web_app",
+          "text" => "Open",
+          "web_app" => %{"url" => "https://example.test/app"},
+          "future_field" => "ignored"
+        },
+        "getChatMenuButton"
+      )
+
+    assert web_app_button == %MenuButtonWebApp{
+             type: "web_app",
+             text: "Open",
+             web_app: %{"url" => "https://example.test/app"}
+           }
+
+    assert Parser.parse_result(%{"type" => "future_button"}, "getChatMenuButton") ==
+             %MenuButton{type: "future_button"}
+  end
+
+  test "parse result of get_my_default_administrator_rights" do
+    rights =
+      Parser.parse_result(
+        %{
+          "is_anonymous" => false,
+          "can_manage_chat" => true,
+          "can_delete_messages" => true,
+          "can_manage_video_chats" => true,
+          "can_restrict_members" => true,
+          "can_promote_members" => false,
+          "can_change_info" => true,
+          "can_invite_users" => true,
+          "can_post_stories" => true,
+          "can_edit_stories" => true,
+          "can_delete_stories" => true,
+          "can_post_messages" => true,
+          "can_edit_messages" => true,
+          "can_pin_messages" => nil,
+          "can_manage_topics" => nil,
+          "can_manage_direct_messages" => true,
+          "can_manage_tags" => nil,
+          "future_field" => "ignored"
+        },
+        "getMyDefaultAdministratorRights"
+      )
+
+    assert rights == %ChatAdministratorRights{
+             is_anonymous: false,
+             can_manage_chat: true,
+             can_delete_messages: true,
+             can_manage_video_chats: true,
+             can_restrict_members: true,
+             can_promote_members: false,
+             can_change_info: true,
+             can_invite_users: true,
+             can_post_stories: true,
+             can_edit_stories: true,
+             can_delete_stories: true,
+             can_post_messages: true,
+             can_edit_messages: true,
+             can_pin_messages: nil,
+             can_manage_topics: nil,
+             can_manage_direct_messages: true,
+             can_manage_tags: nil
+           }
   end
 
   test "parse result of get_user_profile_photos" do

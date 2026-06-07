@@ -46,6 +46,105 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule BotCommand do
+    defstruct command: nil, description: nil
+
+    @type t :: %BotCommand{
+            command: binary,
+            description: binary
+          }
+  end
+
+  defmodule BotName do
+    defstruct name: nil
+
+    @type t :: %BotName{name: binary}
+  end
+
+  defmodule BotDescription do
+    defstruct description: nil
+
+    @type t :: %BotDescription{description: binary}
+  end
+
+  defmodule BotShortDescription do
+    defstruct short_description: nil
+
+    @type t :: %BotShortDescription{short_description: binary}
+  end
+
+  defmodule MenuButton do
+    defstruct type: nil
+
+    @type t ::
+            %MenuButton{type: binary}
+            | MenuButtonCommands.t()
+            | MenuButtonWebApp.t()
+            | MenuButtonDefault.t()
+  end
+
+  defmodule MenuButtonCommands do
+    defstruct type: nil
+
+    @type t :: %MenuButtonCommands{type: binary}
+  end
+
+  defmodule MenuButtonWebApp do
+    defstruct type: nil, text: nil, web_app: nil
+
+    @type t :: %MenuButtonWebApp{
+            type: binary,
+            text: binary,
+            web_app: any
+          }
+  end
+
+  defmodule MenuButtonDefault do
+    defstruct type: nil
+
+    @type t :: %MenuButtonDefault{type: binary}
+  end
+
+  defmodule ChatAdministratorRights do
+    defstruct is_anonymous: nil,
+              can_manage_chat: nil,
+              can_delete_messages: nil,
+              can_manage_video_chats: nil,
+              can_restrict_members: nil,
+              can_promote_members: nil,
+              can_change_info: nil,
+              can_invite_users: nil,
+              can_post_stories: nil,
+              can_edit_stories: nil,
+              can_delete_stories: nil,
+              can_post_messages: nil,
+              can_edit_messages: nil,
+              can_pin_messages: nil,
+              can_manage_topics: nil,
+              can_manage_direct_messages: nil,
+              can_manage_tags: nil
+
+    @type t :: %ChatAdministratorRights{
+            is_anonymous: boolean,
+            can_manage_chat: boolean,
+            can_delete_messages: boolean,
+            can_manage_video_chats: boolean,
+            can_restrict_members: boolean,
+            can_promote_members: boolean,
+            can_change_info: boolean,
+            can_invite_users: boolean,
+            can_post_stories: boolean,
+            can_edit_stories: boolean,
+            can_delete_stories: boolean,
+            can_post_messages: boolean,
+            can_edit_messages: boolean,
+            can_pin_messages: boolean,
+            can_manage_topics: boolean,
+            can_manage_direct_messages: boolean,
+            can_manage_tags: boolean
+          }
+  end
+
   defmodule ChatPhoto do
     defstruct small_file_id: nil, big_file_id: nil
     @type t :: %ChatPhoto{small_file_id: binary, big_file_id: binary}

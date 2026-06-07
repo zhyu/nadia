@@ -22,10 +22,16 @@ defmodule Nadia do
 
   alias Nadia.Model.{
     BotAccessSettings,
+    BotCommand,
+    BotDescription,
+    BotName,
+    BotShortDescription,
     BusinessConnection,
+    ChatAdministratorRights,
     Error,
     File,
     ForumTopic,
+    MenuButton,
     Message,
     MessageId,
     Poll,
@@ -204,6 +210,27 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to get the current list of the bot's commands for the given
+  scope and user language.
+  Returns a list of `Nadia.Model.BotCommand` objects on success.
+  """
+  @spec get_my_commands() :: {:ok, [BotCommand.t()]} | {:error, Error.t()}
+  @spec get_my_commands([{atom, any}] | map) :: {:ok, [BotCommand.t()]} | {:error, Error.t()}
+  @spec get_my_commands(Client.t()) :: {:ok, [BotCommand.t()]} | {:error, Error.t()}
+  @spec get_my_commands(Client.t(), [{atom, any}] | map) ::
+          {:ok, [BotCommand.t()]} | {:error, Error.t()}
+  def get_my_commands(), do: get_my_commands([])
+  def get_my_commands(%Client{} = client), do: get_my_commands(client, [])
+
+  def get_my_commands(options) do
+    api_request("getMyCommands", encode_json_option(options, :scope))
+  end
+
+  def get_my_commands(%Client{} = client, options) do
+    api_request(client, "getMyCommands", encode_json_option(options, :scope))
+  end
+
+  @doc """
   Use this method to change the bot's name.
   Returns `:ok` on success.
   """
@@ -215,6 +242,20 @@ defmodule Nadia do
   def set_my_name(%Client{} = client), do: set_my_name(client, [])
   def set_my_name(options), do: api_request("setMyName", options)
   def set_my_name(%Client{} = client, options), do: api_request(client, "setMyName", options)
+
+  @doc """
+  Use this method to get the current bot name for the given user language.
+  Returns a `Nadia.Model.BotName` on success.
+  """
+  @spec get_my_name() :: {:ok, BotName.t()} | {:error, Error.t()}
+  @spec get_my_name([{atom, any}] | map) :: {:ok, BotName.t()} | {:error, Error.t()}
+  @spec get_my_name(Client.t()) :: {:ok, BotName.t()} | {:error, Error.t()}
+  @spec get_my_name(Client.t(), [{atom, any}] | map) ::
+          {:ok, BotName.t()} | {:error, Error.t()}
+  def get_my_name(), do: get_my_name([])
+  def get_my_name(%Client{} = client), do: get_my_name(client, [])
+  def get_my_name(options), do: api_request("getMyName", options)
+  def get_my_name(%Client{} = client, options), do: api_request(client, "getMyName", options)
 
   @doc """
   Use this method to change the bot's description.
@@ -233,6 +274,24 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to get the current bot description for the given user language.
+  Returns a `Nadia.Model.BotDescription` on success.
+  """
+  @spec get_my_description() :: {:ok, BotDescription.t()} | {:error, Error.t()}
+  @spec get_my_description([{atom, any}] | map) ::
+          {:ok, BotDescription.t()} | {:error, Error.t()}
+  @spec get_my_description(Client.t()) :: {:ok, BotDescription.t()} | {:error, Error.t()}
+  @spec get_my_description(Client.t(), [{atom, any}] | map) ::
+          {:ok, BotDescription.t()} | {:error, Error.t()}
+  def get_my_description(), do: get_my_description([])
+  def get_my_description(%Client{} = client), do: get_my_description(client, [])
+  def get_my_description(options), do: api_request("getMyDescription", options)
+
+  def get_my_description(%Client{} = client, options) do
+    api_request(client, "getMyDescription", options)
+  end
+
+  @doc """
   Use this method to change the bot's short description.
   Returns `:ok` on success.
   """
@@ -247,6 +306,26 @@ defmodule Nadia do
 
   def set_my_short_description(%Client{} = client, options) do
     api_request(client, "setMyShortDescription", options)
+  end
+
+  @doc """
+  Use this method to get the current bot short description for the given user
+  language.
+  Returns a `Nadia.Model.BotShortDescription` on success.
+  """
+  @spec get_my_short_description() :: {:ok, BotShortDescription.t()} | {:error, Error.t()}
+  @spec get_my_short_description([{atom, any}] | map) ::
+          {:ok, BotShortDescription.t()} | {:error, Error.t()}
+  @spec get_my_short_description(Client.t()) ::
+          {:ok, BotShortDescription.t()} | {:error, Error.t()}
+  @spec get_my_short_description(Client.t(), [{atom, any}] | map) ::
+          {:ok, BotShortDescription.t()} | {:error, Error.t()}
+  def get_my_short_description(), do: get_my_short_description([])
+  def get_my_short_description(%Client{} = client), do: get_my_short_description(client, [])
+  def get_my_short_description(options), do: api_request("getMyShortDescription", options)
+
+  def get_my_short_description(%Client{} = client, options) do
+    api_request(client, "getMyShortDescription", options)
   end
 
   @doc """
@@ -286,6 +365,24 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to get the current value of the bot's menu button in a private
+  chat, or the default menu button.
+  Returns a `Nadia.Model.MenuButton` on success.
+  """
+  @spec get_chat_menu_button() :: {:ok, MenuButton.t()} | {:error, Error.t()}
+  @spec get_chat_menu_button([{atom, any}] | map) :: {:ok, MenuButton.t()} | {:error, Error.t()}
+  @spec get_chat_menu_button(Client.t()) :: {:ok, MenuButton.t()} | {:error, Error.t()}
+  @spec get_chat_menu_button(Client.t(), [{atom, any}] | map) ::
+          {:ok, MenuButton.t()} | {:error, Error.t()}
+  def get_chat_menu_button(), do: get_chat_menu_button([])
+  def get_chat_menu_button(%Client{} = client), do: get_chat_menu_button(client, [])
+  def get_chat_menu_button(options), do: api_request("getChatMenuButton", options)
+
+  def get_chat_menu_button(%Client{} = client, options) do
+    api_request(client, "getChatMenuButton", options)
+  end
+
+  @doc """
   Use this method to change the default administrator rights requested by the bot.
   Returns `:ok` on success.
   """
@@ -307,6 +404,32 @@ defmodule Nadia do
 
   def set_my_default_administrator_rights(%Client{} = client, options) do
     api_request(client, "setMyDefaultAdministratorRights", encode_json_option(options, :rights))
+  end
+
+  @doc """
+  Use this method to get the current default administrator rights of the bot.
+  Returns `Nadia.Model.ChatAdministratorRights` on success.
+  """
+  @spec get_my_default_administrator_rights() ::
+          {:ok, ChatAdministratorRights.t()} | {:error, Error.t()}
+  @spec get_my_default_administrator_rights([{atom, any}] | map) ::
+          {:ok, ChatAdministratorRights.t()} | {:error, Error.t()}
+  @spec get_my_default_administrator_rights(Client.t()) ::
+          {:ok, ChatAdministratorRights.t()} | {:error, Error.t()}
+  @spec get_my_default_administrator_rights(Client.t(), [{atom, any}] | map) ::
+          {:ok, ChatAdministratorRights.t()} | {:error, Error.t()}
+  def get_my_default_administrator_rights(), do: get_my_default_administrator_rights([])
+
+  def get_my_default_administrator_rights(%Client{} = client) do
+    get_my_default_administrator_rights(client, [])
+  end
+
+  def get_my_default_administrator_rights(options) do
+    api_request("getMyDefaultAdministratorRights", options)
+  end
+
+  def get_my_default_administrator_rights(%Client{} = client, options) do
+    api_request(client, "getMyDefaultAdministratorRights", options)
   end
 
   @doc """

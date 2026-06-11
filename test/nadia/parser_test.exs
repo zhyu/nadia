@@ -66,6 +66,7 @@ defmodule Nadia.ParserTest do
     ReactionCount,
     ReactionType,
     SentGuestMessage,
+    StarAmount,
     Sticker,
     UserChatBoosts,
     UserProfileAudios,
@@ -112,6 +113,26 @@ defmodule Nadia.ParserTest do
 
     assert Parser.parse_result(%{"short_description" => "Helpful"}, "getMyShortDescription") ==
              %BotShortDescription{short_description: "Helpful"}
+  end
+
+  test "parse result of StarAmount balance getters" do
+    star_amount =
+      Parser.parse_result(
+        %{
+          "amount" => 42,
+          "nanostar_amount" => 123_000_000,
+          "future_star_amount_field" => "ignored"
+        },
+        "getMyStarBalance"
+      )
+
+    assert star_amount == %StarAmount{amount: 42, nanostar_amount: 123_000_000}
+    refute Map.has_key?(star_amount, :future_star_amount_field)
+
+    assert Parser.parse_result(
+             %{amount: -1, nanostar_amount: -500_000_000, future_star_amount_field: "ignored"},
+             "getBusinessAccountStarBalance"
+           ) == %StarAmount{amount: -1, nanostar_amount: -500_000_000}
   end
 
   test "parse result of get_chat_menu_button" do

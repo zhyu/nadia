@@ -60,6 +60,7 @@ defmodule Nadia.APITest do
     ReactionType,
     ReplyKeyboardRemove,
     SentGuestMessage,
+    StarAmount,
     Sticker,
     User,
     UserChatBoosts,
@@ -1290,6 +1291,42 @@ defmodule Nadia.APITest do
 
     assert_telegram_request("transferBusinessAccountStars",
       body: {:form, [{"business_connection_id", "business-i1"}, {"star_count", "250"}]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "Star balance getter wrappers build request contracts and parse balances" do
+    stub_telegram_result(%{
+      amount: 12,
+      nanostar_amount: 345_000_000,
+      future_star_amount_field: "ignored"
+    })
+
+    assert {:ok, %StarAmount{amount: 12, nanostar_amount: 345_000_000}} =
+             Nadia.get_my_star_balance()
+
+    assert_telegram_request("getMyStarBalance",
+      body: {:form, []},
+      options: [recv_timeout: 5000]
+    )
+
+    client =
+      Client.new(token: "999:family-star-balance", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    stub_telegram_result(%{
+      amount: 250,
+      nanostar_amount: 1,
+      future_star_amount_field: "ignored"
+    })
+
+    assert {:ok, %StarAmount{amount: 250, nanostar_amount: 1}} =
+             Nadia.get_business_account_star_balance(client, "business-i2")
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-star-balance/getBusinessAccountStarBalance",
+      body: {:form, [{"business_connection_id", "business-i2"}]},
+      headers: [],
       options: [recv_timeout: 5000]
     )
   end

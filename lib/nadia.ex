@@ -39,6 +39,7 @@ defmodule Nadia do
     PreparedInlineMessage,
     PreparedKeyboardButton,
     SentGuestMessage,
+    StarAmount,
     Sticker,
     Update,
     User,
@@ -2771,6 +2772,29 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to get the Telegram Stars balance of a managed business account.
+  Returns a StarAmount object.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  """
+  @spec get_business_account_star_balance(binary) ::
+          {:ok, StarAmount.t()} | {:error, Error.t()}
+  @spec get_business_account_star_balance(Client.t(), binary) ::
+          {:ok, StarAmount.t()} | {:error, Error.t()}
+  def get_business_account_star_balance(business_connection_id) do
+    api_request("getBusinessAccountStarBalance", business_connection_id: business_connection_id)
+  end
+
+  def get_business_account_star_balance(%Client{} = client, business_connection_id) do
+    api_request(
+      client,
+      "getBusinessAccountStarBalance",
+      business_connection_id: business_connection_id
+    )
+  end
+
+  @doc """
   Use this method to mark an incoming message as read on behalf of a business account.
   Returns `:ok` on success.
 
@@ -3217,6 +3241,15 @@ defmodule Nadia do
       request_options([pre_checkout_query_id: pre_checkout_query_id, ok: ok], options)
     )
   end
+
+  @doc """
+  Use this method to get the current Telegram Stars balance of the bot.
+  Returns a StarAmount object.
+  """
+  @spec get_my_star_balance() :: {:ok, StarAmount.t()} | {:error, Error.t()}
+  @spec get_my_star_balance(Client.t()) :: {:ok, StarAmount.t()} | {:error, Error.t()}
+  def get_my_star_balance, do: api_request("getMyStarBalance")
+  def get_my_star_balance(%Client{} = client), do: api_request(client, "getMyStarBalance")
 
   @doc """
   Use this method to refund a successful Telegram Stars payment.

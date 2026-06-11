@@ -73,6 +73,15 @@ defmodule Nadia.Model do
     @type t :: %BotShortDescription{short_description: binary}
   end
 
+  defmodule StarAmount do
+    defstruct amount: nil, nanostar_amount: nil
+
+    @type t :: %StarAmount{
+            amount: integer,
+            nanostar_amount: integer
+          }
+  end
+
   defmodule MenuButton do
     defstruct type: nil
 

@@ -67,6 +67,7 @@ defmodule Nadia.Parser do
     ReactionCount,
     ReactionType,
     SentGuestMessage,
+    StarAmount,
     UserChatBoosts,
     UserProfileAudios,
     WebhookInfo
@@ -120,6 +121,8 @@ defmodule Nadia.Parser do
       "getManagedBotAccessSettings" -> parse(BotAccessSettings, result)
       "getUserPersonalChatMessages" -> parse(:messages, result)
       "getUserProfileAudios" -> parse(UserProfileAudios, result)
+      "getMyStarBalance" -> parse(StarAmount, result)
+      "getBusinessAccountStarBalance" -> parse(StarAmount, result)
       "getMyCommands" -> parse(:bot_commands, result)
       "getMyName" -> parse(BotName, result)
       "getMyDescription" -> parse(BotDescription, result)

@@ -22,6 +22,7 @@ defmodule Nadia.Behaviour do
     PreparedInlineMessage,
     PreparedKeyboardButton,
     SentGuestMessage,
+    StarAmount,
     Sticker,
     Update,
     User,
@@ -536,6 +537,10 @@ defmodule Nadia.Behaviour do
   @callback get_business_connection(binary) :: {:ok, BusinessConnection.t()} | {:error, Error.t()}
   @callback get_business_connection(Client.t(), binary) ::
               {:ok, BusinessConnection.t()} | {:error, Error.t()}
+  @callback get_business_account_star_balance(binary) ::
+              {:ok, StarAmount.t()} | {:error, Error.t()}
+  @callback get_business_account_star_balance(Client.t(), binary) ::
+              {:ok, StarAmount.t()} | {:error, Error.t()}
   @callback read_business_message(binary, integer, integer) :: :ok | {:error, Error.t()}
   @callback read_business_message(Client.t(), binary, integer, integer) ::
               :ok | {:error, Error.t()}
@@ -610,6 +615,8 @@ defmodule Nadia.Behaviour do
               :ok | {:error, Error.t()}
   @callback answer_pre_checkout_query(Client.t(), binary, boolean, [{atom, any}] | map) ::
               :ok | {:error, Error.t()}
+  @callback get_my_star_balance() :: {:ok, StarAmount.t()} | {:error, Error.t()}
+  @callback get_my_star_balance(Client.t()) :: {:ok, StarAmount.t()} | {:error, Error.t()}
   @callback refund_star_payment(integer, binary) :: :ok | {:error, Error.t()}
   @callback refund_star_payment(Client.t(), integer, binary) :: :ok | {:error, Error.t()}
   @callback edit_user_star_subscription(integer, binary, boolean) :: :ok | {:error, Error.t()}
@@ -1001,6 +1008,8 @@ defmodule Nadia.Behaviour do
                       get_chat_member: 3,
                       get_user_chat_boosts: 3,
                       get_business_connection: 2,
+                      get_business_account_star_balance: 1,
+                      get_business_account_star_balance: 2,
                       read_business_message: 3,
                       read_business_message: 4,
                       delete_business_messages: 2,
@@ -1030,6 +1039,8 @@ defmodule Nadia.Behaviour do
                       answer_pre_checkout_query: 2,
                       answer_pre_checkout_query: 3,
                       answer_pre_checkout_query: 4,
+                      get_my_star_balance: 0,
+                      get_my_star_balance: 1,
                       refund_star_payment: 2,
                       refund_star_payment: 3,
                       edit_user_star_subscription: 3,

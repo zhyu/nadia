@@ -288,6 +288,220 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule GiftBackground do
+    defstruct center_color: nil, edge_color: nil, text_color: nil
+
+    @type t :: %GiftBackground{
+            center_color: integer,
+            edge_color: integer,
+            text_color: integer
+          }
+  end
+
+  defmodule Gift do
+    defstruct id: nil,
+              sticker: nil,
+              star_count: nil,
+              upgrade_star_count: nil,
+              is_premium: nil,
+              has_colors: nil,
+              total_count: nil,
+              remaining_count: nil,
+              personal_total_count: nil,
+              personal_remaining_count: nil,
+              background: nil,
+              unique_gift_variant_count: nil,
+              publisher_chat: nil
+
+    @type t :: %Gift{
+            id: binary,
+            sticker: Sticker.t(),
+            star_count: integer,
+            upgrade_star_count: integer,
+            is_premium: boolean,
+            has_colors: boolean,
+            total_count: integer,
+            remaining_count: integer,
+            personal_total_count: integer,
+            personal_remaining_count: integer,
+            background: GiftBackground.t(),
+            unique_gift_variant_count: integer,
+            publisher_chat: Chat.t()
+          }
+  end
+
+  defmodule Gifts do
+    defstruct gifts: []
+
+    @type t :: %Gifts{gifts: [Gift.t()]}
+  end
+
+  defmodule UniqueGiftModel do
+    defstruct name: nil, sticker: nil, rarity_per_mille: nil, rarity: nil
+
+    @type t :: %UniqueGiftModel{
+            name: binary,
+            sticker: Sticker.t(),
+            rarity_per_mille: integer,
+            rarity: binary
+          }
+  end
+
+  defmodule UniqueGiftSymbol do
+    defstruct name: nil, sticker: nil, rarity_per_mille: nil
+
+    @type t :: %UniqueGiftSymbol{
+            name: binary,
+            sticker: Sticker.t(),
+            rarity_per_mille: integer
+          }
+  end
+
+  defmodule UniqueGiftBackdropColors do
+    defstruct center_color: nil, edge_color: nil, symbol_color: nil, text_color: nil
+
+    @type t :: %UniqueGiftBackdropColors{
+            center_color: integer,
+            edge_color: integer,
+            symbol_color: integer,
+            text_color: integer
+          }
+  end
+
+  defmodule UniqueGiftBackdrop do
+    defstruct name: nil, colors: nil, rarity_per_mille: nil
+
+    @type t :: %UniqueGiftBackdrop{
+            name: binary,
+            colors: UniqueGiftBackdropColors.t(),
+            rarity_per_mille: integer
+          }
+  end
+
+  defmodule UniqueGiftColors do
+    defstruct model_custom_emoji_id: nil,
+              symbol_custom_emoji_id: nil,
+              light_theme_main_color: nil,
+              light_theme_other_colors: nil,
+              dark_theme_main_color: nil,
+              dark_theme_other_colors: nil
+
+    @type t :: %UniqueGiftColors{
+            model_custom_emoji_id: binary,
+            symbol_custom_emoji_id: binary,
+            light_theme_main_color: integer,
+            light_theme_other_colors: [integer],
+            dark_theme_main_color: integer,
+            dark_theme_other_colors: [integer]
+          }
+  end
+
+  defmodule UniqueGift do
+    defstruct gift_id: nil,
+              base_name: nil,
+              name: nil,
+              number: nil,
+              model: nil,
+              symbol: nil,
+              backdrop: nil,
+              is_premium: nil,
+              is_burned: nil,
+              is_from_blockchain: nil,
+              colors: nil,
+              publisher_chat: nil
+
+    @type t :: %UniqueGift{
+            gift_id: binary,
+            base_name: binary,
+            name: binary,
+            number: integer,
+            model: UniqueGiftModel.t(),
+            symbol: UniqueGiftSymbol.t(),
+            backdrop: UniqueGiftBackdrop.t(),
+            is_premium: boolean,
+            is_burned: boolean,
+            is_from_blockchain: boolean,
+            colors: UniqueGiftColors.t(),
+            publisher_chat: Chat.t()
+          }
+  end
+
+  defmodule OwnedGift do
+    defstruct type: nil
+
+    @type t :: %OwnedGift{type: binary} | OwnedGiftRegular.t() | OwnedGiftUnique.t()
+  end
+
+  defmodule OwnedGiftRegular do
+    defstruct type: nil,
+              gift: nil,
+              owned_gift_id: nil,
+              sender_user: nil,
+              send_date: nil,
+              text: nil,
+              entities: nil,
+              is_private: nil,
+              is_saved: nil,
+              can_be_upgraded: nil,
+              was_refunded: nil,
+              convert_star_count: nil,
+              prepaid_upgrade_star_count: nil,
+              is_upgrade_separate: nil,
+              unique_gift_number: nil
+
+    @type t :: %OwnedGiftRegular{
+            type: binary,
+            gift: Gift.t(),
+            owned_gift_id: binary,
+            sender_user: User.t(),
+            send_date: integer,
+            text: binary,
+            entities: [MessageEntity.t()],
+            is_private: boolean,
+            is_saved: boolean,
+            can_be_upgraded: boolean,
+            was_refunded: boolean,
+            convert_star_count: integer,
+            prepaid_upgrade_star_count: integer,
+            is_upgrade_separate: boolean,
+            unique_gift_number: integer
+          }
+  end
+
+  defmodule OwnedGiftUnique do
+    defstruct type: nil,
+              gift: nil,
+              owned_gift_id: nil,
+              sender_user: nil,
+              send_date: nil,
+              is_saved: nil,
+              can_be_transferred: nil,
+              transfer_star_count: nil,
+              next_transfer_date: nil
+
+    @type t :: %OwnedGiftUnique{
+            type: binary,
+            gift: UniqueGift.t(),
+            owned_gift_id: binary,
+            sender_user: User.t(),
+            send_date: integer,
+            is_saved: boolean,
+            can_be_transferred: boolean,
+            transfer_star_count: integer,
+            next_transfer_date: integer
+          }
+  end
+
+  defmodule OwnedGifts do
+    defstruct total_count: nil, gifts: [], next_offset: nil
+
+    @type t :: %OwnedGifts{
+            total_count: integer,
+            gifts: [OwnedGift.t()],
+            next_offset: binary
+          }
+  end
+
   defmodule ForumTopic do
     defstruct message_thread_id: nil,
               name: nil,

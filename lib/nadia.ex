@@ -33,9 +33,11 @@ defmodule Nadia do
     File,
     ForumTopic,
     GameHighScore,
+    Gifts,
     MenuButton,
     Message,
     MessageId,
+    OwnedGifts,
     Poll,
     PreparedInlineMessage,
     PreparedKeyboardButton,
@@ -486,6 +488,73 @@ defmodule Nadia do
 
   def set_user_emoji_status(%Client{} = client, user_id, options) do
     api_request(client, "setUserEmojiStatus", request_options([user_id: user_id], options))
+  end
+
+  @doc """
+  Use this method to get all gifts that can be sent by the bot.
+  Returns a `Nadia.Model.Gifts` object on success.
+  """
+  @spec get_available_gifts() :: {:ok, Gifts.t()} | {:error, Error.t()}
+  @spec get_available_gifts(Client.t()) :: {:ok, Gifts.t()} | {:error, Error.t()}
+  def get_available_gifts, do: api_request("getAvailableGifts")
+  def get_available_gifts(%Client{} = client), do: api_request(client, "getAvailableGifts")
+
+  @doc """
+  Use this method to get gifts owned by a user.
+  Returns a `Nadia.Model.OwnedGifts` object on success.
+
+  Args:
+  * `user_id` - Unique identifier of the target user
+  * `options` - orddict or map of options
+  """
+  @spec get_user_gifts(integer) :: {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @spec get_user_gifts(integer, [{atom, any}] | map) ::
+          {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @spec get_user_gifts(Client.t(), integer) ::
+          {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @spec get_user_gifts(Client.t(), integer, [{atom, any}] | map) ::
+          {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  def get_user_gifts(user_id), do: get_user_gifts(user_id, [])
+
+  def get_user_gifts(%Client{} = client, user_id) do
+    get_user_gifts(client, user_id, [])
+  end
+
+  def get_user_gifts(user_id, options) do
+    api_request("getUserGifts", request_options([user_id: user_id], options))
+  end
+
+  def get_user_gifts(%Client{} = client, user_id, options) do
+    api_request(client, "getUserGifts", request_options([user_id: user_id], options))
+  end
+
+  @doc """
+  Use this method to get gifts owned by a chat.
+  Returns a `Nadia.Model.OwnedGifts` object on success.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  * `options` - orddict or map of options
+  """
+  @spec get_chat_gifts(integer | binary) :: {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @spec get_chat_gifts(integer | binary, [{atom, any}] | map) ::
+          {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @spec get_chat_gifts(Client.t(), integer | binary) ::
+          {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @spec get_chat_gifts(Client.t(), integer | binary, [{atom, any}] | map) ::
+          {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  def get_chat_gifts(chat_id), do: get_chat_gifts(chat_id, [])
+
+  def get_chat_gifts(%Client{} = client, chat_id) do
+    get_chat_gifts(client, chat_id, [])
+  end
+
+  def get_chat_gifts(chat_id, options) do
+    api_request("getChatGifts", request_options([chat_id: chat_id], options))
+  end
+
+  def get_chat_gifts(%Client{} = client, chat_id, options) do
+    api_request(client, "getChatGifts", request_options([chat_id: chat_id], options))
   end
 
   @doc """
@@ -2986,6 +3055,44 @@ defmodule Nadia do
       client,
       "getBusinessAccountStarBalance",
       business_connection_id: business_connection_id
+    )
+  end
+
+  @doc """
+  Use this method to get gifts received and owned by a managed business account.
+  Returns a `Nadia.Model.OwnedGifts` object on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `options` - orddict or map of options
+  """
+  @spec get_business_account_gifts(binary) :: {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @spec get_business_account_gifts(binary, [{atom, any}] | map) ::
+          {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @spec get_business_account_gifts(Client.t(), binary) ::
+          {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @spec get_business_account_gifts(Client.t(), binary, [{atom, any}] | map) ::
+          {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  def get_business_account_gifts(business_connection_id) do
+    get_business_account_gifts(business_connection_id, [])
+  end
+
+  def get_business_account_gifts(%Client{} = client, business_connection_id) do
+    get_business_account_gifts(client, business_connection_id, [])
+  end
+
+  def get_business_account_gifts(business_connection_id, options) do
+    api_request(
+      "getBusinessAccountGifts",
+      request_options([business_connection_id: business_connection_id], options)
+    )
+  end
+
+  def get_business_account_gifts(%Client{} = client, business_connection_id, options) do
+    api_request(
+      client,
+      "getBusinessAccountGifts",
+      request_options([business_connection_id: business_connection_id], options)
     )
   end
 

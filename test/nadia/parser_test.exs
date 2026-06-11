@@ -33,6 +33,9 @@ defmodule Nadia.ParserTest do
     ChecklistTask,
     ForumTopic,
     GameHighScore,
+    Gift,
+    GiftBackground,
+    Gifts,
     InlineQuery,
     CallbackQuery,
     ChosenInlineResult,
@@ -49,6 +52,10 @@ defmodule Nadia.ParserTest do
     MenuButtonWebApp,
     MessageReactionCountUpdated,
     MessageReactionUpdated,
+    OwnedGift,
+    OwnedGiftRegular,
+    OwnedGifts,
+    OwnedGiftUnique,
     PaidMedia,
     PaidMediaInfo,
     PaidMediaLivePhoto,
@@ -70,6 +77,12 @@ defmodule Nadia.ParserTest do
     SentWebAppMessage,
     StarAmount,
     Sticker,
+    UniqueGift,
+    UniqueGiftBackdrop,
+    UniqueGiftBackdropColors,
+    UniqueGiftColors,
+    UniqueGiftModel,
+    UniqueGiftSymbol,
     UserChatBoosts,
     UserProfileAudios,
     Video,
@@ -135,6 +148,256 @@ defmodule Nadia.ParserTest do
              %{amount: -1, nanostar_amount: -500_000_000, future_star_amount_field: "ignored"},
              "getBusinessAccountStarBalance"
            ) == %StarAmount{amount: -1, nanostar_amount: -500_000_000}
+  end
+
+  test "parse result of get_available_gifts" do
+    gifts =
+      Parser.parse_result(
+        %{
+          "gifts" => [
+            %{
+              "id" => "gift-parser-1",
+              "sticker" => %{
+                "file_id" => "gift-parser-sticker-1",
+                "width" => 512,
+                "height" => 512,
+                "emoji" => "\u{1F381}",
+                "future_sticker_field" => "ignored"
+              },
+              "star_count" => 25,
+              "upgrade_star_count" => 50,
+              "is_premium" => true,
+              "has_colors" => true,
+              "total_count" => 100,
+              "remaining_count" => 90,
+              "personal_total_count" => 5,
+              "personal_remaining_count" => 4,
+              "background" => %{
+                "center_color" => 16_711_680,
+                "edge_color" => 16_711_935,
+                "text_color" => 16_777_215,
+                "future_background_field" => "ignored"
+              },
+              "unique_gift_variant_count" => 12,
+              "publisher_chat" => %{
+                "id" => -1_001_111_111_111,
+                "type" => "channel",
+                "title" => "Gift Publisher",
+                "future_chat_field" => "ignored"
+              },
+              "future_gift_field" => "ignored"
+            }
+          ],
+          "future_gifts_field" => "ignored"
+        },
+        "getAvailableGifts"
+      )
+
+    assert %Gifts{
+             gifts: [
+               %Gift{
+                 id: "gift-parser-1",
+                 sticker: %Sticker{file_id: "gift-parser-sticker-1", emoji: "\u{1F381}"},
+                 background: %GiftBackground{
+                   center_color: 16_711_680,
+                   edge_color: 16_711_935,
+                   text_color: 16_777_215
+                 },
+                 publisher_chat: %Chat{title: "Gift Publisher"}
+               } = gift
+             ]
+           } = gifts
+
+    refute Map.has_key?(gifts, :future_gifts_field)
+    refute Map.has_key?(gift, :future_gift_field)
+    refute Map.has_key?(gift.sticker, :future_sticker_field)
+    refute Map.has_key?(gift.background, :future_background_field)
+    refute Map.has_key?(gift.publisher_chat, :future_chat_field)
+  end
+
+  test "parse result of owned gift getters" do
+    raw_owned_gifts = %{
+      "total_count" => 3,
+      "gifts" => [
+        %{
+          "type" => "regular",
+          "gift" => %{
+            "id" => "regular-gift-1",
+            "sticker" => %{
+              "file_id" => "regular-sticker-1",
+              "width" => 512,
+              "height" => 512,
+              "future_sticker_field" => "ignored"
+            },
+            "star_count" => 15,
+            "background" => %{
+              "center_color" => 1,
+              "edge_color" => 2,
+              "text_color" => 3
+            },
+            "publisher_chat" => %{
+              "id" => -1001,
+              "type" => "channel",
+              "title" => "Regular Publisher"
+            },
+            "future_gift_field" => "ignored"
+          },
+          "owned_gift_id" => "owned-regular-1",
+          "sender_user" => %{
+            "id" => 91_002,
+            "is_bot" => false,
+            "first_name" => "Sender",
+            "gift_future_user_field" => "ignored"
+          },
+          "send_date" => 1_780_005_000,
+          "text" => "For you",
+          "entities" => [
+            %{
+              "type" => "text_mention",
+              "offset" => 0,
+              "length" => 3,
+              "user" => %{"id" => 91_004, "is_bot" => false, "first_name" => "Mentioned"},
+              "future_entity_field" => "ignored"
+            }
+          ],
+          "is_private" => false,
+          "is_saved" => true,
+          "can_be_upgraded" => true,
+          "was_refunded" => false,
+          "convert_star_count" => 10,
+          "prepaid_upgrade_star_count" => 5,
+          "is_upgrade_separate" => false,
+          "unique_gift_number" => 7,
+          "future_regular_field" => "ignored"
+        },
+        %{
+          "type" => "unique",
+          "gift" => %{
+            "gift_id" => "base-gift-1",
+            "base_name" => "Nadia Gift",
+            "name" => "NadiaGift-1",
+            "number" => 1,
+            "model" => %{
+              "name" => "Model",
+              "sticker" => %{"file_id" => "model-sticker-1", "width" => 512, "height" => 512},
+              "rarity_per_mille" => 10,
+              "rarity" => "rare",
+              "future_model_field" => "ignored"
+            },
+            "symbol" => %{
+              "name" => "Symbol",
+              "sticker" => %{"file_id" => "symbol-sticker-1", "width" => 512, "height" => 512},
+              "rarity_per_mille" => 20,
+              "future_symbol_field" => "ignored"
+            },
+            "backdrop" => %{
+              "name" => "Backdrop",
+              "colors" => %{
+                "center_color" => 1,
+                "edge_color" => 2,
+                "symbol_color" => 3,
+                "text_color" => 4,
+                "future_backdrop_colors_field" => "ignored"
+              },
+              "rarity_per_mille" => 30,
+              "future_backdrop_field" => "ignored"
+            },
+            "is_premium" => true,
+            "is_burned" => false,
+            "is_from_blockchain" => false,
+            "colors" => %{
+              "model_custom_emoji_id" => "model-emoji",
+              "symbol_custom_emoji_id" => "symbol-emoji",
+              "light_theme_main_color" => 5,
+              "light_theme_other_colors" => [6, 7],
+              "dark_theme_main_color" => 8,
+              "dark_theme_other_colors" => [9],
+              "future_colors_field" => "ignored"
+            },
+            "publisher_chat" => %{
+              "id" => -1002,
+              "type" => "channel",
+              "title" => "Unique Publisher"
+            },
+            "future_unique_gift_field" => "ignored"
+          },
+          "owned_gift_id" => "owned-unique-1",
+          "sender_user" => %{"id" => 91_003, "is_bot" => false, "first_name" => "Unique Sender"},
+          "send_date" => 1_780_005_100,
+          "is_saved" => true,
+          "can_be_transferred" => true,
+          "transfer_star_count" => 75,
+          "next_transfer_date" => 1_780_100_000,
+          "future_unique_field" => "ignored"
+        },
+        %{
+          "type" => "future",
+          "gift" => %{"id" => "unknown"},
+          "future_owned_gift_field" => "ignored"
+        }
+      ],
+      "next_offset" => "owned-next",
+      "future_owned_gifts_field" => "ignored"
+    }
+
+    for method <- ["getUserGifts", "getChatGifts", "getBusinessAccountGifts"] do
+      assert %OwnedGifts{
+               total_count: 3,
+               next_offset: "owned-next",
+               gifts: [
+                 %OwnedGiftRegular{
+                   gift: %Gift{
+                     id: "regular-gift-1",
+                     sticker: %Sticker{file_id: "regular-sticker-1"},
+                     background: %GiftBackground{center_color: 1},
+                     publisher_chat: %Chat{title: "Regular Publisher"}
+                   },
+                   sender_user: %User{id: 91_002, first_name: "Sender"},
+                   entities: [
+                     %MessageEntity{
+                       type: "text_mention",
+                       user: %User{id: 91_004, first_name: "Mentioned"}
+                     }
+                   ]
+                 } = regular,
+                 %OwnedGiftUnique{
+                   gift: %UniqueGift{
+                     model: %UniqueGiftModel{
+                       name: "Model",
+                       sticker: %Sticker{file_id: "model-sticker-1"}
+                     },
+                     symbol: %UniqueGiftSymbol{
+                       name: "Symbol",
+                       sticker: %Sticker{file_id: "symbol-sticker-1"}
+                     },
+                     backdrop: %UniqueGiftBackdrop{
+                       colors: %UniqueGiftBackdropColors{symbol_color: 3}
+                     },
+                     colors: %UniqueGiftColors{light_theme_other_colors: [6, 7]},
+                     publisher_chat: %Chat{title: "Unique Publisher"}
+                   },
+                   sender_user: %User{id: 91_003, first_name: "Unique Sender"}
+                 } = unique,
+                 %OwnedGift{type: "future"} = future
+               ]
+             } = owned_gifts = Parser.parse_result(raw_owned_gifts, method)
+
+      refute Map.has_key?(owned_gifts, :future_owned_gifts_field)
+      refute Map.has_key?(regular, :future_regular_field)
+      refute Map.has_key?(regular.gift, :future_gift_field)
+      refute Map.has_key?(regular.gift.sticker, :future_sticker_field)
+      refute Map.has_key?(regular.sender_user, :gift_future_user_field)
+      refute Map.has_key?(hd(regular.entities), :future_entity_field)
+      refute Map.has_key?(unique, :future_unique_field)
+      refute Map.has_key?(unique.gift, :future_unique_gift_field)
+      refute Map.has_key?(unique.gift.model, :future_model_field)
+      refute Map.has_key?(unique.gift.symbol, :future_symbol_field)
+      refute Map.has_key?(unique.gift.backdrop, :future_backdrop_field)
+      refute Map.has_key?(unique.gift.backdrop.colors, :future_backdrop_colors_field)
+      refute Map.has_key?(unique.gift.colors, :future_colors_field)
+      refute Map.has_key?(future, :gift)
+      refute Map.has_key?(future, :future_owned_gift_field)
+    end
   end
 
   test "parse result of get_chat_menu_button" do

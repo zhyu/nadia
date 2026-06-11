@@ -37,6 +37,9 @@ defmodule Nadia.APITest do
     ChecklistTask,
     ForumTopic,
     GameHighScore,
+    Gift,
+    GiftBackground,
+    Gifts,
     KeyboardButton,
     Message,
     MessageId,
@@ -46,6 +49,9 @@ defmodule Nadia.APITest do
     Location,
     MenuButtonWebApp,
     MessageReactionUpdated,
+    OwnedGiftRegular,
+    OwnedGifts,
+    OwnedGiftUnique,
     PaidMedia,
     PaidMediaInfo,
     PaidMediaLivePhoto,
@@ -64,6 +70,12 @@ defmodule Nadia.APITest do
     SentWebAppMessage,
     StarAmount,
     Sticker,
+    UniqueGift,
+    UniqueGiftBackdrop,
+    UniqueGiftBackdropColors,
+    UniqueGiftColors,
+    UniqueGiftModel,
+    UniqueGiftSymbol,
     User,
     UserChatBoosts,
     UserProfileAudios,
@@ -303,6 +315,252 @@ defmodule Nadia.APITest do
     assert Jason.decode!(params["text_entities"]) == [
              %{"type" => "italic", "offset" => 0, "length" => 7}
            ]
+  end
+
+  test "gift getter wrappers build request contracts and parse modeled gifts" do
+    stub_telegram_result(%{
+      gifts: [
+        %{
+          id: "gift-getter-1",
+          sticker: %{
+            file_id: "gift-sticker-1",
+            width: 512,
+            height: 512,
+            emoji: "\u{1F381}",
+            future_sticker_field: "ignored"
+          },
+          star_count: 25,
+          upgrade_star_count: 50,
+          is_premium: true,
+          has_colors: true,
+          total_count: 100,
+          remaining_count: 90,
+          personal_total_count: 5,
+          personal_remaining_count: 4,
+          background: %{
+            center_color: 16_711_680,
+            edge_color: 16_711_935,
+            text_color: 16_777_215,
+            future_background_field: "ignored"
+          },
+          unique_gift_variant_count: 12,
+          publisher_chat: %{
+            id: -1_001_111_111_111,
+            type: "channel",
+            title: "Gift Publisher"
+          },
+          future_gift_field: "ignored"
+        }
+      ]
+    })
+
+    assert {:ok,
+            %Gifts{
+              gifts: [
+                %Gift{
+                  id: "gift-getter-1",
+                  sticker: %Sticker{file_id: "gift-sticker-1"},
+                  background: %GiftBackground{center_color: 16_711_680},
+                  publisher_chat: %Chat{title: "Gift Publisher"}
+                }
+              ]
+            }} = Nadia.get_available_gifts()
+
+    assert_telegram_request("getAvailableGifts",
+      body: {:form, []},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(%{
+      total_count: 1,
+      gifts: [
+        %{
+          type: "regular",
+          gift: %{
+            id: "regular-gift-1",
+            sticker: %{file_id: "regular-sticker-1", width: 512, height: 512},
+            star_count: 15
+          },
+          owned_gift_id: "owned-regular-1",
+          sender_user: %{id: 91_002, is_bot: false, first_name: "Sender"},
+          send_date: 1_780_005_000,
+          text: "For you",
+          entities: [
+            %{type: "bold", offset: 0, length: 3, future_entity_field: "ignored"}
+          ],
+          is_private: false,
+          is_saved: true,
+          can_be_upgraded: true,
+          was_refunded: false,
+          convert_star_count: 10,
+          prepaid_upgrade_star_count: 5,
+          is_upgrade_separate: false,
+          unique_gift_number: 7
+        }
+      ],
+      next_offset: "next-user"
+    })
+
+    assert {:ok,
+            %OwnedGifts{
+              total_count: 1,
+              gifts: [
+                %OwnedGiftRegular{
+                  gift: %Gift{
+                    id: "regular-gift-1",
+                    sticker: %Sticker{file_id: "regular-sticker-1"}
+                  },
+                  sender_user: %User{id: 91_002, first_name: "Sender"},
+                  entities: [%MessageEntity{type: "bold"}]
+                }
+              ],
+              next_offset: "next-user"
+            }} =
+             Nadia.get_user_gifts(91_001,
+               offset: "",
+               limit: 2,
+               exclude_unsaved: false
+             )
+
+    assert_telegram_request("getUserGifts",
+      body:
+        {:form,
+         [
+           {"user_id", "91001"},
+           {"offset", ""},
+           {"limit", "2"},
+           {"exclude_unsaved", "false"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    client =
+      Client.new(
+        token: "999:family-gift-getters",
+        http_client: Nadia.HTTPCase.StubHTTPClient
+      )
+
+    stub_telegram_result(%{
+      total_count: 1,
+      gifts: [
+        %{
+          type: "unique",
+          gift: %{
+            gift_id: "base-gift-1",
+            base_name: "Nadia Gift",
+            name: "NadiaGift-1",
+            number: 1,
+            model: %{
+              name: "Model",
+              sticker: %{file_id: "model-sticker-1", width: 512, height: 512},
+              rarity_per_mille: 10,
+              rarity: "rare"
+            },
+            symbol: %{
+              name: "Symbol",
+              sticker: %{file_id: "symbol-sticker-1", width: 512, height: 512},
+              rarity_per_mille: 20
+            },
+            backdrop: %{
+              name: "Backdrop",
+              colors: %{
+                center_color: 1,
+                edge_color: 2,
+                symbol_color: 3,
+                text_color: 4
+              },
+              rarity_per_mille: 30
+            },
+            is_premium: true,
+            is_burned: false,
+            is_from_blockchain: false,
+            colors: %{
+              model_custom_emoji_id: "model-emoji",
+              symbol_custom_emoji_id: "symbol-emoji",
+              light_theme_main_color: 5,
+              light_theme_other_colors: [6, 7],
+              dark_theme_main_color: 8,
+              dark_theme_other_colors: [9]
+            },
+            publisher_chat: %{id: -1_002_222_222_222, type: "channel", title: "Unique Publisher"}
+          },
+          owned_gift_id: "owned-unique-1",
+          sender_user: %{id: 91_003, is_bot: false, first_name: "Unique Sender"},
+          send_date: 1_780_005_100,
+          is_saved: true,
+          can_be_transferred: true,
+          transfer_star_count: 75,
+          next_transfer_date: 1_780_100_000
+        }
+      ],
+      next_offset: ""
+    })
+
+    assert {:ok,
+            %OwnedGifts{
+              gifts: [
+                %OwnedGiftUnique{
+                  gift: %UniqueGift{
+                    model: %UniqueGiftModel{sticker: %Sticker{file_id: "model-sticker-1"}},
+                    symbol: %UniqueGiftSymbol{sticker: %Sticker{file_id: "symbol-sticker-1"}},
+                    backdrop: %UniqueGiftBackdrop{
+                      colors: %UniqueGiftBackdropColors{symbol_color: 3}
+                    },
+                    colors: %UniqueGiftColors{model_custom_emoji_id: "model-emoji"},
+                    publisher_chat: %Chat{title: "Unique Publisher"}
+                  },
+                  sender_user: %User{id: 91_003, first_name: "Unique Sender"}
+                }
+              ]
+            }} =
+             Nadia.get_chat_gifts(client, "@gift_channel", %{
+               offset: "chat-next",
+               limit: 1,
+               exclude_unsaved: true
+             })
+
+    request =
+      assert_http_request(
+        method: :post,
+        url: "https://api.telegram.org/bot999:family-gift-getters/getChatGifts",
+        headers: [],
+        options: [recv_timeout: 5000]
+      )
+
+    assert form_params(request) == %{
+             "chat_id" => "@gift_channel",
+             "offset" => "chat-next",
+             "limit" => "1",
+             "exclude_unsaved" => "true"
+           }
+
+    stub_telegram_result(%{total_count: 0, gifts: [], next_offset: ""})
+
+    assert {:ok, %OwnedGifts{total_count: 0, gifts: [], next_offset: ""}} =
+             Nadia.get_business_account_gifts("business-gifts-1",
+               exclude_unsaved: true,
+               exclude_saved: false,
+               exclude_unlimited: true,
+               exclude_limited: false,
+               exclude_unique: true,
+               sort_by_price: true,
+               offset: "business-next",
+               limit: 10
+             )
+
+    request = assert_telegram_request("getBusinessAccountGifts", options: [recv_timeout: 5000])
+
+    assert form_params(request) == %{
+             "business_connection_id" => "business-gifts-1",
+             "exclude_unsaved" => "true",
+             "exclude_saved" => "false",
+             "exclude_unlimited" => "true",
+             "exclude_limited" => "false",
+             "exclude_unique" => "true",
+             "sort_by_price" => "true",
+             "offset" => "business-next",
+             "limit" => "10"
+           }
   end
 
   test "bot command and menu settings wrappers JSON-encode object form fields" do

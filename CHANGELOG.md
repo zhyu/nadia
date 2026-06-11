@@ -32,6 +32,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   settings, and Stars transfer maintenance.
 - Added Bot API wrappers for business gift conversion, upgrade, and transfer
   maintenance.
+- Added Bot API gift getter wrappers plus gift and owned-gift response
+  structs/parser coverage.
 - Added Bot API Star balance getter wrappers and `%Nadia.Model.StarAmount{}`
   parser/model support.
 - Added Bot API wrappers for payment acknowledgement and Telegram Stars

@@ -16,9 +16,11 @@ defmodule Nadia.Behaviour do
     File,
     ForumTopic,
     GameHighScore,
+    Gifts,
     MenuButton,
     Message,
     MessageId,
+    OwnedGifts,
     Poll,
     PreparedInlineMessage,
     PreparedKeyboardButton,
@@ -127,6 +129,22 @@ defmodule Nadia.Behaviour do
   @callback set_user_emoji_status(Client.t(), integer) :: :ok | {:error, Error.t()}
   @callback set_user_emoji_status(Client.t(), integer, [{atom, any}] | map) ::
               :ok | {:error, Error.t()}
+  @callback get_available_gifts() :: {:ok, Gifts.t()} | {:error, Error.t()}
+  @callback get_available_gifts(Client.t()) :: {:ok, Gifts.t()} | {:error, Error.t()}
+  @callback get_user_gifts(integer) :: {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @callback get_user_gifts(integer, [{atom, any}] | map) ::
+              {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @callback get_user_gifts(Client.t(), integer) ::
+              {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @callback get_user_gifts(Client.t(), integer, [{atom, any}] | map) ::
+              {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @callback get_chat_gifts(integer | binary) :: {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @callback get_chat_gifts(integer | binary, [{atom, any}] | map) ::
+              {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @callback get_chat_gifts(Client.t(), integer | binary) ::
+              {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @callback get_chat_gifts(Client.t(), integer | binary, [{atom, any}] | map) ::
+              {:ok, OwnedGifts.t()} | {:error, Error.t()}
   @callback send_gift(binary) :: :ok | {:error, Error.t()}
   @callback send_gift(binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
   @callback send_gift(Client.t(), binary) :: :ok | {:error, Error.t()}
@@ -582,6 +600,13 @@ defmodule Nadia.Behaviour do
               {:ok, StarAmount.t()} | {:error, Error.t()}
   @callback get_business_account_star_balance(Client.t(), binary) ::
               {:ok, StarAmount.t()} | {:error, Error.t()}
+  @callback get_business_account_gifts(binary) :: {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @callback get_business_account_gifts(binary, [{atom, any}] | map) ::
+              {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @callback get_business_account_gifts(Client.t(), binary) ::
+              {:ok, OwnedGifts.t()} | {:error, Error.t()}
+  @callback get_business_account_gifts(Client.t(), binary, [{atom, any}] | map) ::
+              {:ok, OwnedGifts.t()} | {:error, Error.t()}
   @callback read_business_message(binary, integer, integer) :: :ok | {:error, Error.t()}
   @callback read_business_message(Client.t(), binary, integer, integer) ::
               :ok | {:error, Error.t()}
@@ -954,6 +979,14 @@ defmodule Nadia.Behaviour do
                       set_user_emoji_status: 1,
                       set_user_emoji_status: 2,
                       set_user_emoji_status: 3,
+                      get_available_gifts: 0,
+                      get_available_gifts: 1,
+                      get_user_gifts: 1,
+                      get_user_gifts: 2,
+                      get_user_gifts: 3,
+                      get_chat_gifts: 1,
+                      get_chat_gifts: 2,
+                      get_chat_gifts: 3,
                       send_gift: 1,
                       send_gift: 2,
                       send_gift: 3,
@@ -1088,6 +1121,9 @@ defmodule Nadia.Behaviour do
                       get_business_connection: 2,
                       get_business_account_star_balance: 1,
                       get_business_account_star_balance: 2,
+                      get_business_account_gifts: 1,
+                      get_business_account_gifts: 2,
+                      get_business_account_gifts: 3,
                       read_business_message: 3,
                       read_business_message: 4,
                       delete_business_messages: 2,

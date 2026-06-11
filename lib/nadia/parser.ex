@@ -18,6 +18,9 @@ defmodule Nadia.Parser do
     BusinessOpeningHoursInterval,
     ForumTopic,
     GameHighScore,
+    Gift,
+    GiftBackground,
+    Gifts,
     User,
     Chat,
     ChatInviteLink,
@@ -50,6 +53,10 @@ defmodule Nadia.Parser do
     MessageId,
     MessageReactionCountUpdated,
     MessageReactionUpdated,
+    OwnedGift,
+    OwnedGiftRegular,
+    OwnedGifts,
+    OwnedGiftUnique,
     PaidMedia,
     PaidMediaInfo,
     PaidMediaLivePhoto,
@@ -70,6 +77,12 @@ defmodule Nadia.Parser do
     SentGuestMessage,
     SentWebAppMessage,
     StarAmount,
+    UniqueGift,
+    UniqueGiftBackdrop,
+    UniqueGiftBackdropColors,
+    UniqueGiftColors,
+    UniqueGiftModel,
+    UniqueGiftSymbol,
     UserChatBoosts,
     UserProfileAudios,
     WebhookInfo
@@ -119,6 +132,10 @@ defmodule Nadia.Parser do
       "answerWebAppQuery" -> parse(SentWebAppMessage, result)
       "savePreparedInlineMessage" -> parse(PreparedInlineMessage, result)
       "savePreparedKeyboardButton" -> parse(PreparedKeyboardButton, result)
+      "getAvailableGifts" -> parse(Gifts, result)
+      "getUserGifts" -> parse(OwnedGifts, result)
+      "getChatGifts" -> parse(OwnedGifts, result)
+      "getBusinessAccountGifts" -> parse(OwnedGifts, result)
       "getManagedBotToken" -> result
       "replaceManagedBotToken" -> result
       "getManagedBotAccessSettings" -> parse(BotAccessSettings, result)
@@ -257,6 +274,37 @@ defmodule Nadia.Parser do
   defp parse(BotAccessSettings, {:added_users, val}) when is_list(val),
     do: {:added_users, Enum.map(val, &parse(User, &1))}
 
+  defp parse(Gifts, {:gifts, val}) when is_list(val),
+    do: {:gifts, Enum.map(val, &parse(Gift, &1))}
+
+  defp parse(Gift, {:sticker, val}), do: {:sticker, parse(Sticker, val)}
+  defp parse(Gift, {:background, val}), do: {:background, parse(GiftBackground, val)}
+  defp parse(Gift, {:publisher_chat, val}), do: {:publisher_chat, parse(Chat, val)}
+
+  defp parse(UniqueGiftModel, {:sticker, val}), do: {:sticker, parse(Sticker, val)}
+  defp parse(UniqueGiftSymbol, {:sticker, val}), do: {:sticker, parse(Sticker, val)}
+
+  defp parse(UniqueGiftBackdrop, {:colors, val}),
+    do: {:colors, parse(UniqueGiftBackdropColors, val)}
+
+  defp parse(UniqueGift, {:model, val}), do: {:model, parse(UniqueGiftModel, val)}
+  defp parse(UniqueGift, {:symbol, val}), do: {:symbol, parse(UniqueGiftSymbol, val)}
+  defp parse(UniqueGift, {:backdrop, val}), do: {:backdrop, parse(UniqueGiftBackdrop, val)}
+  defp parse(UniqueGift, {:colors, val}), do: {:colors, parse(UniqueGiftColors, val)}
+  defp parse(UniqueGift, {:publisher_chat, val}), do: {:publisher_chat, parse(Chat, val)}
+
+  defp parse(OwnedGifts, {:gifts, val}) when is_list(val),
+    do: {:gifts, Enum.map(val, &parse_owned_gift/1)}
+
+  defp parse(OwnedGiftRegular, {:gift, val}), do: {:gift, parse(Gift, val)}
+  defp parse(OwnedGiftRegular, {:sender_user, val}), do: {:sender_user, parse(User, val)}
+
+  defp parse(OwnedGiftRegular, {:entities, val}) when is_list(val),
+    do: {:entities, Enum.map(val, &parse(MessageEntity, &1))}
+
+  defp parse(OwnedGiftUnique, {:gift, val}), do: {:gift, parse(UniqueGift, val)}
+  defp parse(OwnedGiftUnique, {:sender_user, val}), do: {:sender_user, parse(User, val)}
+
   defp parse(UserProfileAudios, {:audios, val}) when is_list(val),
     do: {:audios, Enum.map(val, &parse(Audio, &1))}
 
@@ -374,6 +422,16 @@ defmodule Nadia.Parser do
   end
 
   defp parse_paid_media(val), do: val
+
+  defp parse_owned_gift(%{} = val) do
+    case Map.get(val, :type) || Map.get(val, "type") do
+      "regular" -> parse(OwnedGiftRegular, val)
+      "unique" -> parse(OwnedGiftUnique, val)
+      _ -> parse(OwnedGift, val)
+    end
+  end
+
+  defp parse_owned_gift(val), do: val
 
   defp parse_menu_button(%{} = val) do
     case Map.get(val, :type) || Map.get(val, "type") do

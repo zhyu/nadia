@@ -3154,6 +3154,142 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to convert a gift received by a managed business account to Telegram Stars.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `owned_gift_id` - Unique identifier of the regular gift that should be converted to Telegram Stars
+  """
+  @spec convert_gift_to_stars(binary, binary) :: :ok | {:error, Error.t()}
+  @spec convert_gift_to_stars(Client.t(), binary, binary) :: :ok | {:error, Error.t()}
+  def convert_gift_to_stars(business_connection_id, owned_gift_id) do
+    api_request(
+      "convertGiftToStars",
+      business_connection_id: business_connection_id,
+      owned_gift_id: owned_gift_id
+    )
+  end
+
+  def convert_gift_to_stars(%Client{} = client, business_connection_id, owned_gift_id) do
+    api_request(
+      client,
+      "convertGiftToStars",
+      business_connection_id: business_connection_id,
+      owned_gift_id: owned_gift_id
+    )
+  end
+
+  @doc """
+  Use this method to upgrade a gift received by a managed business account.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `owned_gift_id` - Unique identifier of the regular gift that should be upgraded
+  * `options` - orddict of options
+
+  Options:
+  * `:keep_original_details` - Pass true to keep the original gift text, sender, and receiver in the upgraded gift
+  * `:star_count` - Number of Telegram Stars that will be paid for the upgrade
+  """
+  @spec upgrade_gift(binary, binary) :: :ok | {:error, Error.t()}
+  @spec upgrade_gift(binary, binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  @spec upgrade_gift(Client.t(), binary, binary) :: :ok | {:error, Error.t()}
+  @spec upgrade_gift(Client.t(), binary, binary, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  def upgrade_gift(business_connection_id, owned_gift_id) do
+    upgrade_gift(business_connection_id, owned_gift_id, [])
+  end
+
+  def upgrade_gift(%Client{} = client, business_connection_id, owned_gift_id) do
+    upgrade_gift(client, business_connection_id, owned_gift_id, [])
+  end
+
+  def upgrade_gift(business_connection_id, owned_gift_id, options) do
+    api_request(
+      "upgradeGift",
+      request_options(
+        [business_connection_id: business_connection_id, owned_gift_id: owned_gift_id],
+        options
+      )
+    )
+  end
+
+  def upgrade_gift(%Client{} = client, business_connection_id, owned_gift_id, options) do
+    api_request(
+      client,
+      "upgradeGift",
+      request_options(
+        [business_connection_id: business_connection_id, owned_gift_id: owned_gift_id],
+        options
+      )
+    )
+  end
+
+  @doc """
+  Use this method to transfer an owned gift to another user.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `owned_gift_id` - Unique identifier of the regular gift that should be transferred
+  * `new_owner_chat_id` - Unique identifier of the chat which will own the gift
+  * `options` - orddict of options
+
+  Options:
+  * `:star_count` - Number of Telegram Stars that will be paid for the transfer
+  """
+  @spec transfer_gift(binary, binary, integer) :: :ok | {:error, Error.t()}
+  @spec transfer_gift(binary, binary, integer, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  @spec transfer_gift(Client.t(), binary, binary, integer) :: :ok | {:error, Error.t()}
+  @spec transfer_gift(Client.t(), binary, binary, integer, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  def transfer_gift(business_connection_id, owned_gift_id, new_owner_chat_id) do
+    transfer_gift(business_connection_id, owned_gift_id, new_owner_chat_id, [])
+  end
+
+  def transfer_gift(%Client{} = client, business_connection_id, owned_gift_id, new_owner_chat_id) do
+    transfer_gift(client, business_connection_id, owned_gift_id, new_owner_chat_id, [])
+  end
+
+  def transfer_gift(business_connection_id, owned_gift_id, new_owner_chat_id, options) do
+    api_request(
+      "transferGift",
+      request_options(
+        [
+          business_connection_id: business_connection_id,
+          owned_gift_id: owned_gift_id,
+          new_owner_chat_id: new_owner_chat_id
+        ],
+        options
+      )
+    )
+  end
+
+  def transfer_gift(
+        %Client{} = client,
+        business_connection_id,
+        owned_gift_id,
+        new_owner_chat_id,
+        options
+      ) do
+    api_request(
+      client,
+      "transferGift",
+      request_options(
+        [
+          business_connection_id: business_connection_id,
+          owned_gift_id: owned_gift_id,
+          new_owner_chat_id: new_owner_chat_id
+        ],
+        options
+      )
+    )
+  end
+
+  @doc """
   Use this method to reply to shipping queries.
   Returns `:ok` on success.
 

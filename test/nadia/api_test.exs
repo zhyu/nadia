@@ -1295,6 +1295,66 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "business gift maintenance true-return wrappers build request contracts" do
+    stub_telegram_result(true)
+
+    client =
+      Client.new(
+        token: "999:family-j2",
+        http_client: Nadia.HTTPCase.StubHTTPClient
+      )
+
+    assert :ok == Nadia.convert_gift_to_stars(client, "business-j2", "owned-gift-1")
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-j2/convertGiftToStars",
+      body:
+        {:form,
+         [
+           {"business_connection_id", "business-j2"},
+           {"owned_gift_id", "owned-gift-1"}
+         ]},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok ==
+             Nadia.upgrade_gift("business-j2", "owned-gift-2",
+               keep_original_details: false,
+               star_count: 25
+             )
+
+    assert_telegram_request("upgradeGift",
+      body:
+        {:form,
+         [
+           {"business_connection_id", "business-j2"},
+           {"owned_gift_id", "owned-gift-2"},
+           {"keep_original_details", "false"},
+           {"star_count", "25"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok ==
+             Nadia.transfer_gift("business-j2", "owned-gift-3", 91_001, %{
+               star_count: 75
+             })
+
+    request =
+      assert_telegram_request("transferGift",
+        options: [recv_timeout: 5000]
+      )
+
+    assert form_params(request) == %{
+             "business_connection_id" => "business-j2",
+             "owned_gift_id" => "owned-gift-3",
+             "new_owner_chat_id" => "91001",
+             "star_count" => "75"
+           }
+  end
+
   test "Star balance getter wrappers build request contracts and parse balances" do
     stub_telegram_result(%{
       amount: 12,

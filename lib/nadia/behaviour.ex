@@ -602,6 +602,20 @@ defmodule Nadia.Behaviour do
   @callback transfer_business_account_stars(binary, integer) :: :ok | {:error, Error.t()}
   @callback transfer_business_account_stars(Client.t(), binary, integer) ::
               :ok | {:error, Error.t()}
+  @callback convert_gift_to_stars(binary, binary) :: :ok | {:error, Error.t()}
+  @callback convert_gift_to_stars(Client.t(), binary, binary) :: :ok | {:error, Error.t()}
+  @callback upgrade_gift(binary, binary) :: :ok | {:error, Error.t()}
+  @callback upgrade_gift(binary, binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback upgrade_gift(Client.t(), binary, binary) :: :ok | {:error, Error.t()}
+  @callback upgrade_gift(Client.t(), binary, binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback transfer_gift(binary, binary, integer) :: :ok | {:error, Error.t()}
+  @callback transfer_gift(binary, binary, integer, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback transfer_gift(Client.t(), binary, binary, integer) :: :ok | {:error, Error.t()}
+  @callback transfer_gift(Client.t(), binary, binary, integer, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
   @callback answer_shipping_query(binary, boolean) :: :ok | {:error, Error.t()}
   @callback answer_shipping_query(binary, boolean, [{atom, any}] | map) ::
               :ok | {:error, Error.t()}
@@ -1033,6 +1047,14 @@ defmodule Nadia.Behaviour do
                       set_business_account_gift_settings: 4,
                       transfer_business_account_stars: 2,
                       transfer_business_account_stars: 3,
+                      convert_gift_to_stars: 2,
+                      convert_gift_to_stars: 3,
+                      upgrade_gift: 2,
+                      upgrade_gift: 3,
+                      upgrade_gift: 4,
+                      transfer_gift: 3,
+                      transfer_gift: 4,
+                      transfer_gift: 5,
                       answer_shipping_query: 2,
                       answer_shipping_query: 3,
                       answer_shipping_query: 4,

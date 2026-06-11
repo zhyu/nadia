@@ -147,6 +147,7 @@ defmodule Nadia.Parser do
       "answerWebAppQuery" -> parse(SentWebAppMessage, result)
       "savePreparedInlineMessage" -> parse(PreparedInlineMessage, result)
       "savePreparedKeyboardButton" -> parse(PreparedKeyboardButton, result)
+      "createInvoiceLink" -> result
       "getAvailableGifts" -> parse(Gifts, result)
       "getUserGifts" -> parse(OwnedGifts, result)
       "getChatGifts" -> parse(OwnedGifts, result)

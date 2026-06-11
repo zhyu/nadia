@@ -1842,6 +1842,177 @@ defmodule Nadia.APITest do
     assert form_params(request) == %{"offset" => "next", "limit" => "1"}
   end
 
+  test "send_invoice/7 JSON-encodes invoice fields and parses messages" do
+    prices = [
+      [label: "Base", amount: 1500, future_nil: nil],
+      %{label: "Tax", amount: 125, future_nil: nil}
+    ]
+
+    suggested_post_parameters = %{
+      price: 1625,
+      send_date: 1_780_020_000,
+      protect_content: false,
+      future_nil: nil
+    }
+
+    reply_parameters = [
+      message_id: 77,
+      quote: "Please confirm",
+      allow_sending_without_reply: false,
+      future_nil: nil
+    ]
+
+    reply_markup = %{inline_keyboard: [[%{text: "Pay", pay: true}]]}
+
+    stub_telegram_result(message_result(%{message_id: 9801}))
+
+    assert {:ok, %Message{message_id: 9801}} =
+             Nadia.send_invoice(
+               123,
+               "Nadia invoice",
+               "Coverage slice",
+               "payload-l3",
+               "USD",
+               prices,
+               provider_token: nil,
+               message_thread_id: 11,
+               direct_messages_topic_id: 22,
+               max_tip_amount: 500,
+               suggested_tip_amounts: [100, 250],
+               need_email: false,
+               disable_notification: true,
+               protect_content: false,
+               allow_paid_broadcast: true,
+               suggested_post_parameters: suggested_post_parameters,
+               reply_parameters: reply_parameters,
+               reply_markup: reply_markup,
+               future_nil: nil
+             )
+
+    request = assert_telegram_request("sendInvoice", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["chat_id"] == "123"
+    assert params["title"] == "Nadia invoice"
+    assert params["description"] == "Coverage slice"
+    assert params["payload"] == "payload-l3"
+    assert params["currency"] == "USD"
+    assert params["message_thread_id"] == "11"
+    assert params["direct_messages_topic_id"] == "22"
+    assert params["max_tip_amount"] == "500"
+    assert params["need_email"] == "false"
+    assert params["disable_notification"] == "true"
+    assert params["protect_content"] == "false"
+    assert params["allow_paid_broadcast"] == "true"
+    refute Map.has_key?(params, "provider_token")
+    refute Map.has_key?(params, "future_nil")
+
+    assert Jason.decode!(params["prices"]) == [
+             %{"label" => "Base", "amount" => 1500},
+             %{"label" => "Tax", "amount" => 125}
+           ]
+
+    assert Jason.decode!(params["suggested_tip_amounts"]) == [100, 250]
+
+    assert Jason.decode!(params["suggested_post_parameters"]) == %{
+             "price" => 1625,
+             "send_date" => 1_780_020_000,
+             "protect_content" => false
+           }
+
+    assert Jason.decode!(params["reply_parameters"]) == %{
+             "message_id" => 77,
+             "quote" => "Please confirm",
+             "allow_sending_without_reply" => false
+           }
+
+    assert Jason.decode!(params["reply_markup"]) == %{
+             "inline_keyboard" => [[%{"text" => "Pay", "pay" => true}]]
+           }
+  end
+
+  test "create_invoice_link wrappers return strings and encode provider data deliberately" do
+    prices = [%{label: "Subscription", amount: 2999, future_nil: nil}]
+    provider_data = %{order_id: "order-l3", nested: %{source: "nadia", coupon: nil}}
+
+    stub_telegram_result("https://t.me/nadia_bot?start=invoice-l3")
+
+    assert {:ok, "https://t.me/nadia_bot?start=invoice-l3"} =
+             Nadia.create_invoice_link(
+               "Invoice link",
+               "Reusable payment link",
+               "payload-link-l3",
+               "USD",
+               prices,
+               %{
+                 business_connection_id: "business-l3",
+                 provider_token: nil,
+                 subscription_period: 2_592_000,
+                 provider_data: provider_data,
+                 photo_size: 2048,
+                 need_phone_number: false,
+                 send_phone_number_to_provider: true,
+                 future_nil: nil
+               }
+             )
+
+    request = assert_telegram_request("createInvoiceLink", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["title"] == "Invoice link"
+    assert params["description"] == "Reusable payment link"
+    assert params["payload"] == "payload-link-l3"
+    assert params["currency"] == "USD"
+    assert params["business_connection_id"] == "business-l3"
+    assert params["subscription_period"] == "2592000"
+    assert params["photo_size"] == "2048"
+    assert params["need_phone_number"] == "false"
+    assert params["send_phone_number_to_provider"] == "true"
+    refute Map.has_key?(params, "provider_token")
+    refute Map.has_key?(params, "future_nil")
+
+    assert Jason.decode!(params["prices"]) == [
+             %{"label" => "Subscription", "amount" => 2999}
+           ]
+
+    assert Jason.decode!(params["provider_data"]) == %{
+             "order_id" => "order-l3",
+             "nested" => %{"source" => "nadia"}
+           }
+
+    client = Client.new(token: "999:family-l3", http_client: Nadia.HTTPCase.StubHTTPClient)
+    binary_provider_data = ~s({"already":"json"})
+
+    stub_telegram_result("https://t.me/nadia_bot?start=invoice-l3-binary")
+
+    assert {:ok, "https://t.me/nadia_bot?start=invoice-l3-binary"} =
+             Nadia.create_invoice_link(
+               client,
+               "Binary provider data",
+               "Pass through JSON",
+               "payload-binary-l3",
+               "XTR",
+               [%{label: "Stars", amount: 50}],
+               %{provider_data: binary_provider_data, need_email: true}
+             )
+
+    request =
+      assert_http_request(
+        method: :post,
+        url: "https://api.telegram.org/bot999:family-l3/createInvoiceLink",
+        headers: [],
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params["title"] == "Binary provider data"
+    assert params["currency"] == "XTR"
+    assert params["provider_data"] == binary_provider_data
+    assert params["need_email"] == "true"
+    assert Jason.decode!(params["prices"]) == [%{"label" => "Stars", "amount" => 50}]
+  end
+
   test "answer_shipping_query/3 encodes shipping options and preserves error messages" do
     stub_telegram_result(true)
 

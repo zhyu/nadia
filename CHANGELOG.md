@@ -38,6 +38,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   parser/model support.
 - Added Bot API `getStarTransactions` wrapper plus Star transaction response
   structs/parser coverage.
+- Added Bot API invoice wrappers for sending invoices and creating invoice
+  links.
 - Added Bot API wrappers for payment acknowledgement and Telegram Stars
   payment/subscription maintenance.
 - Added Bot API wrappers for bulk message deletion and message reaction

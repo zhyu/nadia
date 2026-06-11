@@ -683,6 +683,76 @@ defmodule Nadia.Behaviour do
   @callback transfer_gift(Client.t(), binary, binary, integer) :: :ok | {:error, Error.t()}
   @callback transfer_gift(Client.t(), binary, binary, integer, [{atom, any}] | map) ::
               :ok | {:error, Error.t()}
+  @callback send_invoice(
+              integer | binary,
+              binary,
+              binary,
+              binary,
+              binary,
+              list | map | struct | binary
+            ) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_invoice(
+              integer | binary,
+              binary,
+              binary,
+              binary,
+              binary,
+              list | map | struct | binary,
+              [{atom, any}] | map
+            ) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_invoice(
+              Client.t(),
+              integer | binary,
+              binary,
+              binary,
+              binary,
+              binary,
+              list | map | struct | binary
+            ) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_invoice(
+              Client.t(),
+              integer | binary,
+              binary,
+              binary,
+              binary,
+              binary,
+              list | map | struct | binary,
+              [{atom, any}] | map
+            ) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback create_invoice_link(binary, binary, binary, binary, list | map | struct | binary) ::
+              {:ok, binary} | {:error, Error.t()}
+  @callback create_invoice_link(
+              binary,
+              binary,
+              binary,
+              binary,
+              list | map | struct | binary,
+              [{atom, any}] | map
+            ) ::
+              {:ok, binary} | {:error, Error.t()}
+  @callback create_invoice_link(
+              Client.t(),
+              binary,
+              binary,
+              binary,
+              binary,
+              list | map | struct | binary
+            ) ::
+              {:ok, binary} | {:error, Error.t()}
+  @callback create_invoice_link(
+              Client.t(),
+              binary,
+              binary,
+              binary,
+              binary,
+              list | map | struct | binary,
+              [{atom, any}] | map
+            ) ::
+              {:ok, binary} | {:error, Error.t()}
   @callback answer_shipping_query(binary, boolean) :: :ok | {:error, Error.t()}
   @callback answer_shipping_query(binary, boolean, [{atom, any}] | map) ::
               :ok | {:error, Error.t()}
@@ -1163,6 +1233,12 @@ defmodule Nadia.Behaviour do
                       transfer_gift: 3,
                       transfer_gift: 4,
                       transfer_gift: 5,
+                      send_invoice: 6,
+                      send_invoice: 7,
+                      send_invoice: 8,
+                      create_invoice_link: 5,
+                      create_invoice_link: 6,
+                      create_invoice_link: 7,
                       answer_shipping_query: 2,
                       answer_shipping_query: 3,
                       answer_shipping_query: 4,

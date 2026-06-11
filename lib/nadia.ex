@@ -3593,6 +3593,202 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to send invoices.
+  On success, the sent Message is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target channel
+  * `title` - Product name
+  * `description` - Product description
+  * `payload` - Bot-defined invoice payload
+  * `currency` - Three-letter ISO 4217 currency code, or `XTR` for Stars
+  * `prices` - JSON-serializable price breakdown array or a pre-encoded JSON string
+  * `options` - orddict or map of options
+  """
+  @spec send_invoice(
+          integer | binary,
+          binary,
+          binary,
+          binary,
+          binary,
+          list | map | struct | binary
+        ) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_invoice(
+          integer | binary,
+          binary,
+          binary,
+          binary,
+          binary,
+          list | map | struct | binary,
+          [{atom, any}] | map
+        ) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_invoice(
+          Client.t(),
+          integer | binary,
+          binary,
+          binary,
+          binary,
+          binary,
+          list | map | struct | binary
+        ) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_invoice(
+          Client.t(),
+          integer | binary,
+          binary,
+          binary,
+          binary,
+          binary,
+          list | map | struct | binary,
+          [{atom, any}] | map
+        ) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_invoice(chat_id, title, description, payload, currency, prices) do
+    send_invoice(chat_id, title, description, payload, currency, prices, [])
+  end
+
+  def send_invoice(%Client{} = client, chat_id, title, description, payload, currency, prices) do
+    send_invoice(client, chat_id, title, description, payload, currency, prices, [])
+  end
+
+  def send_invoice(chat_id, title, description, payload, currency, prices, options) do
+    api_request(
+      "sendInvoice",
+      request_options(
+        [
+          chat_id: chat_id,
+          title: title,
+          description: description,
+          payload: payload,
+          currency: currency,
+          prices: encode_json_array_payload(prices)
+        ],
+        encode_invoice_options(options)
+      )
+    )
+  end
+
+  def send_invoice(
+        %Client{} = client,
+        chat_id,
+        title,
+        description,
+        payload,
+        currency,
+        prices,
+        options
+      ) do
+    api_request(
+      client,
+      "sendInvoice",
+      request_options(
+        [
+          chat_id: chat_id,
+          title: title,
+          description: description,
+          payload: payload,
+          currency: currency,
+          prices: encode_json_array_payload(prices)
+        ],
+        encode_invoice_options(options)
+      )
+    )
+  end
+
+  @doc """
+  Use this method to create a link for an invoice.
+  On success, the created invoice link is returned as a string.
+
+  Args:
+  * `title` - Product name
+  * `description` - Product description
+  * `payload` - Bot-defined invoice payload
+  * `currency` - Three-letter ISO 4217 currency code, or `XTR` for Stars
+  * `prices` - JSON-serializable price breakdown array or a pre-encoded JSON string
+  * `options` - orddict or map of options
+  """
+  @spec create_invoice_link(binary, binary, binary, binary, list | map | struct | binary) ::
+          {:ok, binary} | {:error, Error.t()}
+  @spec create_invoice_link(
+          binary,
+          binary,
+          binary,
+          binary,
+          list | map | struct | binary,
+          [{atom, any}] | map
+        ) ::
+          {:ok, binary} | {:error, Error.t()}
+  @spec create_invoice_link(
+          Client.t(),
+          binary,
+          binary,
+          binary,
+          binary,
+          list | map | struct | binary
+        ) ::
+          {:ok, binary} | {:error, Error.t()}
+  @spec create_invoice_link(
+          Client.t(),
+          binary,
+          binary,
+          binary,
+          binary,
+          list | map | struct | binary,
+          [{atom, any}] | map
+        ) ::
+          {:ok, binary} | {:error, Error.t()}
+  def create_invoice_link(title, description, payload, currency, prices) do
+    create_invoice_link(title, description, payload, currency, prices, [])
+  end
+
+  def create_invoice_link(%Client{} = client, title, description, payload, currency, prices) do
+    create_invoice_link(client, title, description, payload, currency, prices, [])
+  end
+
+  def create_invoice_link(title, description, payload, currency, prices, options) do
+    api_request(
+      "createInvoiceLink",
+      request_options(
+        [
+          title: title,
+          description: description,
+          payload: payload,
+          currency: currency,
+          prices: encode_json_array_payload(prices)
+        ],
+        encode_invoice_options(options)
+      )
+    )
+  end
+
+  def create_invoice_link(
+        %Client{} = client,
+        title,
+        description,
+        payload,
+        currency,
+        prices,
+        options
+      ) do
+    api_request(
+      client,
+      "createInvoiceLink",
+      request_options(
+        [
+          title: title,
+          description: description,
+          payload: payload,
+          currency: currency,
+          prices: encode_json_array_payload(prices)
+        ],
+        encode_invoice_options(options)
+      )
+    )
+  end
+
+  @doc """
   Use this method to reply to shipping queries.
   Returns `:ok` on success.
 
@@ -4755,6 +4951,14 @@ defmodule Nadia do
 
   defp encode_json_array_option(options, key) when is_map(options) do
     Map.update(options, key, nil, &encode_json_array_payload/1)
+  end
+
+  defp encode_invoice_options(options) do
+    options
+    |> encode_json_array_option(:suggested_tip_amounts)
+    |> encode_json_option(:provider_data)
+    |> encode_json_option(:suggested_post_parameters)
+    |> encode_json_option(:reply_parameters)
   end
 
   defp encode_added_user_ids(options) do

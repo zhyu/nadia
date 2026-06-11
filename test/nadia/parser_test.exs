@@ -4,6 +4,7 @@ defmodule Nadia.ParserTest do
   alias Nadia.Parser
 
   alias Nadia.Model.{
+    AffiliateInfo,
     Update,
     Audio,
     BotAccessSettings,
@@ -73,10 +74,24 @@ defmodule Nadia.ParserTest do
     PreparedKeyboardButton,
     ReactionCount,
     ReactionType,
+    RevenueWithdrawalState,
+    RevenueWithdrawalStateFailed,
+    RevenueWithdrawalStatePending,
+    RevenueWithdrawalStateSucceeded,
     SentGuestMessage,
     SentWebAppMessage,
     StarAmount,
+    StarTransaction,
+    StarTransactions,
     Sticker,
+    TransactionPartner,
+    TransactionPartnerAffiliateProgram,
+    TransactionPartnerChat,
+    TransactionPartnerFragment,
+    TransactionPartnerOther,
+    TransactionPartnerTelegramAds,
+    TransactionPartnerTelegramApi,
+    TransactionPartnerUser,
     UniqueGift,
     UniqueGiftBackdrop,
     UniqueGiftBackdropColors,
@@ -148,6 +163,276 @@ defmodule Nadia.ParserTest do
              %{amount: -1, nanostar_amount: -500_000_000, future_star_amount_field: "ignored"},
              "getBusinessAccountStarBalance"
            ) == %StarAmount{amount: -1, nanostar_amount: -500_000_000}
+  end
+
+  test "parse result of get_star_transactions" do
+    gift = %{
+      "id" => "gift-star-tx",
+      "sticker" => %{
+        "file_id" => "gift-star-sticker",
+        "width" => 512,
+        "height" => 512,
+        "star_tx_future_sticker_field" => "ignored"
+      },
+      "star_count" => 25,
+      "star_tx_future_gift_field" => "ignored"
+    }
+
+    star_transactions =
+      Parser.parse_result(
+        %{
+          "transactions" => [
+            %{
+              "id" => "tx-user",
+              "amount" => 125,
+              "nanostar_amount" => 5,
+              "date" => 1_780_010_000,
+              "source" => %{
+                "type" => "user",
+                "transaction_type" => "paid_media_payment",
+                "user" => %{
+                  "id" => 91_001,
+                  "is_bot" => false,
+                  "first_name" => "Buyer",
+                  "star_tx_future_user_field" => "ignored"
+                },
+                "affiliate" => %{
+                  "affiliate_user" => %{
+                    "id" => 91_002,
+                    "is_bot" => true,
+                    "first_name" => "Affiliate Bot"
+                  },
+                  "affiliate_chat" => %{
+                    "id" => -1001,
+                    "type" => "channel",
+                    "title" => "Affiliate Channel",
+                    "star_tx_future_chat_field" => "ignored"
+                  },
+                  "commission_per_mille" => 50,
+                  "amount" => 6,
+                  "nanostar_amount" => 7,
+                  "future_affiliate_field" => "ignored"
+                },
+                "invoice_payload" => "invoice-payload",
+                "subscription_period" => 2_592_000,
+                "paid_media" => [
+                  %{
+                    "type" => "photo",
+                    "photo" => [
+                      %{
+                        "file_id" => "paid-photo-1",
+                        "width" => 640,
+                        "height" => 480,
+                        "star_tx_future_photo_field" => "ignored"
+                      }
+                    ],
+                    "star_tx_future_paid_media_field" => "ignored"
+                  },
+                  %{"type" => "future_media", "star_tx_future_paid_media_field" => "ignored"}
+                ],
+                "paid_media_payload" => "paid-media-payload",
+                "gift" => gift,
+                "premium_subscription_duration" => 3,
+                "future_user_partner_field" => "ignored"
+              },
+              "future_transaction_field" => "ignored"
+            },
+            %{
+              "id" => "tx-chat",
+              "amount" => -25,
+              "date" => 1_780_010_100,
+              "receiver" => %{
+                "type" => "chat",
+                "chat" => %{
+                  "id" => -1002,
+                  "type" => "channel",
+                  "title" => "Gift Chat"
+                },
+                "gift" => gift,
+                "future_chat_partner_field" => "ignored"
+              }
+            },
+            %{
+              "id" => "tx-fragment",
+              "amount" => -75,
+              "date" => 1_780_010_200,
+              "source" => %{
+                "type" => "fragment",
+                "withdrawal_state" => %{
+                  "type" => "pending",
+                  "future_withdrawal_field" => "ignored"
+                }
+              },
+              "receiver" => %{
+                "type" => "fragment",
+                "withdrawal_state" => %{
+                  "type" => "succeeded",
+                  "date" => 1_780_010_300,
+                  "url" => "https://fragment.example/tx",
+                  "future_withdrawal_field" => "ignored"
+                }
+              }
+            },
+            %{
+              "id" => "tx-fragment-failed",
+              "amount" => -80,
+              "date" => 1_780_010_250,
+              "receiver" => %{
+                "type" => "fragment",
+                "withdrawal_state" => %{"type" => "failed"}
+              }
+            },
+            %{
+              "id" => "tx-fragment-unknown",
+              "amount" => -81,
+              "date" => 1_780_010_260,
+              "receiver" => %{
+                "type" => "fragment",
+                "withdrawal_state" => %{"type" => "future_state", "extra" => "ignored"}
+              }
+            },
+            %{
+              "id" => "tx-telegram-api",
+              "amount" => -3,
+              "date" => 1_780_010_400,
+              "receiver" => %{
+                "type" => "telegram_api",
+                "request_count" => 17,
+                "future_api_partner_field" => "ignored"
+              }
+            },
+            %{
+              "id" => "tx-affiliate-program",
+              "amount" => 5,
+              "date" => 1_780_010_500,
+              "source" => %{
+                "type" => "affiliate_program",
+                "sponsor_user" => %{
+                  "id" => 91_003,
+                  "is_bot" => true,
+                  "first_name" => "Sponsor Bot"
+                },
+                "commission_per_mille" => 100
+              }
+            },
+            %{
+              "id" => "tx-telegram-ads",
+              "amount" => -9,
+              "date" => 1_780_010_600,
+              "receiver" => %{"type" => "telegram_ads"}
+            },
+            %{
+              "id" => "tx-other",
+              "amount" => 1,
+              "date" => 1_780_010_700,
+              "source" => %{"type" => "other"}
+            },
+            %{
+              "id" => "tx-unknown",
+              "amount" => 2,
+              "date" => 1_780_010_800,
+              "source" => %{
+                "type" => "future_partner",
+                "future_partner_field" => "ignored"
+              }
+            }
+          ],
+          "future_star_transactions_field" => "ignored"
+        },
+        "getStarTransactions"
+      )
+
+    assert %StarTransactions{
+             transactions: [
+               %StarTransaction{
+                 id: "tx-user",
+                 source:
+                   %TransactionPartnerUser{
+                     user: %User{id: 91_001, first_name: "Buyer"},
+                     affiliate: %AffiliateInfo{
+                       affiliate_user: %User{id: 91_002, first_name: "Affiliate Bot"},
+                       affiliate_chat: %Chat{title: "Affiliate Channel"},
+                       commission_per_mille: 50,
+                       amount: 6,
+                       nanostar_amount: 7
+                     },
+                     paid_media: [
+                       %PaidMediaPhoto{photo: [%PhotoSize{file_id: "paid-photo-1"}]},
+                       %PaidMedia{type: "future_media"}
+                     ],
+                     gift: %Gift{
+                       id: "gift-star-tx",
+                       sticker: %Sticker{file_id: "gift-star-sticker"}
+                     }
+                   } = user_partner
+               } = user_transaction,
+               %StarTransaction{
+                 receiver:
+                   %TransactionPartnerChat{
+                     chat: %Chat{title: "Gift Chat"},
+                     gift: %Gift{id: "gift-star-tx"}
+                   } = chat_partner
+               },
+               %StarTransaction{
+                 source: %TransactionPartnerFragment{
+                   withdrawal_state: %RevenueWithdrawalStatePending{} = pending_state
+                 },
+                 receiver: %TransactionPartnerFragment{
+                   withdrawal_state:
+                     %RevenueWithdrawalStateSucceeded{
+                       date: 1_780_010_300,
+                       url: "https://fragment.example/tx"
+                     } = succeeded_state
+                 }
+               },
+               %StarTransaction{
+                 receiver: %TransactionPartnerFragment{
+                   withdrawal_state: %RevenueWithdrawalStateFailed{type: "failed"}
+                 }
+               },
+               %StarTransaction{
+                 receiver: %TransactionPartnerFragment{
+                   withdrawal_state:
+                     %RevenueWithdrawalState{type: "future_state"} =
+                       unknown_state
+                 }
+               },
+               %StarTransaction{
+                 receiver: %TransactionPartnerTelegramApi{request_count: 17} = api_partner
+               },
+               %StarTransaction{
+                 source: %TransactionPartnerAffiliateProgram{
+                   sponsor_user: %User{id: 91_003},
+                   commission_per_mille: 100
+                 }
+               },
+               %StarTransaction{receiver: %TransactionPartnerTelegramAds{type: "telegram_ads"}},
+               %StarTransaction{source: %TransactionPartnerOther{type: "other"}},
+               %StarTransaction{
+                 source: %TransactionPartner{type: "future_partner"} = unknown_partner
+               }
+             ]
+           } = star_transactions
+
+    [paid_media_photo | _] = user_partner.paid_media
+    [photo_size | _] = paid_media_photo.photo
+
+    refute Map.has_key?(star_transactions, :future_star_transactions_field)
+    refute Map.has_key?(user_transaction, :future_transaction_field)
+    refute Map.has_key?(user_partner, :future_user_partner_field)
+    refute Map.has_key?(user_partner.user, :star_tx_future_user_field)
+    refute Map.has_key?(user_partner.affiliate, :future_affiliate_field)
+    refute Map.has_key?(user_partner.affiliate.affiliate_chat, :star_tx_future_chat_field)
+    refute Map.has_key?(paid_media_photo, :star_tx_future_paid_media_field)
+    refute Map.has_key?(photo_size, :star_tx_future_photo_field)
+    refute Map.has_key?(user_partner.gift, :star_tx_future_gift_field)
+    refute Map.has_key?(user_partner.gift.sticker, :star_tx_future_sticker_field)
+    refute Map.has_key?(chat_partner, :future_chat_partner_field)
+    refute Map.has_key?(pending_state, :future_withdrawal_field)
+    refute Map.has_key?(succeeded_state, :future_withdrawal_field)
+    refute Map.has_key?(unknown_state, :extra)
+    refute Map.has_key?(api_partner, :future_api_partner_field)
+    refute Map.has_key?(unknown_partner, :future_partner_field)
   end
 
   test "parse result of get_available_gifts" do

@@ -27,6 +27,7 @@ defmodule Nadia.Behaviour do
     SentGuestMessage,
     SentWebAppMessage,
     StarAmount,
+    StarTransactions,
     Sticker,
     Update,
     User,
@@ -697,6 +698,13 @@ defmodule Nadia.Behaviour do
               :ok | {:error, Error.t()}
   @callback get_my_star_balance() :: {:ok, StarAmount.t()} | {:error, Error.t()}
   @callback get_my_star_balance(Client.t()) :: {:ok, StarAmount.t()} | {:error, Error.t()}
+  @callback get_star_transactions() :: {:ok, StarTransactions.t()} | {:error, Error.t()}
+  @callback get_star_transactions([{atom, any}] | map) ::
+              {:ok, StarTransactions.t()} | {:error, Error.t()}
+  @callback get_star_transactions(Client.t()) ::
+              {:ok, StarTransactions.t()} | {:error, Error.t()}
+  @callback get_star_transactions(Client.t(), [{atom, any}] | map) ::
+              {:ok, StarTransactions.t()} | {:error, Error.t()}
   @callback refund_star_payment(integer, binary) :: :ok | {:error, Error.t()}
   @callback refund_star_payment(Client.t(), integer, binary) :: :ok | {:error, Error.t()}
   @callback edit_user_star_subscription(integer, binary, boolean) :: :ok | {:error, Error.t()}
@@ -1163,6 +1171,9 @@ defmodule Nadia.Behaviour do
                       answer_pre_checkout_query: 4,
                       get_my_star_balance: 0,
                       get_my_star_balance: 1,
+                      get_star_transactions: 0,
+                      get_star_transactions: 1,
+                      get_star_transactions: 2,
                       refund_star_payment: 2,
                       refund_star_payment: 3,
                       edit_user_star_subscription: 3,

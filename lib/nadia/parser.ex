@@ -4,6 +4,7 @@ defmodule Nadia.Parser do
   """
 
   alias Nadia.Model.{
+    AffiliateInfo,
     BotAccessSettings,
     BotCommand,
     BotDescription,
@@ -74,15 +75,29 @@ defmodule Nadia.Parser do
     PreparedKeyboardButton,
     ReactionCount,
     ReactionType,
+    RevenueWithdrawalState,
+    RevenueWithdrawalStateFailed,
+    RevenueWithdrawalStatePending,
+    RevenueWithdrawalStateSucceeded,
     SentGuestMessage,
     SentWebAppMessage,
     StarAmount,
+    StarTransaction,
+    StarTransactions,
     UniqueGift,
     UniqueGiftBackdrop,
     UniqueGiftBackdropColors,
     UniqueGiftColors,
     UniqueGiftModel,
     UniqueGiftSymbol,
+    TransactionPartner,
+    TransactionPartnerAffiliateProgram,
+    TransactionPartnerChat,
+    TransactionPartnerFragment,
+    TransactionPartnerOther,
+    TransactionPartnerTelegramAds,
+    TransactionPartnerTelegramApi,
+    TransactionPartnerUser,
     UserChatBoosts,
     UserProfileAudios,
     WebhookInfo
@@ -143,6 +158,7 @@ defmodule Nadia.Parser do
       "getUserProfileAudios" -> parse(UserProfileAudios, result)
       "getMyStarBalance" -> parse(StarAmount, result)
       "getBusinessAccountStarBalance" -> parse(StarAmount, result)
+      "getStarTransactions" -> parse(StarTransactions, result)
       "getGameHighScores" -> parse(:game_high_scores, result)
       "getMyCommands" -> parse(:bot_commands, result)
       "getMyName" -> parse(BotName, result)
@@ -227,6 +243,34 @@ defmodule Nadia.Parser do
 
     struct(type, entries)
   end
+
+  defp parse(StarTransactions, {:transactions, val}) when is_list(val),
+    do: {:transactions, Enum.map(val, &parse(StarTransaction, &1))}
+
+  defp parse(StarTransaction, {:source, val}), do: {:source, parse_transaction_partner(val)}
+  defp parse(StarTransaction, {:receiver, val}), do: {:receiver, parse_transaction_partner(val)}
+
+  defp parse(TransactionPartnerUser, {:user, val}), do: {:user, parse(User, val)}
+
+  defp parse(TransactionPartnerUser, {:affiliate, val}),
+    do: {:affiliate, parse(AffiliateInfo, val)}
+
+  defp parse(TransactionPartnerUser, {:paid_media, val}) when is_list(val),
+    do: {:paid_media, Enum.map(val, &parse_paid_media/1)}
+
+  defp parse(TransactionPartnerUser, {:gift, val}), do: {:gift, parse(Gift, val)}
+
+  defp parse(TransactionPartnerChat, {:chat, val}), do: {:chat, parse(Chat, val)}
+  defp parse(TransactionPartnerChat, {:gift, val}), do: {:gift, parse(Gift, val)}
+
+  defp parse(TransactionPartnerAffiliateProgram, {:sponsor_user, val}),
+    do: {:sponsor_user, parse(User, val)}
+
+  defp parse(TransactionPartnerFragment, {:withdrawal_state, val}),
+    do: {:withdrawal_state, parse_revenue_withdrawal_state(val)}
+
+  defp parse(AffiliateInfo, {:affiliate_user, val}), do: {:affiliate_user, parse(User, val)}
+  defp parse(AffiliateInfo, {:affiliate_chat, val}), do: {:affiliate_chat, parse(Chat, val)}
 
   defp parse(Poll, {:options, val}) when is_list(val),
     do: {:options, Enum.map(val, &parse(PollOption, &1))}
@@ -422,6 +466,32 @@ defmodule Nadia.Parser do
   end
 
   defp parse_paid_media(val), do: val
+
+  defp parse_transaction_partner(%{} = val) do
+    case Map.get(val, :type) || Map.get(val, "type") do
+      "user" -> parse(TransactionPartnerUser, val)
+      "chat" -> parse(TransactionPartnerChat, val)
+      "affiliate_program" -> parse(TransactionPartnerAffiliateProgram, val)
+      "fragment" -> parse(TransactionPartnerFragment, val)
+      "telegram_ads" -> parse(TransactionPartnerTelegramAds, val)
+      "telegram_api" -> parse(TransactionPartnerTelegramApi, val)
+      "other" -> parse(TransactionPartnerOther, val)
+      _ -> parse(TransactionPartner, val)
+    end
+  end
+
+  defp parse_transaction_partner(val), do: val
+
+  defp parse_revenue_withdrawal_state(%{} = val) do
+    case Map.get(val, :type) || Map.get(val, "type") do
+      "pending" -> parse(RevenueWithdrawalStatePending, val)
+      "succeeded" -> parse(RevenueWithdrawalStateSucceeded, val)
+      "failed" -> parse(RevenueWithdrawalStateFailed, val)
+      _ -> parse(RevenueWithdrawalState, val)
+    end
+  end
+
+  defp parse_revenue_withdrawal_state(val), do: val
 
   defp parse_owned_gift(%{} = val) do
     case Map.get(val, :type) || Map.get(val, "type") do

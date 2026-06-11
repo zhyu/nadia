@@ -69,7 +69,11 @@ defmodule Nadia.APITest do
     SentGuestMessage,
     SentWebAppMessage,
     StarAmount,
+    StarTransaction,
+    StarTransactions,
     Sticker,
+    TransactionPartnerTelegramApi,
+    TransactionPartnerUser,
     UniqueGift,
     UniqueGiftBackdrop,
     UniqueGiftBackdropColors,
@@ -1758,6 +1762,84 @@ defmodule Nadia.APITest do
       headers: [],
       options: [recv_timeout: 5000]
     )
+  end
+
+  test "get_star_transactions wrappers build request contracts and parse transactions" do
+    stub_telegram_result(%{
+      transactions: [
+        %{
+          id: "star-tx-1",
+          amount: 125,
+          nanostar_amount: 5,
+          date: 1_780_010_000,
+          source: %{
+            type: "user",
+            transaction_type: "invoice_payment",
+            user: %{id: 91_001, is_bot: false, first_name: "Buyer"},
+            invoice_payload: "invoice-payload"
+          }
+        }
+      ]
+    })
+
+    assert {:ok,
+            %StarTransactions{
+              transactions: [
+                %StarTransaction{
+                  id: "star-tx-1",
+                  source: %TransactionPartnerUser{
+                    transaction_type: "invoice_payment",
+                    user: %User{id: 91_001, first_name: "Buyer"},
+                    invoice_payload: "invoice-payload"
+                  }
+                }
+              ]
+            }} = Nadia.get_star_transactions(offset: "", limit: 2)
+
+    assert_telegram_request("getStarTransactions",
+      body: {:form, [{"offset", ""}, {"limit", "2"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    client =
+      Client.new(
+        token: "999:family-star-transactions",
+        http_client: Nadia.HTTPCase.StubHTTPClient
+      )
+
+    stub_telegram_result(%{
+      transactions: [
+        %{
+          id: "star-tx-2",
+          amount: -3,
+          date: 1_780_010_100,
+          receiver: %{
+            type: "telegram_api",
+            request_count: 17
+          }
+        }
+      ]
+    })
+
+    assert {:ok,
+            %StarTransactions{
+              transactions: [
+                %StarTransaction{
+                  id: "star-tx-2",
+                  receiver: %TransactionPartnerTelegramApi{request_count: 17}
+                }
+              ]
+            }} = Nadia.get_star_transactions(client, %{offset: "next", limit: 1})
+
+    request =
+      assert_http_request(
+        method: :post,
+        url: "https://api.telegram.org/bot999:family-star-transactions/getStarTransactions",
+        headers: [],
+        options: [recv_timeout: 5000]
+      )
+
+    assert form_params(request) == %{"offset" => "next", "limit" => "1"}
   end
 
   test "answer_shipping_query/3 encodes shipping options and preserves error messages" do

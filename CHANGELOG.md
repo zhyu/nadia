@@ -36,6 +36,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   structs/parser coverage.
 - Added Bot API Star balance getter wrappers and `%Nadia.Model.StarAmount{}`
   parser/model support.
+- Added Bot API `getStarTransactions` wrapper plus Star transaction response
+  structs/parser coverage.
 - Added Bot API wrappers for payment acknowledgement and Telegram Stars
   payment/subscription maintenance.
 - Added Bot API wrappers for bulk message deletion and message reaction

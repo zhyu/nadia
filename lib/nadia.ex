@@ -44,6 +44,7 @@ defmodule Nadia do
     SentGuestMessage,
     SentWebAppMessage,
     StarAmount,
+    StarTransactions,
     Sticker,
     Update,
     User,
@@ -3688,6 +3689,31 @@ defmodule Nadia do
   @spec get_my_star_balance(Client.t()) :: {:ok, StarAmount.t()} | {:error, Error.t()}
   def get_my_star_balance, do: api_request("getMyStarBalance")
   def get_my_star_balance(%Client{} = client), do: api_request(client, "getMyStarBalance")
+
+  @doc """
+  Use this method to get the bot's Telegram Star transactions.
+  Returns a StarTransactions object.
+
+  Args:
+  * `options` - orddict or map of options
+  """
+  @spec get_star_transactions() :: {:ok, StarTransactions.t()} | {:error, Error.t()}
+  @spec get_star_transactions([{atom, any}] | map) ::
+          {:ok, StarTransactions.t()} | {:error, Error.t()}
+  @spec get_star_transactions(Client.t()) ::
+          {:ok, StarTransactions.t()} | {:error, Error.t()}
+  @spec get_star_transactions(Client.t(), [{atom, any}] | map) ::
+          {:ok, StarTransactions.t()} | {:error, Error.t()}
+  def get_star_transactions(), do: get_star_transactions([])
+  def get_star_transactions(%Client{} = client), do: get_star_transactions(client, [])
+
+  def get_star_transactions(options) do
+    api_request("getStarTransactions", request_options([], options))
+  end
+
+  def get_star_transactions(%Client{} = client, options) do
+    api_request(client, "getStarTransactions", request_options([], options))
+  end
 
   @doc """
   Use this method to refund a successful Telegram Stars payment.

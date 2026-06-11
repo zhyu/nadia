@@ -82,6 +82,168 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule RevenueWithdrawalState do
+    defstruct type: nil
+
+    @type t ::
+            %RevenueWithdrawalState{type: binary}
+            | RevenueWithdrawalStatePending.t()
+            | RevenueWithdrawalStateSucceeded.t()
+            | RevenueWithdrawalStateFailed.t()
+  end
+
+  defmodule RevenueWithdrawalStatePending do
+    defstruct type: nil
+
+    @type t :: %RevenueWithdrawalStatePending{type: binary}
+  end
+
+  defmodule RevenueWithdrawalStateSucceeded do
+    defstruct type: nil, date: nil, url: nil
+
+    @type t :: %RevenueWithdrawalStateSucceeded{
+            type: binary,
+            date: integer,
+            url: binary
+          }
+  end
+
+  defmodule RevenueWithdrawalStateFailed do
+    defstruct type: nil
+
+    @type t :: %RevenueWithdrawalStateFailed{type: binary}
+  end
+
+  defmodule AffiliateInfo do
+    defstruct affiliate_user: nil,
+              affiliate_chat: nil,
+              commission_per_mille: nil,
+              amount: nil,
+              nanostar_amount: nil
+
+    @type t :: %AffiliateInfo{
+            affiliate_user: User.t(),
+            affiliate_chat: Chat.t(),
+            commission_per_mille: integer,
+            amount: integer,
+            nanostar_amount: integer
+          }
+  end
+
+  defmodule TransactionPartner do
+    defstruct type: nil
+
+    @type t ::
+            %TransactionPartner{type: binary}
+            | TransactionPartnerUser.t()
+            | TransactionPartnerChat.t()
+            | TransactionPartnerAffiliateProgram.t()
+            | TransactionPartnerFragment.t()
+            | TransactionPartnerTelegramAds.t()
+            | TransactionPartnerTelegramApi.t()
+            | TransactionPartnerOther.t()
+  end
+
+  defmodule TransactionPartnerUser do
+    defstruct type: nil,
+              transaction_type: nil,
+              user: nil,
+              affiliate: nil,
+              invoice_payload: nil,
+              subscription_period: nil,
+              paid_media: [],
+              paid_media_payload: nil,
+              gift: nil,
+              premium_subscription_duration: nil
+
+    @type t :: %TransactionPartnerUser{
+            type: binary,
+            transaction_type: binary,
+            user: User.t(),
+            affiliate: AffiliateInfo.t(),
+            invoice_payload: binary,
+            subscription_period: integer,
+            paid_media: [PaidMedia.t()],
+            paid_media_payload: binary,
+            gift: Gift.t(),
+            premium_subscription_duration: integer
+          }
+  end
+
+  defmodule TransactionPartnerChat do
+    defstruct type: nil, chat: nil, gift: nil
+
+    @type t :: %TransactionPartnerChat{
+            type: binary,
+            chat: Chat.t(),
+            gift: Gift.t()
+          }
+  end
+
+  defmodule TransactionPartnerAffiliateProgram do
+    defstruct type: nil, sponsor_user: nil, commission_per_mille: nil
+
+    @type t :: %TransactionPartnerAffiliateProgram{
+            type: binary,
+            sponsor_user: User.t(),
+            commission_per_mille: integer
+          }
+  end
+
+  defmodule TransactionPartnerFragment do
+    defstruct type: nil, withdrawal_state: nil
+
+    @type t :: %TransactionPartnerFragment{
+            type: binary,
+            withdrawal_state: RevenueWithdrawalState.t()
+          }
+  end
+
+  defmodule TransactionPartnerTelegramAds do
+    defstruct type: nil
+
+    @type t :: %TransactionPartnerTelegramAds{type: binary}
+  end
+
+  defmodule TransactionPartnerTelegramApi do
+    defstruct type: nil, request_count: nil
+
+    @type t :: %TransactionPartnerTelegramApi{
+            type: binary,
+            request_count: integer
+          }
+  end
+
+  defmodule TransactionPartnerOther do
+    defstruct type: nil
+
+    @type t :: %TransactionPartnerOther{type: binary}
+  end
+
+  defmodule StarTransaction do
+    defstruct id: nil,
+              amount: nil,
+              nanostar_amount: nil,
+              date: nil,
+              source: nil,
+              receiver: nil
+
+    @type t :: %StarTransaction{
+            id: binary,
+            amount: integer,
+            nanostar_amount: integer,
+            date: integer,
+            source: TransactionPartner.t(),
+            receiver: TransactionPartner.t()
+          }
+  end
+
+  defmodule StarTransactions do
+    defstruct transactions: []
+
+    @type t :: %StarTransactions{transactions: [StarTransaction.t()]}
+  end
+
   defmodule MenuButton do
     defstruct type: nil
 

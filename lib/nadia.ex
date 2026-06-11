@@ -32,6 +32,7 @@ defmodule Nadia do
     Error,
     File,
     ForumTopic,
+    GameHighScore,
     MenuButton,
     Message,
     MessageId,
@@ -39,6 +40,7 @@ defmodule Nadia do
     PreparedInlineMessage,
     PreparedKeyboardButton,
     SentGuestMessage,
+    SentWebAppMessage,
     StarAmount,
     Sticker,
     Update,
@@ -1375,6 +1377,43 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to send a game.
+  On success, the sent Message is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat
+  * `game_short_name` - Short name of the game
+  * `options` - orddict or map of options
+  """
+  @spec send_game(integer | binary, binary) :: {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_game(integer | binary, binary, [{atom, any}] | map) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_game(Client.t(), integer | binary, binary) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_game(Client.t(), integer | binary, binary, [{atom, any}] | map) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_game(chat_id, game_short_name), do: send_game(chat_id, game_short_name, [])
+
+  def send_game(%Client{} = client, chat_id, game_short_name) do
+    send_game(client, chat_id, game_short_name, [])
+  end
+
+  def send_game(chat_id, game_short_name, options) do
+    api_request(
+      "sendGame",
+      request_options([chat_id: chat_id, game_short_name: game_short_name], options)
+    )
+  end
+
+  def send_game(%Client{} = client, chat_id, game_short_name, options) do
+    api_request(
+      client,
+      "sendGame",
+      request_options([chat_id: chat_id, game_short_name: game_short_name], options)
+    )
+  end
+
+  @doc """
   Use this method to send a checklist on behalf of a connected business account.
   On success, the sent Message is returned.
 
@@ -1743,6 +1782,70 @@ defmodule Nadia do
 
   def get_user_profile_audios(%Client{} = client, user_id, options) do
     api_request(client, "getUserProfileAudios", request_options([user_id: user_id], options))
+  end
+
+  @doc """
+  Use this method to set a user's score in a game message.
+  On success, the edited Message is returned, or `:ok` is returned when editing
+  an inline message.
+
+  Args:
+  * `user_id` - User identifier
+  * `score` - New score
+  * `options` - orddict or map of options
+  """
+  @spec set_game_score(integer, integer) :: {:ok, Message.t()} | :ok | {:error, Error.t()}
+  @spec set_game_score(integer, integer, [{atom, any}] | map) ::
+          {:ok, Message.t()} | :ok | {:error, Error.t()}
+  @spec set_game_score(Client.t(), integer, integer) ::
+          {:ok, Message.t()} | :ok | {:error, Error.t()}
+  @spec set_game_score(Client.t(), integer, integer, [{atom, any}] | map) ::
+          {:ok, Message.t()} | :ok | {:error, Error.t()}
+  def set_game_score(user_id, score), do: set_game_score(user_id, score, [])
+
+  def set_game_score(%Client{} = client, user_id, score) do
+    set_game_score(client, user_id, score, [])
+  end
+
+  def set_game_score(user_id, score, options) do
+    api_request("setGameScore", request_options([user_id: user_id, score: score], options))
+  end
+
+  def set_game_score(%Client{} = client, user_id, score, options) do
+    api_request(
+      client,
+      "setGameScore",
+      request_options([user_id: user_id, score: score], options)
+    )
+  end
+
+  @doc """
+  Use this method to get data for game high score tables.
+  Returns a list of GameHighScore objects.
+
+  Args:
+  * `user_id` - Target user identifier
+  * `options` - orddict or map of options
+  """
+  @spec get_game_high_scores(integer) :: {:ok, [GameHighScore.t()]} | {:error, Error.t()}
+  @spec get_game_high_scores(integer, [{atom, any}] | map) ::
+          {:ok, [GameHighScore.t()]} | {:error, Error.t()}
+  @spec get_game_high_scores(Client.t(), integer) ::
+          {:ok, [GameHighScore.t()]} | {:error, Error.t()}
+  @spec get_game_high_scores(Client.t(), integer, [{atom, any}] | map) ::
+          {:ok, [GameHighScore.t()]} | {:error, Error.t()}
+  def get_game_high_scores(user_id), do: get_game_high_scores(user_id, [])
+
+  def get_game_high_scores(%Client{} = client, user_id) do
+    get_game_high_scores(client, user_id, [])
+  end
+
+  def get_game_high_scores(user_id, options) do
+    api_request("getGameHighScores", request_options([user_id: user_id], options))
+  end
+
+  def get_game_high_scores(%Client{} = client, user_id, options) do
+    api_request(client, "getGameHighScores", request_options([user_id: user_id], options))
   end
 
   @doc """
@@ -3716,6 +3819,35 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to set the result of an interaction with a Web App.
+  On success, a SentWebAppMessage object is returned.
+
+  Args:
+  * `web_app_query_id` - Unique identifier for the query to be answered
+  * `result` - An inline query result describing the message to be sent
+  """
+  @spec answer_web_app_query(binary, list | map | struct | binary) ::
+          {:ok, SentWebAppMessage.t()} | {:error, Error.t()}
+  @spec answer_web_app_query(Client.t(), binary, list | map | struct | binary) ::
+          {:ok, SentWebAppMessage.t()} | {:error, Error.t()}
+  def answer_web_app_query(web_app_query_id, result) do
+    api_request(
+      "answerWebAppQuery",
+      web_app_query_id: web_app_query_id,
+      result: encode_json_payload(result)
+    )
+  end
+
+  def answer_web_app_query(%Client{} = client, web_app_query_id, result) do
+    api_request(
+      client,
+      "answerWebAppQuery",
+      web_app_query_id: web_app_query_id,
+      result: encode_json_payload(result)
+    )
+  end
+
+  @doc """
   Use this method to store a message that can be sent by a user of a Mini App.
   On success, a PreparedInlineMessage object is returned.
 
@@ -4281,6 +4413,36 @@ defmodule Nadia do
 
   def stop_poll(%Client{} = client, chat_id, message_id, options) do
     api_request(client, "stopPoll", [chat_id: chat_id, message_id: message_id] ++ options)
+  end
+
+  @doc """
+  Use this method to inform a user that Telegram Passport elements they provided
+  contain errors.
+  Returns `:ok` on success.
+
+  Args:
+  * `user_id` - User identifier
+  * `errors` - JSON-serializable list of PassportElementError objects
+  """
+  @spec set_passport_data_errors(integer, list | map | struct | binary) ::
+          :ok | {:error, Error.t()}
+  @spec set_passport_data_errors(Client.t(), integer, list | map | struct | binary) ::
+          :ok | {:error, Error.t()}
+  def set_passport_data_errors(user_id, errors) do
+    api_request(
+      "setPassportDataErrors",
+      user_id: user_id,
+      errors: encode_json_array_payload(errors)
+    )
+  end
+
+  def set_passport_data_errors(%Client{} = client, user_id, errors) do
+    api_request(
+      client,
+      "setPassportDataErrors",
+      user_id: user_id,
+      errors: encode_json_array_payload(errors)
+    )
   end
 
   @doc """

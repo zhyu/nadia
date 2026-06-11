@@ -68,6 +68,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   `Message.checklist`.
 - Added Bot API updating-message wrappers for editing media, live locations,
   checklists, stopping polls, and approving or declining suggested posts.
+- Added Bot API wrappers and parser/model support for Web App query answers,
+  games, game high scores, and Passport data errors.
 
 ### Changed
 

@@ -36,6 +36,7 @@ defmodule Nadia.APITest do
     Checklist,
     ChecklistTask,
     ForumTopic,
+    GameHighScore,
     KeyboardButton,
     Message,
     MessageId,
@@ -60,6 +61,7 @@ defmodule Nadia.APITest do
     ReactionType,
     ReplyKeyboardRemove,
     SentGuestMessage,
+    SentWebAppMessage,
     StarAmount,
     Sticker,
     User,
@@ -1042,6 +1044,40 @@ defmodule Nadia.APITest do
              "id" => "guest-article-1",
              "title" => "Guest reply"
            } = Jason.decode!(params["result"])
+  end
+
+  test "answer_web_app_query/2 builds request and parses sent web app messages" do
+    result = %InlineQueryResult.Article{
+      id: "web-app-article-1",
+      title: "Web App reply",
+      hide_url: false,
+      description: nil,
+      reply_markup: %{inline_keyboard: [[%{text: "Open", callback_data: "open"}]]}
+    }
+
+    stub_telegram_result(%{inline_message_id: "inline-web-app-message-wrapper-1"})
+
+    assert {:ok, %SentWebAppMessage{inline_message_id: "inline-web-app-message-wrapper-1"}} =
+             Nadia.answer_web_app_query("web-app-query-wrapper-1", result)
+
+    request =
+      assert_telegram_request("answerWebAppQuery",
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params["web_app_query_id"] == "web-app-query-wrapper-1"
+
+    assert Jason.decode!(params["result"]) == %{
+             "type" => "article",
+             "id" => "web-app-article-1",
+             "title" => "Web App reply",
+             "hide_url" => false,
+             "reply_markup" => %{
+               "inline_keyboard" => [[%{"text" => "Open", "callback_data" => "open"}]]
+             }
+           }
   end
 
   test "set_my_profile_photo/1 explicit client JSON-encodes profile photo objects" do
@@ -2236,6 +2272,107 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "send_game/3 builds request and parses messages" do
+    reply_markup = %{inline_keyboard: [[%{text: "Play", callback_game: %{}}]]}
+    encoded_reply_markup = Jason.encode!(reply_markup)
+
+    stub_telegram_result(message_result(%{message_id: 9502, game: %{title: "Nadia Quest"}}))
+
+    assert {:ok, %Message{message_id: 9502, game: %{"title" => "Nadia Quest"}}} =
+             Nadia.send_game("@games", "nadia_quest",
+               message_thread_id: 42,
+               disable_notification: false,
+               protect_content: true,
+               reply_markup: reply_markup
+             )
+
+    assert_telegram_request("sendGame",
+      body:
+        {:form,
+         [
+           {"chat_id", "@games"},
+           {"game_short_name", "nadia_quest"},
+           {"message_thread_id", "42"},
+           {"disable_notification", "false"},
+           {"protect_content", "true"},
+           {"reply_markup", encoded_reply_markup}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "set_game_score/4 uses explicit clients and returns ok for true responses" do
+    client = Client.new(token: "999:family-m", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    stub_telegram_result(true)
+
+    assert :ok ==
+             Nadia.set_game_score(client, 7001, 9000,
+               force: true,
+               disable_edit_message: false,
+               chat_id: "@games",
+               message_id: 88
+             )
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-m/setGameScore",
+      body:
+        {:form,
+         [
+           {"user_id", "7001"},
+           {"score", "9000"},
+           {"force", "true"},
+           {"disable_edit_message", "false"},
+           {"chat_id", "@games"},
+           {"message_id", "88"}
+         ]},
+      headers: [],
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "get_game_high_scores/2 builds request and parses high score lists" do
+    stub_telegram_result([
+      %{
+        position: 1,
+        user: %{id: 7001, is_bot: false, first_name: "Player One"},
+        score: 9000
+      },
+      %{
+        position: 2,
+        user: %{id: 7002, is_bot: false, first_name: "Player Two"},
+        score: 8800
+      }
+    ])
+
+    assert {:ok,
+            [
+              %GameHighScore{
+                position: 1,
+                user: %User{id: 7001, is_bot: false, first_name: "Player One"},
+                score: 9000
+              },
+              %GameHighScore{
+                position: 2,
+                user: %User{id: 7002, is_bot: false, first_name: "Player Two"},
+                score: 8800
+              }
+            ]} =
+             Nadia.get_game_high_scores(7001, chat_id: "@games", message_id: 88)
+
+    assert_telegram_request("getGameHighScores",
+      body:
+        {:form,
+         [
+           {"user_id", "7001"},
+           {"chat_id", "@games"},
+           {"message_id", "88"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
   test "send_checklist/4 JSON-encodes checklist, preserves false options, and parses checklist messages" do
     checklist_response = %{
       title: "Launch",
@@ -2594,6 +2731,55 @@ defmodule Nadia.APITest do
          ]},
       options: [recv_timeout: 5000]
     )
+  end
+
+  test "set_passport_data_errors/2 JSON-encodes errors and uses the Passport method" do
+    errors = [
+      [
+        source: "data",
+        type: "personal_details",
+        field_name: "birth_date",
+        data_hash: "hash-1",
+        message: "Invalid date",
+        future_nil: nil
+      ],
+      %{
+        source: "front_side",
+        type: "passport",
+        file_hash: "hash-2",
+        message: "Image is blurry",
+        future_nil: nil
+      }
+    ]
+
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.set_passport_data_errors(7001, errors)
+
+    request =
+      assert_telegram_request("setPassportDataErrors",
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params["user_id"] == "7001"
+
+    assert Jason.decode!(params["errors"]) == [
+             %{
+               "source" => "data",
+               "type" => "personal_details",
+               "field_name" => "birth_date",
+               "data_hash" => "hash-1",
+               "message" => "Invalid date"
+             },
+             %{
+               "source" => "front_side",
+               "type" => "passport",
+               "file_hash" => "hash-2",
+               "message" => "Image is blurry"
+             }
+           ]
   end
 
   test "suggested post approval wrappers return ok and pass optional params" do

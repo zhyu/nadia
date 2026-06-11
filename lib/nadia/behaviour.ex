@@ -15,6 +15,7 @@ defmodule Nadia.Behaviour do
     Error,
     File,
     ForumTopic,
+    GameHighScore,
     MenuButton,
     Message,
     MessageId,
@@ -22,6 +23,7 @@ defmodule Nadia.Behaviour do
     PreparedInlineMessage,
     PreparedKeyboardButton,
     SentGuestMessage,
+    SentWebAppMessage,
     StarAmount,
     Sticker,
     Update,
@@ -256,6 +258,13 @@ defmodule Nadia.Behaviour do
               {:ok, Message.t()} | {:error, Error.t()}
   @callback send_dice(Client.t(), integer | binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_game(integer | binary, binary) :: {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_game(integer | binary, binary, [{atom, any}] | map) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_game(Client.t(), integer | binary, binary) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_game(Client.t(), integer | binary, binary, [{atom, any}] | map) ::
+              {:ok, Message.t()} | {:error, Error.t()}
   @callback send_checklist(binary, integer | binary, list | map | struct | binary) ::
               {:ok, Message.t()} | {:error, Error.t()}
   @callback send_checklist(binary, integer | binary, list | map | struct | binary, [
@@ -309,6 +318,20 @@ defmodule Nadia.Behaviour do
               {:ok, UserProfileAudios.t()} | {:error, Error.t()}
   @callback get_user_profile_audios(Client.t(), integer, [{atom, any}] | map) ::
               {:ok, UserProfileAudios.t()} | {:error, Error.t()}
+  @callback set_game_score(integer, integer) :: {:ok, Message.t()} | :ok | {:error, Error.t()}
+  @callback set_game_score(integer, integer, [{atom, any}] | map) ::
+              {:ok, Message.t()} | :ok | {:error, Error.t()}
+  @callback set_game_score(Client.t(), integer, integer) ::
+              {:ok, Message.t()} | :ok | {:error, Error.t()}
+  @callback set_game_score(Client.t(), integer, integer, [{atom, any}] | map) ::
+              {:ok, Message.t()} | :ok | {:error, Error.t()}
+  @callback get_game_high_scores(integer) :: {:ok, [GameHighScore.t()]} | {:error, Error.t()}
+  @callback get_game_high_scores(integer, [{atom, any}] | map) ::
+              {:ok, [GameHighScore.t()]} | {:error, Error.t()}
+  @callback get_game_high_scores(Client.t(), integer) ::
+              {:ok, [GameHighScore.t()]} | {:error, Error.t()}
+  @callback get_game_high_scores(Client.t(), integer, [{atom, any}] | map) ::
+              {:ok, [GameHighScore.t()]} | {:error, Error.t()}
   @callback get_updates([{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
   @callback get_updates(Client.t(), [{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
   @callback set_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
@@ -694,6 +717,10 @@ defmodule Nadia.Behaviour do
               {atom, any}
             ]) ::
               {:ok, SentGuestMessage.t()} | {:error, Error.t()}
+  @callback answer_web_app_query(binary, list | map | struct | binary) ::
+              {:ok, SentWebAppMessage.t()} | {:error, Error.t()}
+  @callback answer_web_app_query(Client.t(), binary, list | map | struct | binary) ::
+              {:ok, SentWebAppMessage.t()} | {:error, Error.t()}
   @callback save_prepared_inline_message(integer, Nadia.Model.InlineQueryResult.t()) ::
               {:ok, PreparedInlineMessage.t()} | {:error, Error.t()}
   @callback save_prepared_inline_message(
@@ -784,6 +811,10 @@ defmodule Nadia.Behaviour do
               {:ok, Poll.t()} | {:error, Error.t()}
   @callback stop_poll(Client.t(), integer | binary, integer, [{atom, any}]) ::
               {:ok, Poll.t()} | {:error, Error.t()}
+  @callback set_passport_data_errors(integer, list | map | struct | binary) ::
+              :ok | {:error, Error.t()}
+  @callback set_passport_data_errors(Client.t(), integer, list | map | struct | binary) ::
+              :ok | {:error, Error.t()}
   @callback approve_suggested_post(integer, integer) :: :ok | {:error, Error.t()}
   @callback approve_suggested_post(integer, integer, [{atom, any}]) ::
               :ok | {:error, Error.t()}
@@ -961,6 +992,9 @@ defmodule Nadia.Behaviour do
                       send_poll: 4,
                       send_dice: 2,
                       send_dice: 3,
+                      send_game: 2,
+                      send_game: 3,
+                      send_game: 4,
                       send_checklist: 4,
                       send_checklist: 5,
                       send_message_draft: 3,
@@ -975,6 +1009,12 @@ defmodule Nadia.Behaviour do
                       get_user_profile_audios: 1,
                       get_user_profile_audios: 2,
                       get_user_profile_audios: 3,
+                      set_game_score: 2,
+                      set_game_score: 3,
+                      set_game_score: 4,
+                      get_game_high_scores: 1,
+                      get_game_high_scores: 2,
+                      get_game_high_scores: 3,
                       get_updates: 2,
                       set_webhook: 2,
                       delete_webhook: 1,
@@ -1102,6 +1142,8 @@ defmodule Nadia.Behaviour do
                       set_message_reaction: 4,
                       answer_callback_query: 3,
                       answer_guest_query: 4,
+                      answer_web_app_query: 2,
+                      answer_web_app_query: 3,
                       save_prepared_inline_message: 2,
                       save_prepared_inline_message: 3,
                       save_prepared_inline_message: 4,
@@ -1118,6 +1160,8 @@ defmodule Nadia.Behaviour do
                       edit_message_checklist: 6,
                       stop_poll: 3,
                       stop_poll: 4,
+                      set_passport_data_errors: 2,
+                      set_passport_data_errors: 3,
                       approve_suggested_post: 3,
                       approve_suggested_post: 4,
                       decline_suggested_post: 3,

@@ -32,6 +32,7 @@ defmodule Nadia.ParserTest do
     Checklist,
     ChecklistTask,
     ForumTopic,
+    GameHighScore,
     InlineQuery,
     CallbackQuery,
     ChosenInlineResult,
@@ -66,6 +67,7 @@ defmodule Nadia.ParserTest do
     ReactionCount,
     ReactionType,
     SentGuestMessage,
+    SentWebAppMessage,
     StarAmount,
     Sticker,
     UserChatBoosts,
@@ -876,6 +878,21 @@ defmodule Nadia.ParserTest do
     assert %SentGuestMessage{inline_message_id: "inline-guest-message-1"} = sent_guest_message
   end
 
+  test "parse result of answer_web_app_query" do
+    sent_web_app_message =
+      Parser.parse_result(
+        %{
+          "inline_message_id" => "inline-web-app-message-1",
+          "future_sent_web_app_message_field" => "ignored"
+        },
+        "answerWebAppQuery"
+      )
+
+    assert sent_web_app_message == %SentWebAppMessage{
+             inline_message_id: "inline-web-app-message-1"
+           }
+  end
+
   test "parse result of save_prepared_inline_message" do
     prepared_inline_message =
       Parser.parse_result(
@@ -1216,6 +1233,34 @@ defmodule Nadia.ParserTest do
              }
            ] =
              stickers
+  end
+
+  test "parse result of get_game_high_scores" do
+    game_high_scores =
+      Parser.parse_result(
+        [
+          %{
+            "position" => 1,
+            "user" => %{
+              "id" => 7001,
+              "is_bot" => false,
+              "first_name" => "Player One",
+              "future_user_field" => "ignored"
+            },
+            "score" => 9000,
+            "future_high_score_field" => "ignored"
+          }
+        ],
+        "getGameHighScores"
+      )
+
+    assert game_high_scores == [
+             %GameHighScore{
+               position: 1,
+               user: %User{id: 7001, is_bot: false, first_name: "Player One"},
+               score: 9000
+             }
+           ]
   end
 
   test "parse result of get_custom_emoji_stickers" do

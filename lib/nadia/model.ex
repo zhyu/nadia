@@ -747,6 +747,14 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule SentWebAppMessage do
+    defstruct inline_message_id: nil
+
+    @type t :: %SentWebAppMessage{
+            inline_message_id: binary
+          }
+  end
+
   defmodule PreparedInlineMessage do
     defstruct id: nil, expiration_date: nil
 
@@ -870,6 +878,16 @@ defmodule Nadia.Model do
 
     @type t :: %UserChatBoosts{
             boosts: [ChatBoost.t()]
+          }
+  end
+
+  defmodule GameHighScore do
+    defstruct position: nil, user: nil, score: nil
+
+    @type t :: %GameHighScore{
+            position: integer,
+            user: User.t(),
+            score: integer
           }
   end
 

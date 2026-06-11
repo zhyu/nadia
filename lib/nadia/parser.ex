@@ -17,6 +17,7 @@ defmodule Nadia.Parser do
     BusinessOpeningHours,
     BusinessOpeningHoursInterval,
     ForumTopic,
+    GameHighScore,
     User,
     Chat,
     ChatInviteLink,
@@ -67,6 +68,7 @@ defmodule Nadia.Parser do
     ReactionCount,
     ReactionType,
     SentGuestMessage,
+    SentWebAppMessage,
     StarAmount,
     UserChatBoosts,
     UserProfileAudios,
@@ -114,6 +116,7 @@ defmodule Nadia.Parser do
       "getUserChatBoosts" -> parse(UserChatBoosts, result)
       "getBusinessConnection" -> parse(BusinessConnection, result)
       "answerGuestQuery" -> parse(SentGuestMessage, result)
+      "answerWebAppQuery" -> parse(SentWebAppMessage, result)
       "savePreparedInlineMessage" -> parse(PreparedInlineMessage, result)
       "savePreparedKeyboardButton" -> parse(PreparedKeyboardButton, result)
       "getManagedBotToken" -> result
@@ -123,6 +126,7 @@ defmodule Nadia.Parser do
       "getUserProfileAudios" -> parse(UserProfileAudios, result)
       "getMyStarBalance" -> parse(StarAmount, result)
       "getBusinessAccountStarBalance" -> parse(StarAmount, result)
+      "getGameHighScores" -> parse(:game_high_scores, result)
       "getMyCommands" -> parse(:bot_commands, result)
       "getMyName" -> parse(BotName, result)
       "getMyDescription" -> parse(BotDescription, result)
@@ -194,6 +198,7 @@ defmodule Nadia.Parser do
   defp parse(:message_ids, l) when is_list(l), do: Enum.map(l, &parse(MessageId, &1))
   defp parse(:stickers, l) when is_list(l), do: Enum.map(l, &parse(Sticker, &1))
   defp parse(:bot_commands, l) when is_list(l), do: Enum.map(l, &parse(BotCommand, &1))
+  defp parse(:game_high_scores, l) when is_list(l), do: Enum.map(l, &parse(GameHighScore, &1))
 
   defp parse(type, val) when is_map(val) do
     fields = struct_fields(type)
@@ -246,6 +251,8 @@ defmodule Nadia.Parser do
   defp parse(ManagedBotUpdated, {:bot, val}), do: {:bot, parse(User, val)}
 
   defp parse(ChatInviteLink, {:creator, val}), do: {:creator, parse(User, val)}
+
+  defp parse(GameHighScore, {:user, val}), do: {:user, parse(User, val)}
 
   defp parse(BotAccessSettings, {:added_users, val}) when is_list(val),
     do: {:added_users, Enum.map(val, &parse(User, &1))}

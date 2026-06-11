@@ -34,6 +34,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   maintenance.
 - Added Bot API gift getter wrappers plus gift and owned-gift response
   structs/parser coverage.
+- Added Bot API story wrappers plus `%Nadia.Model.Story{}` response parser
+  coverage.
 - Added Bot API Star balance getter wrappers and `%Nadia.Model.StarAmount{}`
   parser/model support.
 - Added Bot API `getStarTransactions` wrapper plus Star transaction response

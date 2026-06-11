@@ -45,6 +45,7 @@ defmodule Nadia do
     SentWebAppMessage,
     StarAmount,
     StarTransactions,
+    Story,
     Sticker,
     Update,
     User,
@@ -3593,6 +3594,238 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to post a story on behalf of a managed business account.
+  Returns a Story object.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `content` - JSON-serializable story content object or a pre-encoded JSON string
+  * `active_period` - Period after which the story is moved to the archive, in seconds
+  * `options` - orddict or map of options
+
+  Options:
+  * `:caption` - Caption of the story
+  * `:parse_mode` - Mode for parsing entities in the story caption
+  * `:caption_entities` - JSON-serializable caption entities array or a pre-encoded JSON string
+  * `:areas` - JSON-serializable story areas array or a pre-encoded JSON string
+  * `:post_to_chat_page` - Pass true to keep the story accessible after it expires
+  * `:protect_content` - Pass true if the content of the story must be protected
+  """
+  @spec post_story(binary, list | map | struct | binary, integer) ::
+          {:ok, Story.t()} | {:error, Error.t()}
+  @spec post_story(binary, list | map | struct | binary, integer, [{atom, any}] | map) ::
+          {:ok, Story.t()} | {:error, Error.t()}
+  @spec post_story(Client.t(), binary, list | map | struct | binary, integer) ::
+          {:ok, Story.t()} | {:error, Error.t()}
+  @spec post_story(
+          Client.t(),
+          binary,
+          list | map | struct | binary,
+          integer,
+          [{atom, any}] | map
+        ) :: {:ok, Story.t()} | {:error, Error.t()}
+  def post_story(business_connection_id, content, active_period) do
+    post_story(business_connection_id, content, active_period, [])
+  end
+
+  def post_story(%Client{} = client, business_connection_id, content, active_period) do
+    post_story(client, business_connection_id, content, active_period, [])
+  end
+
+  def post_story(business_connection_id, content, active_period, options) do
+    api_request(
+      "postStory",
+      request_options(
+        [
+          business_connection_id: business_connection_id,
+          content: encode_json_payload(content),
+          active_period: active_period
+        ],
+        encode_story_options(options)
+      )
+    )
+  end
+
+  def post_story(%Client{} = client, business_connection_id, content, active_period, options) do
+    api_request(
+      client,
+      "postStory",
+      request_options(
+        [
+          business_connection_id: business_connection_id,
+          content: encode_json_payload(content),
+          active_period: active_period
+        ],
+        encode_story_options(options)
+      )
+    )
+  end
+
+  @doc """
+  Use this method to edit a story previously posted by the bot on behalf of a managed business account.
+  Returns a Story object.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `story_id` - Unique identifier of the story to edit
+  * `content` - JSON-serializable story content object or a pre-encoded JSON string
+  * `options` - orddict or map of options
+
+  Options:
+  * `:caption` - Caption of the story
+  * `:parse_mode` - Mode for parsing entities in the story caption
+  * `:caption_entities` - JSON-serializable caption entities array or a pre-encoded JSON string
+  * `:areas` - JSON-serializable story areas array or a pre-encoded JSON string
+  """
+  @spec edit_story(binary, integer, list | map | struct | binary) ::
+          {:ok, Story.t()} | {:error, Error.t()}
+  @spec edit_story(binary, integer, list | map | struct | binary, [{atom, any}] | map) ::
+          {:ok, Story.t()} | {:error, Error.t()}
+  @spec edit_story(Client.t(), binary, integer, list | map | struct | binary) ::
+          {:ok, Story.t()} | {:error, Error.t()}
+  @spec edit_story(
+          Client.t(),
+          binary,
+          integer,
+          list | map | struct | binary,
+          [{atom, any}] | map
+        ) :: {:ok, Story.t()} | {:error, Error.t()}
+  def edit_story(business_connection_id, story_id, content) do
+    edit_story(business_connection_id, story_id, content, [])
+  end
+
+  def edit_story(%Client{} = client, business_connection_id, story_id, content) do
+    edit_story(client, business_connection_id, story_id, content, [])
+  end
+
+  def edit_story(business_connection_id, story_id, content, options) do
+    api_request(
+      "editStory",
+      request_options(
+        [
+          business_connection_id: business_connection_id,
+          story_id: story_id,
+          content: encode_json_payload(content)
+        ],
+        encode_story_options(options)
+      )
+    )
+  end
+
+  def edit_story(%Client{} = client, business_connection_id, story_id, content, options) do
+    api_request(
+      client,
+      "editStory",
+      request_options(
+        [
+          business_connection_id: business_connection_id,
+          story_id: story_id,
+          content: encode_json_payload(content)
+        ],
+        encode_story_options(options)
+      )
+    )
+  end
+
+  @doc """
+  Use this method to delete a story previously posted by the bot on behalf of a managed business account.
+  Returns `:ok` on success.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `story_id` - Unique identifier of the story to delete
+  """
+  @spec delete_story(binary, integer) :: :ok | {:error, Error.t()}
+  @spec delete_story(Client.t(), binary, integer) :: :ok | {:error, Error.t()}
+  def delete_story(business_connection_id, story_id) do
+    api_request("deleteStory", business_connection_id: business_connection_id, story_id: story_id)
+  end
+
+  def delete_story(%Client{} = client, business_connection_id, story_id) do
+    api_request(
+      client,
+      "deleteStory",
+      business_connection_id: business_connection_id,
+      story_id: story_id
+    )
+  end
+
+  @doc """
+  Use this method to repost a story on behalf of a managed business account.
+  Returns a Story object.
+
+  Args:
+  * `business_connection_id` - Unique identifier of the business connection
+  * `from_chat_id` - Unique identifier of the chat which posted the story
+  * `from_story_id` - Unique identifier of the story that should be reposted
+  * `active_period` - Period after which the story is moved to the archive, in seconds
+  * `options` - orddict or map of options
+
+  Options:
+  * `:post_to_chat_page` - Pass true to keep the story accessible after it expires
+  * `:protect_content` - Pass true if the content of the story must be protected
+  """
+  @spec repost_story(binary, integer, integer, integer) ::
+          {:ok, Story.t()} | {:error, Error.t()}
+  @spec repost_story(binary, integer, integer, integer, [{atom, any}] | map) ::
+          {:ok, Story.t()} | {:error, Error.t()}
+  @spec repost_story(Client.t(), binary, integer, integer, integer) ::
+          {:ok, Story.t()} | {:error, Error.t()}
+  @spec repost_story(Client.t(), binary, integer, integer, integer, [{atom, any}] | map) ::
+          {:ok, Story.t()} | {:error, Error.t()}
+  def repost_story(business_connection_id, from_chat_id, from_story_id, active_period) do
+    repost_story(business_connection_id, from_chat_id, from_story_id, active_period, [])
+  end
+
+  def repost_story(
+        %Client{} = client,
+        business_connection_id,
+        from_chat_id,
+        from_story_id,
+        active_period
+      ) do
+    repost_story(client, business_connection_id, from_chat_id, from_story_id, active_period, [])
+  end
+
+  def repost_story(business_connection_id, from_chat_id, from_story_id, active_period, options) do
+    api_request(
+      "repostStory",
+      request_options(
+        [
+          business_connection_id: business_connection_id,
+          from_chat_id: from_chat_id,
+          from_story_id: from_story_id,
+          active_period: active_period
+        ],
+        options
+      )
+    )
+  end
+
+  def repost_story(
+        %Client{} = client,
+        business_connection_id,
+        from_chat_id,
+        from_story_id,
+        active_period,
+        options
+      ) do
+    api_request(
+      client,
+      "repostStory",
+      request_options(
+        [
+          business_connection_id: business_connection_id,
+          from_chat_id: from_chat_id,
+          from_story_id: from_story_id,
+          active_period: active_period
+        ],
+        options
+      )
+    )
+  end
+
+  @doc """
   Use this method to send invoices.
   On success, the sent Message is returned.
 
@@ -4959,6 +5192,12 @@ defmodule Nadia do
     |> encode_json_option(:provider_data)
     |> encode_json_option(:suggested_post_parameters)
     |> encode_json_option(:reply_parameters)
+  end
+
+  defp encode_story_options(options) do
+    options
+    |> encode_json_array_option(:caption_entities)
+    |> encode_json_array_option(:areas)
   end
 
   defp encode_added_user_ids(options) do

@@ -84,6 +84,7 @@ defmodule Nadia.Parser do
     StarAmount,
     StarTransaction,
     StarTransactions,
+    Story,
     UniqueGift,
     UniqueGiftBackdrop,
     UniqueGiftBackdropColors,
@@ -152,6 +153,9 @@ defmodule Nadia.Parser do
       "getUserGifts" -> parse(OwnedGifts, result)
       "getChatGifts" -> parse(OwnedGifts, result)
       "getBusinessAccountGifts" -> parse(OwnedGifts, result)
+      "postStory" -> parse(Story, result)
+      "editStory" -> parse(Story, result)
+      "repostStory" -> parse(Story, result)
       "getManagedBotToken" -> result
       "replaceManagedBotToken" -> result
       "getManagedBotAccessSettings" -> parse(BotAccessSettings, result)
@@ -304,6 +308,8 @@ defmodule Nadia.Parser do
   defp parse(PaidMediaLivePhoto, {:live_photo, val}), do: {:live_photo, val}
 
   defp parse(BusinessConnection, {:rights, val}), do: {:rights, parse(BusinessBotRights, val)}
+
+  defp parse(Story, {:chat, val}), do: {:chat, parse(Chat, val)}
 
   defp parse(BusinessOpeningHours, {:opening_hours, val}) when is_list(val),
     do: {:opening_hours, Enum.map(val, &parse(BusinessOpeningHoursInterval, &1))}

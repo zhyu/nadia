@@ -347,6 +347,15 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule Story do
+    defstruct chat: nil, id: nil
+
+    @type t :: %Story{
+            chat: Chat.t(),
+            id: integer
+          }
+  end
+
   defmodule ChatInviteLink do
     defstruct invite_link: nil,
               creator: nil,

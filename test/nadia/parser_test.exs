@@ -83,6 +83,7 @@ defmodule Nadia.ParserTest do
     StarAmount,
     StarTransaction,
     StarTransactions,
+    Story,
     Sticker,
     TransactionPartner,
     TransactionPartnerAffiliateProgram,
@@ -682,6 +683,33 @@ defmodule Nadia.ParserTest do
       refute Map.has_key?(unique.gift.colors, :future_colors_field)
       refute Map.has_key?(future, :gift)
       refute Map.has_key?(future, :future_owned_gift_field)
+    end
+  end
+
+  test "parse result of story methods" do
+    raw_story = %{
+      "chat" => %{
+        "id" => -100_910_010_010,
+        "type" => "channel",
+        "title" => "Stories",
+        "future_chat_field" => "ignored"
+      },
+      "id" => 51,
+      "future_story_field" => "ignored"
+    }
+
+    for method <- ["postStory", "editStory", "repostStory"] do
+      assert %Story{
+               chat: %Chat{
+                 id: -100_910_010_010,
+                 type: "channel",
+                 title: "Stories"
+               },
+               id: 51
+             } = story = Parser.parse_result(raw_story, method)
+
+      refute Map.has_key?(story, :future_story_field)
+      refute Map.has_key?(story.chat, :future_chat_field)
     end
   end
 

@@ -71,6 +71,7 @@ defmodule Nadia.APITest do
     StarAmount,
     StarTransaction,
     StarTransactions,
+    Story,
     Sticker,
     TransactionPartnerTelegramApi,
     TransactionPartnerUser,
@@ -1725,6 +1726,144 @@ defmodule Nadia.APITest do
              "owned_gift_id" => "owned-gift-3",
              "new_owner_chat_id" => "91001",
              "star_count" => "75"
+           }
+  end
+
+  test "story wrappers build request contracts and parse stories" do
+    content = [type: "photo", photo: "attach://story-photo", future_nil: nil]
+
+    caption_entities = [
+      %{type: "bold", offset: 0, length: 5, future_nil: nil}
+    ]
+
+    areas = [
+      %{
+        position: %{
+          x_percentage: 50.0,
+          y_percentage: 50.0,
+          width_percentage: 30.0,
+          height_percentage: 20.0,
+          rotation_angle: 0.0,
+          corner_radius_percentage: 4.0,
+          future_nil: nil
+        },
+        type: %{type: "link", url: "https://example.test/story", future_nil: nil},
+        future_nil: nil
+      }
+    ]
+
+    stub_telegram_result(%{
+      chat: %{id: -100_910_010_001, type: "channel", title: "Story Channel"},
+      id: 41,
+      future_story_field: "ignored"
+    })
+
+    assert {:ok, %Story{id: 41, chat: %Chat{title: "Story Channel"}}} =
+             Nadia.post_story("business-story-1", content, 86_400,
+               caption: "Hello",
+               parse_mode: "MarkdownV2",
+               caption_entities: caption_entities,
+               areas: areas,
+               post_to_chat_page: true,
+               protect_content: false
+             )
+
+    request = assert_telegram_request("postStory", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["business_connection_id"] == "business-story-1"
+    assert params["active_period"] == "86400"
+    assert params["caption"] == "Hello"
+    assert params["parse_mode"] == "MarkdownV2"
+    assert params["post_to_chat_page"] == "true"
+    assert params["protect_content"] == "false"
+
+    assert Jason.decode!(params["content"]) == %{
+             "type" => "photo",
+             "photo" => "attach://story-photo"
+           }
+
+    assert Jason.decode!(params["caption_entities"]) == [
+             %{"type" => "bold", "offset" => 0, "length" => 5}
+           ]
+
+    assert [
+             %{
+               "position" => %{"x_percentage" => 50.0},
+               "type" => %{"type" => "link", "url" => "https://example.test/story"}
+             }
+           ] = Jason.decode!(params["areas"])
+
+    client =
+      Client.new(
+        token: "999:family-story",
+        http_client: Nadia.HTTPCase.StubHTTPClient
+      )
+
+    preencoded_content = Jason.encode!(%{type: "video", video: "attach://story-video"})
+
+    stub_telegram_result(%{
+      chat: %{id: -100_910_010_002, type: "channel", title: "Edited Story"},
+      id: 42
+    })
+
+    assert {:ok, %Story{id: 42, chat: %Chat{title: "Edited Story"}}} =
+             Nadia.edit_story(client, "business-story-1", 41, preencoded_content, %{
+               caption: "Edited",
+               caption_entities: caption_entities,
+               areas: areas
+             })
+
+    request =
+      assert_http_request(
+        method: :post,
+        url: "https://api.telegram.org/bot999:family-story/editStory",
+        headers: [],
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params["business_connection_id"] == "business-story-1"
+    assert params["story_id"] == "41"
+    assert params["content"] == preencoded_content
+    assert params["caption"] == "Edited"
+
+    assert Jason.decode!(params["caption_entities"]) == [
+             %{"type" => "bold", "offset" => 0, "length" => 5}
+           ]
+
+    assert [%{"type" => %{"type" => "link"}}] = Jason.decode!(params["areas"])
+
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.delete_story("business-story-1", 42)
+
+    assert_telegram_request("deleteStory",
+      body: {:form, [{"business_connection_id", "business-story-1"}, {"story_id", "42"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(%{
+      chat: %{id: -100_910_010_003, type: "channel", title: "Reposted Story"},
+      id: 43
+    })
+
+    assert {:ok, %Story{id: 43, chat: %Chat{title: "Reposted Story"}}} =
+             Nadia.repost_story("business-story-1", -100_910_010_004, 11, 43_200,
+               post_to_chat_page: false,
+               protect_content: true
+             )
+
+    request = assert_telegram_request("repostStory", options: [recv_timeout: 5000])
+
+    assert form_params(request) == %{
+             "business_connection_id" => "business-story-1",
+             "from_chat_id" => "-100910010004",
+             "from_story_id" => "11",
+             "active_period" => "43200",
+             "post_to_chat_page" => "false",
+             "protect_content" => "true"
            }
   end
 

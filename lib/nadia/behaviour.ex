@@ -28,6 +28,7 @@ defmodule Nadia.Behaviour do
     SentWebAppMessage,
     StarAmount,
     StarTransactions,
+    Story,
     Sticker,
     Update,
     User,
@@ -683,6 +684,42 @@ defmodule Nadia.Behaviour do
   @callback transfer_gift(Client.t(), binary, binary, integer) :: :ok | {:error, Error.t()}
   @callback transfer_gift(Client.t(), binary, binary, integer, [{atom, any}] | map) ::
               :ok | {:error, Error.t()}
+  @callback post_story(binary, list | map | struct | binary, integer) ::
+              {:ok, Story.t()} | {:error, Error.t()}
+  @callback post_story(binary, list | map | struct | binary, integer, [{atom, any}] | map) ::
+              {:ok, Story.t()} | {:error, Error.t()}
+  @callback post_story(Client.t(), binary, list | map | struct | binary, integer) ::
+              {:ok, Story.t()} | {:error, Error.t()}
+  @callback post_story(
+              Client.t(),
+              binary,
+              list | map | struct | binary,
+              integer,
+              [{atom, any}] | map
+            ) :: {:ok, Story.t()} | {:error, Error.t()}
+  @callback edit_story(binary, integer, list | map | struct | binary) ::
+              {:ok, Story.t()} | {:error, Error.t()}
+  @callback edit_story(binary, integer, list | map | struct | binary, [{atom, any}] | map) ::
+              {:ok, Story.t()} | {:error, Error.t()}
+  @callback edit_story(Client.t(), binary, integer, list | map | struct | binary) ::
+              {:ok, Story.t()} | {:error, Error.t()}
+  @callback edit_story(
+              Client.t(),
+              binary,
+              integer,
+              list | map | struct | binary,
+              [{atom, any}] | map
+            ) :: {:ok, Story.t()} | {:error, Error.t()}
+  @callback delete_story(binary, integer) :: :ok | {:error, Error.t()}
+  @callback delete_story(Client.t(), binary, integer) :: :ok | {:error, Error.t()}
+  @callback repost_story(binary, integer, integer, integer) ::
+              {:ok, Story.t()} | {:error, Error.t()}
+  @callback repost_story(binary, integer, integer, integer, [{atom, any}] | map) ::
+              {:ok, Story.t()} | {:error, Error.t()}
+  @callback repost_story(Client.t(), binary, integer, integer, integer) ::
+              {:ok, Story.t()} | {:error, Error.t()}
+  @callback repost_story(Client.t(), binary, integer, integer, integer, [{atom, any}] | map) ::
+              {:ok, Story.t()} | {:error, Error.t()}
   @callback send_invoice(
               integer | binary,
               binary,
@@ -1233,6 +1270,17 @@ defmodule Nadia.Behaviour do
                       transfer_gift: 3,
                       transfer_gift: 4,
                       transfer_gift: 5,
+                      post_story: 3,
+                      post_story: 4,
+                      post_story: 5,
+                      edit_story: 3,
+                      edit_story: 4,
+                      edit_story: 5,
+                      delete_story: 2,
+                      delete_story: 3,
+                      repost_story: 4,
+                      repost_story: 5,
+                      repost_story: 6,
                       send_invoice: 6,
                       send_invoice: 7,
                       send_invoice: 8,

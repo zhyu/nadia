@@ -5,6 +5,7 @@ defmodule Nadia.ParserTest do
 
   alias Nadia.Model.{
     Update,
+    Audio,
     BotAccessSettings,
     BotCommand,
     BotDescription,
@@ -19,6 +20,7 @@ defmodule Nadia.ParserTest do
     BusinessOpeningHoursInterval,
     Chat,
     ChatAdministratorRights,
+    ChatInviteLink,
     ChatBoost,
     ChatBoostAdded,
     ChatBoostRemoved,
@@ -66,6 +68,7 @@ defmodule Nadia.ParserTest do
     SentGuestMessage,
     Sticker,
     UserChatBoosts,
+    UserProfileAudios,
     Video,
     Venue,
     WebhookInfo
@@ -209,6 +212,45 @@ defmodule Nadia.ParserTest do
              ],
              total_count: 1
            }
+  end
+
+  test "parse result of get_user_profile_audios" do
+    user_profile_audios =
+      Parser.parse_result(
+        %{
+          "total_count" => 1,
+          "audios" => [
+            %{
+              "file_id" => "profile-audio-1",
+              "duration" => 42,
+              "performer" => "Nadia",
+              "title" => "Coverage",
+              "mime_type" => "audio/mpeg",
+              "file_size" => 4096,
+              "future_audio_field" => "ignored"
+            }
+          ],
+          "future_user_profile_audios_field" => "ignored"
+        },
+        "getUserProfileAudios"
+      )
+
+    assert user_profile_audios == %UserProfileAudios{
+             total_count: 1,
+             audios: [
+               %Audio{
+                 file_id: "profile-audio-1",
+                 duration: 42,
+                 performer: "Nadia",
+                 title: "Coverage",
+                 mime_type: "audio/mpeg",
+                 file_size: 4096
+               }
+             ]
+           }
+
+    refute Map.has_key?(user_profile_audios, :future_user_profile_audios_field)
+    refute Map.has_key?(hd(user_profile_audios.audios), :future_audio_field)
   end
 
   test "parse result of get_updates" do
@@ -946,6 +988,58 @@ defmodule Nadia.ParserTest do
              icon_custom_emoji_id: "emoji-topic-1",
              is_name_implicit: true
            } = forum_topic
+  end
+
+  test "parse result of chat invite link methods" do
+    raw_invite_link = %{
+      "invite_link" => "https://t.me/+family-n",
+      "creator" => %{
+        "id" => 4201,
+        "is_bot" => true,
+        "first_name" => "Nadia",
+        "future_chat_invite_creator_field" => "ignored"
+      },
+      "creates_join_request" => true,
+      "is_primary" => false,
+      "is_revoked" => false,
+      "name" => "Family N",
+      "expire_date" => 1_800_000_000,
+      "member_limit" => 25,
+      "pending_join_request_count" => 2,
+      "subscription_period" => 2_592_000,
+      "subscription_price" => 150,
+      "future_invite_field" => "ignored"
+    }
+
+    for method <- [
+          "createChatInviteLink",
+          "editChatInviteLink",
+          "createChatSubscriptionInviteLink",
+          "editChatSubscriptionInviteLink",
+          "revokeChatInviteLink"
+        ] do
+      invite_link = Parser.parse_result(raw_invite_link, method)
+
+      assert %ChatInviteLink{
+               invite_link: "https://t.me/+family-n",
+               creator: %User{id: 4201, is_bot: true, first_name: "Nadia"},
+               creates_join_request: true,
+               is_primary: false,
+               is_revoked: false,
+               name: "Family N",
+               expire_date: 1_800_000_000,
+               member_limit: 25,
+               pending_join_request_count: 2,
+               subscription_period: 2_592_000,
+               subscription_price: 150
+             } = invite_link
+
+      refute Map.has_key?(invite_link, :future_invite_field)
+      refute Map.has_key?(invite_link.creator, :future_chat_invite_creator_field)
+    end
+
+    assert Parser.parse_result("https://t.me/+primary-family-n", "exportChatInviteLink") ==
+             "https://t.me/+primary-family-n"
   end
 
   test "parse result of copy_message" do

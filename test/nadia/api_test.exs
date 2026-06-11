@@ -10,6 +10,7 @@ defmodule Nadia.APITest do
   alias Nadia.Model.InlineQueryResult
 
   alias Nadia.Model.{
+    Audio,
     BotAccessSettings,
     BotCommand,
     BotDescription,
@@ -24,6 +25,7 @@ defmodule Nadia.APITest do
     BusinessOpeningHoursInterval,
     Chat,
     ChatAdministratorRights,
+    ChatInviteLink,
     ChatBoost,
     ChatBoostAdded,
     ChatBoostRemoved,
@@ -61,6 +63,7 @@ defmodule Nadia.APITest do
     Sticker,
     User,
     UserChatBoosts,
+    UserProfileAudios,
     Video
   }
 
@@ -2820,6 +2823,186 @@ defmodule Nadia.APITest do
 
     assert_telegram_request("unpinAllGeneralForumTopicMessages",
       body: {:form, [{"chat_id", "@forum"}]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "chat invite link wrappers build request contracts and parse invite links" do
+    client = Client.new(token: "999:family-n", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    invite_link_result = %{
+      invite_link: "https://t.me/+family-n",
+      creator: %{id: 4201, is_bot: true, first_name: "Nadia"},
+      creates_join_request: true,
+      is_primary: false,
+      is_revoked: false,
+      name: "Family N",
+      expire_date: 1_800_000_000,
+      member_limit: 25,
+      pending_join_request_count: 2,
+      subscription_period: 2_592_000,
+      subscription_price: 150,
+      future_invite_field: "ignored"
+    }
+
+    stub_telegram_result("https://t.me/+primary-family-n")
+
+    assert {:ok, "https://t.me/+primary-family-n"} =
+             Nadia.export_chat_invite_link("@family_n")
+
+    assert_telegram_request("exportChatInviteLink",
+      body: {:form, [{"chat_id", "@family_n"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    stub_telegram_result(invite_link_result)
+
+    assert {:ok,
+            %ChatInviteLink{
+              invite_link: "https://t.me/+family-n",
+              creator: %User{id: 4201, is_bot: true, first_name: "Nadia"},
+              creates_join_request: true,
+              subscription_price: 150
+            }} =
+             Nadia.create_chat_invite_link("@family_n",
+               name: "Family N",
+               expire_date: 1_800_000_000,
+               member_limit: 25,
+               creates_join_request: false
+             )
+
+    assert_telegram_request("createChatInviteLink",
+      body:
+        {:form,
+         [
+           {"chat_id", "@family_n"},
+           {"name", "Family N"},
+           {"expire_date", "1800000000"},
+           {"member_limit", "25"},
+           {"creates_join_request", "false"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert {:ok, %ChatInviteLink{creator: %User{id: 4201}}} =
+             Nadia.edit_chat_invite_link(
+               client,
+               "@family_n",
+               "https://t.me/+family-n",
+               %{name: "Renamed", expire_date: 1_800_000_001, creates_join_request: true}
+             )
+
+    request =
+      assert_http_request(
+        method: :post,
+        url: "https://api.telegram.org/bot999:family-n/editChatInviteLink",
+        headers: [],
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params == %{
+             "chat_id" => "@family_n",
+             "invite_link" => "https://t.me/+family-n",
+             "creates_join_request" => "true",
+             "expire_date" => "1800000001",
+             "name" => "Renamed"
+           }
+
+    assert {:ok, %ChatInviteLink{subscription_period: 2_592_000}} =
+             Nadia.create_chat_subscription_invite_link(
+               "@family_n",
+               2_592_000,
+               150,
+               name: "Subscription"
+             )
+
+    assert_telegram_request("createChatSubscriptionInviteLink",
+      body:
+        {:form,
+         [
+           {"chat_id", "@family_n"},
+           {"subscription_period", "2592000"},
+           {"subscription_price", "150"},
+           {"name", "Subscription"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert {:ok, %ChatInviteLink{name: "Family N"}} =
+             Nadia.edit_chat_subscription_invite_link(
+               "@family_n",
+               "https://t.me/+subscription-family-n",
+               name: "Subscription 2"
+             )
+
+    assert_telegram_request("editChatSubscriptionInviteLink",
+      method: :post,
+      body:
+        {:form,
+         [
+           {"chat_id", "@family_n"},
+           {"invite_link", "https://t.me/+subscription-family-n"},
+           {"name", "Subscription 2"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert {:ok, %ChatInviteLink{is_revoked: false}} =
+             Nadia.revoke_chat_invite_link("@family_n", "https://t.me/+family-n")
+
+    assert_telegram_request("revokeChatInviteLink",
+      body: {:form, [{"chat_id", "@family_n"}, {"invite_link", "https://t.me/+family-n"}]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "get_user_profile_audios builds request contracts and parses audios" do
+    client = Client.new(token: "999:family-n", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    stub_telegram_result(%{
+      total_count: 1,
+      audios: [
+        %{
+          file_id: "profile-audio-1",
+          duration: 42,
+          performer: "Nadia",
+          title: "Coverage",
+          mime_type: "audio/mpeg",
+          file_size: 4096,
+          future_audio_field: "ignored"
+        }
+      ],
+      future_profile_audio_field: "ignored"
+    })
+
+    assert {:ok,
+            %UserProfileAudios{
+              total_count: 1,
+              audios: [
+                %Audio{
+                  file_id: "profile-audio-1",
+                  duration: 42,
+                  performer: "Nadia",
+                  title: "Coverage"
+                }
+              ]
+            }} = Nadia.get_user_profile_audios(4201, offset: 3, limit: 10)
+
+    assert_telegram_request("getUserProfileAudios",
+      body: {:form, [{"user_id", "4201"}, {"offset", "3"}, {"limit", "10"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert {:ok, %UserProfileAudios{total_count: 1, audios: [%Audio{file_id: "profile-audio-1"}]}} =
+             Nadia.get_user_profile_audios(client, 4202)
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-n/getUserProfileAudios",
+      body: {:form, [{"user_id", "4202"}]},
+      headers: [],
       options: [recv_timeout: 5000]
     )
   end

@@ -19,6 +19,7 @@ defmodule Nadia.Parser do
     ForumTopic,
     User,
     Chat,
+    ChatInviteLink,
     ChatBoost,
     ChatBoostAdded,
     ChatBoostRemoved,
@@ -67,6 +68,7 @@ defmodule Nadia.Parser do
     ReactionType,
     SentGuestMessage,
     UserChatBoosts,
+    UserProfileAudios,
     WebhookInfo
   }
 
@@ -91,6 +93,12 @@ defmodule Nadia.Parser do
       "getWebhookInfo" -> parse(WebhookInfo, result)
       "getFile" -> parse(File, result)
       "getChat" -> parse(Chat, result)
+      "exportChatInviteLink" -> result
+      "createChatInviteLink" -> parse(ChatInviteLink, result)
+      "editChatInviteLink" -> parse(ChatInviteLink, result)
+      "createChatSubscriptionInviteLink" -> parse(ChatInviteLink, result)
+      "editChatSubscriptionInviteLink" -> parse(ChatInviteLink, result)
+      "revokeChatInviteLink" -> parse(ChatInviteLink, result)
       "getChatMember" -> parse(ChatMember, result)
       "getChatAdministrators" -> parse(:chat_members, result)
       "getChatMemberCount" -> result
@@ -111,6 +119,7 @@ defmodule Nadia.Parser do
       "replaceManagedBotToken" -> result
       "getManagedBotAccessSettings" -> parse(BotAccessSettings, result)
       "getUserPersonalChatMessages" -> parse(:messages, result)
+      "getUserProfileAudios" -> parse(UserProfileAudios, result)
       "getMyCommands" -> parse(:bot_commands, result)
       "getMyName" -> parse(BotName, result)
       "getMyDescription" -> parse(BotDescription, result)
@@ -233,8 +242,13 @@ defmodule Nadia.Parser do
   defp parse(ManagedBotUpdated, {:user, val}), do: {:user, parse(User, val)}
   defp parse(ManagedBotUpdated, {:bot, val}), do: {:bot, parse(User, val)}
 
+  defp parse(ChatInviteLink, {:creator, val}), do: {:creator, parse(User, val)}
+
   defp parse(BotAccessSettings, {:added_users, val}) when is_list(val),
     do: {:added_users, Enum.map(val, &parse(User, &1))}
+
+  defp parse(UserProfileAudios, {:audios, val}) when is_list(val),
+    do: {:audios, Enum.map(val, &parse(Audio, &1))}
 
   defp parse(Message, {:checklist, val}), do: {:checklist, parse(Checklist, val)}
 

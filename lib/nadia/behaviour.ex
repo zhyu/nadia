@@ -10,6 +10,7 @@ defmodule Nadia.Behaviour do
     BusinessConnection,
     Chat,
     ChatAdministratorRights,
+    ChatInviteLink,
     ChatMember,
     Error,
     File,
@@ -25,6 +26,7 @@ defmodule Nadia.Behaviour do
     Update,
     User,
     UserChatBoosts,
+    UserProfileAudios,
     UserProfilePhotos,
     WebhookInfo
   }
@@ -264,6 +266,14 @@ defmodule Nadia.Behaviour do
               {:ok, UserProfilePhotos.t()} | {:error, Error.t()}
   @callback get_user_profile_photos(Client.t(), integer, [{atom, any}]) ::
               {:ok, UserProfilePhotos.t()} | {:error, Error.t()}
+  @callback get_user_profile_audios(integer) ::
+              {:ok, UserProfileAudios.t()} | {:error, Error.t()}
+  @callback get_user_profile_audios(integer, [{atom, any}] | map) ::
+              {:ok, UserProfileAudios.t()} | {:error, Error.t()}
+  @callback get_user_profile_audios(Client.t(), integer) ::
+              {:ok, UserProfileAudios.t()} | {:error, Error.t()}
+  @callback get_user_profile_audios(Client.t(), integer, [{atom, any}] | map) ::
+              {:ok, UserProfileAudios.t()} | {:error, Error.t()}
   @callback get_updates([{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
   @callback get_updates(Client.t(), [{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
   @callback set_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
@@ -426,6 +436,66 @@ defmodule Nadia.Behaviour do
               :ok | {:error, Error.t()}
   @callback get_chat(integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
   @callback get_chat(Client.t(), integer | binary) :: {:ok, Chat.t()} | {:error, Error.t()}
+  @callback export_chat_invite_link(integer | binary) :: {:ok, binary} | {:error, Error.t()}
+  @callback export_chat_invite_link(Client.t(), integer | binary) ::
+              {:ok, binary} | {:error, Error.t()}
+  @callback create_chat_invite_link(integer | binary) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback create_chat_invite_link(integer | binary, [{atom, any}] | map) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback create_chat_invite_link(Client.t(), integer | binary) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback create_chat_invite_link(Client.t(), integer | binary, [{atom, any}] | map) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback edit_chat_invite_link(integer | binary, binary) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback edit_chat_invite_link(integer | binary, binary, [{atom, any}] | map) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback edit_chat_invite_link(Client.t(), integer | binary, binary) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback edit_chat_invite_link(Client.t(), integer | binary, binary, [{atom, any}] | map) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback create_chat_subscription_invite_link(integer | binary, integer, integer) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback create_chat_subscription_invite_link(
+              integer | binary,
+              integer,
+              integer,
+              [{atom, any}] | map
+            ) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback create_chat_subscription_invite_link(
+              Client.t(),
+              integer | binary,
+              integer,
+              integer
+            ) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback create_chat_subscription_invite_link(
+              Client.t(),
+              integer | binary,
+              integer,
+              integer,
+              [{atom, any}] | map
+            ) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback edit_chat_subscription_invite_link(integer | binary, binary) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback edit_chat_subscription_invite_link(integer | binary, binary, [{atom, any}] | map) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback edit_chat_subscription_invite_link(Client.t(), integer | binary, binary) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback edit_chat_subscription_invite_link(
+              Client.t(),
+              integer | binary,
+              binary,
+              [{atom, any}] | map
+            ) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback revoke_chat_invite_link(integer | binary, binary) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @callback revoke_chat_invite_link(Client.t(), integer | binary, binary) ::
+              {:ok, ChatInviteLink.t()} | {:error, Error.t()}
   @callback get_chat_administrators(integer | binary) ::
               {:ok, [ChatMember.t()]} | {:error, Error.t()}
   @callback get_chat_administrators(integer | binary, [{atom, any}]) ::
@@ -811,6 +881,9 @@ defmodule Nadia.Behaviour do
                       send_chat_action: 3,
                       send_chat_action: 4,
                       get_user_profile_photos: 3,
+                      get_user_profile_audios: 1,
+                      get_user_profile_audios: 2,
+                      get_user_profile_audios: 3,
                       get_updates: 2,
                       set_webhook: 2,
                       delete_webhook: 1,
@@ -858,6 +931,22 @@ defmodule Nadia.Behaviour do
                       unhide_general_forum_topic: 2,
                       unpin_all_general_forum_topic_messages: 2,
                       get_chat: 2,
+                      export_chat_invite_link: 1,
+                      export_chat_invite_link: 2,
+                      create_chat_invite_link: 1,
+                      create_chat_invite_link: 2,
+                      create_chat_invite_link: 3,
+                      edit_chat_invite_link: 2,
+                      edit_chat_invite_link: 3,
+                      edit_chat_invite_link: 4,
+                      create_chat_subscription_invite_link: 3,
+                      create_chat_subscription_invite_link: 4,
+                      create_chat_subscription_invite_link: 5,
+                      edit_chat_subscription_invite_link: 2,
+                      edit_chat_subscription_invite_link: 3,
+                      edit_chat_subscription_invite_link: 4,
+                      revoke_chat_invite_link: 2,
+                      revoke_chat_invite_link: 3,
                       get_chat_administrators: 2,
                       get_chat_administrators: 3,
                       get_chat_member_count: 2,

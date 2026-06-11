@@ -176,6 +176,34 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule ChatInviteLink do
+    defstruct invite_link: nil,
+              creator: nil,
+              creates_join_request: nil,
+              is_primary: nil,
+              is_revoked: nil,
+              name: nil,
+              expire_date: nil,
+              member_limit: nil,
+              pending_join_request_count: nil,
+              subscription_period: nil,
+              subscription_price: nil
+
+    @type t :: %ChatInviteLink{
+            invite_link: binary,
+            creator: User.t(),
+            creates_join_request: boolean,
+            is_primary: boolean,
+            is_revoked: boolean,
+            name: binary,
+            expire_date: integer,
+            member_limit: integer,
+            pending_join_request_count: integer,
+            subscription_period: integer,
+            subscription_price: integer
+          }
+  end
+
   defmodule PhotoSize do
     defstruct file_id: nil, file_unique_id: nil, width: nil, height: nil, file_size: nil
 
@@ -1141,6 +1169,11 @@ defmodule Nadia.Model do
   defmodule UserProfilePhotos do
     defstruct total_count: nil, photos: []
     @type t :: %UserProfilePhotos{total_count: integer, photos: [[PhotoSize.t()]]}
+  end
+
+  defmodule UserProfileAudios do
+    defstruct total_count: nil, audios: []
+    @type t :: %UserProfileAudios{total_count: integer, audios: [Audio.t()]}
   end
 
   defmodule File do

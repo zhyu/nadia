@@ -28,6 +28,7 @@ defmodule Nadia do
     BotShortDescription,
     BusinessConnection,
     ChatAdministratorRights,
+    ChatInviteLink,
     Error,
     File,
     ForumTopic,
@@ -42,6 +43,7 @@ defmodule Nadia do
     Update,
     User,
     UserChatBoosts,
+    UserProfileAudios,
     UserProfilePhotos,
     WebhookInfo
   }
@@ -1543,6 +1545,39 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to get a list of profile audios for a user.
+  Returns a UserProfileAudios object.
+
+  Args:
+  * `user_id` - Unique identifier of the target user
+  * `options` - orddict of options
+
+  Options:
+  * `:offset` - Sequential number of the first audio to be returned
+  * `:limit` - Limits the number of audios to be retrieved
+  """
+  @spec get_user_profile_audios(integer) :: {:ok, UserProfileAudios.t()} | {:error, Error.t()}
+  @spec get_user_profile_audios(integer, [{atom, any}] | map) ::
+          {:ok, UserProfileAudios.t()} | {:error, Error.t()}
+  @spec get_user_profile_audios(Client.t(), integer) ::
+          {:ok, UserProfileAudios.t()} | {:error, Error.t()}
+  @spec get_user_profile_audios(Client.t(), integer, [{atom, any}] | map) ::
+          {:ok, UserProfileAudios.t()} | {:error, Error.t()}
+  def get_user_profile_audios(user_id), do: get_user_profile_audios(user_id, [])
+
+  def get_user_profile_audios(%Client{} = client, user_id) do
+    get_user_profile_audios(client, user_id, [])
+  end
+
+  def get_user_profile_audios(user_id, options) do
+    api_request("getUserProfileAudios", request_options([user_id: user_id], options))
+  end
+
+  def get_user_profile_audios(%Client{} = client, user_id, options) do
+    api_request(client, "getUserProfileAudios", request_options([user_id: user_id], options))
+  end
+
+  @doc """
   Use this method to receive incoming updates using long polling.
   An Array of Update objects is returned.
 
@@ -2318,6 +2353,220 @@ defmodule Nadia do
 
   def get_chat(%Client{} = client, chat_id) do
     api_request(client, "getChat", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to generate a new primary invite link for a chat.
+  Returns the new invite link as String on success.
+  """
+  @spec export_chat_invite_link(integer | binary) :: {:ok, binary} | {:error, Error.t()}
+  @spec export_chat_invite_link(Client.t(), integer | binary) ::
+          {:ok, binary} | {:error, Error.t()}
+  def export_chat_invite_link(chat_id) do
+    api_request("exportChatInviteLink", chat_id: chat_id)
+  end
+
+  def export_chat_invite_link(%Client{} = client, chat_id) do
+    api_request(client, "exportChatInviteLink", chat_id: chat_id)
+  end
+
+  @doc """
+  Use this method to create an additional invite link for a chat.
+  Returns the new invite link as a ChatInviteLink object.
+  """
+  @spec create_chat_invite_link(integer | binary) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec create_chat_invite_link(integer | binary, [{atom, any}] | map) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec create_chat_invite_link(Client.t(), integer | binary) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec create_chat_invite_link(Client.t(), integer | binary, [{atom, any}] | map) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  def create_chat_invite_link(chat_id), do: create_chat_invite_link(chat_id, [])
+
+  def create_chat_invite_link(%Client{} = client, chat_id) do
+    create_chat_invite_link(client, chat_id, [])
+  end
+
+  def create_chat_invite_link(chat_id, options) do
+    api_request("createChatInviteLink", request_options([chat_id: chat_id], options))
+  end
+
+  def create_chat_invite_link(%Client{} = client, chat_id, options) do
+    api_request(client, "createChatInviteLink", request_options([chat_id: chat_id], options))
+  end
+
+  @doc """
+  Use this method to edit a non-primary invite link created by the bot.
+  Returns the edited invite link as a ChatInviteLink object.
+  """
+  @spec edit_chat_invite_link(integer | binary, binary) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec edit_chat_invite_link(integer | binary, binary, [{atom, any}] | map) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec edit_chat_invite_link(Client.t(), integer | binary, binary) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec edit_chat_invite_link(Client.t(), integer | binary, binary, [{atom, any}] | map) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  def edit_chat_invite_link(chat_id, invite_link) do
+    edit_chat_invite_link(chat_id, invite_link, [])
+  end
+
+  def edit_chat_invite_link(%Client{} = client, chat_id, invite_link) do
+    edit_chat_invite_link(client, chat_id, invite_link, [])
+  end
+
+  def edit_chat_invite_link(chat_id, invite_link, options) do
+    api_request(
+      "editChatInviteLink",
+      request_options([chat_id: chat_id, invite_link: invite_link], options)
+    )
+  end
+
+  def edit_chat_invite_link(%Client{} = client, chat_id, invite_link, options) do
+    api_request(
+      client,
+      "editChatInviteLink",
+      request_options([chat_id: chat_id, invite_link: invite_link], options)
+    )
+  end
+
+  @doc """
+  Use this method to create a subscription invite link for a channel chat.
+  Returns the new invite link as a ChatInviteLink object.
+  """
+  @spec create_chat_subscription_invite_link(integer | binary, integer, integer) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec create_chat_subscription_invite_link(
+          integer | binary,
+          integer,
+          integer,
+          [{atom, any}] | map
+        ) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec create_chat_subscription_invite_link(Client.t(), integer | binary, integer, integer) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec create_chat_subscription_invite_link(
+          Client.t(),
+          integer | binary,
+          integer,
+          integer,
+          [{atom, any}] | map
+        ) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  def create_chat_subscription_invite_link(chat_id, subscription_period, subscription_price) do
+    create_chat_subscription_invite_link(chat_id, subscription_period, subscription_price, [])
+  end
+
+  def create_chat_subscription_invite_link(
+        %Client{} = client,
+        chat_id,
+        subscription_period,
+        subscription_price
+      ) do
+    create_chat_subscription_invite_link(
+      client,
+      chat_id,
+      subscription_period,
+      subscription_price,
+      []
+    )
+  end
+
+  def create_chat_subscription_invite_link(
+        chat_id,
+        subscription_period,
+        subscription_price,
+        options
+      ) do
+    api_request(
+      "createChatSubscriptionInviteLink",
+      request_options(
+        [
+          chat_id: chat_id,
+          subscription_period: subscription_period,
+          subscription_price: subscription_price
+        ],
+        options
+      )
+    )
+  end
+
+  def create_chat_subscription_invite_link(
+        %Client{} = client,
+        chat_id,
+        subscription_period,
+        subscription_price,
+        options
+      ) do
+    api_request(
+      client,
+      "createChatSubscriptionInviteLink",
+      request_options(
+        [
+          chat_id: chat_id,
+          subscription_period: subscription_period,
+          subscription_price: subscription_price
+        ],
+        options
+      )
+    )
+  end
+
+  @doc """
+  Use this method to edit a subscription invite link created by the bot.
+  Returns the edited invite link as a ChatInviteLink object.
+  """
+  @spec edit_chat_subscription_invite_link(integer | binary, binary) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec edit_chat_subscription_invite_link(integer | binary, binary, [{atom, any}] | map) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec edit_chat_subscription_invite_link(Client.t(), integer | binary, binary) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec edit_chat_subscription_invite_link(
+          Client.t(),
+          integer | binary,
+          binary,
+          [{atom, any}] | map
+        ) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  def edit_chat_subscription_invite_link(chat_id, invite_link) do
+    edit_chat_subscription_invite_link(chat_id, invite_link, [])
+  end
+
+  def edit_chat_subscription_invite_link(%Client{} = client, chat_id, invite_link) do
+    edit_chat_subscription_invite_link(client, chat_id, invite_link, [])
+  end
+
+  def edit_chat_subscription_invite_link(chat_id, invite_link, options) do
+    api_request(
+      "editChatSubscriptionInviteLink",
+      request_options([chat_id: chat_id, invite_link: invite_link], options)
+    )
+  end
+
+  def edit_chat_subscription_invite_link(%Client{} = client, chat_id, invite_link, options) do
+    api_request(
+      client,
+      "editChatSubscriptionInviteLink",
+      request_options([chat_id: chat_id, invite_link: invite_link], options)
+    )
+  end
+
+  @doc """
+  Use this method to revoke an invite link created by the bot.
+  Returns the revoked invite link as a ChatInviteLink object.
+  """
+  @spec revoke_chat_invite_link(integer | binary, binary) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  @spec revoke_chat_invite_link(Client.t(), integer | binary, binary) ::
+          {:ok, ChatInviteLink.t()} | {:error, Error.t()}
+  def revoke_chat_invite_link(chat_id, invite_link) do
+    api_request("revokeChatInviteLink", chat_id: chat_id, invite_link: invite_link)
+  end
+
+  def revoke_chat_invite_link(%Client{} = client, chat_id, invite_link) do
+    api_request(client, "revokeChatInviteLink", chat_id: chat_id, invite_link: invite_link)
   end
 
   @doc """

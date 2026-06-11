@@ -487,6 +487,98 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to send a gift to a user or channel chat.
+  Returns `:ok` on success.
+
+  Args:
+  * `gift_id` - Identifier of the gift
+  * `options` - orddict or map of options, including required `:user_id` or `:chat_id`
+
+  Options:
+  * `:user_id` - Unique identifier of the target user
+  * `:chat_id` - Unique identifier or username of the target channel chat
+  * `:pay_for_upgrade` - Pass true to pay for the gift upgrade from the bot's balance
+  * `:text` - Text that will be shown along with the gift
+  * `:text_parse_mode` - Mode for parsing entities in the text
+  * `:text_entities` - JSON-serializable array of message entities or pre-encoded JSON
+  """
+  @spec send_gift(binary) :: :ok | {:error, Error.t()}
+  @spec send_gift(binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  @spec send_gift(Client.t(), binary) :: :ok | {:error, Error.t()}
+  @spec send_gift(Client.t(), binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  def send_gift(gift_id), do: send_gift(gift_id, [])
+
+  def send_gift(%Client{} = client, gift_id) do
+    send_gift(client, gift_id, [])
+  end
+
+  def send_gift(gift_id, options) do
+    api_request(
+      "sendGift",
+      request_options([gift_id: gift_id], encode_json_option(options, :text_entities))
+    )
+  end
+
+  def send_gift(%Client{} = client, gift_id, options) do
+    api_request(
+      client,
+      "sendGift",
+      request_options([gift_id: gift_id], encode_json_option(options, :text_entities))
+    )
+  end
+
+  @doc """
+  Use this method to gift a Telegram Premium subscription to a user.
+  Returns `:ok` on success.
+
+  Args:
+  * `user_id` - Unique identifier of the target user
+  * `month_count` - Number of months the subscription will be active
+  * `star_count` - Number of Telegram Stars to pay
+  * `options` - orddict or map of options
+
+  Options:
+  * `:text` - Text that will be shown along with the service message
+  * `:text_parse_mode` - Mode for parsing entities in the text
+  * `:text_entities` - JSON-serializable array of message entities or pre-encoded JSON
+  """
+  @spec gift_premium_subscription(integer, integer, integer) :: :ok | {:error, Error.t()}
+  @spec gift_premium_subscription(integer, integer, integer, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  @spec gift_premium_subscription(Client.t(), integer, integer, integer) ::
+          :ok | {:error, Error.t()}
+  @spec gift_premium_subscription(Client.t(), integer, integer, integer, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  def gift_premium_subscription(user_id, month_count, star_count) do
+    gift_premium_subscription(user_id, month_count, star_count, [])
+  end
+
+  def gift_premium_subscription(%Client{} = client, user_id, month_count, star_count) do
+    gift_premium_subscription(client, user_id, month_count, star_count, [])
+  end
+
+  def gift_premium_subscription(user_id, month_count, star_count, options) do
+    api_request(
+      "giftPremiumSubscription",
+      request_options(
+        [user_id: user_id, month_count: month_count, star_count: star_count],
+        encode_json_option(options, :text_entities)
+      )
+    )
+  end
+
+  def gift_premium_subscription(%Client{} = client, user_id, month_count, star_count, options) do
+    api_request(
+      client,
+      "giftPremiumSubscription",
+      request_options(
+        [user_id: user_id, month_count: month_count, star_count: star_count],
+        encode_json_option(options, :text_entities)
+      )
+    )
+  end
+
+  @doc """
   Use this method to verify a user on behalf of the organization represented by the bot.
   Returns `:ok` on success.
   """

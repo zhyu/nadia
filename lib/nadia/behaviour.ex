@@ -125,6 +125,24 @@ defmodule Nadia.Behaviour do
   @callback set_user_emoji_status(Client.t(), integer) :: :ok | {:error, Error.t()}
   @callback set_user_emoji_status(Client.t(), integer, [{atom, any}] | map) ::
               :ok | {:error, Error.t()}
+  @callback send_gift(binary) :: :ok | {:error, Error.t()}
+  @callback send_gift(binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  @callback send_gift(Client.t(), binary) :: :ok | {:error, Error.t()}
+  @callback send_gift(Client.t(), binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback gift_premium_subscription(integer, integer, integer) ::
+              :ok | {:error, Error.t()}
+  @callback gift_premium_subscription(integer, integer, integer, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback gift_premium_subscription(Client.t(), integer, integer, integer) ::
+              :ok | {:error, Error.t()}
+  @callback gift_premium_subscription(
+              Client.t(),
+              integer,
+              integer,
+              integer,
+              [{atom, any}] | map
+            ) :: :ok | {:error, Error.t()}
   @callback verify_user(integer) :: :ok | {:error, Error.t()}
   @callback verify_user(integer, [{atom, any}] | map) :: :ok | {:error, Error.t()}
   @callback verify_user(Client.t(), integer) :: :ok | {:error, Error.t()}
@@ -905,6 +923,12 @@ defmodule Nadia.Behaviour do
                       set_user_emoji_status: 1,
                       set_user_emoji_status: 2,
                       set_user_emoji_status: 3,
+                      send_gift: 1,
+                      send_gift: 2,
+                      send_gift: 3,
+                      gift_premium_subscription: 3,
+                      gift_premium_subscription: 4,
+                      gift_premium_subscription: 5,
                       verify_user: 1,
                       verify_user: 2,
                       verify_user: 3,

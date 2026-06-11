@@ -228,6 +228,81 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "outgoing gift true-return wrappers build request contracts" do
+    stub_telegram_result(true)
+
+    text_entities = [
+      %MessageEntity{type: "bold", offset: 0, length: 4},
+      [type: "custom_emoji", offset: 5, length: 1, custom_emoji_id: "emoji-1"]
+    ]
+
+    assert :ok ==
+             Nadia.send_gift("gift-j3",
+               chat_id: -1_001_234_567_890,
+               pay_for_upgrade: false,
+               text: "Gift text",
+               text_parse_mode: "MarkdownV2",
+               text_entities: text_entities
+             )
+
+    request =
+      assert_telegram_request("sendGift",
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params["gift_id"] == "gift-j3"
+    assert params["chat_id"] == "-1001234567890"
+    assert params["pay_for_upgrade"] == "false"
+    assert params["text"] == "Gift text"
+    assert params["text_parse_mode"] == "MarkdownV2"
+    refute Map.has_key?(params, "user_id")
+
+    assert Jason.decode!(params["text_entities"]) == [
+             %{"type" => "bold", "offset" => 0, "length" => 4},
+             %{
+               "type" => "custom_emoji",
+               "offset" => 5,
+               "length" => 1,
+               "custom_emoji_id" => "emoji-1"
+             }
+           ]
+
+    client =
+      Client.new(
+        token: "999:family-j3",
+        http_client: Nadia.HTTPCase.StubHTTPClient
+      )
+
+    assert :ok ==
+             Nadia.gift_premium_subscription(client, 91_001, 3, 1000, %{
+               text: "Premium",
+               text_parse_mode: nil,
+               text_entities: [%MessageEntity{type: "italic", offset: 0, length: 7}]
+             })
+
+    request =
+      assert_http_request(
+        method: :post,
+        url: "https://api.telegram.org/bot999:family-j3/giftPremiumSubscription",
+        headers: [],
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params["user_id"] == "91001"
+    assert params["month_count"] == "3"
+    assert params["star_count"] == "1000"
+    assert params["text"] == "Premium"
+    refute Map.has_key?(params, "text_parse_mode")
+
+    assert Jason.decode!(params["text_entities"]) == [
+             %{"type" => "italic", "offset" => 0, "length" => 7}
+           ]
+  end
+
   test "bot command and menu settings wrappers JSON-encode object form fields" do
     stub_telegram_result(true)
 

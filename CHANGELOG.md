@@ -35,6 +35,7 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added Bot API wrappers for chat administration, membership restrictions,
   join-request moderation, chat metadata, pinned-message, and chat sticker-set
   maintenance.
+- Added Bot API `setChatPhoto` wrapper with direct chat photo upload support.
 - Added Bot API wrappers for bot lifecycle and public bot settings maintenance,
   including commands, descriptions, menu button, default administrator rights,
   and user emoji status updates.

@@ -2438,6 +2438,13 @@ defmodule Nadia.APITest do
       options: [recv_timeout: 5000]
     )
 
+    assert :ok == Nadia.set_chat_photo("@moderated", "existing-photo-file-id")
+
+    assert_telegram_request("setChatPhoto",
+      body: {:form, [{"chat_id", "@moderated"}, {"photo", "existing-photo-file-id"}]},
+      options: [recv_timeout: 5000]
+    )
+
     assert :ok == Nadia.set_chat_title("@moderated", "Moderation Room")
 
     assert_telegram_request("setChatTitle",
@@ -2479,6 +2486,36 @@ defmodule Nadia.APITest do
       body: {:form, [{"chat_id", "@moderated"}]},
       options: [recv_timeout: 5000]
     )
+  end
+
+  test "set_chat_photo builds multipart request for explicit-client local file upload" do
+    file_path =
+      Path.join(
+        System.tmp_dir!(),
+        "nadia-set-chat-photo-#{System.unique_integer([:positive])}.jpg"
+      )
+
+    File.write!(file_path, "chat photo")
+    on_exit(fn -> File.rm(file_path) end)
+
+    stub_telegram_result(true)
+
+    client = Client.new(token: "999:family-o", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    assert :ok == Nadia.set_chat_photo(client, "@moderated", file_path)
+
+    request =
+      assert_http_request(
+        method: :post,
+        url: "https://api.telegram.org/bot999:family-o/setChatPhoto",
+        headers: [],
+        options: [recv_timeout: 5000]
+      )
+
+    assert {:multipart, parts} = request.body
+    assert {"chat_id", "@moderated"} in parts
+
+    assert {:file, file_path, {"form-data", [{"name", "photo"}, {"filename", file_path}]}, []} in parts
   end
 
   test "get_forum_topic_icon_stickers parses sticker arrays and supports explicit clients" do

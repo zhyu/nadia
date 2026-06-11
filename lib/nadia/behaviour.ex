@@ -597,6 +597,24 @@ defmodule Nadia.Behaviour do
   @callback transfer_business_account_stars(binary, integer) :: :ok | {:error, Error.t()}
   @callback transfer_business_account_stars(Client.t(), binary, integer) ::
               :ok | {:error, Error.t()}
+  @callback answer_shipping_query(binary, boolean) :: :ok | {:error, Error.t()}
+  @callback answer_shipping_query(binary, boolean, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback answer_shipping_query(Client.t(), binary, boolean) :: :ok | {:error, Error.t()}
+  @callback answer_shipping_query(Client.t(), binary, boolean, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback answer_pre_checkout_query(binary, boolean) :: :ok | {:error, Error.t()}
+  @callback answer_pre_checkout_query(binary, boolean, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback answer_pre_checkout_query(Client.t(), binary, boolean) ::
+              :ok | {:error, Error.t()}
+  @callback answer_pre_checkout_query(Client.t(), binary, boolean, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback refund_star_payment(integer, binary) :: :ok | {:error, Error.t()}
+  @callback refund_star_payment(Client.t(), integer, binary) :: :ok | {:error, Error.t()}
+  @callback edit_user_star_subscription(integer, binary, boolean) :: :ok | {:error, Error.t()}
+  @callback edit_user_star_subscription(Client.t(), integer, binary, boolean) ::
+              :ok | {:error, Error.t()}
   @callback get_managed_bot_token(integer) :: {:ok, binary} | {:error, Error.t()}
   @callback get_managed_bot_token(Client.t(), integer) :: {:ok, binary} | {:error, Error.t()}
   @callback replace_managed_bot_token(integer) :: {:ok, binary} | {:error, Error.t()}
@@ -1006,6 +1024,16 @@ defmodule Nadia.Behaviour do
                       set_business_account_gift_settings: 4,
                       transfer_business_account_stars: 2,
                       transfer_business_account_stars: 3,
+                      answer_shipping_query: 2,
+                      answer_shipping_query: 3,
+                      answer_shipping_query: 4,
+                      answer_pre_checkout_query: 2,
+                      answer_pre_checkout_query: 3,
+                      answer_pre_checkout_query: 4,
+                      refund_star_payment: 2,
+                      refund_star_payment: 3,
+                      edit_user_star_subscription: 3,
+                      edit_user_star_subscription: 4,
                       get_managed_bot_token: 2,
                       replace_managed_bot_token: 2,
                       get_managed_bot_access_settings: 2,

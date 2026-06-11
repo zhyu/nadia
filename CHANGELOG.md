@@ -30,6 +30,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   token/access settings, user chat boosts, and user personal chat messages.
 - Added Bot API wrappers for business account read/delete, profile, gift
   settings, and Stars transfer maintenance.
+- Added Bot API wrappers for payment acknowledgement and Telegram Stars
+  payment/subscription maintenance.
 - Added Bot API wrappers for bulk message deletion and message reaction
   maintenance.
 - Added Bot API wrappers for chat administration, membership restrictions,

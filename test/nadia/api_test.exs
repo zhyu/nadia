@@ -1294,6 +1294,122 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "answer_shipping_query/3 encodes shipping options and preserves error messages" do
+    stub_telegram_result(true)
+
+    shipping_options = [
+      [
+        id: "standard",
+        title: "Standard",
+        prices: [[label: "Shipping", amount: 500, future_nil: nil]],
+        future_nil: nil
+      ],
+      %{
+        id: "express",
+        title: "Express",
+        prices: [%{label: "Shipping", amount: 1200, future_nil: nil}],
+        future_nil: nil
+      }
+    ]
+
+    assert :ok ==
+             Nadia.answer_shipping_query("shipping-l1-ok", true,
+               shipping_options: shipping_options,
+               error_message: nil
+             )
+
+    request = assert_telegram_request("answerShippingQuery", options: [recv_timeout: 5000])
+    params = form_params(request)
+
+    assert params["shipping_query_id"] == "shipping-l1-ok"
+    assert params["ok"] == "true"
+    refute Map.has_key?(params, "error_message")
+
+    assert Jason.decode!(params["shipping_options"]) == [
+             %{
+               "id" => "standard",
+               "title" => "Standard",
+               "prices" => [%{"label" => "Shipping", "amount" => 500}]
+             },
+             %{
+               "id" => "express",
+               "title" => "Express",
+               "prices" => [%{"label" => "Shipping", "amount" => 1200}]
+             }
+           ]
+
+    assert :ok ==
+             Nadia.answer_shipping_query("shipping-l1-error", false,
+               error_message: "Cannot ship there"
+             )
+
+    assert_telegram_request("answerShippingQuery",
+      body:
+        {:form,
+         [
+           {"shipping_query_id", "shipping-l1-error"},
+           {"ok", "false"},
+           {"error_message", "Cannot ship there"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
+  test "pre-checkout and Star payment wrappers build request contracts" do
+    stub_telegram_result(true)
+
+    client = Client.new(token: "999:family-l1", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    assert :ok ==
+             Nadia.answer_pre_checkout_query(client, "pre-checkout-l1", false, %{
+               error_message: "Payment unavailable",
+               future_nil: nil
+             })
+
+    request =
+      assert_http_request(
+        method: :post,
+        url: "https://api.telegram.org/bot999:family-l1/answerPreCheckoutQuery",
+        headers: [],
+        options: [recv_timeout: 5000]
+      )
+
+    assert form_params(request) == %{
+             "pre_checkout_query_id" => "pre-checkout-l1",
+             "ok" => "false",
+             "error_message" => "Payment unavailable"
+           }
+
+    assert :ok == Nadia.refund_star_payment(12001, "charge-l1")
+
+    assert_telegram_request("refundStarPayment",
+      body:
+        {:form,
+         [
+           {"user_id", "12001"},
+           {"telegram_payment_charge_id", "charge-l1"}
+         ]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok ==
+             Nadia.edit_user_star_subscription(client, 12001, "subscription-charge-l1", false)
+
+    request =
+      assert_http_request(
+        method: :post,
+        url: "https://api.telegram.org/bot999:family-l1/editUserStarSubscription",
+        headers: [],
+        options: [recv_timeout: 5000]
+      )
+
+    assert form_params(request) == %{
+             "user_id" => "12001",
+             "telegram_payment_charge_id" => "subscription-charge-l1",
+             "is_canceled" => "false"
+           }
+  end
+
   test "managed bot token wrappers build requests and return string tokens" do
     stub_telegram_result("123:old-managed-token")
 

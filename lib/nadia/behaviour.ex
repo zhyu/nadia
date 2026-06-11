@@ -124,6 +124,22 @@ defmodule Nadia.Behaviour do
   @callback set_user_emoji_status(Client.t(), integer) :: :ok | {:error, Error.t()}
   @callback set_user_emoji_status(Client.t(), integer, [{atom, any}] | map) ::
               :ok | {:error, Error.t()}
+  @callback verify_user(integer) :: :ok | {:error, Error.t()}
+  @callback verify_user(integer, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  @callback verify_user(Client.t(), integer) :: :ok | {:error, Error.t()}
+  @callback verify_user(Client.t(), integer, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback verify_chat(integer | binary) :: :ok | {:error, Error.t()}
+  @callback verify_chat(integer | binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback verify_chat(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  @callback verify_chat(Client.t(), integer | binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+  @callback remove_user_verification(integer) :: :ok | {:error, Error.t()}
+  @callback remove_user_verification(Client.t(), integer) :: :ok | {:error, Error.t()}
+  @callback remove_chat_verification(integer | binary) :: :ok | {:error, Error.t()}
+  @callback remove_chat_verification(Client.t(), integer | binary) ::
+              :ok | {:error, Error.t()}
   @callback send_message(integer, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
   @callback send_message(Client.t(), integer | binary, binary, [{atom, any}]) ::
@@ -850,6 +866,16 @@ defmodule Nadia.Behaviour do
                       set_user_emoji_status: 1,
                       set_user_emoji_status: 2,
                       set_user_emoji_status: 3,
+                      verify_user: 1,
+                      verify_user: 2,
+                      verify_user: 3,
+                      verify_chat: 1,
+                      verify_chat: 2,
+                      verify_chat: 3,
+                      remove_user_verification: 1,
+                      remove_user_verification: 2,
+                      remove_chat_verification: 1,
+                      remove_chat_verification: 2,
                       send_message: 4,
                       forward_message: 4,
                       forward_message: 5,

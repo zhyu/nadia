@@ -182,6 +182,51 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "organization verification wrappers build request contracts" do
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.verify_user(91_001, custom_description: "Core maintainer")
+
+    assert_telegram_request("verifyUser",
+      body: {:form, [{"user_id", "91001"}, {"custom_description", "Core maintainer"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    client = Client.new(token: "999:family-j1", http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    assert :ok ==
+             Nadia.verify_chat(client, "@verified_room", %{
+               custom_description: "Official channel"
+             })
+
+    request =
+      assert_http_request(
+        method: :post,
+        url: "https://api.telegram.org/bot999:family-j1/verifyChat",
+        headers: [],
+        options: [recv_timeout: 5000]
+      )
+
+    assert form_params(request) == %{
+             "chat_id" => "@verified_room",
+             "custom_description" => "Official channel"
+           }
+
+    assert :ok == Nadia.remove_user_verification(91_001)
+
+    assert_telegram_request("removeUserVerification",
+      body: {:form, [{"user_id", "91001"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.remove_chat_verification(-1_009_100_100_123)
+
+    assert_telegram_request("removeChatVerification",
+      body: {:form, [{"chat_id", "-1009100100123"}]},
+      options: [recv_timeout: 5000]
+    )
+  end
+
   test "bot command and menu settings wrappers JSON-encode object form fields" do
     stub_telegram_result(true)
 

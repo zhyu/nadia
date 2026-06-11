@@ -486,6 +486,81 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to verify a user on behalf of the organization represented by the bot.
+  Returns `:ok` on success.
+  """
+  @spec verify_user(integer) :: :ok | {:error, Error.t()}
+  @spec verify_user(integer, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  @spec verify_user(Client.t(), integer) :: :ok | {:error, Error.t()}
+  @spec verify_user(Client.t(), integer, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  def verify_user(user_id), do: verify_user(user_id, [])
+
+  def verify_user(%Client{} = client, user_id) do
+    verify_user(client, user_id, [])
+  end
+
+  def verify_user(user_id, options) do
+    api_request("verifyUser", request_options([user_id: user_id], options))
+  end
+
+  def verify_user(%Client{} = client, user_id, options) do
+    api_request(client, "verifyUser", request_options([user_id: user_id], options))
+  end
+
+  @doc """
+  Use this method to verify a chat on behalf of the organization represented by the bot.
+  Returns `:ok` on success.
+  """
+  @spec verify_chat(integer | binary) :: :ok | {:error, Error.t()}
+  @spec verify_chat(integer | binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
+  @spec verify_chat(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  @spec verify_chat(Client.t(), integer | binary, [{atom, any}] | map) ::
+          :ok | {:error, Error.t()}
+  def verify_chat(chat_id), do: verify_chat(chat_id, [])
+
+  def verify_chat(%Client{} = client, chat_id) do
+    verify_chat(client, chat_id, [])
+  end
+
+  def verify_chat(chat_id, options) do
+    api_request("verifyChat", request_options([chat_id: chat_id], options))
+  end
+
+  def verify_chat(%Client{} = client, chat_id, options) do
+    api_request(client, "verifyChat", request_options([chat_id: chat_id], options))
+  end
+
+  @doc """
+  Use this method to remove verification from a user who is currently verified on behalf
+  of the organization represented by the bot.
+  Returns `:ok` on success.
+  """
+  @spec remove_user_verification(integer) :: :ok | {:error, Error.t()}
+  @spec remove_user_verification(Client.t(), integer) :: :ok | {:error, Error.t()}
+  def remove_user_verification(user_id) do
+    api_request("removeUserVerification", user_id: user_id)
+  end
+
+  def remove_user_verification(%Client{} = client, user_id) do
+    api_request(client, "removeUserVerification", user_id: user_id)
+  end
+
+  @doc """
+  Use this method to remove verification from a chat that is currently verified on behalf
+  of the organization represented by the bot.
+  Returns `:ok` on success.
+  """
+  @spec remove_chat_verification(integer | binary) :: :ok | {:error, Error.t()}
+  @spec remove_chat_verification(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
+  def remove_chat_verification(chat_id) do
+    api_request("removeChatVerification", chat_id: chat_id)
+  end
+
+  def remove_chat_verification(%Client{} = client, chat_id) do
+    api_request(client, "removeChatVerification", chat_id: chat_id)
+  end
+
+  @doc """
   Use this method to send text messages.
   On success, the sent Message is returned.
 

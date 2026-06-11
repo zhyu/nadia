@@ -44,6 +44,7 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   default administrator rights.
 - Added Bot API wrappers and response structs for bot profile photos and Mini
   App prepared inline messages and keyboard buttons.
+- Added Bot API organization verification wrappers for users and chats.
 - Added Bot API forum topic wrappers, `%Nadia.Model.ForumTopic{}`, and parser
   coverage for `createForumTopic` and `getForumTopicIconStickers` results.
 - Added Bot API wrappers for modern sticker set and custom emoji sticker

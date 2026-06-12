@@ -18,6 +18,7 @@ defmodule Nadia.Model do
               can_join_groups: nil,
               can_read_all_group_messages: nil,
               supports_guest_queries: nil,
+              supports_join_request_queries: nil,
               supports_inline_queries: nil,
               can_connect_to_business: nil,
               has_main_web_app: nil,
@@ -37,6 +38,7 @@ defmodule Nadia.Model do
             can_join_groups: boolean,
             can_read_all_group_messages: boolean,
             supports_guest_queries: boolean,
+            supports_join_request_queries: boolean,
             supports_inline_queries: boolean,
             can_connect_to_business: boolean,
             has_main_web_app: boolean,
@@ -823,6 +825,15 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule RichMessage do
+    defstruct blocks: [], is_rtl: nil
+
+    @type t :: %RichMessage{
+            blocks: [any],
+            is_rtl: boolean
+          }
+  end
+
   defmodule Message do
     defstruct message_id: nil,
               message_thread_id: nil,
@@ -862,6 +873,7 @@ defmodule Nadia.Model do
               link_preview_options: nil,
               suggested_post_info: nil,
               effect_id: nil,
+              rich_message: nil,
               animation: nil,
               audio: nil,
               document: nil,
@@ -944,6 +956,7 @@ defmodule Nadia.Model do
             link_preview_options: any,
             suggested_post_info: any,
             effect_id: binary,
+            rich_message: RichMessage.t(),
             animation: any,
             audio: Audio.t(),
             document: Document.t(),
@@ -1362,6 +1375,7 @@ defmodule Nadia.Model do
     defstruct animation: nil,
               audio: nil,
               document: nil,
+              link: nil,
               live_photo: nil,
               location: nil,
               photo: [],
@@ -1373,6 +1387,7 @@ defmodule Nadia.Model do
             animation: any,
             audio: Audio.t(),
             document: Document.t(),
+            link: Link.t(),
             live_photo: any,
             location: Location.t(),
             photo: [PhotoSize.t()],
@@ -1380,6 +1395,12 @@ defmodule Nadia.Model do
             venue: Venue.t(),
             video: Video.t()
           }
+  end
+
+  defmodule Link do
+    defstruct url: nil
+
+    @type t :: %Link{url: binary}
   end
 
   defmodule PollOption do
@@ -1520,6 +1541,26 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule ChatJoinRequest do
+    defstruct chat: nil,
+              from: nil,
+              user_chat_id: nil,
+              date: nil,
+              bio: nil,
+              invite_link: nil,
+              query_id: nil
+
+    @type t :: %ChatJoinRequest{
+            chat: Chat.t(),
+            from: User.t(),
+            user_chat_id: integer,
+            date: integer,
+            bio: binary,
+            invite_link: ChatInviteLink.t(),
+            query_id: binary
+          }
+  end
+
   defmodule Update do
     defstruct update_id: nil,
               message: nil,
@@ -1571,7 +1612,7 @@ defmodule Nadia.Model do
             poll_answer: PollAnswer.t(),
             my_chat_member: any,
             chat_member: any,
-            chat_join_request: any,
+            chat_join_request: ChatJoinRequest.t(),
             chat_boost: ChatBoostUpdated.t(),
             removed_chat_boost: ChatBoostRemoved.t(),
             managed_bot: ManagedBotUpdated.t()

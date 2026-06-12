@@ -83,8 +83,8 @@ defmodule Nadia.HTTPClient.ReqTest do
     assert {:ok, options} = ReqClient.to_req_options(request)
 
     assert [
-             {"chat_id", "123"},
-             {"photo", {%File.Stream{path: ^file_path}, file_options}}
+             chat_id: "123",
+             photo: {%File.Stream{path: ^file_path}, file_options}
            ] = options[:form_multipart]
 
     assert file_options[:filename] == "photo.txt"

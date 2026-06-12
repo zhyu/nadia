@@ -34,9 +34,11 @@ defmodule Nadia.Parser do
     ChatBoostSourcePremium,
     ChatBoostUpdated,
     ChatAdministratorRights,
+    ChatJoinRequest,
     ChatMember,
     Checklist,
     ChecklistTask,
+    Link,
     Message,
     MenuButton,
     MenuButtonCommands,
@@ -81,6 +83,7 @@ defmodule Nadia.Parser do
     RevenueWithdrawalStateSucceeded,
     SentGuestMessage,
     SentWebAppMessage,
+    RichMessage,
     StarAmount,
     StarTransaction,
     StarTransactions,
@@ -283,6 +286,7 @@ defmodule Nadia.Parser do
   defp parse(Poll, {:media, val}), do: {:media, parse(PollMedia, val)}
   defp parse(Poll, {:explanation_media, val}), do: {:explanation_media, parse(PollMedia, val)}
   defp parse(PollOption, {:media, val}), do: {:media, parse(PollMedia, val)}
+  defp parse(PollMedia, {:link, val}), do: {:link, parse(Link, val)}
   defp parse(PollOptionAdded, {:poll_message, val}), do: {:poll_message, parse(Message, val)}
   defp parse(PollOptionDeleted, {:poll_message, val}), do: {:poll_message, parse(Message, val)}
 
@@ -294,6 +298,7 @@ defmodule Nadia.Parser do
     do: {:boosts, Enum.map(val, &parse(ChatBoost, &1))}
 
   defp parse(Message, {:paid_media, val}), do: {:paid_media, parse(PaidMediaInfo, val)}
+  defp parse(Message, {:rich_message, val}), do: {:rich_message, parse(RichMessage, val)}
 
   defp parse(Update, {:purchased_paid_media, val}),
     do: {:purchased_paid_media, parse(PaidMediaPurchased, val)}
@@ -319,6 +324,7 @@ defmodule Nadia.Parser do
   defp parse(ManagedBotUpdated, {:bot, val}), do: {:bot, parse(User, val)}
 
   defp parse(ChatInviteLink, {:creator, val}), do: {:creator, parse(User, val)}
+  defp parse(ChatJoinRequest, {:invite_link, val}), do: {:invite_link, parse(ChatInviteLink, val)}
 
   defp parse(GameHighScore, {:user, val}), do: {:user, parse(User, val)}
 
@@ -420,6 +426,9 @@ defmodule Nadia.Parser do
     do: {:managed_bot_created, parse(ManagedBotCreated, val)}
 
   defp parse({:managed_bot, val}), do: {:managed_bot, parse(ManagedBotUpdated, val)}
+
+  defp parse({:chat_join_request, val}),
+    do: {:chat_join_request, parse(ChatJoinRequest, val)}
 
   defp parse({:removed_chat_boost, val}),
     do: {:removed_chat_boost, parse(ChatBoostRemoved, val)}

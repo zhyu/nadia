@@ -762,6 +762,56 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to send rich messages.
+  On success, the sent Message is returned.
+
+  Args:
+  * `chat_id` - Unique identifier for the target chat or username of the target bot,
+  supergroup, or channel
+  * `rich_message` - JSON-serializable InputRichMessage object or a pre-encoded JSON string
+  * `options` - orddict of options
+  """
+  @spec send_rich_message(integer | binary, list | map | struct | binary) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_rich_message(integer | binary, list | map | struct | binary, [{atom, any}] | map) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_rich_message(Client.t(), integer | binary, list | map | struct | binary) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  @spec send_rich_message(
+          Client.t(),
+          integer | binary,
+          list | map | struct | binary,
+          [{atom, any}] | map
+        ) ::
+          {:ok, Message.t()} | {:error, Error.t()}
+  def send_rich_message(chat_id, rich_message), do: send_rich_message(chat_id, rich_message, [])
+
+  def send_rich_message(%Client{} = client, chat_id, rich_message) do
+    send_rich_message(client, chat_id, rich_message, [])
+  end
+
+  def send_rich_message(chat_id, rich_message, options) do
+    api_request(
+      "sendRichMessage",
+      request_options(
+        [chat_id: chat_id, rich_message: encode_json_payload(rich_message)],
+        encode_rich_message_options(options)
+      )
+    )
+  end
+
+  def send_rich_message(%Client{} = client, chat_id, rich_message, options) do
+    api_request(
+      client,
+      "sendRichMessage",
+      request_options(
+        [chat_id: chat_id, rich_message: encode_json_payload(rich_message)],
+        encode_rich_message_options(options)
+      )
+    )
+  end
+
+  @doc """
   Use this method to forward messages of any kind.
   On success, the sent Message is returned.
 
@@ -1561,6 +1611,52 @@ defmodule Nadia do
   end
 
   @doc """
+  Use this method to stream a partial rich message to a user while the message is
+  being generated.
+  Returns `:ok` on success.
+  """
+  @spec send_rich_message_draft(integer, integer, list | map | struct | binary) ::
+          :ok | {:error, Error.t()}
+  @spec send_rich_message_draft(integer, integer, list | map | struct | binary, [
+          {atom, any}
+        ]) ::
+          :ok | {:error, Error.t()}
+  @spec send_rich_message_draft(Client.t(), integer, integer, list | map | struct | binary) ::
+          :ok | {:error, Error.t()}
+  @spec send_rich_message_draft(
+          Client.t(),
+          integer,
+          integer,
+          list | map | struct | binary,
+          [{atom, any}]
+        ) ::
+          :ok | {:error, Error.t()}
+  def send_rich_message_draft(chat_id, draft_id, rich_message) do
+    send_rich_message_draft(chat_id, draft_id, rich_message, [])
+  end
+
+  def send_rich_message_draft(%Client{} = client, chat_id, draft_id, rich_message) do
+    send_rich_message_draft(client, chat_id, draft_id, rich_message, [])
+  end
+
+  def send_rich_message_draft(chat_id, draft_id, rich_message, options) do
+    api_request(
+      "sendRichMessageDraft",
+      [chat_id: chat_id, draft_id: draft_id, rich_message: encode_json_payload(rich_message)] ++
+        options
+    )
+  end
+
+  def send_rich_message_draft(%Client{} = client, chat_id, draft_id, rich_message, options) do
+    api_request(
+      client,
+      "sendRichMessageDraft",
+      [chat_id: chat_id, draft_id: draft_id, rich_message: encode_json_payload(rich_message)] ++
+        options
+    )
+  end
+
+  @doc """
   Use this method to send point on the map.
   On success, the sent Message is returned.
 
@@ -2353,6 +2449,53 @@ defmodule Nadia do
 
   def decline_chat_join_request(%Client{} = client, chat_id, user_id) do
     api_request(client, "declineChatJoinRequest", chat_id: chat_id, user_id: user_id)
+  end
+
+  @doc """
+  Use this method to process a received chat join request query.
+  Returns `:ok` on success.
+  """
+  @spec answer_chat_join_request_query(binary, binary) :: :ok | {:error, Error.t()}
+  @spec answer_chat_join_request_query(Client.t(), binary, binary) :: :ok | {:error, Error.t()}
+  def answer_chat_join_request_query(chat_join_request_query_id, result) do
+    api_request(
+      "answerChatJoinRequestQuery",
+      chat_join_request_query_id: chat_join_request_query_id,
+      result: result
+    )
+  end
+
+  def answer_chat_join_request_query(%Client{} = client, chat_join_request_query_id, result) do
+    api_request(
+      client,
+      "answerChatJoinRequestQuery",
+      chat_join_request_query_id: chat_join_request_query_id,
+      result: result
+    )
+  end
+
+  @doc """
+  Use this method to process a received chat join request query by showing a
+  Mini App to the user before deciding the outcome.
+  Returns `:ok` on success.
+  """
+  @spec send_chat_join_request_web_app(binary, binary) :: :ok | {:error, Error.t()}
+  @spec send_chat_join_request_web_app(Client.t(), binary, binary) :: :ok | {:error, Error.t()}
+  def send_chat_join_request_web_app(chat_join_request_query_id, web_app_url) do
+    api_request(
+      "sendChatJoinRequestWebApp",
+      chat_join_request_query_id: chat_join_request_query_id,
+      web_app_url: web_app_url
+    )
+  end
+
+  def send_chat_join_request_web_app(%Client{} = client, chat_join_request_query_id, web_app_url) do
+    api_request(
+      client,
+      "sendChatJoinRequestWebApp",
+      chat_join_request_query_id: chat_join_request_query_id,
+      web_app_url: web_app_url
+    )
   end
 
   @doc """
@@ -4501,9 +4644,18 @@ defmodule Nadia do
   * `:reply_markup`	- A JSON-serialized object for an inline
   keyboard - `Nadia.Model.InlineKeyboardMarkup`
   """
-  @spec edit_message_text(integer | binary, integer, binary, binary, [{atom, any}]) ::
+  @spec edit_message_text(integer | binary, integer | nil, binary | nil, binary | nil, [
+          {atom, any}
+        ]) ::
           {:ok, Message.t()} | {:error, Error.t()}
-  @spec edit_message_text(Client.t(), integer | binary, integer, binary, binary, [{atom, any}]) ::
+  @spec edit_message_text(
+          Client.t(),
+          integer | binary,
+          integer | nil,
+          binary | nil,
+          binary | nil,
+          [{atom, any}]
+        ) ::
           {:ok, Message.t()} | {:error, Error.t()}
   def edit_message_text(chat_id, message_id, inline_message_id, text) do
     edit_message_text(chat_id, message_id, inline_message_id, text, [])
@@ -4516,8 +4668,15 @@ defmodule Nadia do
   def edit_message_text(chat_id, message_id, inline_message_id, text, options) do
     api_request(
       "editMessageText",
-      [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id, text: text] ++
-        options
+      request_options(
+        [
+          chat_id: chat_id,
+          message_id: message_id,
+          inline_message_id: inline_message_id,
+          text: text
+        ],
+        encode_json_option(options, :rich_message)
+      )
     )
   end
 
@@ -4525,8 +4684,15 @@ defmodule Nadia do
     api_request(
       client,
       "editMessageText",
-      [chat_id: chat_id, message_id: message_id, inline_message_id: inline_message_id, text: text] ++
-        options
+      request_options(
+        [
+          chat_id: chat_id,
+          message_id: message_id,
+          inline_message_id: inline_message_id,
+          text: text
+        ],
+        encode_json_option(options, :rich_message)
+      )
     )
   end
 
@@ -5190,6 +5356,12 @@ defmodule Nadia do
     options
     |> encode_json_array_option(:suggested_tip_amounts)
     |> encode_json_option(:provider_data)
+    |> encode_json_option(:suggested_post_parameters)
+    |> encode_json_option(:reply_parameters)
+  end
+
+  defp encode_rich_message_options(options) do
+    options
     |> encode_json_option(:suggested_post_parameters)
     |> encode_json_option(:reply_parameters)
   end

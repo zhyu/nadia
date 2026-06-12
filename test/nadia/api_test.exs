@@ -66,6 +66,7 @@ defmodule Nadia.APITest do
     ReactionCount,
     ReactionType,
     ReplyKeyboardRemove,
+    RichMessage,
     SentGuestMessage,
     SentWebAppMessage,
     StarAmount,
@@ -2922,6 +2923,74 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "send_rich_message and send_rich_message_draft build request contracts" do
+    rich_message = %{html: "<p>Hello <b>Nadia</b></p>", is_rtl: false}
+
+    stub_telegram_result(
+      message_result(%{
+        message_id: 9503,
+        rich_message: %{
+          blocks: [%{type: "paragraph", text: "Hello Nadia"}],
+          is_rtl: false
+        }
+      })
+    )
+
+    assert {:ok,
+            %Message{
+              message_id: 9503,
+              rich_message: %RichMessage{
+                blocks: [%{"type" => "paragraph", "text" => "Hello Nadia"}],
+                is_rtl: false
+              }
+            }} =
+             Nadia.send_rich_message("@rich", rich_message,
+               suggested_post_parameters: %{price: 100},
+               reply_parameters: %{message_id: 12}
+             )
+
+    request =
+      assert_telegram_request("sendRichMessage",
+        options: [recv_timeout: 5000]
+      )
+
+    params = form_params(request)
+
+    assert params["chat_id"] == "@rich"
+
+    assert Jason.decode!(params["rich_message"]) == %{
+             "html" => "<p>Hello <b>Nadia</b></p>",
+             "is_rtl" => false
+           }
+
+    assert Jason.decode!(params["suggested_post_parameters"]) == %{"price" => 100}
+    assert Jason.decode!(params["reply_parameters"]) == %{"message_id" => 12}
+
+    stub_telegram_result(true)
+
+    assert :ok ==
+             Nadia.send_rich_message_draft(123, 45, [markdown: "**draft**"], message_thread_id: 7)
+
+    params = form_params(assert_telegram_request("sendRichMessageDraft"))
+
+    assert params["chat_id"] == "123"
+    assert params["draft_id"] == "45"
+    assert params["message_thread_id"] == "7"
+    assert Jason.decode!(params["rich_message"]) == %{"markdown" => "**draft**"}
+
+    stub_telegram_result(message_result(%{message_id: 9504}))
+
+    assert {:ok, %Message{message_id: 9504}} =
+             Nadia.edit_message_text(123, 456, nil, nil, rich_message: %{markdown: "**edited**"})
+
+    params = form_params(assert_telegram_request("editMessageText"))
+
+    assert params["chat_id"] == "123"
+    assert params["message_id"] == "456"
+    refute Map.has_key?(params, "text")
+    assert Jason.decode!(params["rich_message"]) == %{"markdown" => "**edited**"}
+  end
+
   test "send_game/3 builds request and parses messages" do
     reply_markup = %{inline_keyboard: [[%{text: "Play", callback_game: %{}}]]}
     encoded_reply_markup = Jason.encode!(reply_markup)
@@ -3597,6 +3666,33 @@ defmodule Nadia.APITest do
 
     assert_telegram_request("declineChatJoinRequest",
       body: {:form, [{"chat_id", "@moderated"}, {"user_id", "43"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok == Nadia.answer_chat_join_request_query("join-query-1", "approve")
+
+    assert_telegram_request("answerChatJoinRequestQuery",
+      body: {:form, [{"chat_join_request_query_id", "join-query-1"}, {"result", "approve"}]},
+      options: [recv_timeout: 5000]
+    )
+
+    assert :ok ==
+             Nadia.send_chat_join_request_web_app(
+               client,
+               "join-query-2",
+               "https://example.com/join"
+             )
+
+    assert_http_request(
+      method: :post,
+      url: "https://api.telegram.org/bot999:family-d/sendChatJoinRequestWebApp",
+      body:
+        {:form,
+         [
+           {"chat_join_request_query_id", "join-query-2"},
+           {"web_app_url", "https://example.com/join"}
+         ]},
+      headers: [],
       options: [recv_timeout: 5000]
     )
 

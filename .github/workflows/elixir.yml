@@ -11,7 +11,7 @@ permissions:
 
 env:
   OTP_VERSION: '29.0.1'
-  ELIXIR_VERSION: '1.20.0'
+  ELIXIR_VERSION: '1.20.1'
 
 jobs:
   format:
@@ -39,9 +39,9 @@ jobs:
       matrix:
         include:
           - otp: '27.3.4.12'
-            elixir: '1.20.0'
+            elixir: '1.20.1'
           - otp: '29.0.1'
-            elixir: '1.20.0'
+            elixir: '1.20.1'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6

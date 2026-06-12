@@ -7,8 +7,21 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## 1.0.0 - 2026-06-12
+
 ### Added
 
+- Added complete Telegram Bot API method coverage for Bot API 10.1, published
+  on June 11, 2026. Nadia now wraps all 180 official Bot API methods, with 0
+  missing and 0 extra remote methods in the release inventory.
+- Added Bot API 10.1 rich-message wrappers for `sendRichMessage` and
+  `sendRichMessageDraft`, plus `rich_message` request encoding for
+  `editMessageText`.
+- Added Bot API 10.1 join-request query wrappers for
+  `answerChatJoinRequestQuery` and `sendChatJoinRequestWebApp`.
+- Added focused Bot API 10.1 parser/model support for
+  `User.supports_join_request_queries`, `Message.rich_message`,
+  `ChatJoinRequest.query_id`, and `PollMedia.link`.
 - Added Telegram poll response structs and parser coverage for `Message.poll`,
   update-level `poll` and `poll_answer` updates, poll option service messages,
   and `stopPoll` results.
@@ -81,6 +94,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
+- Prepared Nadia 1.0.0 as the first stable release after the transport,
+  explicit-client, parser-safety, and complete Bot API method-coverage refresh.
+- Upgraded Req to 0.6.1 for Nadia's default HTTP transport.
 - Expanded Telegram response parsing for selected modern `Update`, `Message`,
   `User`, `MessageEntity`, and `PhotoSize` fields, including fixture-backed
   `getUpdates` coverage with string-key JSON decoding and no atom creation for

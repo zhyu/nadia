@@ -185,6 +185,18 @@ defmodule Nadia.Behaviour do
               {:ok, Message.t()} | {:error, Error.t()}
   @callback send_message(Client.t(), integer | binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_rich_message(integer | binary, list | map | struct | binary) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_rich_message(integer | binary, list | map | struct | binary, [
+              {atom, any}
+            ]) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_rich_message(Client.t(), integer | binary, list | map | struct | binary) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+  @callback send_rich_message(Client.t(), integer | binary, list | map | struct | binary, [
+              {atom, any}
+            ]) ::
+              {:ok, Message.t()} | {:error, Error.t()}
   @callback forward_message(integer | binary, integer | binary, integer) ::
               {:ok, Message.t()} | {:error, Error.t()}
   @callback forward_message(integer | binary, integer | binary, integer, [{atom, any}]) ::
@@ -303,6 +315,18 @@ defmodule Nadia.Behaviour do
   @callback send_message_draft(Client.t(), integer | binary, integer) ::
               :ok | {:error, Error.t()}
   @callback send_message_draft(Client.t(), integer | binary, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+  @callback send_rich_message_draft(integer, integer, list | map | struct | binary) ::
+              :ok | {:error, Error.t()}
+  @callback send_rich_message_draft(integer, integer, list | map | struct | binary, [
+              {atom, any}
+            ]) ::
+              :ok | {:error, Error.t()}
+  @callback send_rich_message_draft(Client.t(), integer, integer, list | map | struct | binary) ::
+              :ok | {:error, Error.t()}
+  @callback send_rich_message_draft(Client.t(), integer, integer, list | map | struct | binary, [
+              {atom, any}
+            ]) ::
               :ok | {:error, Error.t()}
   @callback send_animation(integer, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -445,6 +469,12 @@ defmodule Nadia.Behaviour do
               :ok | {:error, Error.t()}
   @callback decline_chat_join_request(integer | binary, integer) :: :ok | {:error, Error.t()}
   @callback decline_chat_join_request(Client.t(), integer | binary, integer) ::
+              :ok | {:error, Error.t()}
+  @callback answer_chat_join_request_query(binary, binary) :: :ok | {:error, Error.t()}
+  @callback answer_chat_join_request_query(Client.t(), binary, binary) ::
+              :ok | {:error, Error.t()}
+  @callback send_chat_join_request_web_app(binary, binary) :: :ok | {:error, Error.t()}
+  @callback send_chat_join_request_web_app(Client.t(), binary, binary) ::
               :ok | {:error, Error.t()}
   @callback delete_chat_photo(integer | binary) :: :ok | {:error, Error.t()}
   @callback delete_chat_photo(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
@@ -886,9 +916,18 @@ defmodule Nadia.Behaviour do
               {:ok, PreparedKeyboardButton.t()} | {:error, Error.t()}
   @callback save_prepared_keyboard_button(Client.t(), integer, list | map | struct | binary) ::
               {:ok, PreparedKeyboardButton.t()} | {:error, Error.t()}
-  @callback edit_message_text(integer | binary, integer, binary, binary, [{atom, any}]) ::
+  @callback edit_message_text(integer | binary, integer | nil, binary | nil, binary | nil, [
+              {atom, any}
+            ]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-  @callback edit_message_text(Client.t(), integer | binary, integer, binary, binary, [{atom, any}]) ::
+  @callback edit_message_text(
+              Client.t(),
+              integer | binary,
+              integer | nil,
+              binary | nil,
+              binary | nil,
+              [{atom, any}]
+            ) ::
               {:ok, Message.t()} | {:error, Error.t()}
   @callback edit_message_caption(integer | binary, integer, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -1119,6 +1158,9 @@ defmodule Nadia.Behaviour do
                       remove_chat_verification: 1,
                       remove_chat_verification: 2,
                       send_message: 4,
+                      send_rich_message: 2,
+                      send_rich_message: 3,
+                      send_rich_message: 4,
                       forward_message: 4,
                       forward_message: 5,
                       forward_messages: 4,
@@ -1147,6 +1189,9 @@ defmodule Nadia.Behaviour do
                       send_checklist: 5,
                       send_message_draft: 3,
                       send_message_draft: 4,
+                      send_rich_message_draft: 3,
+                      send_rich_message_draft: 4,
+                      send_rich_message_draft: 5,
                       send_animation: 4,
                       send_location: 5,
                       send_venue: 7,
@@ -1307,6 +1352,10 @@ defmodule Nadia.Behaviour do
                       get_managed_bot_access_settings: 2,
                       set_managed_bot_access_settings: 4,
                       get_user_personal_chat_messages: 3,
+                      answer_chat_join_request_query: 2,
+                      answer_chat_join_request_query: 3,
+                      send_chat_join_request_web_app: 2,
+                      send_chat_join_request_web_app: 3,
                       delete_messages: 3,
                       delete_message_reaction: 4,
                       delete_all_message_reactions: 3,

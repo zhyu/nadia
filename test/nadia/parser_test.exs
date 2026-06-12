@@ -22,6 +22,7 @@ defmodule Nadia.ParserTest do
     Chat,
     ChatAdministratorRights,
     ChatInviteLink,
+    ChatJoinRequest,
     ChatBoost,
     ChatBoostAdded,
     ChatBoostRemoved,
@@ -42,6 +43,7 @@ defmodule Nadia.ParserTest do
     ChosenInlineResult,
     User,
     Location,
+    Link,
     PhotoSize,
     UserProfilePhotos,
     Message,
@@ -78,6 +80,7 @@ defmodule Nadia.ParserTest do
     RevenueWithdrawalStateFailed,
     RevenueWithdrawalStatePending,
     RevenueWithdrawalStateSucceeded,
+    RichMessage,
     SentGuestMessage,
     SentWebAppMessage,
     StarAmount,
@@ -1712,6 +1715,52 @@ defmodule Nadia.ParserTest do
            ] = messages
   end
 
+  test "parse rich messages and poll link media" do
+    message =
+      Parser.parse_result(
+        %{
+          "message_id" => 9503,
+          "chat" => %{"id" => 123, "type" => "private"},
+          "rich_message" => %{
+            "blocks" => [
+              %{"type" => "paragraph", "text" => %{"type" => "bold", "text" => "Nadia"}}
+            ],
+            "is_rtl" => true,
+            "future_rich_message_field" => "ignored"
+          }
+        },
+        "sendRichMessage"
+      )
+
+    assert %Message{
+             message_id: 9503,
+             rich_message: %RichMessage{
+               blocks: [
+                 %{"type" => "paragraph", "text" => %{"type" => "bold", "text" => "Nadia"}}
+               ],
+               is_rtl: true
+             }
+           } = message
+
+    poll =
+      Parser.parse_result(
+        %{
+          "id" => "poll-link-1",
+          "question" => "Open link?",
+          "options" => [],
+          "total_voter_count" => 0,
+          "is_closed" => false,
+          "is_anonymous" => false,
+          "type" => "regular",
+          "allows_multiple_answers" => false,
+          "media" => %{"link" => %{"url" => "https://example.com/poll"}}
+        },
+        "stopPoll"
+      )
+
+    assert %Poll{media: %PollMedia{link: %Link{url: "https://example.com/poll"}}} = poll
+  end
+
   test "parse Message.checklist with task entities and completion actors" do
     message =
       Parser.parse_result(
@@ -2038,6 +2087,55 @@ defmodule Nadia.ParserTest do
                update_id: 790_000_001
              }
            ]
+  end
+
+  test "parse result of get_updates chat join request query" do
+    raw_updates = [
+      %{
+        "update_id" => 790_000_002,
+        "chat_join_request" => %{
+          "chat" => %{"id" => -100_123, "type" => "supergroup", "title" => "Nadia Test"},
+          "from" => %{
+            "id" => 440_000_001,
+            "is_bot" => false,
+            "first_name" => "Joiner",
+            "supports_join_request_queries" => true
+          },
+          "user_chat_id" => 440_000_001,
+          "date" => 1_508_360_700,
+          "bio" => "Please let me in",
+          "invite_link" => %{
+            "invite_link" => "https://t.me/+join",
+            "creator" => %{"id" => 440_000_002, "is_bot" => true, "first_name" => "Guard"}
+          },
+          "query_id" => "join-query-parser-1",
+          "future_join_request_field" => "ignored"
+        }
+      }
+    ]
+
+    assert [
+             %Update{
+               chat_join_request: %ChatJoinRequest{
+                 chat: %Chat{id: -100_123, type: "supergroup", title: "Nadia Test"},
+                 from: %User{
+                   id: 440_000_001,
+                   is_bot: false,
+                   first_name: "Joiner",
+                   supports_join_request_queries: true
+                 },
+                 user_chat_id: 440_000_001,
+                 date: 1_508_360_700,
+                 bio: "Please let me in",
+                 invite_link: %ChatInviteLink{
+                   invite_link: "https://t.me/+join",
+                   creator: %User{id: 440_000_002, is_bot: true, first_name: "Guard"}
+                 },
+                 query_id: "join-query-parser-1"
+               },
+               update_id: 790_000_002
+             }
+           ] = Parser.parse_result(raw_updates, "getUpdates")
   end
 
   test "parse result of get_webhook_info" do

@@ -82,10 +82,13 @@ defmodule Nadia.HTTPClient.Req do
     name = disposition_value(disposition, "name")
     filename = disposition_value(disposition, "filename") || Path.basename(file_path)
 
-    {name, {File.stream!(file_path), filename: filename}}
+    {multipart_name(name), {File.stream!(file_path), filename: filename}}
   end
 
-  defp multipart_part(part), do: part
+  defp multipart_part({name, value}), do: {multipart_name(name), value}
+
+  defp multipart_name(name) when is_atom(name), do: name
+  defp multipart_name(name) when is_binary(name), do: String.to_atom(name)
 
   defp disposition_value(disposition, name) do
     Enum.find_value(disposition, fn

@@ -2,7 +2,7 @@ defmodule Nadia.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/zhyu/nadia"
-  @version "0.9.0"
+  @version "1.0.0"
 
   def project do
     [
@@ -27,7 +27,7 @@ defmodule Nadia.Mixfile do
   defp deps do
     [
       {:jason, "~> 1.4"},
-      {:req, "~> 0.5.0"},
+      {:req, "~> 0.6.1"},
       {:ex_doc, ">= 0.0.0", only: :docs, runtime: false}
     ]
   end

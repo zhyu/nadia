@@ -18,7 +18,7 @@ permissions:
 
 env:
   OTP_VERSION: '29.0.1'
-  ELIXIR_VERSION: '1.20.0'
+  ELIXIR_VERSION: '1.20.1'
 
 jobs:
   verify:

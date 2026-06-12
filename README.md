@@ -9,6 +9,13 @@
 
 Telegram Bot API Wrapper written in Elixir ([document](https://hexdocs.pm/nadia/))
 
+## API Coverage
+
+As of Nadia 1.0.0, the Telegram Bot API wrapper covers all 180 official methods
+in Telegram Bot API 10.1, published on June 11, 2026. Nadia keeps response
+parsing strict: modeled response fields are parsed into Nadia structs, while
+unknown future fields are ignored until the library explicitly models them.
+
 ## Installation
 
 Nadia requires Elixir 1.20 or later and Erlang/OTP 27 or later.
@@ -18,7 +25,7 @@ Add `:nadia` to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:nadia, "~> 0.9.0"}
+    {:nadia, "~> 1.0"}
   ]
 end
 ```

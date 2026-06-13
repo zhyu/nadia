@@ -2058,13 +2058,22 @@ defmodule Nadia do
 
   Options:
   * `:url` - HTTPS url to send updates to.
+  * `:secret_token` - Secret token Telegram should send in the
+  `X-Telegram-Bot-Api-Secret-Token` header.
+  * `:allowed_updates` - JSON-serializable list of update types to receive.
   """
   @spec set_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
   @spec set_webhook(Client.t(), [{atom, any}]) :: :ok | {:error, Error.t()}
   def set_webhook(), do: set_webhook([])
   def set_webhook(%Client{} = client), do: set_webhook(client, [])
-  def set_webhook(options), do: api_request("setWebhook", options)
-  def set_webhook(%Client{} = client, options), do: api_request(client, "setWebhook", options)
+
+  def set_webhook(options) do
+    api_request("setWebhook", encode_json_array_option(options, :allowed_updates))
+  end
+
+  def set_webhook(%Client{} = client, options) do
+    api_request(client, "setWebhook", encode_json_array_option(options, :allowed_updates))
+  end
 
   @doc """
   Use this method to remove webhook integration if you decide to switch back to `Nadia.get_updates/1`.

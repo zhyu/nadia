@@ -260,6 +260,24 @@ defmodule NadiaTest do
              end)
 
     assert :ok =
+             assert_wrapper_call(
+               "setWebhook",
+               [
+                 {"url", "https://telegram.org/"},
+                 {"secret_token", "secret"},
+                 {"allowed_updates", Jason.encode!(["message", "callback_query"])}
+               ],
+               true,
+               fn ->
+                 Nadia.set_webhook(
+                   url: "https://telegram.org/",
+                   secret_token: "secret",
+                   allowed_updates: ["message", "callback_query"]
+                 )
+               end
+             )
+
+    assert :ok =
              assert_wrapper_call("deleteWebhook", [], true, fn ->
                Nadia.delete_webhook()
              end)

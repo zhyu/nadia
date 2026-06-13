@@ -11,7 +11,7 @@ Telegram Bot API Wrapper written in Elixir ([document](https://hexdocs.pm/nadia/
 
 ## API Coverage
 
-As of Nadia 1.0.0, the Telegram Bot API wrapper covers all 180 official methods
+As of Nadia 1.1.0, the Telegram Bot API wrapper covers all 180 official methods
 in Telegram Bot API 10.1, published on June 11, 2026. Nadia keeps response
 parsing strict: modeled response fields are parsed into Nadia structs, while
 unknown future fields are ignored until the library explicitly models them.
@@ -25,7 +25,7 @@ Add `:nadia` to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:nadia, "~> 1.0"}
+    {:nadia, "~> 1.1"}
   ]
 end
 ```
@@ -141,6 +141,35 @@ iex> {:ok,
     new_chat_photo: [], new_chat_title: nil, photo: [], pinned_message: nil,
     reply_to_message: nil, sticker: nil, supergroup_chat_created: nil,
     text: "rew", venue: nil, video: nil, voice: nil}, update_id: 98765}]}
+```
+
+### Incoming update helpers
+
+Webhook handlers and custom polling loops can parse raw Telegram update payloads
+without reaching into Nadia internals:
+
+```elixir
+with {:ok, update} <- Nadia.Parser.parse_update(raw_body) do
+  context = Nadia.Context.new(update)
+
+  if context.message && context.message.text == "/start" do
+    Nadia.Context.reply(context, "Ready")
+  end
+end
+```
+
+`Nadia.Parser.parse_update/1` accepts a decoded update map, an existing
+`%Nadia.Model.Update{}`, or a raw JSON object binary. `parse_updates/1` accepts
+a decoded list, a JSON array binary, or a decoded/encoded Bot API response
+envelope with a `"result"` update list.
+
+Contexts preserve explicit clients for multi-bot applications:
+
+```elixir
+client = Nadia.Client.from_config(:support)
+context = Nadia.Context.new(update, client)
+
+Nadia.Context.reply(context, "Support bot here")
 ```
 
 ### `send_message`

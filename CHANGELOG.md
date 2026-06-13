@@ -7,6 +7,17 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## 1.1.0 - 2026-06-13
+
+### Added
+
+- Added public incoming update parsing helpers:
+  `Nadia.Parser.parse_update/1`, `Nadia.Parser.parse_update!/1`, and
+  `Nadia.Parser.parse_updates/1`.
+- Added `Nadia.Context` for extracting effective message/chat/user data from
+  updates and replying or answering callback queries through existing Nadia API
+  wrappers, including explicit `%Nadia.Client{}` support.
+
 ## 1.0.0 - 2026-06-12
 
 ### Added

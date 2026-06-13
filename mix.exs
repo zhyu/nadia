@@ -2,7 +2,7 @@ defmodule Nadia.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/zhyu/nadia"
-  @version "1.2.0"
+  @version "1.3.0"
 
   def project do
     [
@@ -35,6 +35,15 @@ defmodule Nadia.Mixfile do
   defp package do
     [
       description: "Telegram Bot API Wrapper written in Elixir",
+      files: [
+        ".formatter.exs",
+        "CHANGELOG.md",
+        "LICENSE.md",
+        "README.md",
+        "guides",
+        "lib",
+        "mix.exs"
+      ],
       maintainers: ["zhyu"],
       licenses: ["MIT"],
       links: %{
@@ -48,6 +57,7 @@ defmodule Nadia.Mixfile do
     [
       extras: [
         "CHANGELOG.md": [title: "Changelog"],
+        "guides/build-your-first-bot.md": [title: "Build Your First Bot"],
         "LICENSE.md": [title: "License"],
         "README.md": [title: "Overview"]
       ],

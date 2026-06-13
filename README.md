@@ -11,7 +11,7 @@ Telegram Bot API Wrapper written in Elixir ([document](https://hexdocs.pm/nadia/
 
 ## API Coverage
 
-As of Nadia 1.2.0, the Telegram Bot API wrapper covers all 180 official methods
+As of Nadia 1.3.0, the Telegram Bot API wrapper covers all 180 official methods
 in Telegram Bot API 10.1, published on June 11, 2026. Nadia keeps response
 parsing strict: modeled response fields are parsed into Nadia structs, while
 unknown future fields are ignored until the library explicitly models them.
@@ -25,7 +25,7 @@ Add `:nadia` to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:nadia, "~> 1.2"}
+    {:nadia, "~> 1.3"}
   ]
 end
 ```
@@ -222,6 +222,15 @@ It advances the offset after `:ok`, `:ignore`, or `{:ok, value}` handler
 results. Handler `{:error, reason}` results, handler exceptions, and
 `getUpdates` errors are retried with bounded backoff without acknowledging the
 failed update.
+
+To generate a starter handler and offline test, run:
+
+```sh
+mix nadia.gen.bot MyApp.Bot --polling
+```
+
+See [Build Your First Bot](guides/build-your-first-bot.md) for the full
+walkthrough.
 
 ### `send_message`
 

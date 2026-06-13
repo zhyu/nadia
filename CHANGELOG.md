@@ -7,6 +7,16 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## 1.3.0 - 2026-06-13
+
+### Added
+
+- Added `mix nadia.gen.bot` to generate a starter bot handler, offline test,
+  and polling setup instructions.
+- Added a "Build Your First Bot" guide for generated polling bots.
+- Documented Nadia's HTTP adapter structs and behaviour so generated tests and
+  custom adapters have a stable public testing boundary.
+
 ## 1.2.0 - 2026-06-13
 
 ### Added

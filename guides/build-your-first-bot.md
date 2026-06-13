@@ -18,7 +18,7 @@ Add Nadia to your dependencies and fetch it:
 ```elixir
 def deps do
   [
-    {:nadia, "~> 1.0"}
+    {:nadia, "~> 1.3"}
   ]
 end
 ```

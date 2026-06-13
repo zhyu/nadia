@@ -7,6 +7,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## 1.5.0 - 2026-06-13
+
+### Added
+
+- Added `Nadia.SessionStore` and `Nadia.SessionStore.ETS` for optional,
+  explicit bot session storage without adding persistence dependencies or a
+  conversation DSL.
+
 ## 1.4.0 - 2026-06-13
 
 ### Added

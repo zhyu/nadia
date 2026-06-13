@@ -11,7 +11,7 @@ Telegram Bot API Wrapper written in Elixir ([document](https://hexdocs.pm/nadia/
 
 ## API Coverage
 
-As of Nadia 1.4.0, the Telegram Bot API wrapper covers all 180 official methods
+As of Nadia 1.5.0, the Telegram Bot API wrapper covers all 180 official methods
 in Telegram Bot API 10.1, published on June 11, 2026. Nadia keeps response
 parsing strict: modeled response fields are parsed into Nadia structs, while
 unknown future fields are ignored until the library explicitly models them.
@@ -25,7 +25,7 @@ Add `:nadia` to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:nadia, "~> 1.4"}
+    {:nadia, "~> 1.5"}
   ]
 end
 ```
@@ -252,6 +252,31 @@ Nadia.Webhook.dispatch_body(
 `Nadia.Context`, and dispatches through `Nadia.Dispatcher`. See
 [Receive Webhook Updates](guides/receive-webhook-updates.md) for a
 framework-neutral endpoint outline.
+
+### Session storage
+
+For bots that need small amounts of per-chat or per-user state, Nadia provides
+an optional session store behaviour and a local ETS implementation:
+
+```elixir
+children = [
+  {Nadia.SessionStore.ETS, name: MyApp.BotSessions}
+]
+
+store = {Nadia.SessionStore.ETS, MyApp.BotSessions}
+{:ok, key} = Nadia.SessionStore.chat_user_key(context)
+
+{:ok, session} =
+  Nadia.SessionStore.update(store, key, fn session ->
+    Map.put(session, :last_command, "/start")
+  end)
+```
+
+Session stores are explicit. Nadia does not start a global store or attach
+state to polling, dispatching, or contexts automatically. The ETS store is
+in-memory, local to one process/node, and intended for development or simple
+single-node bots. Implement `Nadia.SessionStore` with application storage when
+you need persistence or distributed deployment.
 
 ### `send_message`
 

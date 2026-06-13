@@ -1,5 +1,7 @@
 defmodule Nadia.HTTPRequest do
-  @moduledoc false
+  @moduledoc """
+  Request struct passed to Nadia HTTP adapters.
+  """
 
   @enforce_keys [:method, :url]
   defstruct method: nil, url: nil, body: nil, headers: [], options: []

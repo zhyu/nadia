@@ -1,5 +1,12 @@
 defmodule Nadia.HTTPClient do
-  @moduledoc false
+  @moduledoc """
+  Behaviour for Nadia HTTP adapters.
+
+  Custom adapters receive a `Nadia.HTTPRequest` and return either
+  `{:ok, %Nadia.HTTPResponse{}}` or `{:error, reason}`. Applications usually do
+  not call this module directly, but tests and custom transports may pass an
+  adapter module through `Nadia.Client.new/1`.
+  """
 
   alias Nadia.HTTPRequest
   alias Nadia.HTTPResponse

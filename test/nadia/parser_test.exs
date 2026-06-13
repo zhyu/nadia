@@ -139,6 +139,94 @@ defmodule Nadia.ParserTest do
            ]
   end
 
+  test "parse_update parses decoded and raw webhook update payloads" do
+    payload = %{
+      "update_id" => 790_000_001,
+      "message" => %{
+        "message_id" => 11,
+        "date" => 1_700_000_001,
+        "text" => "hello",
+        "future_message_field" => "ignored",
+        "chat" => %{
+          "id" => 123,
+          "type" => "private",
+          "first_name" => "Nadia",
+          "future_chat_field" => "ignored"
+        },
+        "from" => %{
+          "id" => 123,
+          "is_bot" => false,
+          "first_name" => "Nadia",
+          "future_user_field" => "ignored"
+        }
+      },
+      "future_update_field" => "ignored"
+    }
+
+    assert {:ok, %Update{} = update} = Parser.parse_update(payload)
+    assert update.update_id == 790_000_001
+    assert update.message.text == "hello"
+    assert update.message.chat == %Chat{id: 123, type: "private", first_name: "Nadia"}
+    assert update.message.from == %User{id: 123, is_bot: false, first_name: "Nadia"}
+    refute existing_struct_key?(update, "future_update_field")
+    refute existing_struct_key?(update.message, "future_message_field")
+
+    assert Parser.parse_update!(Jason.encode!(payload)) == update
+    assert Parser.parse_update(update) == {:ok, update}
+  end
+
+  test "parse_update returns errors for invalid payloads" do
+    assert {:error, %Jason.DecodeError{}} = Parser.parse_update("{")
+    assert {:error, :invalid_update} = Parser.parse_update(["not", "an", "update"])
+
+    assert_raise Jason.DecodeError, fn -> Parser.parse_update!("{") end
+
+    assert_raise ArgumentError, ~r/expected a Telegram update map or JSON object/, fn ->
+      Parser.parse_update!(["not", "an", "update"])
+    end
+  end
+
+  test "parse_updates parses lists, JSON arrays, and getUpdates response envelopes" do
+    payloads = [
+      %{
+        "update_id" => 790_000_001,
+        "message" => %{
+          "message_id" => 11,
+          "date" => 1_700_000_001,
+          "text" => "hello",
+          "chat" => %{"id" => 123, "type" => "private"}
+        }
+      },
+      %{
+        "update_id" => 790_000_002,
+        "callback_query" => %{
+          "id" => "callback-1",
+          "from" => %{"id" => 123, "is_bot" => false, "first_name" => "Nadia"},
+          "message" => %{
+            "message_id" => 12,
+            "date" => 1_700_000_002,
+            "chat" => %{"id" => 123, "type" => "private"}
+          },
+          "data" => "confirm"
+        }
+      }
+    ]
+
+    assert {:ok, [%Update{message: %Message{text: "hello"}}, %Update{callback_query: callback}]} =
+             Parser.parse_updates(payloads)
+
+    assert callback.id == "callback-1"
+    assert {:ok, [%Update{}, %Update{}]} = Parser.parse_updates(Jason.encode!(payloads))
+    assert {:ok, [%Update{}, %Update{}]} = Parser.parse_updates(%{"result" => payloads})
+    assert {:ok, [%Update{}, %Update{}]} = Parser.parse_updates(%{result: payloads})
+  end
+
+  test "parse_updates returns errors for invalid payload collections" do
+    assert {:error, %Jason.DecodeError{}} = Parser.parse_updates("[")
+    assert {:error, :invalid_updates} = Parser.parse_updates(%{"result" => %{}})
+    assert {:error, :invalid_update} = Parser.parse_updates([%{"update_id" => 1}, "[]"])
+  end
+
   test "parse result of bot name and description getters" do
     assert Parser.parse_result(%{"name" => "Nadia"}, "getMyName") == %BotName{name: "Nadia"}
 
@@ -2162,6 +2250,12 @@ defmodule Nadia.ParserTest do
              pending_update_count: 0,
              url: "https://elixir-trading-bot.herokuapp.com/"
            }
+  end
+
+  defp existing_struct_key?(%_{} = struct, key) when is_binary(key) do
+    struct
+    |> Map.keys()
+    |> Enum.any?(&(Atom.to_string(&1) == key))
   end
 
   defp response_result_fixture(name) do

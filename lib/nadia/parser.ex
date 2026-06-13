@@ -181,6 +181,76 @@ defmodule Nadia.Parser do
     end
   end
 
+  @doc """
+  Parses a webhook-style Telegram update payload.
+
+  Accepts either a decoded map with string or atom keys, an existing
+  `%Nadia.Model.Update{}`, or a raw JSON object binary. Unknown fields are
+  ignored in the same way as API response parsing.
+  """
+  @spec parse_update(Update.t() | map | binary) :: {:ok, Update.t()} | {:error, term}
+  def parse_update(%Update{} = update), do: {:ok, update}
+  def parse_update(update) when is_map(update), do: {:ok, parse(Update, update)}
+
+  def parse_update(update) when is_binary(update) do
+    with {:ok, decoded} <- Jason.decode(update),
+         do: parse_update(decoded)
+  end
+
+  def parse_update(_update), do: {:error, :invalid_update}
+
+  @doc """
+  Parses a webhook-style Telegram update payload and raises on invalid input.
+
+  Raw JSON binaries are decoded with `Jason.decode!/1`; decoded values must be
+  maps or `%Nadia.Model.Update{}` structs.
+  """
+  @spec parse_update!(Update.t() | map | binary) :: Update.t()
+  def parse_update!(%Update{} = update), do: update
+  def parse_update!(update) when is_map(update), do: parse(Update, update)
+
+  def parse_update!(update) when is_binary(update) do
+    update
+    |> Jason.decode!()
+    |> parse_update!()
+  end
+
+  def parse_update!(update) do
+    raise ArgumentError,
+          "expected a Telegram update map or JSON object, got: #{inspect(update)}"
+  end
+
+  @doc """
+  Parses multiple Telegram update payloads.
+
+  Accepts a list of decoded update maps or structs, a JSON array binary, or a
+  decoded/encoded Bot API response envelope containing a `"result"` update
+  list.
+  """
+  @spec parse_updates([Update.t() | map] | map | binary) :: {:ok, [Update.t()]} | {:error, term}
+  def parse_updates(%{"result" => updates}), do: parse_updates(updates)
+  def parse_updates(%{result: updates}), do: parse_updates(updates)
+
+  def parse_updates(updates) when is_list(updates) do
+    Enum.reduce_while(updates, {:ok, []}, fn update, {:ok, parsed_updates} ->
+      case parse_update(update) do
+        {:ok, parsed_update} -> {:cont, {:ok, [parsed_update | parsed_updates]}}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+    |> case do
+      {:ok, parsed_updates} -> {:ok, Enum.reverse(parsed_updates)}
+      error -> error
+    end
+  end
+
+  def parse_updates(updates) when is_binary(updates) do
+    with {:ok, decoded} <- Jason.decode(updates),
+         do: parse_updates(decoded)
+  end
+
+  def parse_updates(_updates), do: {:error, :invalid_updates}
+
   @keys_of_message [
     :message,
     :reply_to_message,

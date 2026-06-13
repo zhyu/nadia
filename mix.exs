@@ -2,7 +2,7 @@ defmodule Nadia.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/zhyu/nadia"
-  @version "1.3.0"
+  @version "1.4.0"
 
   def project do
     [
@@ -58,6 +58,7 @@ defmodule Nadia.Mixfile do
       extras: [
         "CHANGELOG.md": [title: "Changelog"],
         "guides/build-your-first-bot.md": [title: "Build Your First Bot"],
+        "guides/receive-webhook-updates.md": [title: "Receive Webhook Updates"],
         "LICENSE.md": [title: "License"],
         "README.md": [title: "Overview"]
       ],

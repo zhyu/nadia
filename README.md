@@ -11,7 +11,7 @@ Telegram Bot API Wrapper written in Elixir ([document](https://hexdocs.pm/nadia/
 
 ## API Coverage
 
-As of Nadia 1.3.0, the Telegram Bot API wrapper covers all 180 official methods
+As of Nadia 1.4.0, the Telegram Bot API wrapper covers all 180 official methods
 in Telegram Bot API 10.1, published on June 11, 2026. Nadia keeps response
 parsing strict: modeled response fields are parsed into Nadia structs, while
 unknown future fields are ignored until the library explicitly models them.
@@ -25,7 +25,7 @@ Add `:nadia` to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:nadia, "~> 1.3"}
+    {:nadia, "~> 1.4"}
   ]
 end
 ```
@@ -231,6 +231,27 @@ mix nadia.gen.bot MyApp.Bot --polling
 
 See [Build Your First Bot](guides/build-your-first-bot.md) for the full
 walkthrough.
+
+### Webhook helpers
+
+Nadia includes framework-neutral webhook helpers without adding a Plug or
+Phoenix dependency:
+
+```elixir
+Nadia.Webhook.dispatch_body(
+  raw_body,
+  MyApp.Bot,
+  headers: request_headers,
+  secret_token: System.fetch_env!("TELEGRAM_WEBHOOK_SECRET"),
+  client: Nadia.Client.from_config(:support)
+)
+```
+
+`Nadia.Webhook` verifies Telegram's optional
+`x-telegram-bot-api-secret-token` header, parses the raw update body, builds a
+`Nadia.Context`, and dispatches through `Nadia.Dispatcher`. See
+[Receive Webhook Updates](guides/receive-webhook-updates.md) for a
+framework-neutral endpoint outline.
 
 ### `send_message`
 

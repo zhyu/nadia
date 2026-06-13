@@ -7,6 +7,18 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## 1.4.0 - 2026-06-13
+
+### Added
+
+- Added `Nadia.Webhook` framework-neutral helpers for parsing webhook request
+  bodies, verifying Telegram secret token headers, building contexts, and
+  dispatching updates without adding Plug or Phoenix as dependencies.
+- Added a "Receive Webhook Updates" guide documenting the core helper-only
+  webhook integration decision.
+- Added `Nadia.set_webhook/1,2` documentation for `:secret_token` and
+  JSON-array request encoding for `:allowed_updates` lists.
+
 ## 1.3.0 - 2026-06-13
 
 ### Added

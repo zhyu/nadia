@@ -11,7 +11,7 @@ Telegram Bot API Wrapper written in Elixir ([document](https://hexdocs.pm/nadia/
 
 ## API Coverage
 
-As of Nadia 1.1.0, the Telegram Bot API wrapper covers all 180 official methods
+As of Nadia 1.2.0, the Telegram Bot API wrapper covers all 180 official methods
 in Telegram Bot API 10.1, published on June 11, 2026. Nadia keeps response
 parsing strict: modeled response fields are parsed into Nadia structs, while
 unknown future fields are ignored until the library explicitly models them.
@@ -25,7 +25,7 @@ Add `:nadia` to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:nadia, "~> 1.1"}
+    {:nadia, "~> 1.2"}
   ]
 end
 ```
@@ -171,6 +171,57 @@ context = Nadia.Context.new(update, client)
 
 Nadia.Context.reply(context, "Support bot here")
 ```
+
+### Dispatching updates
+
+For non-polling update intake, define a small handler and dispatch parsed
+updates to it:
+
+```elixir
+defmodule MyApp.Bot do
+  @behaviour Nadia.Handler
+
+  @impl true
+  def handle_update(_update, context) do
+    case Nadia.Dispatcher.match_command(context, "start") do
+      {:ok, _match} ->
+        Nadia.Context.reply(context, "Ready")
+
+      :nomatch ->
+        :ignore
+    end
+  end
+end
+
+with {:ok, update} <- Nadia.Parser.parse_update(raw_body) do
+  Nadia.Dispatcher.dispatch(update, MyApp.Bot, client: Nadia.Client.from_config(:support))
+end
+```
+
+`Nadia.Dispatcher.dispatch/3` returns the handler result unchanged. Handler
+exceptions are not swallowed, so callers and future supervisors can decide how
+to handle failed updates.
+
+### Supervised polling
+
+To run a bot under OTP, add `Nadia.Polling` to your supervision tree:
+
+```elixir
+children = [
+  {Nadia.Polling,
+   client: Nadia.Client.from_config(:support),
+   handler: MyApp.Bot,
+   allowed_updates: ["message", "callback_query"],
+   timeout: 30}
+]
+```
+
+`Nadia.Polling` calls `getUpdates` with long polling, dispatches updates
+sequentially through `Nadia.Dispatcher`, and tracks the next offset in memory.
+It advances the offset after `:ok`, `:ignore`, or `{:ok, value}` handler
+results. Handler `{:error, reason}` results, handler exceptions, and
+`getUpdates` errors are retried with bounded backoff without acknowledging the
+failed update.
 
 ### `send_message`
 

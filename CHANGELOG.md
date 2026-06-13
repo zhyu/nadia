@@ -7,6 +7,19 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## 1.2.0 - 2026-06-13
+
+### Added
+
+- Added `Nadia.Handler` and `Nadia.Dispatcher` for behaviour-first update
+  dispatch, plus small command, text, callback, and fallback matching helpers
+  for non-polling handlers.
+- Added `Nadia.Polling`, an OTP long-polling worker that calls `getUpdates`,
+  dispatches updates sequentially, tracks offsets in memory, and retries API or
+  handler failures with bounded backoff.
+- Added JSON-array request encoding for `Nadia.get_updates/1,2`
+  `:allowed_updates` lists.
+
 ## 1.1.0 - 2026-06-13
 
 ### Added

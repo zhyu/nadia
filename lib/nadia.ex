@@ -2032,13 +2032,20 @@ defmodule Nadia do
   accepted. Defaults to 100
   * `:timeout` - Timeout in seconds for long polling. Defaults to 0, i.e. usual short
   polling
+  * `:allowed_updates` - JSON-serializable list of update types to receive
   """
   @spec get_updates([{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
   @spec get_updates(Client.t(), [{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
   def get_updates(), do: get_updates([])
   def get_updates(%Client{} = client), do: get_updates(client, [])
-  def get_updates(options), do: api_request("getUpdates", options)
-  def get_updates(%Client{} = client, options), do: api_request(client, "getUpdates", options)
+
+  def get_updates(options) do
+    api_request("getUpdates", encode_json_array_option(options, :allowed_updates))
+  end
+
+  def get_updates(%Client{} = client, options) do
+    api_request(client, "getUpdates", encode_json_array_option(options, :allowed_updates))
+  end
 
   @doc """
   Use this method to specify a url and receive incoming updates via an outgoing

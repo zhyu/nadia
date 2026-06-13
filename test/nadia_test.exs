@@ -157,6 +157,14 @@ defmodule NadiaTest do
 
     assert [%Nadia.Model.Update{message: %Message{text: "hello"}}] = updates
 
+    assert {:ok, []} =
+             assert_wrapper_call(
+               "getUpdates",
+               [{"allowed_updates", Jason.encode!(["message", "callback_query"])}],
+               [],
+               fn -> Nadia.get_updates(allowed_updates: ["message", "callback_query"]) end
+             )
+
     webhook_info = %{
       allowed_updates: [],
       has_custom_certificate: false,

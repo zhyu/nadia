@@ -27,9 +27,12 @@ defmodule Mix.Tasks.Nadia.Gen.BotTest do
 
   test "generates a polling bot handler, offline test, and next steps" do
     output =
-      capture_io(fn ->
-        Mix.Task.run(@task, ["MyApp.Bot", "--polling"])
+      with_ansi_enabled(true, fn ->
+        capture_io(fn ->
+          Mix.Task.run(@task, ["MyApp.Bot", "--polling"])
+        end)
       end)
+      |> strip_ansi()
 
     assert File.read!("lib/my_app/bot.ex") =~ "defmodule MyApp.Bot do"
     assert File.read!("lib/my_app/bot.ex") =~ "@behaviour Nadia.Handler"
@@ -67,6 +70,7 @@ defmodule Mix.Tasks.Nadia.Gen.BotTest do
       capture_io(fn ->
         Mix.Task.run(@task, ["MyApp.Bot"])
       end)
+      |> strip_ansi()
 
     assert output =~ "* skipping lib/my_app/bot.ex"
     assert File.read!("lib/my_app/bot.ex") == "# existing\n"
@@ -142,5 +146,23 @@ defmodule Mix.Tasks.Nadia.Gen.BotTest do
     assert_raise Mix.Error, ~r/use Nadia.Webhook in your web framework/, fn ->
       Mix.Task.run(@task, ["MyApp.Bot", "--webhook"])
     end
+  end
+
+  defp with_ansi_enabled(enabled?, fun) do
+    previous = Application.fetch_env(:elixir, :ansi_enabled)
+    Application.put_env(:elixir, :ansi_enabled, enabled?)
+
+    try do
+      fun.()
+    after
+      case previous do
+        {:ok, value} -> Application.put_env(:elixir, :ansi_enabled, value)
+        :error -> Application.delete_env(:elixir, :ansi_enabled)
+      end
+    end
+  end
+
+  defp strip_ansi(output) do
+    Regex.replace(~r/\e\[[0-9;]*m/, output, "")
   end
 end

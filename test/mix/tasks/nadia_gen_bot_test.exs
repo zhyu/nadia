@@ -90,6 +90,7 @@ defmodule Mix.Tasks.Nadia.Gen.BotTest do
     end)
 
     File.write!("test/test_helper.exs", "ExUnit.start()\n")
+    File.cp!(Path.join(repo_path, "mix.lock"), "mix.lock")
 
     File.write!("mix.exs", """
     defmodule FixtureBot.MixProject do
@@ -121,13 +122,8 @@ defmodule Mix.Tasks.Nadia.Gen.BotTest do
     env = [
       {"MIX_ENV", "test"},
       {"MIX_DEPS_PATH", Path.join(repo_path, "deps")},
-      {"MIX_BUILD_PATH", Path.join(File.cwd!(), "_build")}
+      {"MIX_BUILD_PATH", Path.join(repo_path, "_build/test")}
     ]
-
-    {deps_get_output, deps_get_status} =
-      System.cmd("mix", ["deps.get"], stderr_to_stdout: true, env: env)
-
-    assert deps_get_status == 0, deps_get_output
 
     {test_output, test_status} =
       System.cmd("mix", ["test"], stderr_to_stdout: true, env: env)

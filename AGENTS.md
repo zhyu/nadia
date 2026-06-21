@@ -2,7 +2,6 @@
 
 ## Start Every Session
 
-- Run `git context --json` from the repository root before making changes.
 - Read the relevant local files before acting; prefer `README.md`,
   `CHANGELOG.md`, `mix.exs`, `.github/workflows/*.yml`, tests, and commit
   history over stale planning notes.

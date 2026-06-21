@@ -7,6 +7,21 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Added
+
+- Added a tested bot example catalog covering command and callback routing,
+  inline keyboards, and explicit multi-step conversation state.
+- Added guides for learning paths, multiple bots, offline handler testing,
+  production operation, and the Telegraph API.
+
+### Changed
+
+- Reworked the README into a secure quick start and documentation map, grouped
+  ExDoc guides, modules, and Bot API methods by task, and expanded the webhook
+  guide with production-oriented delivery and secret verification guidance.
+- Updated configuration, package metadata, and Telegraph reference text to
+  remove insecure or misleading examples.
+
 ## 1.5.0 - 2026-06-13
 
 ### Added

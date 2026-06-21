@@ -4,6 +4,14 @@ This guide shows the shortest OTP path from a new supervised Mix app to a
 Nadia bot. It uses long polling, so no web framework or webhook endpoint is
 required.
 
+Create a bot with [@BotFather](https://t.me/BotFather) and keep its token out of
+source control. If this bot already has a webhook, remove it before using long
+polling:
+
+```elixir
+Nadia.delete_webhook(drop_pending_updates: false)
+```
+
 Start with an OTP application:
 
 ```sh
@@ -98,3 +106,10 @@ TELEGRAM_BOT_TOKEN=123:token mix run --no-halt
 
 Send `/start` to the bot in Telegram. The generated handler replies with
 `Ready` and echoes plain text messages.
+
+The handler must return `:ok`, `:ignore`, or `{:ok, value}` after successfully
+processing an update. Errors and exceptions are retried by `Nadia.Polling`.
+
+Continue with [Commands And Inline Keyboards](examples/inline-keyboards.md),
+[Conversation State](examples/conversation-state.md), or the full
+[Examples And Learning Paths](examples.md) catalog.

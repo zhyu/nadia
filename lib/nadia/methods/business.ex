@@ -40,6 +40,7 @@ defmodule Nadia.Methods.Business do
         WebhookInfo
       }
 
+      @doc group: "Business"
       @doc """
       Use this method to get information about the connection of the bot with a business account.
       Returns a BusinessConnection object.
@@ -54,12 +55,14 @@ defmodule Nadia.Methods.Business do
         api_request("getBusinessConnection", business_connection_id: business_connection_id)
       end
 
+      @doc group: "Business"
       def get_business_connection(%Client{} = client, business_connection_id) do
         api_request(client, "getBusinessConnection",
           business_connection_id: business_connection_id
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to get the Telegram Stars balance of a managed business account.
       Returns a StarAmount object.
@@ -77,6 +80,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def get_business_account_star_balance(%Client{} = client, business_connection_id) do
         api_request(
           client,
@@ -85,13 +89,14 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to get gifts received and owned by a managed business account.
       Returns a `Nadia.Model.OwnedGifts` object on success.
 
       Args:
       * `business_connection_id` - Unique identifier of the business connection
-      * `options` - orddict or map of options
+      * `options` - keyword list or map of options
       """
       @spec get_business_account_gifts(binary) :: {:ok, OwnedGifts.t()} | {:error, Error.t()}
       @spec get_business_account_gifts(binary, [{atom, any}] | map) ::
@@ -104,6 +109,7 @@ defmodule Nadia.Methods.Business do
         get_business_account_gifts(business_connection_id, [])
       end
 
+      @doc group: "Business"
       def get_business_account_gifts(%Client{} = client, business_connection_id) do
         get_business_account_gifts(client, business_connection_id, [])
       end
@@ -115,6 +121,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def get_business_account_gifts(%Client{} = client, business_connection_id, options) do
         api_request(
           client,
@@ -123,6 +130,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to mark an incoming message as read on behalf of a business account.
       Returns `:ok` on success.
@@ -144,6 +152,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def read_business_message(%Client{} = client, business_connection_id, chat_id, message_id) do
         api_request(
           client,
@@ -154,6 +163,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to delete messages on behalf of a business account.
       Returns `:ok` on success.
@@ -172,6 +182,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def delete_business_messages(%Client{} = client, business_connection_id, message_ids) do
         api_request(
           client,
@@ -181,6 +192,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to change the first and last name of a managed business account.
       Returns `:ok` on success.
@@ -188,7 +200,7 @@ defmodule Nadia.Methods.Business do
       Args:
       * `business_connection_id` - Unique identifier of the business connection
       * `first_name` - New first name of the business account
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:last_name` - New last name of the business account
@@ -203,6 +215,7 @@ defmodule Nadia.Methods.Business do
         set_business_account_name(business_connection_id, first_name, [])
       end
 
+      @doc group: "Business"
       def set_business_account_name(%Client{} = client, business_connection_id, first_name) do
         set_business_account_name(client, business_connection_id, first_name, [])
       end
@@ -217,6 +230,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def set_business_account_name(
             %Client{} = client,
             business_connection_id,
@@ -233,13 +247,14 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to change the username of a managed business account.
       Returns `:ok` on success.
 
       Args:
       * `business_connection_id` - Unique identifier of the business connection
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:username` - New username of the business account
@@ -254,6 +269,7 @@ defmodule Nadia.Methods.Business do
         set_business_account_username(business_connection_id, [])
       end
 
+      @doc group: "Business"
       def set_business_account_username(%Client{} = client, business_connection_id) do
         set_business_account_username(client, business_connection_id, [])
       end
@@ -265,6 +281,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def set_business_account_username(%Client{} = client, business_connection_id, options) do
         api_request(
           client,
@@ -273,13 +290,14 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to change the bio of a managed business account.
       Returns `:ok` on success.
 
       Args:
       * `business_connection_id` - Unique identifier of the business connection
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:bio` - New bio of the business account
@@ -293,6 +311,7 @@ defmodule Nadia.Methods.Business do
         set_business_account_bio(business_connection_id, [])
       end
 
+      @doc group: "Business"
       def set_business_account_bio(%Client{} = client, business_connection_id) do
         set_business_account_bio(client, business_connection_id, [])
       end
@@ -304,6 +323,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def set_business_account_bio(%Client{} = client, business_connection_id, options) do
         api_request(
           client,
@@ -312,6 +332,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to change the profile photo of a managed business account.
       Returns `:ok` on success.
@@ -319,7 +340,7 @@ defmodule Nadia.Methods.Business do
       Args:
       * `business_connection_id` - Unique identifier of the business connection
       * `photo` - JSON-serializable profile photo object or a pre-encoded JSON string
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:is_public` - Pass true to set the public profile photo
@@ -343,6 +364,7 @@ defmodule Nadia.Methods.Business do
         set_business_account_profile_photo(business_connection_id, photo, [])
       end
 
+      @doc group: "Business"
       def set_business_account_profile_photo(%Client{} = client, business_connection_id, photo) do
         set_business_account_profile_photo(client, business_connection_id, photo, [])
       end
@@ -357,6 +379,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def set_business_account_profile_photo(
             %Client{} = client,
             business_connection_id,
@@ -373,13 +396,14 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to remove the current profile photo of a managed business account.
       Returns `:ok` on success.
 
       Args:
       * `business_connection_id` - Unique identifier of the business connection
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:is_public` - Pass true to remove the public profile photo
@@ -394,6 +418,7 @@ defmodule Nadia.Methods.Business do
         remove_business_account_profile_photo(business_connection_id, [])
       end
 
+      @doc group: "Business"
       def remove_business_account_profile_photo(%Client{} = client, business_connection_id) do
         remove_business_account_profile_photo(client, business_connection_id, [])
       end
@@ -405,6 +430,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def remove_business_account_profile_photo(
             %Client{} = client,
             business_connection_id,
@@ -417,6 +443,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to change the gift settings of a managed business account.
       Returns `:ok` on success.
@@ -450,6 +477,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def set_business_account_gift_settings(
             %Client{} = client,
             business_connection_id,
@@ -465,6 +493,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to transfer Telegram Stars from a business account balance to the bot.
       Returns `:ok` on success.
@@ -484,6 +513,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def transfer_business_account_stars(%Client{} = client, business_connection_id, star_count) do
         api_request(
           client,
@@ -493,6 +523,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to convert a gift received by a managed business account to Telegram Stars.
       Returns `:ok` on success.
@@ -511,6 +542,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def convert_gift_to_stars(%Client{} = client, business_connection_id, owned_gift_id) do
         api_request(
           client,
@@ -520,6 +552,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to upgrade a gift received by a managed business account.
       Returns `:ok` on success.
@@ -527,7 +560,7 @@ defmodule Nadia.Methods.Business do
       Args:
       * `business_connection_id` - Unique identifier of the business connection
       * `owned_gift_id` - Unique identifier of the regular gift that should be upgraded
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:keep_original_details` - Pass true to keep the original gift text, sender, and receiver in the upgraded gift
@@ -542,6 +575,7 @@ defmodule Nadia.Methods.Business do
         upgrade_gift(business_connection_id, owned_gift_id, [])
       end
 
+      @doc group: "Business"
       def upgrade_gift(%Client{} = client, business_connection_id, owned_gift_id) do
         upgrade_gift(client, business_connection_id, owned_gift_id, [])
       end
@@ -556,6 +590,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def upgrade_gift(%Client{} = client, business_connection_id, owned_gift_id, options) do
         api_request(
           client,
@@ -567,6 +602,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to transfer an owned gift to another user.
       Returns `:ok` on success.
@@ -575,7 +611,7 @@ defmodule Nadia.Methods.Business do
       * `business_connection_id` - Unique identifier of the business connection
       * `owned_gift_id` - Unique identifier of the regular gift that should be transferred
       * `new_owner_chat_id` - Unique identifier of the chat which will own the gift
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:star_count` - Number of Telegram Stars that will be paid for the transfer
@@ -590,6 +626,7 @@ defmodule Nadia.Methods.Business do
         transfer_gift(business_connection_id, owned_gift_id, new_owner_chat_id, [])
       end
 
+      @doc group: "Business"
       def transfer_gift(
             %Client{} = client,
             business_connection_id,
@@ -613,6 +650,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def transfer_gift(
             %Client{} = client,
             business_connection_id,
@@ -634,6 +672,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to post a story on behalf of a managed business account.
       Returns a Story object.
@@ -642,7 +681,7 @@ defmodule Nadia.Methods.Business do
       * `business_connection_id` - Unique identifier of the business connection
       * `content` - JSON-serializable story content object or a pre-encoded JSON string
       * `active_period` - Period after which the story is moved to the archive, in seconds
-      * `options` - orddict or map of options
+      * `options` - keyword list or map of options
 
       Options:
       * `:caption` - Caption of the story
@@ -669,6 +708,7 @@ defmodule Nadia.Methods.Business do
         post_story(business_connection_id, content, active_period, [])
       end
 
+      @doc group: "Business"
       def post_story(%Client{} = client, business_connection_id, content, active_period) do
         post_story(client, business_connection_id, content, active_period, [])
       end
@@ -687,6 +727,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def post_story(%Client{} = client, business_connection_id, content, active_period, options) do
         api_request(
           client,
@@ -702,6 +743,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to edit a story previously posted by the bot on behalf of a managed business account.
       Returns a Story object.
@@ -710,7 +752,7 @@ defmodule Nadia.Methods.Business do
       * `business_connection_id` - Unique identifier of the business connection
       * `story_id` - Unique identifier of the story to edit
       * `content` - JSON-serializable story content object or a pre-encoded JSON string
-      * `options` - orddict or map of options
+      * `options` - keyword list or map of options
 
       Options:
       * `:caption` - Caption of the story
@@ -735,6 +777,7 @@ defmodule Nadia.Methods.Business do
         edit_story(business_connection_id, story_id, content, [])
       end
 
+      @doc group: "Business"
       def edit_story(%Client{} = client, business_connection_id, story_id, content) do
         edit_story(client, business_connection_id, story_id, content, [])
       end
@@ -753,6 +796,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def edit_story(%Client{} = client, business_connection_id, story_id, content, options) do
         api_request(
           client,
@@ -768,6 +812,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to delete a story previously posted by the bot on behalf of a managed business account.
       Returns `:ok` on success.
@@ -785,6 +830,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def delete_story(%Client{} = client, business_connection_id, story_id) do
         api_request(
           client,
@@ -794,6 +840,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       @doc """
       Use this method to repost a story on behalf of a managed business account.
       Returns a Story object.
@@ -803,7 +850,7 @@ defmodule Nadia.Methods.Business do
       * `from_chat_id` - Unique identifier of the chat which posted the story
       * `from_story_id` - Unique identifier of the story that should be reposted
       * `active_period` - Period after which the story is moved to the archive, in seconds
-      * `options` - orddict or map of options
+      * `options` - keyword list or map of options
 
       Options:
       * `:post_to_chat_page` - Pass true to keep the story accessible after it expires
@@ -821,6 +868,7 @@ defmodule Nadia.Methods.Business do
         repost_story(business_connection_id, from_chat_id, from_story_id, active_period, [])
       end
 
+      @doc group: "Business"
       def repost_story(
             %Client{} = client,
             business_connection_id,
@@ -859,6 +907,7 @@ defmodule Nadia.Methods.Business do
         )
       end
 
+      @doc group: "Business"
       def repost_story(
             %Client{} = client,
             business_connection_id,

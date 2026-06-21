@@ -40,6 +40,7 @@ defmodule Nadia.Methods.ManagedBots do
         WebhookInfo
       }
 
+      @doc group: "Managed Bots"
       @doc """
       Use this method to get the token of a managed bot.
       Returns the token as a string.
@@ -53,10 +54,12 @@ defmodule Nadia.Methods.ManagedBots do
         api_request("getManagedBotToken", user_id: user_id)
       end
 
+      @doc group: "Managed Bots"
       def get_managed_bot_token(%Client{} = client, user_id) do
         api_request(client, "getManagedBotToken", user_id: user_id)
       end
 
+      @doc group: "Managed Bots"
       @doc """
       Use this method to revoke the current token of a managed bot and generate a new one.
       Returns the new token as a string.
@@ -70,10 +73,12 @@ defmodule Nadia.Methods.ManagedBots do
         api_request("replaceManagedBotToken", user_id: user_id)
       end
 
+      @doc group: "Managed Bots"
       def replace_managed_bot_token(%Client{} = client, user_id) do
         api_request(client, "replaceManagedBotToken", user_id: user_id)
       end
 
+      @doc group: "Managed Bots"
       @doc """
       Use this method to get the access settings of a managed bot.
       Returns a BotAccessSettings object.
@@ -89,10 +94,12 @@ defmodule Nadia.Methods.ManagedBots do
         api_request("getManagedBotAccessSettings", user_id: user_id)
       end
 
+      @doc group: "Managed Bots"
       def get_managed_bot_access_settings(%Client{} = client, user_id) do
         api_request(client, "getManagedBotAccessSettings", user_id: user_id)
       end
 
+      @doc group: "Managed Bots"
       @doc """
       Use this method to change the access settings of a managed bot.
       Returns True on success.
@@ -100,7 +107,7 @@ defmodule Nadia.Methods.ManagedBots do
       Args:
       * `user_id` - User identifier of the managed bot whose access settings will be changed
       * `is_access_restricted` - Pass true if only selected users can access the bot
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:added_user_ids` - Array of user identifiers allowed to access the bot
@@ -113,6 +120,7 @@ defmodule Nadia.Methods.ManagedBots do
         set_managed_bot_access_settings(user_id, is_access_restricted, [])
       end
 
+      @doc group: "Managed Bots"
       def set_managed_bot_access_settings(%Client{} = client, user_id, is_access_restricted) do
         set_managed_bot_access_settings(client, user_id, is_access_restricted, [])
       end
@@ -125,6 +133,7 @@ defmodule Nadia.Methods.ManagedBots do
         )
       end
 
+      @doc group: "Managed Bots"
       def set_managed_bot_access_settings(
             %Client{} = client,
             user_id,
@@ -139,6 +148,7 @@ defmodule Nadia.Methods.ManagedBots do
         )
       end
 
+      @doc group: "Managed Bots"
       @doc """
       Use this method to get the last messages from the personal chat of a given user.
       On success, an array of Message objects is returned.
@@ -155,6 +165,7 @@ defmodule Nadia.Methods.ManagedBots do
         api_request("getUserPersonalChatMessages", user_id: user_id, limit: limit)
       end
 
+      @doc group: "Managed Bots"
       def get_user_personal_chat_messages(%Client{} = client, user_id, limit) do
         api_request(client, "getUserPersonalChatMessages", user_id: user_id, limit: limit)
       end

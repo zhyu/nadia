@@ -124,7 +124,7 @@ defmodule Nadia.API do
 
   Args:
   * `method` - name of API method
-  * `options` - orddict of options
+  * `options` - keyword list of options
   * `file_field` - specify the key of file_field in `options` when sending files
   """
   @spec request(binary, [{atom, any}], atom) :: :ok | {:error, Error.t()} | {:ok, any}

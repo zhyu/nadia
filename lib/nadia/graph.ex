@@ -3,7 +3,7 @@ defmodule Nadia.Graph do
   Provides access to Telegra.ph API.
 
   ## Reference
-  http://telegra.ph/api
+  https://telegra.ph/api
   """
 
   alias Nadia.Graph.Model.{Account, Error}
@@ -16,7 +16,7 @@ defmodule Nadia.Graph do
   Args:
   * `short_name` - account name, helps users with several accounts remember which they are currently using. Displayed to the user above the "Edit/Publish" button on Telegra.ph, other users don't see this name. 1-32 characters
   * `author_name` - default author name used when creating new articles. 0-128 characters
-  * `options` - orddict of options
+  * `options` - keyword list of options
 
   Options:
   * `:author_url` - default profile link, opened when users click on the author's name below the title. Can be any link, not necessarily to a Telegram profile or channel. 0-512 characters
@@ -32,7 +32,7 @@ defmodule Nadia.Graph do
   * `access_token` - access token of the Telegraph account
   * `short_name` - new account name. 1-32 characters
   * `author_name` - new default author name used when creating new articles. 0-128 characters
-  * `options` - orddict of options
+  * `options` - keyword list of options
 
   Options:
   * `:author_url` - new default profile link, opened when users click on the author's name below the title. Can be any link, not necessarily to a Telegram profile or channel. 0-512 characters
@@ -85,8 +85,8 @@ defmodule Nadia.Graph do
   Args:
   * `access_token` - (String) Access token of the Telegraph account.
   * `title` - (String, 1-256 characters) Page title.
-  * `content` - (Array of Node, up to 64 KB) Content of the page.
-  * `options` - orddict of options
+  * `content` - JSON-encoded array of Telegraph nodes, up to 64 KB.
+  * `options` - keyword list of options
 
   Options:
   * `:author_name` - (String, 0-128 characters) Author name, displayed below the article's title.
@@ -105,12 +105,12 @@ defmodule Nadia.Graph do
   * `access_token` - (String) Access token of the Telegraph account.
   * `path` - (String) Path to the page.
   * `title` - (String, 1-256 characters) Page title.
-  * `content` - (Array of Node, up to 64 KB) Content of the page.
-  * `options` - orddict of options
+  * `content` - JSON-encoded array of Telegraph nodes, up to 64 KB.
+  * `options` - keyword list of options
 
   Options:
   * `:author_name` - (String, 0-128 characters) Author name, displayed below the article's title.
-  * `:author_url` - (String, 0-512 characters) Profile link, opened when users click on the author's * `:name below` - the title. Can be any link, not necessarily to a Telegram profile or channel.
+  * `:author_url` - (String, 0-512 characters) Profile link opened when users click the author's name below the title.
   * `:return_content` - (Boolean, default = false) If true, a content field will be returned in the Page object.
   """
   @spec edit_page(binary, binary, binary, binary, [{atom, any}]) ::
@@ -125,7 +125,7 @@ defmodule Nadia.Graph do
   @doc """
   Use this method to get a Telegraph page. Returns a Page object on success.
 
-  * `path` path to the Telegraph page (in the format Title-12-31, i.e. everything that comes after http://telegra.ph/)
+  * `path` path to the Telegraph page (in the format Title-12-31, i.e. everything that comes after https://telegra.ph/)
   * `return_content` - if true, content field will be returned in Page object
   """
   @spec get_page(binary, [atom]) :: {:ok, Page.t()} | {:error, Error.t()}
@@ -137,7 +137,7 @@ defmodule Nadia.Graph do
   Use this method to get the number of views for a Telegraph article. Returns a PageViews object on success. By default, the total number of page views will be returned.
 
   * `path` - path to the Telegraph page (in the format Title-12-31, where 12 is the month and 31 the day the article was first published)
-  * `filter_fields` - orddict of fields
+  * `filter_fields` - keyword list of fields
 
   Filter fields:
   * `:year` - if passed, the number of page views for the requested year will be returned.

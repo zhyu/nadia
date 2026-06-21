@@ -40,6 +40,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
         WebhookInfo
       }
 
+      @doc group: "Gifts And Verification"
       @doc """
       Use this method to get all gifts that can be sent by the bot.
       Returns a `Nadia.Model.Gifts` object on success.
@@ -47,15 +48,17 @@ defmodule Nadia.Methods.GiftsAndVerification do
       @spec get_available_gifts() :: {:ok, Gifts.t()} | {:error, Error.t()}
       @spec get_available_gifts(Client.t()) :: {:ok, Gifts.t()} | {:error, Error.t()}
       def get_available_gifts, do: api_request("getAvailableGifts")
+      @doc group: "Gifts And Verification"
       def get_available_gifts(%Client{} = client), do: api_request(client, "getAvailableGifts")
 
+      @doc group: "Gifts And Verification"
       @doc """
       Use this method to get gifts owned by a user.
       Returns a `Nadia.Model.OwnedGifts` object on success.
 
       Args:
       * `user_id` - Unique identifier of the target user
-      * `options` - orddict or map of options
+      * `options` - keyword list or map of options
       """
       @spec get_user_gifts(integer) :: {:ok, OwnedGifts.t()} | {:error, Error.t()}
       @spec get_user_gifts(integer, [{atom, any}] | map) ::
@@ -66,6 +69,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
               {:ok, OwnedGifts.t()} | {:error, Error.t()}
       def get_user_gifts(user_id), do: get_user_gifts(user_id, [])
 
+      @doc group: "Gifts And Verification"
       def get_user_gifts(%Client{} = client, user_id) do
         get_user_gifts(client, user_id, [])
       end
@@ -74,17 +78,19 @@ defmodule Nadia.Methods.GiftsAndVerification do
         api_request("getUserGifts", request_options([user_id: user_id], options))
       end
 
+      @doc group: "Gifts And Verification"
       def get_user_gifts(%Client{} = client, user_id, options) do
         api_request(client, "getUserGifts", request_options([user_id: user_id], options))
       end
 
+      @doc group: "Gifts And Verification"
       @doc """
       Use this method to get gifts owned by a chat.
       Returns a `Nadia.Model.OwnedGifts` object on success.
 
       Args:
       * `chat_id` - Unique identifier for the target chat or username of the target channel
-      * `options` - orddict or map of options
+      * `options` - keyword list or map of options
       """
       @spec get_chat_gifts(integer | binary) :: {:ok, OwnedGifts.t()} | {:error, Error.t()}
       @spec get_chat_gifts(integer | binary, [{atom, any}] | map) ::
@@ -95,6 +101,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
               {:ok, OwnedGifts.t()} | {:error, Error.t()}
       def get_chat_gifts(chat_id), do: get_chat_gifts(chat_id, [])
 
+      @doc group: "Gifts And Verification"
       def get_chat_gifts(%Client{} = client, chat_id) do
         get_chat_gifts(client, chat_id, [])
       end
@@ -103,17 +110,19 @@ defmodule Nadia.Methods.GiftsAndVerification do
         api_request("getChatGifts", request_options([chat_id: chat_id], options))
       end
 
+      @doc group: "Gifts And Verification"
       def get_chat_gifts(%Client{} = client, chat_id, options) do
         api_request(client, "getChatGifts", request_options([chat_id: chat_id], options))
       end
 
+      @doc group: "Gifts And Verification"
       @doc """
       Use this method to send a gift to a user or channel chat.
       Returns `:ok` on success.
 
       Args:
       * `gift_id` - Identifier of the gift
-      * `options` - orddict or map of options, including required `:user_id` or `:chat_id`
+      * `options` - keyword list or map of options, including required `:user_id` or `:chat_id`
 
       Options:
       * `:user_id` - Unique identifier of the target user
@@ -129,6 +138,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
       @spec send_gift(Client.t(), binary, [{atom, any}] | map) :: :ok | {:error, Error.t()}
       def send_gift(gift_id), do: send_gift(gift_id, [])
 
+      @doc group: "Gifts And Verification"
       def send_gift(%Client{} = client, gift_id) do
         send_gift(client, gift_id, [])
       end
@@ -140,6 +150,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
         )
       end
 
+      @doc group: "Gifts And Verification"
       def send_gift(%Client{} = client, gift_id, options) do
         api_request(
           client,
@@ -148,6 +159,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
         )
       end
 
+      @doc group: "Gifts And Verification"
       @doc """
       Use this method to gift a Telegram Premium subscription to a user.
       Returns `:ok` on success.
@@ -156,7 +168,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
       * `user_id` - Unique identifier of the target user
       * `month_count` - Number of months the subscription will be active
       * `star_count` - Number of Telegram Stars to pay
-      * `options` - orddict or map of options
+      * `options` - keyword list or map of options
 
       Options:
       * `:text` - Text that will be shown along with the service message
@@ -174,6 +186,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
         gift_premium_subscription(user_id, month_count, star_count, [])
       end
 
+      @doc group: "Gifts And Verification"
       def gift_premium_subscription(%Client{} = client, user_id, month_count, star_count) do
         gift_premium_subscription(client, user_id, month_count, star_count, [])
       end
@@ -188,6 +201,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
         )
       end
 
+      @doc group: "Gifts And Verification"
       def gift_premium_subscription(%Client{} = client, user_id, month_count, star_count, options) do
         api_request(
           client,
@@ -199,6 +213,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
         )
       end
 
+      @doc group: "Gifts And Verification"
       @doc """
       Use this method to verify a user on behalf of the organization represented by the bot.
       Returns `:ok` on success.
@@ -209,6 +224,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
       @spec verify_user(Client.t(), integer, [{atom, any}] | map) :: :ok | {:error, Error.t()}
       def verify_user(user_id), do: verify_user(user_id, [])
 
+      @doc group: "Gifts And Verification"
       def verify_user(%Client{} = client, user_id) do
         verify_user(client, user_id, [])
       end
@@ -217,10 +233,12 @@ defmodule Nadia.Methods.GiftsAndVerification do
         api_request("verifyUser", request_options([user_id: user_id], options))
       end
 
+      @doc group: "Gifts And Verification"
       def verify_user(%Client{} = client, user_id, options) do
         api_request(client, "verifyUser", request_options([user_id: user_id], options))
       end
 
+      @doc group: "Gifts And Verification"
       @doc """
       Use this method to verify a chat on behalf of the organization represented by the bot.
       Returns `:ok` on success.
@@ -232,6 +250,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
               :ok | {:error, Error.t()}
       def verify_chat(chat_id), do: verify_chat(chat_id, [])
 
+      @doc group: "Gifts And Verification"
       def verify_chat(%Client{} = client, chat_id) do
         verify_chat(client, chat_id, [])
       end
@@ -240,10 +259,12 @@ defmodule Nadia.Methods.GiftsAndVerification do
         api_request("verifyChat", request_options([chat_id: chat_id], options))
       end
 
+      @doc group: "Gifts And Verification"
       def verify_chat(%Client{} = client, chat_id, options) do
         api_request(client, "verifyChat", request_options([chat_id: chat_id], options))
       end
 
+      @doc group: "Gifts And Verification"
       @doc """
       Use this method to remove verification from a user who is currently verified on behalf
       of the organization represented by the bot.
@@ -255,10 +276,12 @@ defmodule Nadia.Methods.GiftsAndVerification do
         api_request("removeUserVerification", user_id: user_id)
       end
 
+      @doc group: "Gifts And Verification"
       def remove_user_verification(%Client{} = client, user_id) do
         api_request(client, "removeUserVerification", user_id: user_id)
       end
 
+      @doc group: "Gifts And Verification"
       @doc """
       Use this method to remove verification from a chat that is currently verified on behalf
       of the organization represented by the bot.
@@ -270,6 +293,7 @@ defmodule Nadia.Methods.GiftsAndVerification do
         api_request("removeChatVerification", chat_id: chat_id)
       end
 
+      @doc group: "Gifts And Verification"
       def remove_chat_verification(%Client{} = client, chat_id) do
         api_request(client, "removeChatVerification", chat_id: chat_id)
       end

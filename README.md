@@ -4,24 +4,25 @@
 [![Module Version](https://img.shields.io/hexpm/v/nadia.svg)](https://hex.pm/packages/nadia)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/nadia/)
 [![Total Download](https://img.shields.io/hexpm/dt/nadia.svg)](https://hex.pm/packages/nadia)
-[![License](https://img.shields.io/hexpm/l/nadia.svg)](https://github.com/zhyu/nadia/blob/master/LICENSE)
+[![License](https://img.shields.io/hexpm/l/nadia.svg)](https://github.com/zhyu/nadia/blob/master/LICENSE.md)
 [![Last Updated](https://img.shields.io/github/last-commit/zhyu/nadia.svg)](https://github.com/zhyu/nadia/commits/master)
 
-Telegram Bot API Wrapper written in Elixir ([document](https://hexdocs.pm/nadia/))
+Nadia is an Elixir client for the Telegram Bot API and Telegraph API. It
+combines complete Bot API method coverage with small, explicit helpers for
+building bots in an OTP application.
 
-## API Coverage
-
-Since Nadia 1.0.0, the Telegram Bot API wrapper covers all 180 official methods
-in Telegram Bot API 10.1, published on June 11, 2026. Current releases preserve
-that complete method coverage. Nadia keeps response parsing strict: modeled
-response fields are parsed into Nadia structs, while unknown future fields are
-ignored until the library explicitly models them.
+* Call every Telegram Bot API method through `Nadia`.
+* Receive updates with supervised polling or framework-neutral webhooks.
+* Route commands, text, and callback queries without a macro DSL.
+* Use explicit clients for multi-bot applications and fake HTTP adapters for
+  offline tests.
+* Add optional conversation state without requiring a persistence dependency.
 
 ## Installation
 
 Nadia requires Elixir 1.20 or later and Erlang/OTP 27 or later.
 
-Add `:nadia` to your `mix.exs` dependencies:
+Add `:nadia` to `mix.exs`:
 
 ```elixir
 def deps do
@@ -31,57 +32,87 @@ def deps do
 end
 ```
 
-And run `$ mix deps.get`.
+Then run:
+
+```sh
+mix deps.get
+```
+
+## Quick Start
+
+Create a bot with [@BotFather](https://t.me/BotFather). Read its token at
+runtime instead of committing it to application configuration:
+
+```elixir
+# config/runtime.exs
+import Config
+
+config :nadia,
+  token: {:system, "TELEGRAM_BOT_TOKEN"}
+```
+
+Direct Bot API calls return `{:ok, result}` or
+`{:error, %Nadia.Model.Error{}}`:
+
+```elixir
+case Nadia.get_me() do
+  {:ok, bot} -> IO.puts("Connected as @#{bot.username}")
+  {:error, error} -> IO.warn("Telegram error: #{inspect(error.reason)}")
+end
+
+Nadia.send_message(chat_id, "Hello from Nadia")
+```
+
+For an OTP bot, generate a handler and offline test:
+
+```sh
+mix nadia.gen.bot MyApp.Bot --polling
+```
+
+Then supervise long polling:
+
+```elixir
+children = [
+  {Nadia.Polling,
+   handler: MyApp.Bot,
+   allowed_updates: ["message"],
+   timeout: 30}
+]
+```
+
+Run the app with the token in its environment:
+
+```sh
+TELEGRAM_BOT_TOKEN=123:token mix run --no-halt
+```
+
+The [Build Your First Bot](guides/build-your-first-bot.md) guide walks through
+the complete setup.
+
+## Learn By Example
+
+The [Examples And Learning Paths](guides/examples.md) page connects Nadia's
+API reference to complete bot-building tasks.
+
+| Build | Guide |
+| --- | --- |
+| A generated polling bot | [Build Your First Bot](guides/build-your-first-bot.md) |
+| Commands and inline buttons | [Commands And Inline Keyboards](guides/examples/inline-keyboards.md) |
+| A multi-step conversation | [Conversation State](guides/examples/conversation-state.md) |
+| An HTTP endpoint | [Receive Webhook Updates](guides/receive-webhook-updates.md) |
+| Several bot identities | [Run Multiple Bots](guides/multiple-bots.md) |
+| Credential-free tests | [Test Bot Handlers](guides/testing-bots.md) |
+| A production deployment | [Production Checklist](guides/production-checklist.md) |
+| Telegraph pages | [Use The Telegraph API](guides/telegraph.md) |
+
+Tested, copyable handler modules live in the
+[`examples`](https://github.com/zhyu/nadia/tree/master/examples) directory.
 
 ## Configuration
 
-In `config/config.exs`, add your Telegram Bot token like [this](config/config.exs.example)
-
-```elixir
-config :nadia,
-  token: "bot token"
-```
-
-You can also add an optional `recv_timeout` in seconds (defaults to 5s):
-
-```elixir
-config :nadia,
-  recv_timeout: 10
-```
-
-You can also add a proxy support:
-
-```elixir
-config :nadia,
-  proxy: "http://proxy_host:proxy_port",
-  proxy_auth: {"user", "password"}
-```
-
-Nadia uses Req as its HTTP client. Proxy configuration supports HTTP and HTTPS
-proxies accepted by Req/Mint; hackney-specific SOCKS options are no longer
-supported.
-
-You can also configure the the base url for the api if you need to for some
-reason:
-
-```elixir
-config :nadia,
-  # Telegram API. Default: https://api.telegram.org/bot
-  base_url: "http://my-own-endpoint.com/whatever/",
-
-  # Telegram Graph API. Default: https://api.telegra.ph
-  graph_base_url: "http://my-own-endpoint.com/whatever/"
-```
-
-Environment variables may be used as well:
-
-```elixir
-config :nadia,
-  token: {:system, "ENVVAR_WITH_MYAPP_TOKEN", "default_value_if_needed"}
-```
-
-For applications that need more than one bot, configure named bots and build
-explicit clients from those names:
+The top-level token config is the default client used by calls such as
+`Nadia.get_me/0` and `Nadia.send_message/3`. Applications with more than one bot
+can configure named clients:
 
 ```elixir
 config :nadia,
@@ -91,255 +122,66 @@ config :nadia,
       recv_timeout: 10
     ],
     alerts: [
-      token: {:system, "ALERTS_BOT_TOKEN"},
-      proxy: "http://proxy_host:proxy_port"
+      token: {:system, "ALERTS_BOT_TOKEN"}
     ]
   ]
 ```
 
 ```elixir
-support_bot = Nadia.Client.from_config(:support)
-alerts_bot = Nadia.Client.from_config(:alerts)
-
-Nadia.send_message(support_bot, support_chat_id, "How can we help?")
-Nadia.send_message(alerts_bot, alerts_chat_id, "Alert triggered")
+support = Nadia.Client.from_config(:support)
+Nadia.send_message(support, support_chat_id, "How can we help?")
 ```
 
-The top-level `:token` configuration remains the default client for existing
-calls such as `Nadia.get_me()` and `Nadia.send_message(chat_id, text)`.
+See [Run Multiple Bots](guides/multiple-bots.md) before supervising several
+pollers; each worker needs a distinct child ID.
 
-## Usage
-
-### `get_me`
+Nadia uses Req as its HTTP transport. Optional HTTP or HTTPS proxy settings are
+passed to Req/Mint:
 
 ```elixir
-iex> Nadia.get_me
-{:ok,
- %Nadia.Model.User{first_name: "Nadia", id: 666, last_name: nil,
-  username: "nadia_bot"}}
+config :nadia,
+  proxy: "http://proxy.example.com:8080",
+  proxy_auth: {"user", "password"},
+  recv_timeout: 10
 ```
 
-### `get_updates`
-
-```elixir
-iex> Nadia.get_updates limit: 5
-{:ok, []}
-
-iex> {:ok,
- [%Nadia.Model.Update{callback_query: nil, chosen_inline_result: nil,
-   edited_message: nil, inline_query: nil,
-   message: %Nadia.Model.Message{audio: nil, caption: nil,
-    channel_chat_created: nil,
-    chat: %Nadia.Model.Chat{first_name: "Nadia", id: 123,
-     last_name: "TheBot", title: nil, type: "private", username: "nadia_the_bot"},
-    contact: nil, date: 1471208260, delete_chat_photo: nil, document: nil,
-    edit_date: nil, entities: nil, forward_date: nil, forward_from: nil,
-    forward_from_chat: nil,
-    from: %Nadia.Model.User{first_name: "Nadia", id: 123,
-     last_name: "TheBot", username: "nadia_the_bot"}, group_chat_created: nil,
-    left_chat_member: nil, location: nil, message_id: 543,
-    migrate_from_chat_id: nil, migrate_to_chat_id: nil, new_chat_member: nil,
-    new_chat_photo: [], new_chat_title: nil, photo: [], pinned_message: nil,
-    reply_to_message: nil, sticker: nil, supergroup_chat_created: nil,
-    text: "rew", venue: nil, video: nil, voice: nil}, update_id: 98765}]}
-```
-
-### Incoming update helpers
-
-Webhook handlers and custom polling loops can parse raw Telegram update payloads
-without reaching into Nadia internals:
-
-```elixir
-with {:ok, update} <- Nadia.Parser.parse_update(raw_body) do
-  context = Nadia.Context.new(update)
-
-  if context.message && context.message.text == "/start" do
-    Nadia.Context.reply(context, "Ready")
-  end
-end
-```
-
-`Nadia.Parser.parse_update/1` accepts a decoded update map, an existing
-`%Nadia.Model.Update{}`, or a raw JSON object binary. `parse_updates/1` accepts
-a decoded list, a JSON array binary, or a decoded/encoded Bot API response
-envelope with a `"result"` update list.
-
-Contexts preserve explicit clients for multi-bot applications:
-
-```elixir
-client = Nadia.Client.from_config(:support)
-context = Nadia.Context.new(update, client)
-
-Nadia.Context.reply(context, "Support bot here")
-```
-
-### Dispatching updates
-
-For non-polling update intake, define a small handler and dispatch parsed
-updates to it:
-
-```elixir
-defmodule MyApp.Bot do
-  @behaviour Nadia.Handler
-
-  @impl true
-  def handle_update(_update, context) do
-    case Nadia.Dispatcher.match_command(context, "start") do
-      {:ok, _match} ->
-        Nadia.Context.reply(context, "Ready")
-
-      :nomatch ->
-        :ignore
-    end
-  end
-end
-
-with {:ok, update} <- Nadia.Parser.parse_update(raw_body) do
-  Nadia.Dispatcher.dispatch(update, MyApp.Bot, client: Nadia.Client.from_config(:support))
-end
-```
-
-`Nadia.Dispatcher.dispatch/3` returns the handler result unchanged. Handler
-exceptions are not swallowed, so callers and future supervisors can decide how
-to handle failed updates.
-
-### Supervised polling
-
-To run a bot under OTP, add `Nadia.Polling` to your supervision tree:
-
-```elixir
-children = [
-  {Nadia.Polling,
-   client: Nadia.Client.from_config(:support),
-   handler: MyApp.Bot,
-   allowed_updates: ["message", "callback_query"],
-   timeout: 30}
-]
-```
-
-`Nadia.Polling` calls `getUpdates` with long polling, dispatches updates
-sequentially through `Nadia.Dispatcher`, and tracks the next offset in memory.
-It advances the offset after `:ok`, `:ignore`, or `{:ok, value}` handler
-results. Handler `{:error, reason}` results, handler exceptions, and
-`getUpdates` errors are retried with bounded backoff without acknowledging the
-failed update.
-
-To generate a starter handler and offline test, run:
-
-```sh
-mix nadia.gen.bot MyApp.Bot --polling
-```
-
-See [Build Your First Bot](guides/build-your-first-bot.md) for the full
-walkthrough.
-
-### Webhook helpers
-
-Nadia includes framework-neutral webhook helpers without adding a Plug or
-Phoenix dependency:
-
-```elixir
-Nadia.Webhook.dispatch_body(
-  raw_body,
-  MyApp.Bot,
-  headers: request_headers,
-  secret_token: System.fetch_env!("TELEGRAM_WEBHOOK_SECRET"),
-  client: Nadia.Client.from_config(:support)
-)
-```
-
-`Nadia.Webhook` verifies Telegram's optional
-`x-telegram-bot-api-secret-token` header, parses the raw update body, builds a
-`Nadia.Context`, and dispatches through `Nadia.Dispatcher`. See
-[Receive Webhook Updates](guides/receive-webhook-updates.md) for a
-framework-neutral endpoint outline.
-
-### Session storage
-
-For bots that need small amounts of per-chat or per-user state, Nadia provides
-an optional session store behaviour and a local ETS implementation:
-
-```elixir
-children = [
-  {Nadia.SessionStore.ETS, name: MyApp.BotSessions}
-]
-
-store = {Nadia.SessionStore.ETS, MyApp.BotSessions}
-{:ok, key} = Nadia.SessionStore.chat_user_key(context)
-
-{:ok, session} =
-  Nadia.SessionStore.update(store, key, fn session ->
-    Map.put(session, :last_command, "/start")
-  end)
-```
-
-Session stores are explicit. Nadia does not start a global store or attach
-state to polling, dispatching, or contexts automatically. The ETS store is
-in-memory, local to one process/node, and intended for development or simple
-single-node bots. Implement `Nadia.SessionStore` with application storage when
-you need persistence or distributed deployment.
-
-### `send_message`
-
-```elixir
-iex> case Nadia.send_message(tlg_id, "The message text goes here") do
-  {:ok, _result} ->
-    :ok
-  {:error, %Nadia.Model.Error{reason: "Please wait a little"}} ->
-    :wait
-  end
-
-:ok
-```
-
-Refer to [Nadia document](https://hexdocs.pm/nadia/) and [Telegram Bot API document](https://core.telegram.org/bots/api) for more details.
+Custom Bot API, file, or Telegraph endpoints can be configured with
+`:base_url`, `:file_base_url`, and `:graph_base_url`. Most applications should
+use the defaults.
 
 ## Testing
 
-The default test suite is offline and credential-free:
+Nadia's normal test suite is offline and credential-free:
 
 ```sh
 mix test
 ```
 
-Optional live Telegram smoke tests are tagged with `:telegram_live` and are not
-run by default:
+The [Test Bot Handlers](guides/testing-bots.md) guide shows how application
+tests can inject a fake `Nadia.HTTPClient` and assert outgoing requests.
+
+Optional maintainer smoke tests against Telegram are tagged
+`:telegram_live`. They require the two-bot environment documented in
+`.env.live.local.example` and are run with:
 
 ```sh
 mix test --only telegram_live
 ```
 
-Live tests require two bots with Bot-to-Bot Communication Mode enabled in
-BotFather. Configure credentials by copying the committed seed file to the
-ignored local env file, then edit the local file:
+## API Coverage
 
-```sh
-cp .env.live.local.example .env.live.local
-chmod 600 .env.live.local
-${EDITOR:-vi} .env.live.local
-```
+Since Nadia 1.0.0, the wrapper covers all 180 official methods in Telegram Bot
+API 10.1, published on June 11, 2026. Current releases preserve that complete
+method coverage. Modeled response fields are parsed into Nadia structs;
+unknown future fields are ignored until Nadia explicitly models them.
 
-The local `.env.live.local` file should define:
+Use the [`Nadia` reference](https://hexdocs.pm/nadia/Nadia.html) for Elixir
+signatures and the [official Telegram Bot API
+documentation](https://core.telegram.org/bots/api) for Telegram's field
+semantics.
 
-```sh
-export NADIA_LIVE_BOT_A_TOKEN="123:bot-a-token"
-export NADIA_LIVE_BOT_A_USERNAME="bot_a_username"
-export NADIA_LIVE_BOT_B_TOKEN="456:bot-b-token"
-export NADIA_LIVE_BOT_B_USERNAME="bot_b_username"
-```
-
-Then source the local file and run the live suite from the same shell:
-
-```sh
-source .env.live.local
-mix test --only telegram_live
-```
-
-Set `NADIA_LIVE_API_ENV=test` in `.env.live.local` to route live smoke tests
-through Telegram's Bot API test environment.
-
-## Copyright and License
+## License
 
 Copyright (c) 2015 Yu Zhang
 
-This library licensed under the [MIT license](./LICENSE.md).
+Nadia is released under the [MIT License](LICENSE.md).

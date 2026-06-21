@@ -40,6 +40,7 @@ defmodule Nadia.Methods.PinnedMessages do
         WebhookInfo
       }
 
+      @doc group: "Pinned Messages"
       @doc """
       Use this method to pin a message in a group, a supergroup, or a channel. The bot must be an
       administrator in the chat for this to work and must have the ‘can_pin_messages’ admin right
@@ -60,6 +61,7 @@ defmodule Nadia.Methods.PinnedMessages do
               :ok | {:error, Error.t()}
       def pin_chat_message(chat_id, message_id), do: pin_chat_message(chat_id, message_id, [])
 
+      @doc group: "Pinned Messages"
       def pin_chat_message(%Client{} = client, chat_id, message_id) do
         pin_chat_message(client, chat_id, message_id, [])
       end
@@ -68,6 +70,7 @@ defmodule Nadia.Methods.PinnedMessages do
         api_request("pinChatMessage", [chat_id: chat_id, message_id: message_id] ++ options)
       end
 
+      @doc group: "Pinned Messages"
       def pin_chat_message(%Client{} = client, chat_id, message_id, options) do
         api_request(
           client,
@@ -76,6 +79,7 @@ defmodule Nadia.Methods.PinnedMessages do
         )
       end
 
+      @doc group: "Pinned Messages"
       @doc """
       Use this method to unpin a message in a group, a supergroup, or a channel. The bot must be an
       administrator in the chat for this to work and must have the ‘can_pin_messages’ admin right in
@@ -84,7 +88,7 @@ defmodule Nadia.Methods.PinnedMessages do
       Args:
       * `chat_id` - Unique identifier for the target chat or username of the target channel
       (in the format @channelusername)
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:business_connection_id` - Unique identifier of the business connection
@@ -99,6 +103,7 @@ defmodule Nadia.Methods.PinnedMessages do
         unpin_chat_message(chat_id, [])
       end
 
+      @doc group: "Pinned Messages"
       def unpin_chat_message(%Client{} = client, chat_id) do
         unpin_chat_message(client, chat_id, [])
       end
@@ -107,6 +112,7 @@ defmodule Nadia.Methods.PinnedMessages do
         api_request("unpinChatMessage", [chat_id: chat_id] ++ options)
       end
 
+      @doc group: "Pinned Messages"
       def unpin_chat_message(%Client{} = client, chat_id, options) do
         api_request(client, "unpinChatMessage", [chat_id: chat_id] ++ options)
       end

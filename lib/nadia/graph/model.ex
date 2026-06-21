@@ -3,7 +3,7 @@ defmodule Nadia.Graph.Model do
   Types used in Telegra.ph API.
 
   ## Reference
-  http://telegra.ph/api#Available-types
+  https://telegra.ph/api#Available-types
   """
 
   defmodule Account do

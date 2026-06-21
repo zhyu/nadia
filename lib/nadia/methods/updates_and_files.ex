@@ -40,12 +40,13 @@ defmodule Nadia.Methods.UpdatesAndFiles do
         WebhookInfo
       }
 
+      @doc group: "Updates And Files"
       @doc """
       Use this method to receive incoming updates using long polling.
       An Array of Update objects is returned.
 
       Args:
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:offset` - Identifier of the first update to be returned. Must be greater by one
@@ -62,16 +63,19 @@ defmodule Nadia.Methods.UpdatesAndFiles do
       @spec get_updates([{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
       @spec get_updates(Client.t(), [{atom, any}]) :: {:ok, [Update.t()]} | {:error, Error.t()}
       def get_updates(), do: get_updates([])
+      @doc group: "Updates And Files"
       def get_updates(%Client{} = client), do: get_updates(client, [])
 
       def get_updates(options) do
         api_request("getUpdates", encode_json_array_option(options, :allowed_updates))
       end
 
+      @doc group: "Updates And Files"
       def get_updates(%Client{} = client, options) do
         api_request(client, "getUpdates", encode_json_array_option(options, :allowed_updates))
       end
 
+      @doc group: "Updates And Files"
       @doc """
       Use this method to specify a url and receive incoming updates via an outgoing
       webhook. Whenever there is an update for the bot, we will send an HTTPS POST
@@ -79,7 +83,7 @@ defmodule Nadia.Methods.UpdatesAndFiles do
       an unsuccessful request, we will give up after a reasonable amount of attempts.
 
       Args:
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:url` - HTTPS url to send updates to.
@@ -90,22 +94,25 @@ defmodule Nadia.Methods.UpdatesAndFiles do
       @spec set_webhook([{atom, any}]) :: :ok | {:error, Error.t()}
       @spec set_webhook(Client.t(), [{atom, any}]) :: :ok | {:error, Error.t()}
       def set_webhook(), do: set_webhook([])
+      @doc group: "Updates And Files"
       def set_webhook(%Client{} = client), do: set_webhook(client, [])
 
       def set_webhook(options) do
         api_request("setWebhook", encode_json_array_option(options, :allowed_updates))
       end
 
+      @doc group: "Updates And Files"
       def set_webhook(%Client{} = client, options) do
         api_request(client, "setWebhook", encode_json_array_option(options, :allowed_updates))
       end
 
+      @doc group: "Updates And Files"
       @doc """
       Use this method to remove webhook integration if you decide to switch back to `Nadia.get_updates/1`.
       Returns `:ok` on success.
 
       Args:
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:drop_pending_updates` - Pass True to drop all pending updates
@@ -115,12 +122,15 @@ defmodule Nadia.Methods.UpdatesAndFiles do
       @spec delete_webhook(Client.t()) :: :ok | {:error, Error.t()}
       @spec delete_webhook(Client.t(), [{atom, any}]) :: :ok | {:error, Error.t()}
       def delete_webhook(), do: delete_webhook([])
+      @doc group: "Updates And Files"
       def delete_webhook(%Client{} = client), do: delete_webhook(client, [])
       def delete_webhook(options), do: api_request("deleteWebhook", options)
 
+      @doc group: "Updates And Files"
       def delete_webhook(%Client{} = client, options),
         do: api_request(client, "deleteWebhook", options)
 
+      @doc group: "Updates And Files"
       @doc """
       Use this method to get current webhook status. Requires no parameters.
       On success, returns a `Nadia.Model.WebhookInfo.t()` object with webhook details.
@@ -129,8 +139,10 @@ defmodule Nadia.Methods.UpdatesAndFiles do
       @spec get_webhook_info() :: {:ok, WebhookInfo.t()} | {:error, Error.t()}
       @spec get_webhook_info(Client.t()) :: {:ok, WebhookInfo.t()} | {:error, Error.t()}
       def get_webhook_info(), do: api_request("getWebhookInfo")
+      @doc group: "Updates And Files"
       def get_webhook_info(%Client{} = client), do: api_request(client, "getWebhookInfo")
 
+      @doc group: "Updates And Files"
       @doc """
       Use this method to get basic info about a file and prepare it for downloading.
       For the moment, bots can download files of up to 20MB in size.
@@ -147,9 +159,11 @@ defmodule Nadia.Methods.UpdatesAndFiles do
       @spec get_file(Client.t(), binary) :: {:ok, File.t()} | {:error, Error.t()}
       def get_file(file_id), do: api_request("getFile", file_id: file_id)
 
+      @doc group: "Updates And Files"
       def get_file(%Client{} = client, file_id),
         do: api_request(client, "getFile", file_id: file_id)
 
+      @doc group: "Updates And Files"
       @doc ~S"""
       Use this method to get link for file for subsequent use.
       This method is an extension of the `get_file` method.
@@ -166,6 +180,7 @@ defmodule Nadia.Methods.UpdatesAndFiles do
         {:ok, build_file_url(file.file_path)}
       end
 
+      @doc group: "Updates And Files"
       def get_file_link(%Client{} = client, file) do
         {:ok, build_file_url(client, file.file_path)}
       end

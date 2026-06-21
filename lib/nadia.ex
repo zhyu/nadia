@@ -18,6 +18,21 @@ defmodule Nadia do
       Nadia.send_message(123, "hello")
   """
 
+  @moduledoc groups: [
+               "Updates And Files",
+               "Messages",
+               "Interactions And Editing",
+               "Chats And Administration",
+               "Pinned Messages",
+               "Stickers",
+               "Games",
+               "Payments",
+               "Bot Account",
+               "Business",
+               "Managed Bots",
+               "Gifts And Verification"
+             ]
+
   alias Nadia.Client
 
   alias Nadia.Model.{

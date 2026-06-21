@@ -1,6 +1,6 @@
 defmodule Nadia.Graph.API do
   @moduledoc """
-  Provides basic functionalities for Telegram Bot API.
+  Request and response plumbing for the Telegraph API.
   """
 
   alias Nadia.Graph.Model.Error
@@ -71,11 +71,11 @@ defmodule Nadia.Graph.API do
   defp encode_json_param(value), do: Jason.encode!(value)
 
   @doc """
-  Generic method to call Telegram Bot API.
+  Generic method for calling the Telegraph API.
 
   Args:
   * `method` - name of API method
-  * `options` - orddict of options
+  * `options` - keyword list of options
   * `file_field` - specify the key of file_field in `options` when sending files
   """
   def request(method, options \\ [], file_field \\ nil) do

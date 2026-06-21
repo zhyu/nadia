@@ -40,6 +40,7 @@ defmodule Nadia.Methods.Messages do
         WebhookInfo
       }
 
+      @doc group: "Messages"
       @doc """
       Use this method to send text messages.
       On success, the sent Message is returned.
@@ -48,7 +49,7 @@ defmodule Nadia.Methods.Messages do
       * `chat_id` - Unique identifier for the target chat or username of the target channel
       (in the format @channelusername)
       * `text` - Text of the message to be sent
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:parse_mode` - Use `Markdown`, if you want Telegram apps to show bold, italic
@@ -66,6 +67,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, Message.t()} | {:error, Error.t()}
       def send_message(chat_id, text), do: send_message(chat_id, text, [])
 
+      @doc group: "Messages"
       def send_message(%Client{} = client, chat_id, text),
         do: send_message(client, chat_id, text, [])
 
@@ -73,10 +75,12 @@ defmodule Nadia.Methods.Messages do
         api_request("sendMessage", [chat_id: chat_id, text: text] ++ options)
       end
 
+      @doc group: "Messages"
       def send_message(%Client{} = client, chat_id, text, options) do
         api_request(client, "sendMessage", [chat_id: chat_id, text: text] ++ options)
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send rich messages.
       On success, the sent Message is returned.
@@ -85,7 +89,7 @@ defmodule Nadia.Methods.Messages do
       * `chat_id` - Unique identifier for the target chat or username of the target bot,
       supergroup, or channel
       * `rich_message` - JSON-serializable InputRichMessage object or a pre-encoded JSON string
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec send_rich_message(integer | binary, list | map | struct | binary) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -103,6 +107,7 @@ defmodule Nadia.Methods.Messages do
       def send_rich_message(chat_id, rich_message),
         do: send_rich_message(chat_id, rich_message, [])
 
+      @doc group: "Messages"
       def send_rich_message(%Client{} = client, chat_id, rich_message) do
         send_rich_message(client, chat_id, rich_message, [])
       end
@@ -117,6 +122,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_rich_message(%Client{} = client, chat_id, rich_message, options) do
         api_request(
           client,
@@ -128,6 +134,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to forward messages of any kind.
       On success, the sent Message is returned.
@@ -138,7 +145,7 @@ defmodule Nadia.Methods.Messages do
       * `from_chat_id` - Unique identifier for the chat where the original message was sent
       or username of the target channel (in the format @channelusername)
       * `message_id` - Unique message identifier
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:message_thread_id` - Unique identifier for the target message thread
@@ -161,6 +168,7 @@ defmodule Nadia.Methods.Messages do
         forward_message(chat_id, from_chat_id, message_id, [])
       end
 
+      @doc group: "Messages"
       def forward_message(%Client{} = client, chat_id, from_chat_id, message_id) do
         forward_message(client, chat_id, from_chat_id, message_id, [])
       end
@@ -172,6 +180,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def forward_message(%Client{} = client, chat_id, from_chat_id, message_id, options) do
         api_request(
           client,
@@ -180,6 +189,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to forward multiple messages of any kind.
       On success, an array of MessageId objects is returned.
@@ -190,7 +200,7 @@ defmodule Nadia.Methods.Messages do
       * `from_chat_id` - Unique identifier for the chat where the original messages were sent
       or username of the target channel (in the format @channelusername)
       * `message_ids` - List of message identifiers
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:message_thread_id` - Unique identifier for the target message thread
@@ -212,6 +222,7 @@ defmodule Nadia.Methods.Messages do
         forward_messages(chat_id, from_chat_id, message_ids, [])
       end
 
+      @doc group: "Messages"
       def forward_messages(%Client{} = client, chat_id, from_chat_id, message_ids) do
         forward_messages(client, chat_id, from_chat_id, message_ids, [])
       end
@@ -227,6 +238,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def forward_messages(%Client{} = client, chat_id, from_chat_id, message_ids, options) do
         api_request(
           client,
@@ -239,6 +251,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to copy messages of any kind.
       On success, the MessageId of the sent message is returned.
@@ -249,7 +262,7 @@ defmodule Nadia.Methods.Messages do
       * `from_chat_id` - Unique identifier for the chat where the original message was sent
       or username of the target channel (in the format @channelusername)
       * `message_id` - Unique message identifier
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:message_thread_id` - Unique identifier for the target message thread
@@ -279,6 +292,7 @@ defmodule Nadia.Methods.Messages do
         copy_message(chat_id, from_chat_id, message_id, [])
       end
 
+      @doc group: "Messages"
       def copy_message(%Client{} = client, chat_id, from_chat_id, message_id) do
         copy_message(client, chat_id, from_chat_id, message_id, [])
       end
@@ -290,6 +304,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def copy_message(%Client{} = client, chat_id, from_chat_id, message_id, options) do
         api_request(
           client,
@@ -298,6 +313,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to copy multiple messages of any kind.
       On success, an array of MessageId objects is returned.
@@ -308,7 +324,7 @@ defmodule Nadia.Methods.Messages do
       * `from_chat_id` - Unique identifier for the chat where the original messages were sent
       or username of the target channel (in the format @channelusername)
       * `message_ids` - List of message identifiers
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:message_thread_id` - Unique identifier for the target message thread
@@ -331,6 +347,7 @@ defmodule Nadia.Methods.Messages do
         copy_messages(chat_id, from_chat_id, message_ids, [])
       end
 
+      @doc group: "Messages"
       def copy_messages(%Client{} = client, chat_id, from_chat_id, message_ids) do
         copy_messages(client, chat_id, from_chat_id, message_ids, [])
       end
@@ -346,6 +363,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def copy_messages(%Client{} = client, chat_id, from_chat_id, message_ids, options) do
         api_request(
           client,
@@ -358,6 +376,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send photos.
       On success, the sent Message is returned.
@@ -367,7 +386,7 @@ defmodule Nadia.Methods.Messages do
       (in the format @channelusername)
       * `photo` - Photo to send. Either a `file_id` to resend a photo that is already on
       the Telegram servers, or a `file_path` to upload a new photo
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:caption` - Photo caption (may also be used when resending photos by `file_id`)
@@ -383,6 +402,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, Message.t()} | {:error, Error.t()}
       def send_photo(chat_id, photo), do: send_photo(chat_id, photo, [])
 
+      @doc group: "Messages"
       def send_photo(%Client{} = client, chat_id, photo),
         do: send_photo(client, chat_id, photo, [])
 
@@ -390,10 +410,12 @@ defmodule Nadia.Methods.Messages do
         api_request("sendPhoto", [chat_id: chat_id, photo: photo] ++ options, :photo)
       end
 
+      @doc group: "Messages"
       def send_photo(%Client{} = client, chat_id, photo, options) do
         api_request(client, "sendPhoto", [chat_id: chat_id, photo: photo] ++ options, :photo)
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send audio files, if you want Telegram clients to display
       them in the music player. Your audio must be in the .mp3 format.
@@ -412,7 +434,7 @@ defmodule Nadia.Methods.Messages do
       (in the format @channelusername)
       * `audio` - Audio to send. Either a `file_id` to resend an audio that is already on
       the Telegram servers, or a `file_path` to upload a new audio
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:duration` - Duration of the audio in seconds
@@ -430,6 +452,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, Message.t()} | {:error, Error.t()}
       def send_audio(chat_id, audio), do: send_audio(chat_id, audio, [])
 
+      @doc group: "Messages"
       def send_audio(%Client{} = client, chat_id, audio),
         do: send_audio(client, chat_id, audio, [])
 
@@ -437,10 +460,12 @@ defmodule Nadia.Methods.Messages do
         api_request("sendAudio", [chat_id: chat_id, audio: audio] ++ options, :audio)
       end
 
+      @doc group: "Messages"
       def send_audio(%Client{} = client, chat_id, audio, options) do
         api_request(client, "sendAudio", [chat_id: chat_id, audio: audio] ++ options, :audio)
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send general files.
       On success, the sent Message is returned.
@@ -452,7 +477,7 @@ defmodule Nadia.Methods.Messages do
       (in the format @channelusername)
       * `document` - File to send. Either a `file_id` to resend a file that is already on
       the Telegram servers, or a `file_path` to upload a new file
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:disable_notification` - Sends the message silently or without notification
@@ -467,6 +492,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, Message.t()} | {:error, Error.t()}
       def send_document(chat_id, document), do: send_document(chat_id, document, [])
 
+      @doc group: "Messages"
       def send_document(%Client{} = client, chat_id, document) do
         send_document(client, chat_id, document, [])
       end
@@ -475,6 +501,7 @@ defmodule Nadia.Methods.Messages do
         api_request("sendDocument", [chat_id: chat_id, document: document] ++ options, :document)
       end
 
+      @doc group: "Messages"
       def send_document(%Client{} = client, chat_id, document, options) do
         api_request(
           client,
@@ -484,6 +511,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send .webp stickers.
       On success, the sent Message is returned.
@@ -493,7 +521,7 @@ defmodule Nadia.Methods.Messages do
       (in the format @channelusername)
       * `sticker` - File to send. Either a `file_id` to resend a sticker that is already on
       the Telegram servers, or a `file_path` to upload a new sticker
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:disable_notification` - Sends the message silently or without notification
@@ -508,6 +536,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, Message.t()} | {:error, Error.t()}
       def send_sticker(chat_id, sticker), do: send_sticker(chat_id, sticker, [])
 
+      @doc group: "Messages"
       def send_sticker(%Client{} = client, chat_id, sticker) do
         send_sticker(client, chat_id, sticker, [])
       end
@@ -516,6 +545,7 @@ defmodule Nadia.Methods.Messages do
         api_request("sendSticker", [chat_id: chat_id, sticker: sticker] ++ options, :sticker)
       end
 
+      @doc group: "Messages"
       def send_sticker(%Client{} = client, chat_id, sticker, options) do
         api_request(
           client,
@@ -525,6 +555,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send video files, Telegram clients support mp4 videos
       (other formats may be sent as Document).
@@ -537,7 +568,7 @@ defmodule Nadia.Methods.Messages do
       (in the format @channelusername)
       * `video` - Video to send. Either a `file_id` to resend a video that is already on
       the Telegram servers, or a `file_path` to upload a new video
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:duration` - Duration of the video in seconds
@@ -554,6 +585,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, Message.t()} | {:error, Error.t()}
       def send_video(chat_id, video), do: send_video(chat_id, video, [])
 
+      @doc group: "Messages"
       def send_video(%Client{} = client, chat_id, video),
         do: send_video(client, chat_id, video, [])
 
@@ -561,10 +593,12 @@ defmodule Nadia.Methods.Messages do
         api_request("sendVideo", [chat_id: chat_id, video: video] ++ options, :video)
       end
 
+      @doc group: "Messages"
       def send_video(%Client{} = client, chat_id, video, options) do
         api_request(client, "sendVideo", [chat_id: chat_id, video: video] ++ options, :video)
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send audio files, if you want Telegram clients to display
       the file as a playable voice message. For this to work, your audio must be in
@@ -578,7 +612,7 @@ defmodule Nadia.Methods.Messages do
       (in the format @channelusername)
       * `voice` - Audio to send. Either a `file_id` to resend an audio that is already on
       the Telegram servers, or a `file_path` to upload a new audio
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:duration` - Duration of the audio in seconds
@@ -594,6 +628,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, Message.t()} | {:error, Error.t()}
       def send_voice(chat_id, voice), do: send_voice(chat_id, voice, [])
 
+      @doc group: "Messages"
       def send_voice(%Client{} = client, chat_id, voice),
         do: send_voice(client, chat_id, voice, [])
 
@@ -601,10 +636,12 @@ defmodule Nadia.Methods.Messages do
         api_request("sendVoice", [chat_id: chat_id, voice: voice] ++ options, :voice)
       end
 
+      @doc group: "Messages"
       def send_voice(%Client{} = client, chat_id, voice, options) do
         api_request(client, "sendVoice", [chat_id: chat_id, voice: voice] ++ options, :voice)
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send video messages.
       On success, the sent Message is returned.
@@ -614,7 +651,7 @@ defmodule Nadia.Methods.Messages do
       (in the format @channelusername)
       * `video_note` - Video note to send. Either a `file_id` to resend a video note that is
       already on the Telegram servers, or a `file_path` to upload a new video note
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec send_video_note(integer | binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -622,6 +659,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, Message.t()} | {:error, Error.t()}
       def send_video_note(chat_id, video_note), do: send_video_note(chat_id, video_note, [])
 
+      @doc group: "Messages"
       def send_video_note(%Client{} = client, chat_id, video_note) do
         send_video_note(client, chat_id, video_note, [])
       end
@@ -634,6 +672,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_video_note(%Client{} = client, chat_id, video_note, options) do
         api_request(
           client,
@@ -643,6 +682,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send live photos.
       On success, the sent Message is returned.
@@ -652,7 +692,7 @@ defmodule Nadia.Methods.Messages do
       (in the format @channelusername)
       * `live_photo` - Live photo media to send
       * `photo` - Cover photo to send as a regular Telegram parameter
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec send_live_photo(integer | binary, binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -662,6 +702,7 @@ defmodule Nadia.Methods.Messages do
         send_live_photo(chat_id, live_photo, photo, [])
       end
 
+      @doc group: "Messages"
       def send_live_photo(%Client{} = client, chat_id, live_photo, photo) do
         send_live_photo(client, chat_id, live_photo, photo, [])
       end
@@ -674,6 +715,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_live_photo(%Client{} = client, chat_id, live_photo, photo, options) do
         api_request(
           client,
@@ -683,6 +725,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send an album of photos, videos, documents or audios.
       On success, an array of sent Messages is returned.
@@ -691,7 +734,7 @@ defmodule Nadia.Methods.Messages do
       * `chat_id` - Unique identifier for the target chat or username of the target channel
       (in the format @channelusername)
       * `media` - JSON-serializable media array or a pre-encoded JSON string
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec send_media_group(integer | binary, list | map | struct | binary, [{atom, any}]) ::
               {:ok, [Message.t()]} | {:error, Error.t()}
@@ -701,6 +744,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, [Message.t()]} | {:error, Error.t()}
       def send_media_group(chat_id, media), do: send_media_group(chat_id, media, [])
 
+      @doc group: "Messages"
       def send_media_group(%Client{} = client, chat_id, media) do
         send_media_group(client, chat_id, media, [])
       end
@@ -712,6 +756,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_media_group(%Client{} = client, chat_id, media, options) do
         api_request(
           client,
@@ -720,6 +765,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send paid media.
       On success, the sent Message is returned.
@@ -729,7 +775,7 @@ defmodule Nadia.Methods.Messages do
       (in the format @channelusername)
       * `star_count` - Amount of Telegram Stars to be paid for the media
       * `media` - JSON-serializable paid media array or a pre-encoded JSON string
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec send_paid_media(integer | binary, integer, list | map | struct | binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -741,6 +787,7 @@ defmodule Nadia.Methods.Messages do
         send_paid_media(chat_id, star_count, media, [])
       end
 
+      @doc group: "Messages"
       def send_paid_media(%Client{} = client, chat_id, star_count, media) do
         send_paid_media(client, chat_id, star_count, media, [])
       end
@@ -752,6 +799,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_paid_media(%Client{} = client, chat_id, star_count, media, options) do
         api_request(
           client,
@@ -760,6 +808,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send a native poll.
       On success, the sent Message is returned.
@@ -768,7 +817,7 @@ defmodule Nadia.Methods.Messages do
       * `chat_id` - Unique identifier for the target chat or username of the target channel
       (in the format @channelusername)
       * `question` - Poll question
-      * `params` - orddict or map of Telegram parameters, including required `:options`
+      * `params` - keyword list or map of Telegram parameters, including required `:options`
       """
       @spec send_poll(integer | binary, binary, [{atom, any}] | map) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -791,6 +840,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_poll(%Client{} = client, chat_id, question, params) when is_list(params) do
         api_request(
           client,
@@ -799,6 +849,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_poll(%Client{} = client, chat_id, question, params) when is_map(params) do
         api_request(
           client,
@@ -810,6 +861,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send an animated emoji that will display a random value.
       On success, the sent Message is returned.
@@ -820,13 +872,16 @@ defmodule Nadia.Methods.Messages do
       @spec send_dice(Client.t(), integer | binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
       def send_dice(chat_id), do: send_dice(chat_id, [])
+      @doc group: "Messages"
       def send_dice(%Client{} = client, chat_id), do: send_dice(client, chat_id, [])
       def send_dice(chat_id, options), do: api_request("sendDice", [chat_id: chat_id] ++ options)
 
+      @doc group: "Messages"
       def send_dice(%Client{} = client, chat_id, options) do
         api_request(client, "sendDice", [chat_id: chat_id] ++ options)
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send a game.
       On success, the sent Message is returned.
@@ -834,7 +889,7 @@ defmodule Nadia.Methods.Messages do
       Args:
       * `chat_id` - Unique identifier for the target chat
       * `game_short_name` - Short name of the game
-      * `options` - orddict or map of options
+      * `options` - keyword list or map of options
       """
       @spec send_game(integer | binary, binary) :: {:ok, Message.t()} | {:error, Error.t()}
       @spec send_game(integer | binary, binary, [{atom, any}] | map) ::
@@ -845,6 +900,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, Message.t()} | {:error, Error.t()}
       def send_game(chat_id, game_short_name), do: send_game(chat_id, game_short_name, [])
 
+      @doc group: "Messages"
       def send_game(%Client{} = client, chat_id, game_short_name) do
         send_game(client, chat_id, game_short_name, [])
       end
@@ -856,6 +912,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_game(%Client{} = client, chat_id, game_short_name, options) do
         api_request(
           client,
@@ -864,6 +921,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send a checklist on behalf of a connected business account.
       On success, the sent Message is returned.
@@ -872,7 +930,7 @@ defmodule Nadia.Methods.Messages do
       * `business_connection_id` - Unique identifier of the business connection
       * `chat_id` - Unique identifier for the target chat or username of the target bot
       * `checklist` - JSON-serializable checklist object or a pre-encoded JSON string
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec send_checklist(binary, integer | binary, list | map | struct | binary) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -888,6 +946,7 @@ defmodule Nadia.Methods.Messages do
         send_checklist(business_connection_id, chat_id, checklist, [])
       end
 
+      @doc group: "Messages"
       def send_checklist(%Client{} = client, business_connection_id, chat_id, checklist) do
         send_checklist(client, business_connection_id, chat_id, checklist, [])
       end
@@ -903,6 +962,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_checklist(%Client{} = client, business_connection_id, chat_id, checklist, options) do
         api_request(
           client,
@@ -915,6 +975,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to stream a partial message draft to a user.
       Returns `:ok` on success.
@@ -928,6 +989,7 @@ defmodule Nadia.Methods.Messages do
               :ok | {:error, Error.t()}
       def send_message_draft(chat_id, draft_id), do: send_message_draft(chat_id, draft_id, [])
 
+      @doc group: "Messages"
       def send_message_draft(%Client{} = client, chat_id, draft_id) do
         send_message_draft(client, chat_id, draft_id, [])
       end
@@ -936,10 +998,12 @@ defmodule Nadia.Methods.Messages do
         api_request("sendMessageDraft", [chat_id: chat_id, draft_id: draft_id] ++ options)
       end
 
+      @doc group: "Messages"
       def send_message_draft(%Client{} = client, chat_id, draft_id, options) do
         api_request(client, "sendMessageDraft", [chat_id: chat_id, draft_id: draft_id] ++ options)
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to stream a partial rich message to a user while the message is
       being generated.
@@ -965,6 +1029,7 @@ defmodule Nadia.Methods.Messages do
         send_rich_message_draft(chat_id, draft_id, rich_message, [])
       end
 
+      @doc group: "Messages"
       def send_rich_message_draft(%Client{} = client, chat_id, draft_id, rich_message) do
         send_rich_message_draft(client, chat_id, draft_id, rich_message, [])
       end
@@ -977,6 +1042,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_rich_message_draft(%Client{} = client, chat_id, draft_id, rich_message, options) do
         api_request(
           client,
@@ -986,6 +1052,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send point on the map.
       On success, the sent Message is returned.
@@ -995,7 +1062,7 @@ defmodule Nadia.Methods.Messages do
       (in the format @channelusername)
       * `latitude` - Latitude of location
       * `longitude` - Longitude of location
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:disable_notification` - Sends the message silently or without notification
@@ -1011,6 +1078,7 @@ defmodule Nadia.Methods.Messages do
       def send_location(chat_id, latitude, longitude),
         do: send_location(chat_id, latitude, longitude, [])
 
+      @doc group: "Messages"
       def send_location(%Client{} = client, chat_id, latitude, longitude) do
         send_location(client, chat_id, latitude, longitude, [])
       end
@@ -1022,6 +1090,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_location(%Client{} = client, chat_id, latitude, longitude, options) do
         api_request(
           client,
@@ -1030,6 +1099,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send information about a venue.
       On success, the sent Message is returned.
@@ -1041,7 +1111,7 @@ defmodule Nadia.Methods.Messages do
       * `longitude` - Longitude of location
       * `title` - Name of the venue
       * `address` - Address of the venue
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:foursquare_id` - Foursquare identifier of the venue
@@ -1061,6 +1131,7 @@ defmodule Nadia.Methods.Messages do
         send_venue(chat_id, latitude, longitude, title, address, [])
       end
 
+      @doc group: "Messages"
       def send_venue(%Client{} = client, chat_id, latitude, longitude, title, address) do
         send_venue(client, chat_id, latitude, longitude, title, address, [])
       end
@@ -1079,6 +1150,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_venue(%Client{} = client, chat_id, latitude, longitude, title, address, options) do
         api_request(
           client,
@@ -1094,6 +1166,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send phone contacts.
       On success, the sent Message is returned.
@@ -1103,7 +1176,7 @@ defmodule Nadia.Methods.Messages do
       (in the format @channelusername)
       * `phone_number` - Contact's phone number
       * `first_name` - Contact's first name
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:last_name` - Contact's last name
@@ -1122,6 +1195,7 @@ defmodule Nadia.Methods.Messages do
       def send_contact(chat_id, phone_number, first_name),
         do: send_contact(chat_id, phone_number, first_name, [])
 
+      @doc group: "Messages"
       def send_contact(%Client{} = client, chat_id, phone_number, first_name) do
         send_contact(client, chat_id, phone_number, first_name, [])
       end
@@ -1133,6 +1207,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       def send_contact(%Client{} = client, chat_id, phone_number, first_name, options) do
         api_request(
           client,
@@ -1141,6 +1216,7 @@ defmodule Nadia.Methods.Messages do
         )
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method when you need to tell the user that something is happening on
       the bot's side. The status is set for 5 seconds or less (when a message
@@ -1157,7 +1233,7 @@ defmodule Nadia.Methods.Messages do
           * `record_audio` or `upload_audio` for audio files
           * `upload_document` for general files
           * `find_location` for location data
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:business_connection_id` - Unique identifier of the business connection
@@ -1172,6 +1248,7 @@ defmodule Nadia.Methods.Messages do
         send_chat_action(chat_id, action, [])
       end
 
+      @doc group: "Messages"
       def send_chat_action(%Client{} = client, chat_id, action) do
         send_chat_action(client, chat_id, action, [])
       end
@@ -1180,10 +1257,12 @@ defmodule Nadia.Methods.Messages do
         api_request("sendChatAction", [chat_id: chat_id, action: action] ++ options)
       end
 
+      @doc group: "Messages"
       def send_chat_action(%Client{} = client, chat_id, action, options) do
         api_request(client, "sendChatAction", [chat_id: chat_id, action: action] ++ options)
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound).
       On success, the sent Message is returned. Bots can currently send animation files of up
@@ -1216,6 +1295,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, Message.t()} | {:error, Error.t()}
       def send_animation(chat_id, animation), do: send_animation(chat_id, animation, [])
 
+      @doc group: "Messages"
       def send_animation(%Client{} = client, chat_id, animation) do
         send_animation(client, chat_id, animation, [])
       end
@@ -1224,17 +1304,19 @@ defmodule Nadia.Methods.Messages do
         api_request("sendAnimation", [chat_id: chat_id, animation: animation] ++ options)
       end
 
+      @doc group: "Messages"
       def send_animation(%Client{} = client, chat_id, animation, options) do
         api_request(client, "sendAnimation", [chat_id: chat_id, animation: animation] ++ options)
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to get a list of profile pictures for a user.
       Returns a UserProfilePhotos object.
 
       Args:
       * `user_id` - Unique identifier of the target user
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:offset` - Sequential number of the first photo to be returned. By default, all
@@ -1248,6 +1330,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, UserProfilePhotos.t()} | {:error, Error.t()}
       def get_user_profile_photos(user_id), do: get_user_profile_photos(user_id, [])
 
+      @doc group: "Messages"
       def get_user_profile_photos(%Client{} = client, user_id) do
         get_user_profile_photos(client, user_id, [])
       end
@@ -1256,17 +1339,19 @@ defmodule Nadia.Methods.Messages do
         api_request("getUserProfilePhotos", [user_id: user_id] ++ options)
       end
 
+      @doc group: "Messages"
       def get_user_profile_photos(%Client{} = client, user_id, options) do
         api_request(client, "getUserProfilePhotos", [user_id: user_id] ++ options)
       end
 
+      @doc group: "Messages"
       @doc """
       Use this method to get a list of profile audios for a user.
       Returns a UserProfileAudios object.
 
       Args:
       * `user_id` - Unique identifier of the target user
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:offset` - Sequential number of the first audio to be returned
@@ -1281,6 +1366,7 @@ defmodule Nadia.Methods.Messages do
               {:ok, UserProfileAudios.t()} | {:error, Error.t()}
       def get_user_profile_audios(user_id), do: get_user_profile_audios(user_id, [])
 
+      @doc group: "Messages"
       def get_user_profile_audios(%Client{} = client, user_id) do
         get_user_profile_audios(client, user_id, [])
       end
@@ -1289,6 +1375,7 @@ defmodule Nadia.Methods.Messages do
         api_request("getUserProfileAudios", request_options([user_id: user_id], options))
       end
 
+      @doc group: "Messages"
       def get_user_profile_audios(%Client{} = client, user_id, options) do
         api_request(client, "getUserProfileAudios", request_options([user_id: user_id], options))
       end

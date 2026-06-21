@@ -40,6 +40,7 @@ defmodule Nadia.Methods.Interactions do
         WebhookInfo
       }
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to send answers to callback queries sent from inline keyboards.
       The answer will be displayed to the user as a notification at the top of the chat
@@ -47,7 +48,7 @@ defmodule Nadia.Methods.Interactions do
 
       Args:
       * `callback_query_id` - Unique identifier for the query to be answered
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:text` - Text of the notification. If not specified, nothing will be shown
@@ -60,6 +61,7 @@ defmodule Nadia.Methods.Interactions do
       def answer_callback_query(callback_query_id),
         do: answer_callback_query(callback_query_id, [])
 
+      @doc group: "Interactions And Editing"
       def answer_callback_query(%Client{} = client, callback_query_id) do
         answer_callback_query(client, callback_query_id, [])
       end
@@ -68,6 +70,7 @@ defmodule Nadia.Methods.Interactions do
         api_request("answerCallbackQuery", [callback_query_id: callback_query_id] ++ options)
       end
 
+      @doc group: "Interactions And Editing"
       def answer_callback_query(%Client{} = client, callback_query_id, options) do
         api_request(
           client,
@@ -76,6 +79,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to reply to a received guest message.
       On success, a SentGuestMessage object is returned.
@@ -83,7 +87,7 @@ defmodule Nadia.Methods.Interactions do
       Args:
       * `guest_query_id` - Unique identifier for the query to be answered
       * `result` - An inline query result describing the message to be sent
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec answer_guest_query(binary, Nadia.Model.InlineQueryResult.t(), [{atom, any}]) ::
               {:ok, SentGuestMessage.t()} | {:error, Error.t()}
@@ -94,6 +98,7 @@ defmodule Nadia.Methods.Interactions do
       def answer_guest_query(guest_query_id, result),
         do: answer_guest_query(guest_query_id, result, [])
 
+      @doc group: "Interactions And Editing"
       def answer_guest_query(%Client{} = client, guest_query_id, result) do
         answer_guest_query(client, guest_query_id, result, [])
       end
@@ -102,10 +107,12 @@ defmodule Nadia.Methods.Interactions do
         do_answer_guest_query(nil, guest_query_id, result, options)
       end
 
+      @doc group: "Interactions And Editing"
       def answer_guest_query(%Client{} = client, guest_query_id, result, options) do
         do_answer_guest_query(client, guest_query_id, result, options)
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to set the result of an interaction with a Web App.
       On success, a SentWebAppMessage object is returned.
@@ -126,6 +133,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def answer_web_app_query(%Client{} = client, web_app_query_id, result) do
         api_request(
           client,
@@ -135,6 +143,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to store a message that can be sent by a user of a Mini App.
       On success, a PreparedInlineMessage object is returned.
@@ -142,7 +151,7 @@ defmodule Nadia.Methods.Interactions do
       Args:
       * `user_id` - Unique identifier of the target user that can use the prepared message
       * `result` - An inline query result describing the message to be sent
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec save_prepared_inline_message(integer, Nadia.Model.InlineQueryResult.t()) ::
               {:ok, PreparedInlineMessage.t()} | {:error, Error.t()}
@@ -165,6 +174,7 @@ defmodule Nadia.Methods.Interactions do
         save_prepared_inline_message(user_id, result, [])
       end
 
+      @doc group: "Interactions And Editing"
       def save_prepared_inline_message(%Client{} = client, user_id, result) do
         save_prepared_inline_message(client, user_id, result, [])
       end
@@ -173,10 +183,12 @@ defmodule Nadia.Methods.Interactions do
         do_save_prepared_inline_message(nil, user_id, result, options)
       end
 
+      @doc group: "Interactions And Editing"
       def save_prepared_inline_message(%Client{} = client, user_id, result, options) do
         do_save_prepared_inline_message(client, user_id, result, options)
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to store a keyboard button that can be used by a user within a Mini App.
       On success, a PreparedKeyboardButton object is returned.
@@ -197,6 +209,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def save_prepared_keyboard_button(%Client{} = client, user_id, button) do
         api_request(
           client,
@@ -206,6 +219,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to edit text messages sent by the bot or via the bot (for inline bots).
       On success, the edited Message is returned
@@ -218,7 +232,7 @@ defmodule Nadia.Methods.Interactions do
       * `inline_message_id`	- Required if `chat_id` and `message_id` are not specified.
       Identifier of the inline message
       * `text` - New text of the message
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:parse_mode`	- Send Markdown or HTML, if you want Telegram apps to show bold, italic,
@@ -244,6 +258,7 @@ defmodule Nadia.Methods.Interactions do
         edit_message_text(chat_id, message_id, inline_message_id, text, [])
       end
 
+      @doc group: "Interactions And Editing"
       def edit_message_text(%Client{} = client, chat_id, message_id, inline_message_id, text) do
         edit_message_text(client, chat_id, message_id, inline_message_id, text, [])
       end
@@ -263,6 +278,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def edit_message_text(
             %Client{} = client,
             chat_id,
@@ -286,6 +302,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to delete message from a chat.
       Bot should have admin permission to do that, and remember you can't delete messages that are more than
@@ -307,6 +324,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def delete_message(%Client{} = client, chat_id, message_id) do
         api_request(
           client,
@@ -316,6 +334,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to delete multiple messages simultaneously.
       Returns True on success.
@@ -335,6 +354,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def delete_messages(%Client{} = client, chat_id, message_ids) do
         api_request(
           client,
@@ -344,6 +364,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to remove a reaction from a message.
       Returns True on success.
@@ -352,7 +373,7 @@ defmodule Nadia.Methods.Interactions do
       * `chat_id` - Unique identifier for the target chat or username of the target supergroup
       (in the format @username)
       * `message_id` - Identifier of the target message
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:user_id` - Identifier of the user whose reaction will be removed
@@ -365,6 +386,7 @@ defmodule Nadia.Methods.Interactions do
       def delete_message_reaction(chat_id, message_id),
         do: delete_message_reaction(chat_id, message_id, [])
 
+      @doc group: "Interactions And Editing"
       def delete_message_reaction(%Client{} = client, chat_id, message_id) do
         delete_message_reaction(client, chat_id, message_id, [])
       end
@@ -376,6 +398,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def delete_message_reaction(%Client{} = client, chat_id, message_id, options) do
         api_request(
           client,
@@ -384,6 +407,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to remove recent reactions added by a given user or chat.
       Returns True on success.
@@ -391,7 +415,7 @@ defmodule Nadia.Methods.Interactions do
       Args:
       * `chat_id` - Unique identifier for the target chat or username of the target supergroup
       (in the format @username)
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:user_id` - Identifier of the user whose reactions will be removed
@@ -403,6 +427,7 @@ defmodule Nadia.Methods.Interactions do
               :ok | {:error, Error.t()}
       def delete_all_message_reactions(chat_id), do: delete_all_message_reactions(chat_id, [])
 
+      @doc group: "Interactions And Editing"
       def delete_all_message_reactions(%Client{} = client, chat_id) do
         delete_all_message_reactions(client, chat_id, [])
       end
@@ -414,6 +439,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def delete_all_message_reactions(%Client{} = client, chat_id, options) do
         api_request(
           client,
@@ -422,6 +448,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to change the chosen reactions on a message.
       Returns True on success.
@@ -430,7 +457,7 @@ defmodule Nadia.Methods.Interactions do
       * `chat_id` - Unique identifier for the target chat or username of the target channel
       (in the format @channelusername)
       * `message_id` - Identifier of the target message
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:reaction` - List of reaction types to set on the message
@@ -443,6 +470,7 @@ defmodule Nadia.Methods.Interactions do
       def set_message_reaction(chat_id, message_id),
         do: set_message_reaction(chat_id, message_id, [])
 
+      @doc group: "Interactions And Editing"
       def set_message_reaction(%Client{} = client, chat_id, message_id) do
         set_message_reaction(client, chat_id, message_id, [])
       end
@@ -454,6 +482,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def set_message_reaction(%Client{} = client, chat_id, message_id, options) do
         api_request(
           client,
@@ -462,6 +491,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to edit captions of messages sent by the bot or via
       the bot (for inline bots). On success, the edited Message is returned.
@@ -473,7 +503,7 @@ defmodule Nadia.Methods.Interactions do
       the sent message
       * `inline_message_id`	- Required if `chat_id` and `message_id` are not specified.
       Identifier of the inline message
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:caption` - New caption of the message
@@ -488,6 +518,7 @@ defmodule Nadia.Methods.Interactions do
         edit_message_caption(chat_id, message_id, inline_message_id, [])
       end
 
+      @doc group: "Interactions And Editing"
       def edit_message_caption(%Client{} = client, chat_id, message_id, inline_message_id) do
         edit_message_caption(client, chat_id, message_id, inline_message_id, [])
       end
@@ -500,6 +531,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def edit_message_caption(
             %Client{} = client,
             chat_id,
@@ -515,6 +547,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to edit only the reply markup of messages sent by the bot or via
       the bot (for inline bots). On success, the edited Message is returned.
@@ -526,7 +559,7 @@ defmodule Nadia.Methods.Interactions do
       the sent message
       * `inline_message_id`	- Required if `chat_id` and `message_id` are not specified.
       Identifier of the inline message
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:reply_markup`	- A JSON-serialized object for an inline
@@ -540,6 +573,7 @@ defmodule Nadia.Methods.Interactions do
         edit_message_reply_markup(chat_id, message_id, inline_message_id, [])
       end
 
+      @doc group: "Interactions And Editing"
       def edit_message_reply_markup(%Client{} = client, chat_id, message_id, inline_message_id) do
         edit_message_reply_markup(client, chat_id, message_id, inline_message_id, [])
       end
@@ -552,6 +586,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def edit_message_reply_markup(
             %Client{} = client,
             chat_id,
@@ -567,6 +602,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to edit animation, audio, document, live photo, photo, or video
       messages, or to add media to text messages. On success, the edited Message is
@@ -574,7 +610,7 @@ defmodule Nadia.Methods.Interactions do
 
       Args:
       * `media` - JSON-serializable media object or a pre-encoded JSON string
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec edit_message_media(list | map | struct | binary, [{atom, any}]) ::
               :ok | {:ok, Message.t()} | {:error, Error.t()}
@@ -585,10 +621,12 @@ defmodule Nadia.Methods.Interactions do
         api_request("editMessageMedia", [media: encode_json_payload(media)] ++ options)
       end
 
+      @doc group: "Interactions And Editing"
       def edit_message_media(%Client{} = client, media, options) do
         api_request(client, "editMessageMedia", [media: encode_json_payload(media)] ++ options)
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to edit live location messages. On success, the edited Message
       is returned, or `:ok` is returned when editing an inline message.
@@ -596,7 +634,7 @@ defmodule Nadia.Methods.Interactions do
       Args:
       * `latitude` - Latitude of new location
       * `longitude` - Longitude of new location
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec edit_message_live_location(float, float, [{atom, any}]) ::
               :ok | {:ok, Message.t()} | {:error, Error.t()}
@@ -609,6 +647,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def edit_message_live_location(%Client{} = client, latitude, longitude, options) do
         api_request(
           client,
@@ -617,13 +656,14 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to stop updating a live location message before `live_period`
       expires. On success, the edited Message is returned, or `:ok` is returned
       when editing an inline message.
 
       Args:
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec stop_message_live_location([{atom, any}]) ::
               :ok | {:ok, Message.t()} | {:error, Error.t()}
@@ -633,10 +673,12 @@ defmodule Nadia.Methods.Interactions do
         api_request("stopMessageLiveLocation", options)
       end
 
+      @doc group: "Interactions And Editing"
       def stop_message_live_location(%Client{} = client, options) do
         api_request(client, "stopMessageLiveLocation", options)
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to edit a checklist on behalf of a connected business account.
       On success, the edited Message is returned.
@@ -646,7 +688,7 @@ defmodule Nadia.Methods.Interactions do
       * `chat_id` - Unique identifier for the target chat or username of the target bot
       * `message_id` - Unique identifier for the target message
       * `checklist` - JSON-serializable checklist object or a pre-encoded JSON string
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec edit_message_checklist(
               binary,
@@ -686,6 +728,7 @@ defmodule Nadia.Methods.Interactions do
         edit_message_checklist(business_connection_id, chat_id, message_id, checklist, [])
       end
 
+      @doc group: "Interactions And Editing"
       def edit_message_checklist(
             %Client{} = client,
             business_connection_id,
@@ -708,6 +751,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def edit_message_checklist(
             %Client{} = client,
             business_connection_id,
@@ -728,6 +772,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to stop a poll which was sent by the bot. On success, the
       stopped Poll is returned.
@@ -735,7 +780,7 @@ defmodule Nadia.Methods.Interactions do
       Args:
       * `chat_id` - Unique identifier for the target chat or username of the target channel
       * `message_id` - Identifier of the original message with the poll
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec stop_poll(integer | binary, integer) :: {:ok, Poll.t()} | {:error, Error.t()}
       @spec stop_poll(integer | binary, integer, [{atom, any}]) ::
@@ -746,6 +791,7 @@ defmodule Nadia.Methods.Interactions do
               {:ok, Poll.t()} | {:error, Error.t()}
       def stop_poll(chat_id, message_id), do: stop_poll(chat_id, message_id, [])
 
+      @doc group: "Interactions And Editing"
       def stop_poll(%Client{} = client, chat_id, message_id) do
         stop_poll(client, chat_id, message_id, [])
       end
@@ -754,10 +800,12 @@ defmodule Nadia.Methods.Interactions do
         api_request("stopPoll", [chat_id: chat_id, message_id: message_id] ++ options)
       end
 
+      @doc group: "Interactions And Editing"
       def stop_poll(%Client{} = client, chat_id, message_id, options) do
         api_request(client, "stopPoll", [chat_id: chat_id, message_id: message_id] ++ options)
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to inform a user that Telegram Passport elements they provided
       contain errors.
@@ -779,6 +827,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       def set_passport_data_errors(%Client{} = client, user_id, errors) do
         api_request(
           client,
@@ -788,6 +837,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to approve a suggested post in a direct messages chat.
       Returns `:ok` on success.
@@ -795,7 +845,7 @@ defmodule Nadia.Methods.Interactions do
       Args:
       * `chat_id` - Unique identifier for the target direct messages chat
       * `message_id` - Identifier of a suggested post message to approve
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec approve_suggested_post(integer, integer) :: :ok | {:error, Error.t()}
       @spec approve_suggested_post(integer, integer, [{atom, any}]) :: :ok | {:error, Error.t()}
@@ -806,6 +856,7 @@ defmodule Nadia.Methods.Interactions do
         approve_suggested_post(chat_id, message_id, [])
       end
 
+      @doc group: "Interactions And Editing"
       def approve_suggested_post(%Client{} = client, chat_id, message_id) do
         approve_suggested_post(client, chat_id, message_id, [])
       end
@@ -814,6 +865,7 @@ defmodule Nadia.Methods.Interactions do
         api_request("approveSuggestedPost", [chat_id: chat_id, message_id: message_id] ++ options)
       end
 
+      @doc group: "Interactions And Editing"
       def approve_suggested_post(%Client{} = client, chat_id, message_id, options) do
         api_request(
           client,
@@ -822,6 +874,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to decline a suggested post in a direct messages chat.
       Returns `:ok` on success.
@@ -829,7 +882,7 @@ defmodule Nadia.Methods.Interactions do
       Args:
       * `chat_id` - Unique identifier for the target direct messages chat
       * `message_id` - Identifier of a suggested post message to decline
-      * `options` - orddict of options
+      * `options` - keyword list of options
       """
       @spec decline_suggested_post(integer, integer) :: :ok | {:error, Error.t()}
       @spec decline_suggested_post(integer, integer, [{atom, any}]) :: :ok | {:error, Error.t()}
@@ -840,6 +893,7 @@ defmodule Nadia.Methods.Interactions do
         decline_suggested_post(chat_id, message_id, [])
       end
 
+      @doc group: "Interactions And Editing"
       def decline_suggested_post(%Client{} = client, chat_id, message_id) do
         decline_suggested_post(client, chat_id, message_id, [])
       end
@@ -848,6 +902,7 @@ defmodule Nadia.Methods.Interactions do
         api_request("declineSuggestedPost", [chat_id: chat_id, message_id: message_id] ++ options)
       end
 
+      @doc group: "Interactions And Editing"
       def decline_suggested_post(%Client{} = client, chat_id, message_id, options) do
         api_request(
           client,
@@ -856,6 +911,7 @@ defmodule Nadia.Methods.Interactions do
         )
       end
 
+      @doc group: "Interactions And Editing"
       @doc """
       Use this method to send answers to an inline query. On success, True is returned.
       No more than 50 results per query are allowed.
@@ -863,7 +919,7 @@ defmodule Nadia.Methods.Interactions do
       Args:
       * `inline_query_id` - Unique identifier for the answered query
       * `results` - An array of results for the inline query
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `cache_time` - The maximum amount of time in seconds that the result of the inline
@@ -889,6 +945,7 @@ defmodule Nadia.Methods.Interactions do
       def answer_inline_query(inline_query_id, results),
         do: answer_inline_query(inline_query_id, results, [])
 
+      @doc group: "Interactions And Editing"
       def answer_inline_query(%Client{} = client, inline_query_id, results) do
         answer_inline_query(client, inline_query_id, results, [])
       end
@@ -897,6 +954,7 @@ defmodule Nadia.Methods.Interactions do
         do_answer_inline_query(nil, inline_query_id, results, options)
       end
 
+      @doc group: "Interactions And Editing"
       def answer_inline_query(%Client{} = client, inline_query_id, results, options) do
         do_answer_inline_query(client, inline_query_id, results, options)
       end

@@ -40,6 +40,7 @@ defmodule Nadia.Methods.Payments do
         WebhookInfo
       }
 
+      @doc group: "Payments"
       @doc """
       Use this method to send invoices.
       On success, the sent Message is returned.
@@ -51,7 +52,7 @@ defmodule Nadia.Methods.Payments do
       * `payload` - Bot-defined invoice payload
       * `currency` - Three-letter ISO 4217 currency code, or `XTR` for Stars
       * `prices` - JSON-serializable price breakdown array or a pre-encoded JSON string
-      * `options` - orddict or map of options
+      * `options` - keyword list or map of options
       """
       @spec send_invoice(
               integer | binary,
@@ -97,6 +98,7 @@ defmodule Nadia.Methods.Payments do
         send_invoice(chat_id, title, description, payload, currency, prices, [])
       end
 
+      @doc group: "Payments"
       def send_invoice(%Client{} = client, chat_id, title, description, payload, currency, prices) do
         send_invoice(client, chat_id, title, description, payload, currency, prices, [])
       end
@@ -118,6 +120,7 @@ defmodule Nadia.Methods.Payments do
         )
       end
 
+      @doc group: "Payments"
       def send_invoice(
             %Client{} = client,
             chat_id,
@@ -145,6 +148,7 @@ defmodule Nadia.Methods.Payments do
         )
       end
 
+      @doc group: "Payments"
       @doc """
       Use this method to create a link for an invoice.
       On success, the created invoice link is returned as a string.
@@ -155,7 +159,7 @@ defmodule Nadia.Methods.Payments do
       * `payload` - Bot-defined invoice payload
       * `currency` - Three-letter ISO 4217 currency code, or `XTR` for Stars
       * `prices` - JSON-serializable price breakdown array or a pre-encoded JSON string
-      * `options` - orddict or map of options
+      * `options` - keyword list or map of options
       """
       @spec create_invoice_link(binary, binary, binary, binary, list | map | struct | binary) ::
               {:ok, binary} | {:error, Error.t()}
@@ -191,6 +195,7 @@ defmodule Nadia.Methods.Payments do
         create_invoice_link(title, description, payload, currency, prices, [])
       end
 
+      @doc group: "Payments"
       def create_invoice_link(%Client{} = client, title, description, payload, currency, prices) do
         create_invoice_link(client, title, description, payload, currency, prices, [])
       end
@@ -211,6 +216,7 @@ defmodule Nadia.Methods.Payments do
         )
       end
 
+      @doc group: "Payments"
       def create_invoice_link(
             %Client{} = client,
             title,
@@ -236,6 +242,7 @@ defmodule Nadia.Methods.Payments do
         )
       end
 
+      @doc group: "Payments"
       @doc """
       Use this method to reply to shipping queries.
       Returns `:ok` on success.
@@ -243,7 +250,7 @@ defmodule Nadia.Methods.Payments do
       Args:
       * `shipping_query_id` - Unique identifier for the query to be answered
       * `ok` - Pass true if delivery to the specified address is possible
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:shipping_options` - JSON-serializable list of shipping options
@@ -259,6 +266,7 @@ defmodule Nadia.Methods.Payments do
         answer_shipping_query(shipping_query_id, ok, [])
       end
 
+      @doc group: "Payments"
       def answer_shipping_query(%Client{} = client, shipping_query_id, ok) do
         answer_shipping_query(client, shipping_query_id, ok, [])
       end
@@ -273,6 +281,7 @@ defmodule Nadia.Methods.Payments do
         )
       end
 
+      @doc group: "Payments"
       def answer_shipping_query(%Client{} = client, shipping_query_id, ok, options) do
         api_request(
           client,
@@ -284,6 +293,7 @@ defmodule Nadia.Methods.Payments do
         )
       end
 
+      @doc group: "Payments"
       @doc """
       Use this method to respond to pre-checkout queries.
       Returns `:ok` on success.
@@ -291,7 +301,7 @@ defmodule Nadia.Methods.Payments do
       Args:
       * `pre_checkout_query_id` - Unique identifier for the query to be answered
       * `ok` - Pass true if the bot is ready to proceed with the order
-      * `options` - orddict of options
+      * `options` - keyword list of options
 
       Options:
       * `:error_message` - Error message to display when `ok` is false
@@ -306,6 +316,7 @@ defmodule Nadia.Methods.Payments do
         answer_pre_checkout_query(pre_checkout_query_id, ok, [])
       end
 
+      @doc group: "Payments"
       def answer_pre_checkout_query(%Client{} = client, pre_checkout_query_id, ok) do
         answer_pre_checkout_query(client, pre_checkout_query_id, ok, [])
       end
@@ -317,6 +328,7 @@ defmodule Nadia.Methods.Payments do
         )
       end
 
+      @doc group: "Payments"
       def answer_pre_checkout_query(%Client{} = client, pre_checkout_query_id, ok, options) do
         api_request(
           client,
@@ -325,6 +337,7 @@ defmodule Nadia.Methods.Payments do
         )
       end
 
+      @doc group: "Payments"
       @doc """
       Use this method to get the current Telegram Stars balance of the bot.
       Returns a StarAmount object.
@@ -332,14 +345,16 @@ defmodule Nadia.Methods.Payments do
       @spec get_my_star_balance() :: {:ok, StarAmount.t()} | {:error, Error.t()}
       @spec get_my_star_balance(Client.t()) :: {:ok, StarAmount.t()} | {:error, Error.t()}
       def get_my_star_balance, do: api_request("getMyStarBalance")
+      @doc group: "Payments"
       def get_my_star_balance(%Client{} = client), do: api_request(client, "getMyStarBalance")
 
+      @doc group: "Payments"
       @doc """
       Use this method to get the bot's Telegram Star transactions.
       Returns a StarTransactions object.
 
       Args:
-      * `options` - orddict or map of options
+      * `options` - keyword list or map of options
       """
       @spec get_star_transactions() :: {:ok, StarTransactions.t()} | {:error, Error.t()}
       @spec get_star_transactions([{atom, any}] | map) ::
@@ -349,16 +364,19 @@ defmodule Nadia.Methods.Payments do
       @spec get_star_transactions(Client.t(), [{atom, any}] | map) ::
               {:ok, StarTransactions.t()} | {:error, Error.t()}
       def get_star_transactions(), do: get_star_transactions([])
+      @doc group: "Payments"
       def get_star_transactions(%Client{} = client), do: get_star_transactions(client, [])
 
       def get_star_transactions(options) do
         api_request("getStarTransactions", request_options([], options))
       end
 
+      @doc group: "Payments"
       def get_star_transactions(%Client{} = client, options) do
         api_request(client, "getStarTransactions", request_options([], options))
       end
 
+      @doc group: "Payments"
       @doc """
       Use this method to refund a successful Telegram Stars payment.
       Returns `:ok` on success.
@@ -377,6 +395,7 @@ defmodule Nadia.Methods.Payments do
         )
       end
 
+      @doc group: "Payments"
       def refund_star_payment(%Client{} = client, user_id, telegram_payment_charge_id) do
         api_request(
           client,
@@ -386,6 +405,7 @@ defmodule Nadia.Methods.Payments do
         )
       end
 
+      @doc group: "Payments"
       @doc """
       Use this method to cancel or re-enable extension of a Telegram Stars subscription.
       Returns `:ok` on success.
@@ -407,6 +427,7 @@ defmodule Nadia.Methods.Payments do
         )
       end
 
+      @doc group: "Payments"
       def edit_user_star_subscription(
             %Client{} = client,
             user_id,

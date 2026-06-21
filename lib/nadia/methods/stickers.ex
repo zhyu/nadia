@@ -40,6 +40,7 @@ defmodule Nadia.Methods.Stickers do
         WebhookInfo
       }
 
+      @doc group: "Stickers"
       @doc """
       Use this method to get a sticker set. On success, a StickerSet object is returned.
 
@@ -53,10 +54,12 @@ defmodule Nadia.Methods.Stickers do
         api_request("getStickerSet", name: name)
       end
 
+      @doc group: "Stickers"
       def get_sticker_set(%Client{} = client, name) do
         api_request(client, "getStickerSet", name: name)
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to get information about custom emoji stickers by their identifiers.
       Returns an array of Sticker objects.
@@ -75,6 +78,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       def get_custom_emoji_stickers(%Client{} = client, custom_emoji_ids) do
         api_request(
           client,
@@ -83,6 +87,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to upload a .png file with a sticker for later use in
       createNewStickerSet and addStickerToSet methods (can be used multiple times).
@@ -107,6 +112,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       def upload_sticker_file(%Client{} = client, user_id, png_sticker) do
         api_request(
           client,
@@ -116,6 +122,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to create new sticker set owned by a user. The bot will be able to
       edit the created sticker set. Returns True on success.
@@ -149,6 +156,7 @@ defmodule Nadia.Methods.Stickers do
         create_new_sticker_set(user_id, name, title, png_sticker, emojis, [])
       end
 
+      @doc group: "Stickers"
       def create_new_sticker_set(%Client{} = client, user_id, name, title, png_sticker, emojis) do
         create_new_sticker_set(client, user_id, name, title, png_sticker, emojis, [])
       end
@@ -162,6 +170,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       def create_new_sticker_set(
             %Client{} = client,
             user_id,
@@ -180,6 +189,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to add a new sticker to a set created by the bot. Returns True on success.
 
@@ -205,6 +215,7 @@ defmodule Nadia.Methods.Stickers do
         add_sticker_to_set(user_id, name, png_sticker, emojis, [])
       end
 
+      @doc group: "Stickers"
       def add_sticker_to_set(%Client{} = client, user_id, name, png_sticker, emojis) do
         add_sticker_to_set(client, user_id, name, png_sticker, emojis, [])
       end
@@ -217,6 +228,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       def add_sticker_to_set(%Client{} = client, user_id, name, png_sticker, emojis, options) do
         api_request(
           client,
@@ -226,6 +238,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to replace an existing sticker in a sticker set with a new one.
       Returns True on success.
@@ -256,6 +269,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       def replace_sticker_in_set(%Client{} = client, user_id, name, old_sticker, sticker) do
         api_request(
           client,
@@ -267,6 +281,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to change the list of emoji assigned to a regular or custom emoji sticker.
       Returns True on success.
@@ -286,6 +301,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       def set_sticker_emoji_list(%Client{} = client, sticker, emoji_list) do
         api_request(
           client,
@@ -295,6 +311,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to change search keywords assigned to a regular or custom emoji sticker.
       Returns True on success.
@@ -312,6 +329,7 @@ defmodule Nadia.Methods.Stickers do
               :ok | {:error, Error.t()}
       def set_sticker_keywords(sticker), do: set_sticker_keywords(sticker, [])
 
+      @doc group: "Stickers"
       def set_sticker_keywords(%Client{} = client, sticker) do
         set_sticker_keywords(client, sticker, [])
       end
@@ -323,6 +341,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       def set_sticker_keywords(%Client{} = client, sticker, options) do
         api_request(
           client,
@@ -331,6 +350,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to change the mask position of a mask sticker.
       Returns True on success.
@@ -348,6 +368,7 @@ defmodule Nadia.Methods.Stickers do
               :ok | {:error, Error.t()}
       def set_sticker_mask_position(sticker), do: set_sticker_mask_position(sticker, [])
 
+      @doc group: "Stickers"
       def set_sticker_mask_position(%Client{} = client, sticker) do
         set_sticker_mask_position(client, sticker, [])
       end
@@ -359,6 +380,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       def set_sticker_mask_position(%Client{} = client, sticker, options) do
         api_request(
           client,
@@ -367,6 +389,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to set the title of a created sticker set.
       Returns True on success.
@@ -381,10 +404,12 @@ defmodule Nadia.Methods.Stickers do
         api_request("setStickerSetTitle", name: name, title: title)
       end
 
+      @doc group: "Stickers"
       def set_sticker_set_title(%Client{} = client, name, title) do
         api_request(client, "setStickerSetTitle", name: name, title: title)
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to set the thumbnail of a regular or mask sticker set.
       Returns True on success.
@@ -406,6 +431,7 @@ defmodule Nadia.Methods.Stickers do
       def set_sticker_set_thumbnail(name, user_id),
         do: set_sticker_set_thumbnail(name, user_id, [])
 
+      @doc group: "Stickers"
       def set_sticker_set_thumbnail(%Client{} = client, name, user_id) do
         set_sticker_set_thumbnail(client, name, user_id, [])
       end
@@ -417,6 +443,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       def set_sticker_set_thumbnail(%Client{} = client, name, user_id, options) do
         api_request(
           client,
@@ -425,6 +452,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to set the thumbnail of a custom emoji sticker set.
       Returns True on success.
@@ -446,6 +474,7 @@ defmodule Nadia.Methods.Stickers do
         set_custom_emoji_sticker_set_thumbnail(name, [])
       end
 
+      @doc group: "Stickers"
       def set_custom_emoji_sticker_set_thumbnail(%Client{} = client, name) do
         set_custom_emoji_sticker_set_thumbnail(client, name, [])
       end
@@ -457,6 +486,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       def set_custom_emoji_sticker_set_thumbnail(%Client{} = client, name, options) do
         api_request(
           client,
@@ -465,6 +495,7 @@ defmodule Nadia.Methods.Stickers do
         )
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to move a sticker in a set created by the bot to a specific position.
       Returns True on success.
@@ -479,10 +510,12 @@ defmodule Nadia.Methods.Stickers do
         api_request("setStickerPositionInSet", sticker: sticker, position: position)
       end
 
+      @doc group: "Stickers"
       def set_sticker_position_in_set(%Client{} = client, sticker, position) do
         api_request(client, "setStickerPositionInSet", sticker: sticker, position: position)
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to delete a sticker from a set created by the bot. Returns True on success.
 
@@ -495,10 +528,12 @@ defmodule Nadia.Methods.Stickers do
         api_request("deleteStickerFromSet", sticker: sticker)
       end
 
+      @doc group: "Stickers"
       def delete_sticker_from_set(%Client{} = client, sticker) do
         api_request(client, "deleteStickerFromSet", sticker: sticker)
       end
 
+      @doc group: "Stickers"
       @doc """
       Use this method to delete a sticker set created by the bot.
       Returns True on success.
@@ -512,6 +547,7 @@ defmodule Nadia.Methods.Stickers do
         api_request("deleteStickerSet", name: name)
       end
 
+      @doc group: "Stickers"
       def delete_sticker_set(%Client{} = client, name) do
         api_request(client, "deleteStickerSet", name: name)
       end

@@ -1,38 +1,25 @@
 import Config
 
+# Put this runtime-dependent configuration in your application's
+# config/runtime.exs. Never commit a real bot token.
 config :nadia,
-  token: "bot_token",
-  proxy: "http://proxy.example.org:443/",
-  # can also be:
-  # proxy: {:http, "proxy.example.org", 443}
-  # proxy: {:https, "proxy.example.org", 443}
-  # or use an environment variable
-  # proxy: {:system, "https_proxy"}
+  token: {:system, "TELEGRAM_BOT_TOKEN"},
   recv_timeout: 10
 
-  # If the need ever rises, you can configure the base url for the api
-  # Telegram API
-  #base_url: "http://my-own-endpoint.com/whatever/",
-  # Telegram Graph API
-  #graph_base_url: "http://my-own-endpoint.com/whatever/"
+# Named clients are useful when one application controls several bots.
+# config :nadia,
+#   bots: [
+#     support: [token: {:system, "SUPPORT_BOT_TOKEN"}],
+#     alerts: [token: {:system, "ALERTS_BOT_TOKEN"}]
+#   ]
 
-# This configuration is loaded before any dependency and is restricted
-# to this project. If another project depends on this project, this
-# file won't be loaded nor affect the parent project. For this reason,
-# if you want to provide default values for your application for third-
-# party users, it should be done in your mix.exs file.
+# Req/Mint HTTP or HTTPS proxy configuration:
+# config :nadia,
+#   proxy: "http://proxy.example.org:8080",
+#   proxy_auth: {"user", "password"}
 
-# Sample configuration:
-#
-#     config :logger, :console,
-#       level: :info,
-#       format: "$date $time [$level] $metadata$message\n",
-#       metadata: [:user_id]
-
-# It is also possible to import configuration files, relative to this
-# directory. For example, you can emulate configuration per environment
-# by uncommenting the line below and defining dev.exs, test.exs and such.
-# Configuration from the imported file will override the ones defined
-# here (which is why it is important to import them last).
-#
-#     import_config "#{Mix.env}.exs"
+# Custom endpoints are rarely needed.
+# config :nadia,
+#   base_url: "https://telegram-api.example.com/bot",
+#   file_base_url: "https://telegram-api.example.com/file/bot",
+#   graph_base_url: "https://telegraph-api.example.com"

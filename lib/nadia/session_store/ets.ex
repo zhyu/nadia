@@ -21,6 +21,11 @@ defmodule Nadia.SessionStore.ETS do
   This store is not persistent or distributed. Use a custom
   `Nadia.SessionStore` backend when sessions must survive restarts or be shared
   across nodes.
+
+  All operations are serialized through the owning GenServer. `update/3` is
+  atomic relative to other calls to this store, while a separate `get/2` then
+  `put/3` sequence is not. Update callbacks block every key and must not call
+  this same store.
   """
 
   use GenServer

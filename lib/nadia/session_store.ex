@@ -89,6 +89,10 @@ defmodule Nadia.SessionStore do
   The update function receives the current session map, or `%{}` when the
   session is missing. It may return a new session map, `{:ok, session}`, or
   `{:error, reason}`. Error returns do not write a new value.
+
+  Backend implementations may execute the function inside a serialized server
+  or storage transaction. Keep it short and free of external side effects, and
+  do not call the same serialized store from inside the function.
   """
   @spec update(store, key, (session -> session | {:ok, session} | {:error, term})) ::
           {:ok, session} | {:error, term}

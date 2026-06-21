@@ -60,6 +60,9 @@ bounded retries for transient failures and avoid retrying permanent input or
 permission errors forever. Telegram enforces flood limits; pace bulk sends and
 observe error rates rather than launching unbounded tasks.
 
+See [Errors And Rate Limits](examples/errors-and-rate-limits.md) for tested
+`retry_after` and chat-migration handling.
+
 ## Protect Credentials And Webhooks
 
 * Read bot tokens and Telegraph access tokens from runtime environment or a
@@ -76,6 +79,9 @@ observe error rates rather than launching unbounded tasks.
 backend implementing `Nadia.SessionStore` when sessions must survive deploys or
 be visible to several nodes. Keep durable business data in application storage,
 not only in a conversational session map.
+
+The [Persistent Session Backends](examples/persistent-sessions.md) guide covers
+the concurrency contract and a tested application-owned DETS example.
 
 Telegram chat and user IDs may exceed 32-bit integer ranges. Store them in an
 Elixir integer or a database `BIGINT`, not a 32-bit column.

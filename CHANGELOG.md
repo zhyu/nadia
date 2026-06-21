@@ -13,6 +13,11 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   inline keyboards, and explicit multi-step conversation state.
 - Added guides for learning paths, multiple bots, offline handler testing,
   production operation, and the Telegraph API.
+- Added offline-tested media/file, persistent session backend, and bounded
+  rate-limit examples with production caveats and ExDoc guides.
+- Added typed Telegram `error_code` and `ResponseParameters` parsing while
+  preserving `%Nadia.Model.Error{reason: reason}` compatibility.
+- Added `file_unique_id` to `Nadia.Model.File` parsing.
 
 ### Changed
 
@@ -21,6 +26,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   guide with production-oriented delivery and secret verification guidance.
 - Updated configuration, package metadata, and Telegraph reference text to
   remove insecure or misleading examples.
+- Normalized structurally invalid Telegram and Telegraph response envelopes,
+  made missing Telegram `file_path` values return an error, enabled local
+  multipart uploads for `send_animation`, and refreshed nearby message/media
+  documentation.
 
 ## 1.5.0 - 2026-06-13
 

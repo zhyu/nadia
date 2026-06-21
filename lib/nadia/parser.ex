@@ -81,6 +81,7 @@ defmodule Nadia.Parser do
     RevenueWithdrawalStateFailed,
     RevenueWithdrawalStatePending,
     RevenueWithdrawalStateSucceeded,
+    ResponseParameters,
     SentGuestMessage,
     SentWebAppMessage,
     RichMessage,
@@ -198,6 +199,22 @@ defmodule Nadia.Parser do
   end
 
   def parse_update(_update), do: {:error, :invalid_update}
+
+  @doc """
+  Parses Telegram error response parameters without creating atoms from
+  remote keys.
+
+  Unknown fields and known fields with invalid types are ignored.
+  """
+  @spec parse_response_parameters(map | term) :: ResponseParameters.t()
+  def parse_response_parameters(parameters) when is_map(parameters) do
+    %ResponseParameters{
+      migrate_to_chat_id: integer_field(parameters, :migrate_to_chat_id),
+      retry_after: non_negative_integer_field(parameters, :retry_after)
+    }
+  end
+
+  def parse_response_parameters(_parameters), do: %ResponseParameters{}
 
   @doc """
   Parses a webhook-style Telegram update payload and raises on invalid input.
@@ -605,6 +622,20 @@ defmodule Nadia.Parser do
     |> struct()
     |> Map.keys()
     |> Enum.reject(&(&1 == :__struct__))
+  end
+
+  defp integer_field(map, key) do
+    case Map.get(map, key, Map.get(map, Atom.to_string(key))) do
+      value when is_integer(value) -> value
+      _ -> nil
+    end
+  end
+
+  defp non_negative_integer_field(map, key) do
+    case integer_field(map, key) do
+      value when is_integer(value) and value >= 0 -> value
+      _ -> nil
+    end
   end
 
   defp known_struct_entry({key, val}, fields) when is_atom(key) do

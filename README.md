@@ -99,6 +99,9 @@ API reference to complete bot-building tasks.
 | A generated polling bot | [Build Your First Bot](guides/build-your-first-bot.md) |
 | Commands and inline buttons | [Commands And Inline Keyboards](guides/examples/inline-keyboards.md) |
 | A multi-step conversation | [Conversation State](guides/examples/conversation-state.md) |
+| Durable conversation state | [Persistent Session Backends](guides/examples/persistent-sessions.md) |
+| Media uploads and downloads | [Media And Files](guides/examples/media-and-files.md) |
+| Bounded Telegram retries | [Errors And Rate Limits](guides/examples/errors-and-rate-limits.md) |
 | An HTTP endpoint | [Receive Webhook Updates](guides/receive-webhook-updates.md) |
 | Several bot identities | [Run Multiple Bots](guides/multiple-bots.md) |
 | Credential-free tests | [Test Bot Handlers](guides/testing-bots.md) |

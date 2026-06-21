@@ -52,14 +52,12 @@ defmodule Nadia.Methods.Messages do
       * `options` - keyword list of options
 
       Options:
-      * `:parse_mode` - Use `Markdown`, if you want Telegram apps to show bold, italic
-      and inline URLs in your bot's message
-      * `:disable_web_page_preview` - Disables link previews for links in this message
+      * `:parse_mode` or `:entities` - Formatting for the message text
+      * `:link_preview_options` - Link preview generation options
       * `:disable_notification` - Sends the message silently or without notification
-      * `:reply_to_message_id` - If the message is a reply, ID of the original message
-      * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
-      force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
-      `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
+      * `:protect_content` - Protects the message from forwarding and saving
+      * `:reply_parameters` - Description of the message to reply to
+      * `:reply_markup` - Additional interface options
       """
       @spec send_message(integer | binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -418,16 +416,12 @@ defmodule Nadia.Methods.Messages do
       @doc group: "Messages"
       @doc """
       Use this method to send audio files, if you want Telegram clients to display
-      them in the music player. Your audio must be in the .mp3 format.
+      them in the music player. Your audio must be in MP3 or M4A format.
       On success, the sent Message is returned.
       Bots can currently send audio files of up to 50 MB in size, this limit may
       be changed in the future.
 
-      For backward compatibility, when the fields title and performer are both
-      empty and the mime-type of the file to be sent is not audio/mpeg, the file
-      will be sent as a playable voice message. For this to work, the audio must be
-      in an .ogg file encoded with OPUS. This behavior will be phased out in the
-      future. For sending voice messages, use the sendVoice method instead.
+      For sending voice messages, use `send_voice` instead.
 
       Args:
       * `chat_id` - Unique identifier for the target chat or username of the target channel
@@ -601,8 +595,8 @@ defmodule Nadia.Methods.Messages do
       @doc group: "Messages"
       @doc """
       Use this method to send audio files, if you want Telegram clients to display
-      the file as a playable voice message. For this to work, your audio must be in
-      an .ogg file encoded with OPUS (other formats may be sent as Audio or Document).
+      the file as a playable voice message. Supported formats are OGG with OPUS,
+      MP3, and M4A (other formats may be sent as Audio or Document).
       On success, the sent Message is returned.
       Bots can currently send voice messages of up to 50 MB in size, this limit may be
       changed in the future.
@@ -1301,12 +1295,21 @@ defmodule Nadia.Methods.Messages do
       end
 
       def send_animation(chat_id, animation, options) do
-        api_request("sendAnimation", [chat_id: chat_id, animation: animation] ++ options)
+        api_request(
+          "sendAnimation",
+          [chat_id: chat_id, animation: animation] ++ options,
+          :animation
+        )
       end
 
       @doc group: "Messages"
       def send_animation(%Client{} = client, chat_id, animation, options) do
-        api_request(client, "sendAnimation", [chat_id: chat_id, animation: animation] ++ options)
+        api_request(
+          client,
+          "sendAnimation",
+          [chat_id: chat_id, animation: animation] ++ options,
+          :animation
+        )
       end
 
       @doc group: "Messages"

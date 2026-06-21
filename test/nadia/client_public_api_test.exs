@@ -335,6 +335,27 @@ defmodule Nadia.ClientPublicAPITest do
     assert {:file, file_path, {"form-data", [{"name", "photo"}, {"filename", file_path}]}, []} in parts
   end
 
+  test "send_animation uploads an existing local path as multipart" do
+    client = client()
+
+    file_path =
+      Path.join(
+        System.tmp_dir!(),
+        "nadia-animation-test-#{System.unique_integer([:positive])}.gif"
+      )
+
+    File.write!(file_path, "GIF89a")
+    on_exit(fn -> File.rm(file_path) end)
+    stub_telegram_result(true)
+
+    assert :ok == Nadia.send_animation(client, 123, file_path)
+
+    request = assert_http_request(method: :post, url: api_url(client, "sendAnimation"))
+    assert {:multipart, parts} = request.body
+
+    assert {:file, file_path, {"form-data", [{"name", "animation"}, {"filename", file_path}]}, []} in parts
+  end
+
   test "get_file_link/2 uses explicit client file URL settings" do
     client = client(token: "999:file-token", file_base_url: "https://files.example/bot")
     file = %TelegramFile{file_id: "file-1", file_path: "documents/file_1.txt", file_size: 123}

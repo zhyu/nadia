@@ -20,8 +20,8 @@ defmodule Nadia.API do
       {:ok, true} ->
         :ok
 
-      {:ok, %{"ok" => false, "description" => description}} ->
-        {:error, %Error{reason: description}}
+      {:telegram_error, error_response} ->
+        {:error, parse_telegram_error(error_response)}
 
       {:ok, result} ->
         {:ok, Nadia.Parser.parse_result(result, method)}
@@ -31,11 +31,38 @@ defmodule Nadia.API do
     end
   end
 
-  defp decode_response(response) do
-    with {:ok, %HTTPResponse{body: body}} <- response,
-         {:ok, %{"result" => result}} <- Jason.decode(body),
-         do: {:ok, result}
+  defp decode_response({:ok, %HTTPResponse{body: body}}) do
+    with {:ok, decoded} <- Jason.decode(body) do
+      case decoded do
+        %{"ok" => true, "result" => result} -> {:ok, result}
+        %{"ok" => false} = error_response -> {:telegram_error, error_response}
+        _other -> {:error, :invalid_response}
+      end
+    end
   end
+
+  defp decode_response({:error, reason}), do: {:error, reason}
+
+  defp parse_telegram_error(error_response) do
+    %Error{
+      reason: telegram_error_reason(error_response),
+      error_code: integer_value(error_response["error_code"]),
+      parameters: parse_error_parameters(error_response["parameters"])
+    }
+  end
+
+  defp telegram_error_reason(%{"description" => description}) when is_binary(description),
+    do: description
+
+  defp telegram_error_reason(_error_response), do: :invalid_response
+
+  defp parse_error_parameters(%{} = parameters),
+    do: Nadia.Parser.parse_response_parameters(parameters)
+
+  defp parse_error_parameters(_parameters), do: nil
+
+  defp integer_value(value) when is_integer(value), do: value
+  defp integer_value(_value), do: nil
 
   defp build_multipart_request(params, file_field) do
     file_field = to_string(file_field)

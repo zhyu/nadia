@@ -16,6 +16,7 @@ Start with the path that matches what you are building.
 | Generate and run an echo bot | [Build Your First Bot](build-your-first-bot.md) | `Mix.Tasks.Nadia.Gen.Bot`, `Nadia.Polling` |
 | Route commands and inline buttons | [Commands And Inline Keyboards](examples/inline-keyboards.md) | `Nadia.Dispatcher`, `Nadia.Context` |
 | Collect data over several messages | [Conversation State](examples/conversation-state.md) | `Nadia.SessionStore` |
+| Persist conversation state | [Persistent Session Backends](examples/persistent-sessions.md) | `Nadia.SessionStore` |
 
 The complete handler source for the interactive examples lives in the
 [`examples`](https://github.com/zhyu/nadia/tree/master/examples) directory and
@@ -28,6 +29,8 @@ is compiled and exercised by Nadia's normal test suite.
 | Receive updates over HTTP | [Receive Webhook Updates](receive-webhook-updates.md) | `Nadia.Webhook` |
 | Run several bot identities | [Run Multiple Bots](multiple-bots.md) | `Nadia.Client`, `Nadia.Polling` |
 | Test without credentials or network calls | [Test Bot Handlers](testing-bots.md) | `Nadia.Client`, `Nadia.HTTPClient` |
+| Upload, reuse, and download files | [Media And Files](examples/media-and-files.md) | `Nadia`, `Nadia.Model.File` |
+| Handle Telegram errors with bounds | [Errors And Rate Limits](examples/errors-and-rate-limits.md) | `Nadia.Model.Error`, `Nadia.Model.ResponseParameters` |
 | Publish Telegraph pages | [Use The Telegraph API](telegraph.md) | `Nadia.Graph` |
 
 ## Prepare For Production

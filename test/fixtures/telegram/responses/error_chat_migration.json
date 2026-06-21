@@ -1,0 +1,8 @@
+{
+  "ok": false,
+  "error_code": 400,
+  "description": "Bad Request: group chat was upgraded to a supergroup chat",
+  "parameters": {
+    "migrate_to_chat_id": -1001234567890
+  }
+}

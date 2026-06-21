@@ -27,8 +27,8 @@ defmodule Nadia.Examples.ConversationBot do
 
   defp start_conversation(context) do
     with_session_key(context, fn key ->
-      with :ok <- SessionStore.put(@store, key, %{step: :name}),
-           {:ok, _message} <- Context.reply(context, "What is your name?") do
+      with {:ok, _message} <- Context.reply(context, "What is your name?"),
+           :ok <- SessionStore.put(@store, key, %{step: :name}) do
         :ok
       end
     end)
@@ -36,8 +36,8 @@ defmodule Nadia.Examples.ConversationBot do
 
   defp cancel_conversation(context) do
     with_session_key(context, fn key ->
-      with :ok <- SessionStore.delete(@store, key),
-           {:ok, _message} <- Context.reply(context, "Cancelled.") do
+      with {:ok, _message} <- Context.reply(context, "Cancelled."),
+           :ok <- SessionStore.delete(@store, key) do
         :ok
       end
     end)
@@ -53,8 +53,8 @@ defmodule Nadia.Examples.ConversationBot do
 
   defp advance(%Context{message: %{text: name}} = context, key, %{step: :name})
        when is_binary(name) do
-    with :ok <- SessionStore.put(@store, key, %{step: :email, name: name}),
-         {:ok, _message} <- Context.reply(context, "What is your email address?") do
+    with {:ok, _message} <- Context.reply(context, "What is your email address?"),
+         :ok <- SessionStore.put(@store, key, %{step: :email, name: name}) do
       :ok
     end
   end
@@ -64,8 +64,8 @@ defmodule Nadia.Examples.ConversationBot do
          name: name
        })
        when is_binary(email) do
-    with :ok <- SessionStore.delete(@store, key),
-         {:ok, _message} <- Context.reply(context, "Thanks #{name}. Saved #{email}.") do
+    with {:ok, _message} <- Context.reply(context, "Thanks #{name}. Received #{email}."),
+         :ok <- SessionStore.delete(@store, key) do
       :ok
     end
   end

@@ -55,8 +55,8 @@ state should follow a user across chats.
 Start a conversation by writing the next expected step:
 
 ```elixir
-with :ok <- Nadia.SessionStore.put(@store, key, %{step: :name}),
-     {:ok, _message} <- Nadia.Context.reply(context, "What is your name?") do
+with {:ok, _message} <- Nadia.Context.reply(context, "What is your name?"),
+     :ok <- Nadia.SessionStore.put(@store, key, %{step: :name}) do
   :ok
 end
 ```
@@ -67,17 +67,16 @@ On later messages, read the session and handle the current step:
 with {:ok, session} <- Nadia.SessionStore.get(@store, key) do
   case {session, context.message} do
     {%{step: :name}, %{text: name}} when is_binary(name) ->
-      with :ok <-
-             Nadia.SessionStore.put(@store, key, %{step: :email, name: name}),
-           {:ok, _message} <-
-             Nadia.Context.reply(context, "What is your email address?") do
+      with {:ok, _message} <-
+             Nadia.Context.reply(context, "What is your email address?"),
+           :ok <- Nadia.SessionStore.put(@store, key, %{step: :email, name: name}) do
         :ok
       end
 
     {%{step: :email, name: name}, %{text: email}} when is_binary(email) ->
-      with :ok <- Nadia.SessionStore.delete(@store, key),
-           {:ok, _message} <-
-             Nadia.Context.reply(context, "Thanks #{name}. Saved #{email}.") do
+      with {:ok, _message} <-
+             Nadia.Context.reply(context, "Thanks #{name}. Received #{email}."),
+           :ok <- Nadia.SessionStore.delete(@store, key) do
         :ok
       end
 
@@ -91,6 +90,12 @@ Treat prompts and side effects as repeatable. Polling advances its offset only
 after a successful handler result, and webhook providers may redeliver when a
 response is lost. A handler can therefore see an update more than once.
 
+Telegram sends and session mutations cannot share one transaction. This
+learning example replies before changing the step so a failed send does not
+misinterpret the same update after retry; a lost response can still produce a
+duplicate prompt. Durable business workflows need application-level
+idempotency and often a transactional outbox.
+
 ## Choose A Production Backend
 
 `Nadia.SessionStore.ETS` is local, in-memory state. It disappears on restart
@@ -101,3 +106,6 @@ Implement the `Nadia.SessionStore` behaviour with application storage when
 state must survive deploys, be shared by several nodes, or participate in a
 larger transaction. Store only conversational progress in a session; durable
 business records belong in the application's primary database.
+
+See [Persistent Session Backends](persistent-sessions.md) for the complete
+backend contract and a tested application-owned DETS example.

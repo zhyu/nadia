@@ -1,0 +1,10 @@
+{
+  "ok": false,
+  "error_code": "not-an-integer",
+  "description": ["not", "a", "string"],
+  "parameters": {
+    "retry_after": "soon",
+    "migrate_to_chat_id": {},
+    "future_malformed_parameter_83f9c1": true
+  }
+}

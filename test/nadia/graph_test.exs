@@ -258,6 +258,42 @@ defmodule Nadia.GraphTest do
              Nadia.Graph.get_account_info("bad-token")
   end
 
+  test "request preserves official Telegraph errors without creating atoms" do
+    unknown_key = "future_telegraph_error_field_83f9c1"
+    refute existing_atom?(unknown_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 400,
+         body:
+           Jason.encode!(%{
+             "ok" => false,
+             "error" => "SHORT_NAME_REQUIRED",
+             unknown_key => true
+           })
+       }}
+    )
+
+    assert {:error, %Error{reason: "SHORT_NAME_REQUIRED"}} =
+             Nadia.Graph.create_account("", "Author")
+
+    refute existing_atom?(unknown_key)
+  end
+
+  test "request normalizes valid JSON with an invalid Telegraph envelope" do
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body: Jason.encode!(%{"ok" => true, "description" => "missing result"})
+       }}
+    )
+
+    assert {:error, %Error{reason: :invalid_response}} =
+             Nadia.Graph.get_page("Sample-Page")
+  end
+
   test "request normalizes transport errors" do
     stub_transport_error(:timeout)
 

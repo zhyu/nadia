@@ -1630,8 +1630,14 @@ defmodule Nadia.Model do
   end
 
   defmodule File do
-    defstruct file_id: nil, file_size: nil, file_path: nil
-    @type t :: %File{file_id: binary, file_size: integer, file_path: binary}
+    defstruct file_id: nil, file_unique_id: nil, file_size: nil, file_path: nil
+
+    @type t :: %File{
+            file_id: binary,
+            file_unique_id: binary,
+            file_size: integer,
+            file_path: binary
+          }
   end
 
   defmodule ReplyKeyboardMarkup do
@@ -1723,9 +1729,30 @@ defmodule Nadia.Model do
           }
   end
 
+  defmodule ResponseParameters do
+    @moduledoc """
+    Details supplied by Telegram for automatically handling selected errors.
+
+    See the official Bot API `ResponseParameters` object for the semantics of
+    chat migration and flood-control delays.
+    """
+
+    defstruct migrate_to_chat_id: nil, retry_after: nil
+
+    @type t :: %ResponseParameters{
+            migrate_to_chat_id: integer | nil,
+            retry_after: non_neg_integer | nil
+          }
+  end
+
   defmodule Error do
-    defexception reason: nil
-    @type t :: %Error{reason: any}
+    defexception reason: nil, error_code: nil, parameters: nil
+
+    @type t :: %Error{
+            reason: any,
+            error_code: integer | nil,
+            parameters: ResponseParameters.t() | nil
+          }
 
     def message(%Error{reason: reason}), do: inspect(reason)
   end

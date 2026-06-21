@@ -23,7 +23,8 @@ defmodule Nadia.Graph.API do
     case Jason.decode(body) do
       {:ok, %{"ok" => false, "description" => description}} -> {:error, description}
       {:ok, %{"ok" => false, "error" => error}} -> {:error, error}
-      {:ok, %{"result" => result}} -> {:ok, result}
+      {:ok, %{"ok" => true, "result" => result}} -> {:ok, result}
+      {:ok, _other} -> {:error, :invalid_response}
       {:error, error} -> {:error, error}
     end
   end

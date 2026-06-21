@@ -65,6 +65,7 @@ defmodule Nadia.APITest do
     PreparedKeyboardButton,
     ReactionCount,
     ReactionType,
+    ResponseParameters,
     ReplyKeyboardRemove,
     RichMessage,
     SentGuestMessage,
@@ -4454,6 +4455,88 @@ defmodule Nadia.APITest do
              API.request("sendMessage", chat_id: 1, text: "hello")
   end
 
+  test "request decodes fixture-backed rate-limit parameters without creating atoms" do
+    unknown_envelope_key = "future_error_envelope_field_83f9c1"
+    unknown_parameter_key = "future_rate_limit_parameter_83f9c1"
+
+    refute existing_atom?(unknown_envelope_key)
+    refute existing_atom?(unknown_parameter_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 429,
+         body: response_fixture("error_rate_limit.json")
+       }}
+    )
+
+    assert {:error,
+            %Error{
+              reason: "Too Many Requests: retry after 2",
+              error_code: 429,
+              parameters: %ResponseParameters{retry_after: 2, migrate_to_chat_id: nil}
+            }} = API.request("sendMessage", chat_id: 1, text: "hello")
+
+    refute existing_atom?(unknown_envelope_key)
+    refute existing_atom?(unknown_parameter_key)
+  end
+
+  test "request decodes fixture-backed chat migration parameters" do
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 400,
+         body: response_fixture("error_chat_migration.json")
+       }}
+    )
+
+    assert {:error,
+            %Error{
+              reason: "Bad Request: group chat was upgraded to a supergroup chat",
+              error_code: 400,
+              parameters: %ResponseParameters{migrate_to_chat_id: -1_001_234_567_890}
+            }} = API.request("sendMessage", chat_id: 1, text: "hello")
+  end
+
+  test "request normalizes malformed fixture-backed Telegram envelopes" do
+    unknown_parameter_key = "future_malformed_parameter_83f9c1"
+    unknown_envelope_key = "future_malformed_envelope_83f9c1"
+
+    refute existing_atom?(unknown_parameter_key)
+    refute existing_atom?(unknown_envelope_key)
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 400,
+         body: response_fixture("error_malformed.json")
+       }}
+    )
+
+    assert {:error,
+            %Error{
+              reason: :invalid_response,
+              error_code: nil,
+              parameters: %ResponseParameters{
+                retry_after: nil,
+                migrate_to_chat_id: nil
+              }
+            }} = API.request("getMe")
+
+    stub_http_response(
+      {:ok,
+       %HTTPResponse{
+         status_code: 200,
+         body: response_fixture("success_malformed.json")
+       }}
+    )
+
+    assert {:error, %Error{reason: :invalid_response}} = API.request("getMe")
+
+    refute existing_atom?(unknown_parameter_key)
+    refute existing_atom?(unknown_envelope_key)
+  end
+
   test "request normalizes transport errors" do
     stub_transport_error(:timeout)
 
@@ -4487,6 +4570,11 @@ defmodule Nadia.APITest do
 
     assert API.build_file_url(client, "document/file_10") ==
              "https://files.example/bot999:file-token/document/file_10"
+  end
+
+  test "get_file_link returns an error when Telegram omits file_path" do
+    assert {:error, %Error{reason: :file_path_unavailable}} =
+             Nadia.get_file_link(%Nadia.Model.File{file_id: "file-1"})
   end
 
   defp existing_atom?(name) do

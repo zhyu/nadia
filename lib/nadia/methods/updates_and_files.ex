@@ -168,6 +168,10 @@ defmodule Nadia.Methods.UpdatesAndFiles do
       Use this method to get link for file for subsequent use.
       This method is an extension of the `get_file` method.
 
+      The URL contains the bot token and should not be logged or exposed as a
+      public permanent URL. If Telegram omits the optional `file_path`, this
+      function returns an error with reason `:file_path_unavailable`.
+
           iex> Nadia.get_file_link(%Nadia.Model.File{file_id: "BQADBQADBgADmEjsA1aqdSxtzvvVAg",
           ...> file_path: "document/file_10", file_size: 17680})
           {:ok,
@@ -176,14 +180,18 @@ defmodule Nadia.Methods.UpdatesAndFiles do
       """
       @spec get_file_link(File.t()) :: {:ok, binary} | {:error, Error.t()}
       @spec get_file_link(Client.t(), File.t()) :: {:ok, binary} | {:error, Error.t()}
-      def get_file_link(file) do
-        {:ok, build_file_url(file.file_path)}
-      end
+      def get_file_link(%File{file_path: file_path}) when is_binary(file_path),
+        do: {:ok, build_file_url(file_path)}
+
+      def get_file_link(%File{}), do: {:error, %Error{reason: :file_path_unavailable}}
 
       @doc group: "Updates And Files"
-      def get_file_link(%Client{} = client, file) do
-        {:ok, build_file_url(client, file.file_path)}
-      end
+      def get_file_link(%Client{} = client, %File{file_path: file_path})
+          when is_binary(file_path),
+          do: {:ok, build_file_url(client, file_path)}
+
+      def get_file_link(%Client{}, %File{}),
+        do: {:error, %Error{reason: :file_path_unavailable}}
     end
   end
 end

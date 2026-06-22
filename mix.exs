@@ -92,7 +92,7 @@ defmodule Nadia.Mixfile do
         Project: ["CHANGELOG.md", "LICENSE.md"]
       ],
       groups_for_modules: [
-        "Bot API": [Nadia, Nadia.Behaviour, Nadia.Client],
+        "Bot API": [Nadia, Nadia.Behaviour, Nadia.Client, Nadia.InputFile],
         "Bot Runtime": [
           Nadia.Context,
           Nadia.Dispatcher,

@@ -1,113 +1,143 @@
 # Media And Files
 
-Telegram accepts a file ID, an HTTP URL, or a multipart upload for most
-single-file methods. Nadia represents all three as binaries, so application
-code should make the intended source explicit before calling the API.
+Telegram accepts file IDs, selected HTTP URLs, and multipart uploads. Nadia
+keeps existing binary arguments compatible and provides `Nadia.InputFile` when
+source intent, upload metadata, or nested `attach://` composition must be
+explicit.
 
 The complete tested helper is
 [`examples/media_files.ex`](https://github.com/zhyu/nadia/blob/master/examples/media_files.ex).
-Files under `examples/` ship in the Hex package but are not compiled into the
-Nadia application. Copy the module into your application's `lib/`, rename it
-for your application, and keep the explicit `%Nadia.Client{}` argument. Nadia's
-test suite loads the source directly and exercises it without credentials.
+Files under `examples/` ship in the Hex package but are not compiled into Nadia.
+Copy the module under your application's `lib/` directory and rename it.
 
 ## Choose A Source
 
 ```elixir
-alias MyApp.MediaFiles
+alias Nadia.InputFile
 
-MediaFiles.send_document(client, chat_id, {:file_id, document.file_id})
+Nadia.send_document(client, chat_id, InputFile.file_id(document.file_id))
 
-MediaFiles.send_document(
+Nadia.send_document(
   client,
   chat_id,
-  {:url, "https://cdn.example.com/manual.pdf"}
+  InputFile.url("https://cdn.example.com/manual.pdf")
 )
 
-MediaFiles.send_document(client, chat_id, {:path, "/srv/my_app/manual.pdf"})
+Nadia.send_document(
+  client,
+  chat_id,
+  InputFile.path("/srv/my_app/manual.pdf", max_bytes: 50_000_000)
+)
 ```
 
-The same underlying `Nadia.send_document/4` call is used in each case:
+Bare binaries retain Nadia's previous rule: an existing regular local path is
+uploaded; any other binary is passed to Telegram as a file ID, URL, or other
+string. Because a missing bare path is indistinguishable from a file ID, use
+`InputFile.path/2` whenever path intent matters. Explicit paths are checked for
+existence, regular-file type, readability, and `:max_bytes` before the HTTP
+adapter is called. A file can still change between validation and streaming,
+so normal transport error handling remains necessary.
 
-* A file ID is the cheapest option because Telegram already stores the bytes.
-  IDs are scoped to one bot, cannot change the media type, and more than one ID
-  can identify the same file.
-* For a URL, Telegram fetches the remote file. It must be reachable by Telegram
-  and have the expected MIME type. URL support varies by method; for example,
-  `sendDocument` currently accepts PDF and ZIP URLs, while video notes do not
-  accept URLs.
-* An existing local path makes Nadia build multipart form data. The Req adapter
-  streams the path from disk rather than reading the complete file into one
-  binary.
+File IDs are bot-scoped and cannot change media type. `file_unique_id` is useful
+for cross-bot correlation but cannot download or reuse a file. URLs must be
+HTTP or HTTPS and reachable by Telegram; method-specific support varies. For
+example, `sendDocument` URL fetching is documented for PDF and ZIP, video notes
+and live photos cannot use URLs, and thumbnails can only be new uploads.
 
-On Telegram's hosted Bot API, the documented generic limits are 5 MB for photo
-URLs and 20 MB for other URLs, versus 10 MB for multipart photos and 50 MB for
-other multipart files. Individual methods can impose narrower format or size
-rules. Treat the current [Sending files](https://core.telegram.org/bots/api#sending-files)
-section as authoritative.
+On Telegram's hosted API, the current general limits are 5 MB for photo URLs,
+20 MB for other URLs, 10 MB for multipart photos, and 50 MB for other multipart
+files. Individual methods can be narrower. Treat the official
+[Sending files](https://core.telegram.org/bots/api#sending-files) section as
+authoritative.
 
-## Report Path Errors Locally
+## Compose Nested Uploads
 
-Nadia's low-level wrappers cannot tell a nonexistent path from a file ID. A
-bare missing path therefore becomes a normal form value and Telegram rejects
-it later. The example's tagged `{:path, path}` source checks `File.stat/1` and
-returns one of these results without making a request:
+Pass structured maps, keyword lists, or structs containing `InputFile` values.
+Nadia assigns collision-safe binary attachment names, replaces each nested
+value with `attach://name`, and adds every multipart part:
 
 ```elixir
-{:error, {:file_error, :enoent}}
-{:error, {:file_error, :not_regular}}
+media = [
+  %{
+    type: "video",
+    media: InputFile.path("/srv/media/demo.mp4"),
+    thumbnail: InputFile.bytes(thumbnail, "thumbnail.jpg", max_bytes: 200_000),
+    cover: InputFile.path("/srv/media/cover.jpg")
+  },
+  %{
+    type: "document",
+    media: InputFile.path("/srv/media/notes.pdf")
+  }
+]
+
+Nadia.send_media_group(client, chat_id, media)
 ```
 
-Validate paths after authorization, use application-owned directories, and do
-not let user input select arbitrary server files. A file can also disappear or
-become unreadable after validation; retain normal error handling around the
-request.
+The same traversal supports paid media, edited media, profile photos, stories,
+stickers, and other JSON payloads used by Nadia wrappers. Pre-encoded JSON
+strings remain pass-through values; use a structured payload when Nadia must
+discover `InputFile` values. An optional `:attach_name` is validated and made
+unique within the request. Attachment names, filenames, paths, and parameter
+keys never create atoms.
 
-## Upload Bytes Deliberately
+## Bound Memory And Streams
 
-Nadia does not currently expose an in-memory `InputFile` type. The example's
-`upload_bytes/5` helper writes bytes to a uniquely named temporary file, uses
-the tested path upload, and removes the file in an `after` block:
+`InputFile.bytes/3` accepts iodata, calculates its size without flattening it,
+and sends the existing data without a temporary-file copy:
 
 ```elixir
-MediaFiles.upload_bytes(client, chat_id, generated_pdf, "report.pdf")
+file =
+  InputFile.bytes(generated_pdf, "report.pdf",
+    content_type: "application/pdf",
+    max_bytes: 5_000_000
+  )
 ```
 
-This duplicates the supplied data to disk. Before using the pattern in an
-application, cap input size, choose a private writable directory with enough
-space, sanitize filenames, and decide how abandoned files are cleaned after a
-VM or host crash. For large producers, an application-owned streaming upload
-abstraction is preferable to first building a large in-memory binary.
+The application already owns that in-memory data; Nadia does not make it small.
+Always set an application limit before accumulating user-controlled or generated
+content.
+
+For a producer that is finite and replay is not required, use a known-size
+Enumerable:
+
+```elixir
+file =
+  InputFile.stream(chunks, "archive.bin",
+    size: exact_byte_count,
+    max_bytes: 50_000_000,
+    content_type: "application/octet-stream"
+  )
+```
+
+Nadia yields chunks to Req without collecting them, checks emitted iodata
+against the declared size, disables Req retries and redirects, and sends a
+Content-Length. A mismatch can be discovered only after part of the request was
+written. Nadia does not support unknown-size or infinite streams, arbitrary IO
+devices, rewind/replay, or automatic ownership of caller-opened resources.
+`File.Stream` owns its open/close lifecycle during enumeration; callers own the
+cleanup behavior of custom `Stream.resource/3` producers. Never blindly retry
+an ambiguous upload failure.
 
 ## Resolve A Download URL
 
-`getFile` returns metadata, not file bytes. The example combines
-`Nadia.get_file/2` and `Nadia.get_file_link/2`:
+`getFile` returns metadata, not bytes. `Nadia.get_file_link/2` builds a URL only
+when `file_path` is present. The URL embeds the bot token and is a credential:
+redact it from logs, traces, analytics, and error reports; never redirect an
+untrusted browser or client to it; and do not store it as a public permanent
+URL.
 
-```elixir
-{:ok, url} = MediaFiles.download_url(client, file_id)
-```
+On Telegram's hosted API, downloads are currently limited to 20 MB and the URL
+is guaranteed valid for **at least** one hour. Request `getFile` again after
+expiry. Preserve the original message's filename and MIME type before calling
+`getFile`, because the download metadata may lose them. Preflight the optional
+`file_size`, but enforce the real byte cap while streaming because the field can
+be absent or stale. The application-owned downloader must also bound redirects,
+timeouts, destination size, partial-file cleanup, and backpressure.
 
-The returned URL embeds the bot token. Never log it, expose it to untrusted
-clients, or store it as a public permanent URL. Fetch it with an
-application-owned HTTP client, stream to a bounded destination, and preserve
-the original message's filename and MIME type when needed because `getFile`
-does not guarantee them.
-
-On Telegram's hosted Bot API, downloads are limited to 20 MB and the URL is
-guaranteed for at least one hour. Request `getFile` again after expiry.
-`file_path` is optional; Nadia returns
-`{:error, %Nadia.Model.Error{reason: :file_path_unavailable}}` when it is absent.
-
-## Know The Current Boundary
-
-The single-file wrappers support file IDs, URLs where Telegram allows them,
-and one local multipart field. Nadia does not yet provide general
-`attach://...` composition for local files in media groups, paid media, covers,
-or thumbnails. Do not pass a local path inside a JSON media array and expect it
-to upload.
-
-A self-hosted local Bot API server has different limits and can return an
-absolute local `file_path`. Nadia's standard token-bearing file URL helper is
-designed for downloadable paths, not those server-local absolute paths. Handle
-that deployment mode explicitly in application code.
+A self-hosted local Bot API server permits uploads up to 2000 MB, downloads
+without a size limit, local paths/file URIs, and may return an absolute local
+`file_path`. Authorize and handle that as server-local filesystem data. Do not
+concatenate an absolute path into Nadia's token-bearing hosted file URL.
+`InputFile.path/2` always means “multipart-upload this path from Nadia's host”;
+pass a server-local file URI as a plain Telegram string only when that local
+Bot API deployment and its filesystem authorization are intentional.

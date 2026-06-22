@@ -476,8 +476,10 @@ defmodule Nadia.Methods.Chats do
       @doc """
       Use this method to set a new profile photo for the chat. Returns True on success.
       """
-      @spec set_chat_photo(integer | binary, binary) :: :ok | {:error, Error.t()}
-      @spec set_chat_photo(Client.t(), integer | binary, binary) :: :ok | {:error, Error.t()}
+      @spec set_chat_photo(integer | binary, binary | Nadia.InputFile.t()) ::
+              :ok | {:error, Error.t()}
+      @spec set_chat_photo(Client.t(), integer | binary, binary | Nadia.InputFile.t()) ::
+              :ok | {:error, Error.t()}
       def set_chat_photo(chat_id, photo) do
         api_request("setChatPhoto", [chat_id: chat_id, photo: photo], :photo)
       end

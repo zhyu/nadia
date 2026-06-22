@@ -18,6 +18,15 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added typed Telegram `error_code` and `ResponseParameters` parsing while
   preserving `%Nadia.Model.Error{reason: reason}` compatibility.
 - Added `file_unique_id` to `Nadia.Model.File` parsing.
+- Added `Nadia.InputFile` for explicit file IDs, URLs, validated local paths,
+  bounded iodata, and known-size streaming uploads, including multiple nested
+  `attach://` parts without creating atoms from attachment names.
+- Added current file identity and metadata parsing for animation, audio,
+  document, live photo, sticker, video, video note, voice, video quality, chat
+  photo, and sticker-set responses while retaining legacy `thumb` fields.
+- Added an offline-tested, application-owned optimistic database session
+  example with bounded compare-and-swap conflicts, update idempotency, and
+  transactional outbox intent.
 
 ### Changed
 
@@ -30,6 +39,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   made missing Telegram `file_path` values return an error, enabled local
   multipart uploads for `send_animation`, and refreshed nearby message/media
   documentation.
+- Reworked Req multipart construction to preserve binary field names, stream
+  paths and known-size Enumerables without whole-file buffering, and reject
+  explicit path or size errors before the network call.
+- Expanded persistent-session, media/download, and production guidance with
+  database concurrency, outbox, duplicate-delivery, token exposure, memory,
+  cleanup, and local Bot API caveats.
 
 ## 1.5.0 - 2026-06-13
 

@@ -7,6 +7,8 @@ defmodule Nadia.API do
   alias Nadia.HTTPClient
   alias Nadia.HTTPRequest
   alias Nadia.HTTPResponse
+  alias Nadia.InputFile
+  alias Nadia.InputFile.JSONPayload
   alias Nadia.Model.Error
 
   defp build_url(%Client{api_environment: :test} = client, method) do
@@ -64,18 +66,6 @@ defmodule Nadia.API do
   defp integer_value(value) when is_integer(value), do: value
   defp integer_value(_value), do: nil
 
-  defp build_multipart_request(params, file_field) do
-    file_field = to_string(file_field)
-    {{_, file_path}, params} = List.keytake(params, file_field, 0)
-
-    {:multipart,
-     params ++
-       [
-         {:file, file_path,
-          {"form-data", [{"name", to_string(file_field)}, {"filename", file_path}]}, []}
-       ]}
-  end
-
   defp calculate_timeout(%Client{} = client, options) when is_list(options) do
     (Keyword.get(options, :timeout, 0) + client.recv_timeout) * 1000
   end
@@ -87,41 +77,306 @@ defmodule Nadia.API do
   defp build_request(params, file_field) when is_list(params) do
     params
     |> Keyword.update(:reply_markup, nil, &encode_json_param/1)
-    |> map_params(file_field)
+    |> normalize_params(file_field)
   end
 
   defp build_request(params, file_field) when is_map(params) do
     params
     |> Map.update(:reply_markup, nil, &encode_json_param/1)
-    |> map_params(file_field)
+    |> normalize_params(file_field)
   end
 
   defp encode_json_param(nil), do: nil
   defp encode_json_param(value), do: Jason.encode!(value)
 
-  defp map_params(params, file_field) do
-    params =
-      params
-      |> Enum.reject(fn {_, v} -> is_nil(v) end)
-      |> Enum.map(fn {k, v} -> {to_string(k), to_string(v)} end)
+  defp normalize_params(params, file_field) do
+    entries = Enum.reject(params, fn {_key, value} -> is_nil(value) end)
+    field_names = entries |> Enum.map(fn {key, _value} -> to_string(key) end) |> MapSet.new()
 
-    file_path = file_path(params, file_field)
+    state = %{
+      parts: [],
+      used_names: collect_entry_attach_names(entries, field_names),
+      next_name: 0
+    }
 
-    if file_path && File.exists?(file_path) do
-      build_multipart_request(params, file_field)
+    entries
+    |> Enum.reduce_while({:ok, [], state}, fn {key, value}, {:ok, normalized, state} ->
+      key = to_string(key)
+
+      case normalize_param(key, value, file_field, state) do
+        {:ok, :file_part, state} -> {:cont, {:ok, normalized, state}}
+        {:ok, value, state} -> {:cont, {:ok, [{key, value} | normalized], state}}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+    |> case do
+      {:ok, normalized, %{parts: []}} ->
+        {:ok, {:form, Enum.reverse(normalized)}}
+
+      {:ok, normalized, state} ->
+        {:ok, {:multipart, Enum.reverse(normalized) ++ Enum.reverse(state.parts)}}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp normalize_param(_key, %JSONPayload{value: value}, _file_field, state) do
+    with {:ok, value, state} <- normalize_json_value(value, state) do
+      {:ok, Jason.encode!(value), state}
+    end
+  end
+
+  defp normalize_param(key, %InputFile{} = input_file, _file_field, state) do
+    normalize_top_level_input_file(key, input_file, state)
+  end
+
+  defp normalize_param(key, value, file_field, state)
+       when is_binary(value) and not is_nil(file_field) do
+    if key == to_string(file_field) do
+      normalize_legacy_file(key, value, state)
     else
-      {:form, params}
+      {:ok, value, state}
     end
   end
 
-  defp file_path(_params, nil), do: nil
+  defp normalize_param(_key, value, _file_field, state), do: {:ok, to_string(value), state}
 
-  defp file_path(params, file_field) do
-    case List.keyfind(params, to_string(file_field), 0) do
-      {_, file_path} -> file_path
-      nil -> nil
+  defp normalize_legacy_file(key, path_or_reference, state) do
+    case File.stat(path_or_reference) do
+      {:ok, %File.Stat{type: :regular}} ->
+        with :ok <- validate_readable(path_or_reference) do
+          part = file_part(key, path_or_reference, path_or_reference, [])
+          {:ok, :file_part, %{state | parts: [part | state.parts]}}
+        else
+          {:error, reason} -> {:error, {:input_file, reason}}
+        end
+
+      {:ok, %File.Stat{}} ->
+        {:error, {:input_file, {:not_regular, path_or_reference}}}
+
+      {:error, _reason} ->
+        {:ok, path_or_reference, state}
     end
   end
+
+  defp normalize_top_level_input_file(key, input_file, state) do
+    case normalize_input_file(input_file) do
+      {:ok, {:reference, value}} ->
+        {:ok, value, state}
+
+      {:ok, {:upload, source, filename, headers}} ->
+        part = file_part(key, source, filename, headers)
+        {:ok, :file_part, %{state | parts: [part | state.parts]}}
+
+      {:error, reason} ->
+        {:error, {:input_file, reason}}
+    end
+  end
+
+  defp normalize_json_value(%InputFile{} = input_file, state) do
+    case normalize_input_file(input_file) do
+      {:ok, {:reference, value}} ->
+        {:ok, value, state}
+
+      {:ok, {:upload, source, filename, headers}} ->
+        with {:ok, name, state} <- allocate_attachment_name(input_file.attach_name, state) do
+          part = file_part(name, source, filename, headers)
+          {:ok, "attach://" <> name, %{state | parts: [part | state.parts]}}
+        end
+
+      {:error, reason} ->
+        {:error, {:input_file, reason}}
+    end
+  end
+
+  defp normalize_json_value(value, state) when is_list(value) do
+    value
+    |> Enum.reduce_while({:ok, [], state}, fn item, {:ok, normalized, state} ->
+      case normalize_json_value(item, state) do
+        {:ok, item, state} -> {:cont, {:ok, [item | normalized], state}}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+    |> case do
+      {:ok, normalized, state} -> {:ok, Enum.reverse(normalized), state}
+      error -> error
+    end
+  end
+
+  defp normalize_json_value(value, state) when is_map(value) do
+    value
+    |> Enum.reduce_while({:ok, %{}, state}, fn {key, item}, {:ok, normalized, state} ->
+      case normalize_json_value(item, state) do
+        {:ok, item, state} -> {:cont, {:ok, Map.put(normalized, key, item), state}}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+  end
+
+  defp normalize_json_value(value, state), do: {:ok, value, state}
+
+  defp normalize_input_file(%InputFile{source: {:file_id, file_id}})
+       when is_binary(file_id) and byte_size(file_id) > 0 do
+    {:ok, {:reference, file_id}}
+  end
+
+  defp normalize_input_file(%InputFile{source: {:url, url}}) when is_binary(url) do
+    case URI.parse(url) do
+      %URI{scheme: scheme, host: host}
+      when scheme in ["http", "https"] and is_binary(host) and byte_size(host) > 0 ->
+        {:ok, {:reference, url}}
+
+      _other ->
+        {:error, {:invalid_url, url}}
+    end
+  end
+
+  defp normalize_input_file(%InputFile{source: {:path, path}} = input_file)
+       when is_binary(path) do
+    with {:ok, %File.Stat{type: :regular, size: size}} <- stat_regular_file(path),
+         :ok <- validate_max_bytes(input_file.max_bytes, size),
+         :ok <- validate_readable(path),
+         {:ok, filename} <- validate_filename(input_file.filename || Path.basename(path)),
+         {:ok, headers} <- input_file_headers(input_file.content_type) do
+      {:ok, {:upload, path, filename, headers}}
+    end
+  end
+
+  defp normalize_input_file(%InputFile{source: {:bytes, bytes}} = input_file) do
+    with {:ok, size} <- iodata_size(bytes),
+         :ok <- validate_max_bytes(input_file.max_bytes, size),
+         {:ok, filename} <- validate_filename(input_file.filename),
+         {:ok, headers} <- input_file_headers(input_file.content_type) do
+      {:ok, {:upload, {:bytes, bytes, size}, filename, headers}}
+    end
+  end
+
+  defp normalize_input_file(%InputFile{source: {:stream, stream}, size: size} = input_file) do
+    with :ok <- validate_stream(stream, size),
+         :ok <- validate_max_bytes(input_file.max_bytes, size),
+         {:ok, filename} <- validate_filename(input_file.filename),
+         {:ok, headers} <- input_file_headers(input_file.content_type) do
+      {:ok, {:upload, {:stream, stream, size}, filename, headers}}
+    end
+  end
+
+  defp normalize_input_file(%InputFile{}), do: {:error, :invalid_source}
+
+  defp stat_regular_file(path) do
+    case File.stat(path) do
+      {:ok, %File.Stat{type: :regular} = stat} -> {:ok, stat}
+      {:ok, %File.Stat{}} -> {:error, {:not_regular, path}}
+      {:error, reason} -> {:error, {:file_error, path, reason}}
+    end
+  end
+
+  defp validate_readable(path) do
+    case File.open(path, [:read]) do
+      {:ok, device} -> File.close(device)
+      {:error, reason} -> {:error, {:file_error, path, reason}}
+    end
+  end
+
+  defp iodata_size(bytes) do
+    {:ok, IO.iodata_length(bytes)}
+  rescue
+    _error -> {:error, :invalid_iodata}
+  end
+
+  defp validate_stream(stream, size) when is_integer(size) and size >= 0 do
+    if Enumerable.impl_for(stream), do: :ok, else: {:error, :invalid_stream}
+  end
+
+  defp validate_stream(_stream, _size), do: {:error, :stream_size_required}
+
+  defp validate_max_bytes(nil, _size), do: :ok
+
+  defp validate_max_bytes(max_bytes, size)
+       when is_integer(max_bytes) and max_bytes >= 0 and size <= max_bytes,
+       do: :ok
+
+  defp validate_max_bytes(max_bytes, size) when is_integer(max_bytes) and max_bytes >= 0,
+    do: {:error, {:too_large, size, max_bytes}}
+
+  defp validate_max_bytes(_max_bytes, _size), do: {:error, :invalid_max_bytes}
+
+  defp validate_filename(filename) when is_binary(filename) and byte_size(filename) > 0,
+    do: {:ok, Path.basename(filename)}
+
+  defp validate_filename(_filename), do: {:error, :invalid_filename}
+
+  defp input_file_headers(nil), do: {:ok, []}
+
+  defp input_file_headers(content_type)
+       when is_binary(content_type) and byte_size(content_type) > 0 do
+    if String.contains?(content_type, ["\r", "\n"]) do
+      {:error, :invalid_content_type}
+    else
+      {:ok, [{"content-type", content_type}]}
+    end
+  end
+
+  defp input_file_headers(_content_type), do: {:error, :invalid_content_type}
+
+  defp file_part(name, source, filename, headers) do
+    {:file, source, {"form-data", [{"name", name}, {"filename", filename}]}, headers}
+  end
+
+  defp allocate_attachment_name(nil, state), do: allocate_generated_name(state)
+
+  defp allocate_attachment_name(name, state) when is_binary(name) do
+    if Regex.match?(~r/\A[A-Za-z0-9_-]+\z/, name) do
+      allocated = unique_name(name, state.used_names, 1)
+      {:ok, allocated, %{state | used_names: MapSet.put(state.used_names, allocated)}}
+    else
+      {:error, {:invalid_attach_name, name}}
+    end
+  end
+
+  defp allocate_attachment_name(name, _state), do: {:error, {:invalid_attach_name, name}}
+
+  defp allocate_generated_name(state) do
+    name = "nadia_file_#{state.next_name}"
+
+    if MapSet.member?(state.used_names, name) do
+      allocate_generated_name(%{state | next_name: state.next_name + 1})
+    else
+      {:ok, name,
+       %{
+         state
+         | used_names: MapSet.put(state.used_names, name),
+           next_name: state.next_name + 1
+       }}
+    end
+  end
+
+  defp unique_name(name, used_names, suffix) do
+    cond do
+      not MapSet.member?(used_names, name) -> name
+      not MapSet.member?(used_names, "#{name}_#{suffix}") -> "#{name}_#{suffix}"
+      true -> unique_name(name, used_names, suffix + 1)
+    end
+  end
+
+  defp collect_entry_attach_names(entries, names) do
+    Enum.reduce(entries, names, fn {_key, value}, names -> collect_attach_names(value, names) end)
+  end
+
+  defp collect_attach_names(%JSONPayload{value: value}, names),
+    do: collect_attach_names(value, names)
+
+  defp collect_attach_names(%InputFile{}, names), do: names
+
+  defp collect_attach_names("attach://" <> name, names), do: MapSet.put(names, name)
+
+  defp collect_attach_names(value, names) when is_list(value),
+    do: Enum.reduce(value, names, &collect_attach_names/2)
+
+  defp collect_attach_names(value, names) when is_map(value),
+    do: Enum.reduce(value, names, fn {_key, item}, names -> collect_attach_names(item, names) end)
+
+  defp collect_attach_names(_value, names), do: names
 
   defp build_options(%Client{} = client, options) do
     timeout = calculate_timeout(client, options)
@@ -152,7 +407,10 @@ defmodule Nadia.API do
   Args:
   * `method` - name of API method
   * `options` - keyword list of options
-  * `file_field` - specify the key of file_field in `options` when sending files
+  * `file_field` - legacy binary field whose existing local path should be uploaded
+
+  Explicit `Nadia.InputFile` values are discovered in every top-level option
+  and in Nadia's structured JSON media payloads.
   """
   @spec request(binary, [{atom, any}], atom) :: :ok | {:error, Error.t()} | {:ok, any}
   def request(method, options \\ [], file_field \\ nil) do
@@ -162,15 +420,21 @@ defmodule Nadia.API do
   @spec request(Client.t(), binary, [{atom, any}] | map, atom | nil) ::
           :ok | {:error, Error.t()} | {:ok, any}
   def request(%Client{} = client, method, options, file_field) do
-    %HTTPRequest{
-      method: :post,
-      url: build_url(client, method),
-      body: build_request(options, file_field),
-      headers: [],
-      options: build_options(client, options)
-    }
-    |> then(&HTTPClient.post(client.http_client, &1))
-    |> process_response(method)
+    case build_request(options, file_field) do
+      {:ok, body} ->
+        %HTTPRequest{
+          method: :post,
+          url: build_url(client, method),
+          body: body,
+          headers: [],
+          options: build_options(client, options)
+        }
+        |> then(&HTTPClient.post(client.http_client, &1))
+        |> process_response(method)
+
+      {:error, reason} ->
+        {:error, %Error{reason: reason}}
+    end
   end
 
   def request?(method, options \\ [], file_field \\ nil) do

@@ -137,8 +137,10 @@ defmodule Nadia.Behaviour.Chats do
                   :ok | {:error, Error.t()}
       @callback delete_chat_photo(integer | binary) :: :ok | {:error, Error.t()}
       @callback delete_chat_photo(Client.t(), integer | binary) :: :ok | {:error, Error.t()}
-      @callback set_chat_photo(integer | binary, binary) :: :ok | {:error, Error.t()}
-      @callback set_chat_photo(Client.t(), integer | binary, binary) :: :ok | {:error, Error.t()}
+      @callback set_chat_photo(integer | binary, binary | Nadia.InputFile.t()) ::
+                  :ok | {:error, Error.t()}
+      @callback set_chat_photo(Client.t(), integer | binary, binary | Nadia.InputFile.t()) ::
+                  :ok | {:error, Error.t()}
       @callback set_chat_title(integer | binary, binary) :: :ok | {:error, Error.t()}
       @callback set_chat_title(Client.t(), integer | binary, binary) :: :ok | {:error, Error.t()}
       @callback set_chat_description(integer | binary) :: :ok | {:error, Error.t()}

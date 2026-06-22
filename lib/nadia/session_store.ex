@@ -84,15 +84,18 @@ defmodule Nadia.SessionStore do
   def put(_store, _key, _session), do: {:error, :invalid_store}
 
   @doc """
-  Atomically updates a session in a store when the backend supports it.
+  Requests an atomic session update from the backend.
 
   The update function receives the current session map, or `%{}` when the
   session is missing. It may return a new session map, `{:ok, session}`, or
   `{:error, reason}`. Error returns do not write a new value.
 
-  Backend implementations may execute the function inside a serialized server
-  or storage transaction. Keep it short and free of external side effects, and
-  do not call the same serialized store from inside the function.
+  The guarantee is backend-owned: a serialized store can run the callback once
+  under its process lock, while an optimistic database backend can rerun it
+  after a compare-and-swap conflict. Keep the callback short, deterministic,
+  and free of Telegram calls or other external side effects. Do not call the
+  same serialized store from inside the function. Separate `get/2` and `put/3`
+  calls do not provide this read-modify-write guarantee.
   """
   @spec update(store, key, (session -> session | {:ok, session} | {:error, term})) ::
           {:ok, session} | {:error, term}

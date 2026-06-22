@@ -72,6 +72,9 @@ See [Errors And Rate Limits](examples/errors-and-rate-limits.md) for tested
 * Enforce request body limits and HTTPS at the web server or proxy.
 * Rotate a token with BotFather if it may have leaked.
 * Keep production credentials out of tests; use an explicit fake HTTP client.
+* Treat `getFile` download URLs as credentials because they contain the bot
+  token. Redact them from logs and traces and enforce byte limits while
+  streaming downloads.
 
 ## Choose Durable State
 
@@ -81,7 +84,15 @@ be visible to several nodes. Keep durable business data in application storage,
 not only in a conversational session map.
 
 The [Persistent Session Backends](examples/persistent-sessions.md) guide covers
-the concurrency contract and a tested application-owned DETS example.
+atomic `update/3`, get-then-put races, row-lock and optimistic-CAS database
+strategies, the tested DETS and database-boundary examples, and bounded conflict
+handling. ETS and DETS are not multi-node transactional databases.
+
+A Telegram request cannot commit atomically with database state. For durable
+effects, commit the state change, `{bot_ref, update_id}` idempotency marker, and
+outbox intent in one application database transaction. Send from a worker after
+commit. An ambiguous Telegram timeout can still produce a duplicate, so an
+outbox is at-least-once intent rather than exactly-once delivery.
 
 Telegram chat and user IDs may exceed 32-bit integer ranges. Store them in an
 Elixir integer or a database `BIGINT`, not a 32-bit column.

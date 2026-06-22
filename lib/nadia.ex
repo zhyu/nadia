@@ -112,18 +112,14 @@ defmodule Nadia do
   defp encode_json_payload(payload) when is_binary(payload), do: payload
 
   defp encode_json_payload(payload) do
-    payload
-    |> json_payload_value()
-    |> Jason.encode!()
+    %Nadia.InputFile.JSONPayload{value: json_payload_value(payload)}
   end
 
   defp encode_json_array_payload(nil), do: nil
   defp encode_json_array_payload(payload) when is_binary(payload), do: payload
 
   defp encode_json_array_payload(payload) when is_list(payload) do
-    payload
-    |> Enum.map(&json_payload_value/1)
-    |> Jason.encode!()
+    %Nadia.InputFile.JSONPayload{value: Enum.map(payload, &json_payload_value/1)}
   end
 
   defp encode_json_array_payload(payload), do: encode_json_payload(payload)
@@ -137,6 +133,8 @@ defmodule Nadia do
       Enum.map(payload, &json_payload_value/1)
     end
   end
+
+  defp json_payload_value(%Nadia.InputFile{} = payload), do: payload
 
   defp json_payload_value(%_{} = payload) do
     payload

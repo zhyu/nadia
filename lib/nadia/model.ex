@@ -319,8 +319,17 @@ defmodule Nadia.Model do
   end
 
   defmodule ChatPhoto do
-    defstruct small_file_id: nil, big_file_id: nil
-    @type t :: %ChatPhoto{small_file_id: binary, big_file_id: binary}
+    defstruct small_file_id: nil,
+              small_file_unique_id: nil,
+              big_file_id: nil,
+              big_file_unique_id: nil
+
+    @type t :: %ChatPhoto{
+            small_file_id: binary,
+            small_file_unique_id: binary,
+            big_file_id: binary,
+            big_file_unique_id: binary
+          }
   end
 
   defmodule Chat do
@@ -398,29 +407,67 @@ defmodule Nadia.Model do
           }
   end
 
-  defmodule Audio do
+  defmodule Animation do
     defstruct file_id: nil,
+              file_unique_id: nil,
+              width: nil,
+              height: nil,
               duration: nil,
-              performer: nil,
-              title: nil,
+              thumbnail: nil,
+              file_name: nil,
               mime_type: nil,
               file_size: nil
 
-    @type t :: %Audio{
+    @type t :: %Animation{
             file_id: binary,
+            file_unique_id: binary,
+            width: integer,
+            height: integer,
             duration: integer,
-            performer: binary,
-            title: binary,
+            thumbnail: PhotoSize.t(),
+            file_name: binary,
             mime_type: binary,
             file_size: integer
           }
   end
 
+  defmodule Audio do
+    defstruct file_id: nil,
+              file_unique_id: nil,
+              duration: nil,
+              performer: nil,
+              title: nil,
+              file_name: nil,
+              mime_type: nil,
+              file_size: nil,
+              thumbnail: nil
+
+    @type t :: %Audio{
+            file_id: binary,
+            file_unique_id: binary,
+            duration: integer,
+            performer: binary,
+            title: binary,
+            file_name: binary,
+            mime_type: binary,
+            file_size: integer,
+            thumbnail: PhotoSize.t()
+          }
+  end
+
   defmodule Document do
-    defstruct file_id: nil, thumb: nil, file_name: nil, mime_type: nil, file_size: nil
+    defstruct file_id: nil,
+              file_unique_id: nil,
+              thumbnail: nil,
+              thumb: nil,
+              file_name: nil,
+              mime_type: nil,
+              file_size: nil
 
     @type t :: %Document{
             file_id: binary,
+            file_unique_id: binary,
+            thumbnail: PhotoSize.t(),
             thumb: PhotoSize.t(),
             file_name: binary,
             mime_type: binary,
@@ -430,34 +477,57 @@ defmodule Nadia.Model do
 
   defmodule Sticker do
     defstruct file_id: nil,
+              file_unique_id: nil,
+              type: nil,
               width: nil,
               height: nil,
+              is_animated: nil,
+              is_video: nil,
+              thumbnail: nil,
               thumb: nil,
               emoji: nil,
               set_name: nil,
+              premium_animation: nil,
               mask_position: nil,
+              custom_emoji_id: nil,
+              needs_repainting: nil,
               file_size: nil
 
     @type t :: %Sticker{
             file_id: binary,
+            file_unique_id: binary,
+            type: binary,
             width: integer,
             height: integer,
+            is_animated: boolean,
+            is_video: boolean,
+            thumbnail: PhotoSize.t(),
             thumb: PhotoSize.t(),
             emoji: binary,
             set_name: binary,
+            premium_animation: Nadia.Model.File.t(),
             mask_position: MaskPosition.t(),
+            custom_emoji_id: binary,
+            needs_repainting: boolean,
             file_size: integer
           }
   end
 
   defmodule StickerSet do
-    defstruct name: nil, title: nil, contains_masks: false, stickers: []
+    defstruct name: nil,
+              title: nil,
+              sticker_type: nil,
+              contains_masks: false,
+              stickers: [],
+              thumbnail: nil
 
     @type t :: %StickerSet{
             name: binary,
             title: binary,
+            sticker_type: binary,
             contains_masks: boolean,
-            stickers: [Sticker.t()]
+            stickers: [Sticker.t()],
+            thumbnail: PhotoSize.t()
           }
   end
 
@@ -702,29 +772,106 @@ defmodule Nadia.Model do
           }
   end
 
-  defmodule Video do
-    defstruct file_id: nil,
+  defmodule LivePhoto do
+    defstruct photo: [],
+              file_id: nil,
+              file_unique_id: nil,
               width: nil,
               height: nil,
               duration: nil,
-              thumb: nil,
               mime_type: nil,
               file_size: nil
 
-    @type t :: %Video{
+    @type t :: %LivePhoto{
+            photo: [PhotoSize.t()],
             file_id: binary,
+            file_unique_id: binary,
             width: integer,
             height: integer,
             duration: integer,
-            thumb: PhotoSize.t(),
             mime_type: binary,
             file_size: integer
           }
   end
 
+  defmodule VideoQuality do
+    defstruct file_id: nil,
+              file_unique_id: nil,
+              width: nil,
+              height: nil,
+              codec: nil,
+              file_size: nil
+
+    @type t :: %VideoQuality{
+            file_id: binary,
+            file_unique_id: binary,
+            width: integer,
+            height: integer,
+            codec: binary,
+            file_size: integer
+          }
+  end
+
+  defmodule Video do
+    defstruct file_id: nil,
+              file_unique_id: nil,
+              width: nil,
+              height: nil,
+              duration: nil,
+              thumbnail: nil,
+              thumb: nil,
+              cover: [],
+              start_timestamp: nil,
+              qualities: [],
+              file_name: nil,
+              mime_type: nil,
+              file_size: nil
+
+    @type t :: %Video{
+            file_id: binary,
+            file_unique_id: binary,
+            width: integer,
+            height: integer,
+            duration: integer,
+            thumbnail: PhotoSize.t(),
+            thumb: PhotoSize.t(),
+            cover: [PhotoSize.t()],
+            start_timestamp: integer,
+            qualities: [VideoQuality.t()],
+            file_name: binary,
+            mime_type: binary,
+            file_size: integer
+          }
+  end
+
+  defmodule VideoNote do
+    defstruct file_id: nil,
+              file_unique_id: nil,
+              length: nil,
+              duration: nil,
+              thumbnail: nil,
+              file_size: nil
+
+    @type t :: %VideoNote{
+            file_id: binary,
+            file_unique_id: binary,
+            length: integer,
+            duration: integer,
+            thumbnail: PhotoSize.t(),
+            file_size: integer
+          }
+  end
+
   defmodule Voice do
-    defstruct file_id: nil, duration: nil, mime_type: nil, file_size: nil
-    @type t :: %Voice{file_id: binary, duration: integer, mime_type: binary, file_size: integer}
+    defstruct file_id: nil, file_unique_id: nil, duration: nil, mime_type: nil, file_size: nil
+
+    @type t :: %Voice{
+            file_id: binary,
+            file_unique_id: binary,
+            duration: integer,
+            mime_type: binary,
+            file_size: integer
+          }
   end
 
   defmodule Contact do
@@ -957,17 +1104,17 @@ defmodule Nadia.Model do
             suggested_post_info: any,
             effect_id: binary,
             rich_message: RichMessage.t(),
-            animation: any,
+            animation: Animation.t(),
             audio: Audio.t(),
             document: Document.t(),
-            live_photo: any,
+            live_photo: LivePhoto.t(),
             paid_media: PaidMediaInfo.t(),
             photo: [PhotoSize.t()],
             story: any,
-            sticker: any,
-            video: any,
-            video_note: any,
-            voice: any,
+            sticker: Sticker.t(),
+            video: Video.t(),
+            video_note: VideoNote.t(),
+            voice: Voice.t(),
             caption: binary,
             caption_entities: [MessageEntity.t()],
             show_caption_above_media: boolean,

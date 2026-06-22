@@ -109,6 +109,7 @@ defmodule Nadia.Parser do
   }
 
   alias Nadia.Model.{Video, Voice, Contact, Location, Venue, Update, File, CallbackQuery}
+  alias Nadia.Model.{Animation, LivePhoto, MaskPosition, VideoNote, VideoQuality}
   alias Nadia.Model.UserProfilePhotos
   alias Nadia.Model.{Sticker, StickerSet}
 
@@ -397,7 +398,16 @@ defmodule Nadia.Parser do
     do: {:photo, Enum.map(val, &parse(PhotoSize, &1))}
 
   defp parse(PaidMediaVideo, {:video, val}), do: {:video, parse(Video, val)}
-  defp parse(PaidMediaLivePhoto, {:live_photo, val}), do: {:live_photo, val}
+  defp parse(PaidMediaLivePhoto, {:live_photo, val}), do: {:live_photo, parse(LivePhoto, val)}
+
+  defp parse(Video, {:cover, val}) when is_list(val),
+    do: {:cover, Enum.map(val, &parse(PhotoSize, &1))}
+
+  defp parse(Video, {:qualities, val}) when is_list(val),
+    do: {:qualities, Enum.map(val, &parse(VideoQuality, &1))}
+
+  defp parse(Sticker, {:premium_animation, val}), do: {:premium_animation, parse(File, val)}
+  defp parse(Sticker, {:mask_position, val}), do: {:mask_position, parse(MaskPosition, val)}
 
   defp parse(BusinessConnection, {:rights, val}), do: {:rights, parse(BusinessBotRights, val)}
 
@@ -477,14 +487,18 @@ defmodule Nadia.Parser do
   defp parse(_type, entry), do: parse(entry)
 
   defp parse({:audio, val}), do: {:audio, parse(Audio, val)}
+  defp parse({:animation, val}), do: {:animation, parse(Animation, val)}
   defp parse({:video, val}), do: {:video, parse(Video, val)}
+  defp parse({:video_note, val}), do: {:video_note, parse(VideoNote, val)}
   defp parse({:voice, val}), do: {:voice, parse(Voice, val)}
+  defp parse({:live_photo, val}), do: {:live_photo, parse(LivePhoto, val)}
   defp parse({:sticker, val}), do: {:sticker, parse(Sticker, val)}
   defp parse({:document, val}), do: {:document, parse(Document, val)}
   defp parse({:contact, val}), do: {:contact, parse(Contact, val)}
   defp parse({:location, val}), do: {:location, parse(Location, val)}
   defp parse({:venue, val}), do: {:venue, parse(Venue, val)}
   defp parse({:thumb, val}), do: {:thumb, parse(PhotoSize, val)}
+  defp parse({:thumbnail, val}), do: {:thumbnail, parse(PhotoSize, val)}
   defp parse({:photos, val}), do: {:photos, parse(:photos, val)}
   defp parse({:user, val}), do: {:user, parse(User, val)}
   defp parse({:poll, val}), do: {:poll, parse(Poll, val)}

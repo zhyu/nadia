@@ -23,8 +23,19 @@ defmodule Nadia.DocumentationExamplesTest do
 
       case request.body do
         {:multipart, parts} ->
-          {:file, path, _disposition, _headers} = List.keyfind(parts, :file, 0)
-          send(self(), {:uploaded_file, path, File.read!(path)})
+          {:file, source, {"form-data", disposition}, _headers} = List.keyfind(parts, :file, 0)
+          filename = List.keyfind(disposition, "filename", 0) |> elem(1)
+
+          case source do
+            path when is_binary(path) ->
+              send(self(), {:uploaded_file, path, File.read!(path)})
+
+            {:bytes, bytes, _size} ->
+              send(self(), {:uploaded_bytes, filename, IO.iodata_to_binary(bytes)})
+
+            {:stream, stream, _size} ->
+              send(self(), {:uploaded_stream, filename, stream})
+          end
 
         _ ->
           :ok
@@ -166,17 +177,18 @@ defmodule Nadia.DocumentationExamplesTest do
              )
 
     assert_receive {:nadia_request, %HTTPRequest{body: {:multipart, _parts}}}
-    assert_receive {:uploaded_file, temporary_path, "from memory"}
-    refute File.exists?(temporary_path)
+    assert_receive {:uploaded_bytes, "unsafe-name.txt", "from memory"}
 
     missing = path <> ".missing"
 
-    assert {:error, {:file_error, :enoent}} =
+    assert {:error, %Error{reason: {:input_file, {:file_error, ^missing, :enoent}}}} =
              Nadia.Examples.MediaFiles.send_document(client, 123, {:path, missing})
 
     refute_receive {:nadia_request, _request}
 
-    assert {:error, {:file_error, :not_regular}} =
+    directory = System.tmp_dir!()
+
+    assert {:error, %Error{reason: {:input_file, {:not_regular, ^directory}}}} =
              Nadia.Examples.MediaFiles.send_document(client, 123, {:path, System.tmp_dir!()})
 
     assert {:error, {:invalid_file_url, "file:///tmp/manual.pdf"}} =

@@ -101,8 +101,9 @@ defmodule Nadia.Methods.Stickers do
       or a `file_path` to upload a new file from local, or a `HTTP URL` to get a file
       from the internet.
       """
-      @spec upload_sticker_file(integer, binary) :: {:ok, File.t()} | {:error, Error.t()}
-      @spec upload_sticker_file(Client.t(), integer, binary) ::
+      @spec upload_sticker_file(integer, binary | Nadia.InputFile.t()) ::
+              {:ok, File.t()} | {:error, Error.t()}
+      @spec upload_sticker_file(Client.t(), integer, binary | Nadia.InputFile.t()) ::
               {:ok, File.t()} | {:error, Error.t()}
       def upload_sticker_file(user_id, png_sticker) do
         api_request(

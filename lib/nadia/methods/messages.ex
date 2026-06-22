@@ -394,9 +394,9 @@ defmodule Nadia.Methods.Messages do
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
       """
-      @spec send_photo(integer | binary, binary, [{atom, any}]) ::
+      @spec send_photo(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-      @spec send_photo(Client.t(), integer | binary, binary, [{atom, any}]) ::
+      @spec send_photo(Client.t(), integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
       def send_photo(chat_id, photo), do: send_photo(chat_id, photo, [])
 
@@ -440,9 +440,9 @@ defmodule Nadia.Methods.Messages do
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
       """
-      @spec send_audio(integer | binary, binary, [{atom, any}]) ::
+      @spec send_audio(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-      @spec send_audio(Client.t(), integer | binary, binary, [{atom, any}]) ::
+      @spec send_audio(Client.t(), integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
       def send_audio(chat_id, audio), do: send_audio(chat_id, audio, [])
 
@@ -480,9 +480,11 @@ defmodule Nadia.Methods.Messages do
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
       """
-      @spec send_document(integer | binary, binary, [{atom, any}]) ::
+      @spec send_document(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-      @spec send_document(Client.t(), integer | binary, binary, [{atom, any}]) ::
+      @spec send_document(Client.t(), integer | binary, binary | Nadia.InputFile.t(), [
+              {atom, any}
+            ]) ::
               {:ok, Message.t()} | {:error, Error.t()}
       def send_document(chat_id, document), do: send_document(chat_id, document, [])
 
@@ -524,9 +526,9 @@ defmodule Nadia.Methods.Messages do
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
       """
-      @spec send_sticker(integer | binary, binary, [{atom, any}]) ::
+      @spec send_sticker(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-      @spec send_sticker(Client.t(), integer | binary, binary, [{atom, any}]) ::
+      @spec send_sticker(Client.t(), integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
       def send_sticker(chat_id, sticker), do: send_sticker(chat_id, sticker, [])
 
@@ -573,9 +575,9 @@ defmodule Nadia.Methods.Messages do
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
       """
-      @spec send_video(integer | binary, binary, [{atom, any}]) ::
+      @spec send_video(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-      @spec send_video(Client.t(), integer | binary, binary, [{atom, any}]) ::
+      @spec send_video(Client.t(), integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
       def send_video(chat_id, video), do: send_video(chat_id, video, [])
 
@@ -616,9 +618,9 @@ defmodule Nadia.Methods.Messages do
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
       """
-      @spec send_voice(integer | binary, binary, [{atom, any}]) ::
+      @spec send_voice(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-      @spec send_voice(Client.t(), integer | binary, binary, [{atom, any}]) ::
+      @spec send_voice(Client.t(), integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
       def send_voice(chat_id, voice), do: send_voice(chat_id, voice, [])
 
@@ -647,9 +649,11 @@ defmodule Nadia.Methods.Messages do
       already on the Telegram servers, or a `file_path` to upload a new video note
       * `options` - keyword list of options
       """
-      @spec send_video_note(integer | binary, binary, [{atom, any}]) ::
+      @spec send_video_note(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-      @spec send_video_note(Client.t(), integer | binary, binary, [{atom, any}]) ::
+      @spec send_video_note(Client.t(), integer | binary, binary | Nadia.InputFile.t(), [
+              {atom, any}
+            ]) ::
               {:ok, Message.t()} | {:error, Error.t()}
       def send_video_note(chat_id, video_note), do: send_video_note(chat_id, video_note, [])
 
@@ -688,9 +692,20 @@ defmodule Nadia.Methods.Messages do
       * `photo` - Cover photo to send as a regular Telegram parameter
       * `options` - keyword list of options
       """
-      @spec send_live_photo(integer | binary, binary, binary, [{atom, any}]) ::
+      @spec send_live_photo(
+              integer | binary,
+              binary | Nadia.InputFile.t(),
+              binary | Nadia.InputFile.t(),
+              [{atom, any}]
+            ) ::
               {:ok, Message.t()} | {:error, Error.t()}
-      @spec send_live_photo(Client.t(), integer | binary, binary, binary, [{atom, any}]) ::
+      @spec send_live_photo(
+              Client.t(),
+              integer | binary,
+              binary | Nadia.InputFile.t(),
+              binary | Nadia.InputFile.t(),
+              [{atom, any}]
+            ) ::
               {:ok, Message.t()} | {:error, Error.t()}
       def send_live_photo(chat_id, live_photo, photo) do
         send_live_photo(chat_id, live_photo, photo, [])
@@ -1273,8 +1288,8 @@ defmodule Nadia.Methods.Messages do
       * `:duration` - Duration of sent animation in seconds
       * `:width` - Animation width
       * `:height` - Animation height
-      * `:thumb` - Thumbnail of the file sent; can be ignored if thumbnail generation for the file
-      is supported server-side. thumbnail should be in JPEG format and less than 200 kB in size.
+      * `:thumbnail` - Thumbnail of the file sent; can be ignored if thumbnail generation for the
+      file is supported server-side. It should be JPEG and less than 200 kB.
       * `:caption` - Animation caption (may also be used when resending animation by file_id), 0-1024 characters
       * `:parse_mode` - Send Markdown or HTML, if you want Telegram apps to show bold, italic, fixed-width
       text or inline URLs in the media caption.
@@ -1283,9 +1298,11 @@ defmodule Nadia.Methods.Messages do
       * `:reply_markup` - Additional interface options. A JSON-serialized object for an inline keyboard,
       custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
       """
-      @spec send_animation(integer | binary, binary, [{atom, any}]) ::
+      @spec send_animation(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
-      @spec send_animation(Client.t(), integer | binary, binary, [{atom, any}]) ::
+      @spec send_animation(Client.t(), integer | binary, binary | Nadia.InputFile.t(), [
+              {atom, any}
+            ]) ::
               {:ok, Message.t()} | {:error, Error.t()}
       def send_animation(chat_id, animation), do: send_animation(chat_id, animation, [])
 

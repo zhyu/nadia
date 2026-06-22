@@ -5,6 +5,7 @@ defmodule Nadia.ParserTest do
 
   alias Nadia.Model.{
     AffiliateInfo,
+    Animation,
     Update,
     Audio,
     BotAccessSettings,
@@ -33,6 +34,7 @@ defmodule Nadia.ParserTest do
     ChatBoostUpdated,
     Checklist,
     ChecklistTask,
+    Document,
     ForumTopic,
     GameHighScore,
     Gift,
@@ -44,6 +46,8 @@ defmodule Nadia.ParserTest do
     User,
     Location,
     Link,
+    LivePhoto,
+    MaskPosition,
     PhotoSize,
     UserProfilePhotos,
     Message,
@@ -105,7 +109,10 @@ defmodule Nadia.ParserTest do
     UserChatBoosts,
     UserProfileAudios,
     Video,
+    VideoNote,
+    VideoQuality,
     Venue,
+    Voice,
     WebhookInfo
   }
 
@@ -1335,10 +1342,9 @@ defmodule Nadia.ParserTest do
 
     assert paid_media_live_photo.type == "live_photo"
 
-    assert paid_media_live_photo.live_photo == %{
-             "file_id" => "paid-live-photo-1",
-             "duration" => 3,
-             "future_live_photo_field" => "preserved-raw"
+    assert paid_media_live_photo.live_photo == %LivePhoto{
+             file_id: "paid-live-photo-1",
+             duration: 3
            }
 
     assert purchased_paid_media.from == %User{
@@ -2252,6 +2258,154 @@ defmodule Nadia.ParserTest do
            }
   end
 
+  test "parse fixture-backed file-bearing message types without creating atoms" do
+    unknown_keys = [
+      "future_media_envelope_field_4a1f",
+      "future_media_thumbnail_field_6b2e",
+      "future_animation_field_12ab",
+      "future_media_message_field_3c7d",
+      "future_media_update_field_7e8f"
+    ]
+
+    Enum.each(unknown_keys, &refute(existing_atom?(&1)))
+
+    fixture =
+      "../fixtures/telegram/responses/get_updates_media_files.json"
+      |> Path.expand(__DIR__)
+      |> File.read!()
+
+    assert {:ok,
+            [
+              %Update{message: %Message{animation: %Animation{} = animation}},
+              %Update{message: %Message{audio: %Audio{} = audio}},
+              %Update{message: %Message{document: %Document{} = document}},
+              %Update{message: %Message{sticker: %Sticker{} = sticker}},
+              %Update{message: %Message{video: %Video{} = video}},
+              %Update{message: %Message{video_note: %VideoNote{} = video_note}},
+              %Update{message: %Message{voice: %Voice{} = voice}},
+              %Update{message: %Message{live_photo: %LivePhoto{} = live_photo}}
+            ]} = Parser.parse_updates(fixture)
+
+    assert animation.file_unique_id == "animation-unique"
+    assert animation.file_name == "animation.mp4"
+
+    assert %PhotoSize{file_unique_id: "animation-thumb-unique"} = animation.thumbnail
+
+    assert %Audio{
+             file_unique_id: "audio-unique",
+             file_name: "media.m4a",
+             thumbnail: %PhotoSize{file_unique_id: "audio-thumb-unique"}
+           } = audio
+
+    assert %Document{
+             file_unique_id: "document-unique",
+             thumbnail: %PhotoSize{file_unique_id: "document-thumb-unique"},
+             file_name: "manual.pdf"
+           } = document
+
+    assert %Sticker{
+             file_unique_id: "sticker-unique",
+             type: "mask",
+             is_animated: false,
+             is_video: false,
+             thumbnail: %PhotoSize{file_unique_id: "sticker-thumb-unique"},
+             premium_animation: %Nadia.Model.File{file_unique_id: "premium-unique"},
+             mask_position: %MaskPosition{point: "forehead"},
+             custom_emoji_id: "custom-1",
+             needs_repainting: true
+           } = sticker
+
+    assert %Video{
+             file_unique_id: "video-unique",
+             thumbnail: %PhotoSize{file_unique_id: "video-thumb-unique"},
+             cover: [
+               %PhotoSize{file_unique_id: "cover-small-unique"},
+               %PhotoSize{file_unique_id: "cover-large-unique"}
+             ],
+             start_timestamp: 3,
+             qualities: [
+               %VideoQuality{
+                 file_unique_id: "video-quality-unique",
+                 codec: "h264"
+               }
+             ],
+             file_name: "video.mp4"
+           } = video
+
+    assert %VideoNote{
+             file_unique_id: "video-note-unique",
+             thumbnail: %PhotoSize{file_unique_id: "video-note-thumb-unique"}
+           } = video_note
+
+    assert voice.file_unique_id == "voice-unique"
+
+    assert %LivePhoto{
+             file_unique_id: "live-photo-video-unique",
+             photo: [%PhotoSize{file_unique_id: "live-photo-static-unique"}]
+           } = live_photo
+
+    Enum.each(unknown_keys, &refute(existing_atom?(&1)))
+  end
+
+  test "parse current chat photo and sticker set metadata while retaining legacy thumb" do
+    chat =
+      Parser.parse_result(
+        %{
+          "id" => 42,
+          "type" => "private",
+          "photo" => %{
+            "small_file_id" => "small",
+            "small_file_unique_id" => "small-unique",
+            "big_file_id" => "big",
+            "big_file_unique_id" => "big-unique"
+          }
+        },
+        "getChat"
+      )
+
+    assert chat.photo.small_file_unique_id == "small-unique"
+    assert chat.photo.big_file_unique_id == "big-unique"
+
+    sticker_set =
+      Parser.parse_result(
+        %{
+          "name" => "set",
+          "title" => "Set",
+          "sticker_type" => "regular",
+          "stickers" => [],
+          "thumbnail" => %{
+            "file_id" => "set-thumb",
+            "file_unique_id" => "set-thumb-unique",
+            "width" => 100,
+            "height" => 100
+          }
+        },
+        "getStickerSet"
+      )
+
+    assert sticker_set.sticker_type == "regular"
+    assert sticker_set.thumbnail.file_unique_id == "set-thumb-unique"
+
+    assert [%Update{message: %Message{document: %Document{thumb: %PhotoSize{file_id: "old"}}}}] =
+             Parser.parse_result(
+               [
+                 %{
+                   update_id: 1,
+                   message: %{
+                     message_id: 1,
+                     date: 1,
+                     chat: %{id: 42, type: "private"},
+                     document: %{
+                       file_id: "document",
+                       thumb: %{file_id: "old", width: 1, height: 1}
+                     }
+                   }
+                 }
+               ],
+               "getUpdates"
+             )
+  end
+
   defp existing_struct_key?(%_{} = struct, key) when is_binary(key) do
     struct
     |> Map.keys()
@@ -2264,5 +2418,12 @@ defmodule Nadia.ParserTest do
     |> File.read!()
     |> Jason.decode!()
     |> Map.fetch!("result")
+  end
+
+  defp existing_atom?(name) do
+    _ = String.to_existing_atom(name)
+    true
+  rescue
+    ArgumentError -> false
   end
 end

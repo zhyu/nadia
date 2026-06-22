@@ -48,7 +48,7 @@ defmodule Nadia.Behaviour.Stickers do
                   {:ok, [Sticker.t()]} | {:error, Error.t()}
       @callback get_custom_emoji_stickers(Client.t(), [binary] | binary) ::
                   {:ok, [Sticker.t()]} | {:error, Error.t()}
-      @callback upload_sticker_file(Client.t(), integer, binary) ::
+      @callback upload_sticker_file(Client.t(), integer, binary | Nadia.InputFile.t()) ::
                   {:ok, File.t()} | {:error, Error.t()}
       @callback create_new_sticker_set(Client.t(), integer, binary, binary, binary, binary, [
                   {atom, any}

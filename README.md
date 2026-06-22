@@ -16,6 +16,8 @@ building bots in an OTP application.
 * Route commands, text, and callback queries without a macro DSL.
 * Use explicit clients for multi-bot applications and fake HTTP adapters for
   offline tests.
+* Upload paths, bounded iodata, and known-size streams with explicit
+  `Nadia.InputFile` values, including nested media attachments.
 * Add optional conversation state without requiring a persistence dependency.
 
 ## Installation

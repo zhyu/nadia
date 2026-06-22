@@ -1,0 +1,210 @@
+{
+  "ok": true,
+  "future_media_envelope_field_4a1f": "ignored",
+  "result": [
+    {
+      "update_id": 8101,
+      "message": {
+        "message_id": 101,
+        "date": 1782000101,
+        "chat": {"id": 7001, "type": "private"},
+        "animation": {
+          "file_id": "animation-file",
+          "file_unique_id": "animation-unique",
+          "width": 640,
+          "height": 360,
+          "duration": 4,
+          "thumbnail": {
+            "file_id": "animation-thumb",
+            "file_unique_id": "animation-thumb-unique",
+            "width": 320,
+            "height": 180,
+            "file_size": 1200,
+            "future_media_thumbnail_field_6b2e": true
+          },
+          "file_name": "animation.mp4",
+          "mime_type": "video/mp4",
+          "file_size": 42000,
+          "future_animation_field_12ab": "ignored"
+        },
+        "future_media_message_field_3c7d": "ignored"
+      },
+      "future_media_update_field_7e8f": "ignored"
+    },
+    {
+      "update_id": 8102,
+      "message": {
+        "message_id": 102,
+        "date": 1782000102,
+        "chat": {"id": 7001, "type": "private"},
+        "audio": {
+          "file_id": "audio-file",
+          "file_unique_id": "audio-unique",
+          "duration": 125,
+          "performer": "Nadia",
+          "title": "Media",
+          "file_name": "media.m4a",
+          "mime_type": "audio/mp4",
+          "file_size": 52000,
+          "thumbnail": {
+            "file_id": "audio-thumb",
+            "file_unique_id": "audio-thumb-unique",
+            "width": 90,
+            "height": 90
+          }
+        }
+      }
+    },
+    {
+      "update_id": 8103,
+      "message": {
+        "message_id": 103,
+        "date": 1782000103,
+        "chat": {"id": 7001, "type": "private"},
+        "document": {
+          "file_id": "document-file",
+          "file_unique_id": "document-unique",
+          "thumbnail": {
+            "file_id": "document-thumb",
+            "file_unique_id": "document-thumb-unique",
+            "width": 100,
+            "height": 140
+          },
+          "file_name": "manual.pdf",
+          "mime_type": "application/pdf",
+          "file_size": 62000
+        }
+      }
+    },
+    {
+      "update_id": 8104,
+      "message": {
+        "message_id": 104,
+        "date": 1782000104,
+        "chat": {"id": 7001, "type": "private"},
+        "sticker": {
+          "file_id": "sticker-file",
+          "file_unique_id": "sticker-unique",
+          "type": "mask",
+          "width": 512,
+          "height": 512,
+          "is_animated": false,
+          "is_video": false,
+          "thumbnail": {
+            "file_id": "sticker-thumb",
+            "file_unique_id": "sticker-thumb-unique",
+            "width": 100,
+            "height": 100
+          },
+          "emoji": "mask",
+          "set_name": "nadia_masks",
+          "premium_animation": {
+            "file_id": "premium-file",
+            "file_unique_id": "premium-unique",
+            "file_size": 7000,
+            "file_path": "stickers/premium.tgs"
+          },
+          "mask_position": {"point": "forehead", "x_shift": 0.1, "y_shift": -0.2, "scale": 1.0},
+          "custom_emoji_id": "custom-1",
+          "needs_repainting": true,
+          "file_size": 72000
+        }
+      }
+    },
+    {
+      "update_id": 8105,
+      "message": {
+        "message_id": 105,
+        "date": 1782000105,
+        "chat": {"id": 7001, "type": "private"},
+        "video": {
+          "file_id": "video-file",
+          "file_unique_id": "video-unique",
+          "width": 1280,
+          "height": 720,
+          "duration": 30,
+          "thumbnail": {
+            "file_id": "video-thumb",
+            "file_unique_id": "video-thumb-unique",
+            "width": 320,
+            "height": 180
+          },
+          "cover": [
+            {"file_id": "cover-small", "file_unique_id": "cover-small-unique", "width": 160, "height": 90},
+            {"file_id": "cover-large", "file_unique_id": "cover-large-unique", "width": 640, "height": 360}
+          ],
+          "start_timestamp": 3,
+          "qualities": [
+            {
+              "file_id": "video-quality-file",
+              "file_unique_id": "video-quality-unique",
+              "width": 640,
+              "height": 360,
+              "codec": "h264",
+              "file_size": 82000
+            }
+          ],
+          "file_name": "video.mp4",
+          "mime_type": "video/mp4",
+          "file_size": 92000
+        }
+      }
+    },
+    {
+      "update_id": 8106,
+      "message": {
+        "message_id": 106,
+        "date": 1782000106,
+        "chat": {"id": 7001, "type": "private"},
+        "video_note": {
+          "file_id": "video-note-file",
+          "file_unique_id": "video-note-unique",
+          "length": 240,
+          "duration": 9,
+          "thumbnail": {
+            "file_id": "video-note-thumb",
+            "file_unique_id": "video-note-thumb-unique",
+            "width": 240,
+            "height": 240
+          },
+          "file_size": 102000
+        }
+      }
+    },
+    {
+      "update_id": 8107,
+      "message": {
+        "message_id": 107,
+        "date": 1782000107,
+        "chat": {"id": 7001, "type": "private"},
+        "voice": {
+          "file_id": "voice-file",
+          "file_unique_id": "voice-unique",
+          "duration": 12,
+          "mime_type": "audio/ogg",
+          "file_size": 112000
+        }
+      }
+    },
+    {
+      "update_id": 8108,
+      "message": {
+        "message_id": 108,
+        "date": 1782000108,
+        "chat": {"id": 7001, "type": "private"},
+        "live_photo": {
+          "photo": [
+            {"file_id": "live-photo-static", "file_unique_id": "live-photo-static-unique", "width": 1080, "height": 1920}
+          ],
+          "file_id": "live-photo-video",
+          "file_unique_id": "live-photo-video-unique",
+          "width": 1080,
+          "height": 1920,
+          "duration": 3,
+          "mime_type": "video/mp4",
+          "file_size": 122000
+        }
+      }
+    }
+  ]
+}

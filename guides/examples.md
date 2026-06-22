@@ -20,7 +20,9 @@ Start with the path that matches what you are building.
 
 The complete handler source for the interactive examples lives in the
 [`examples`](https://github.com/zhyu/nadia/tree/master/examples) directory and
-is compiled and exercised by Nadia's normal test suite.
+is shipped as uncompiled source. Copy and rename an example under your
+application's `lib/` directory. Nadia's normal offline test suite loads and
+exercises every published example directly.
 
 ## Integrate And Test
 
@@ -29,7 +31,7 @@ is compiled and exercised by Nadia's normal test suite.
 | Receive updates over HTTP | [Receive Webhook Updates](receive-webhook-updates.md) | `Nadia.Webhook` |
 | Run several bot identities | [Run Multiple Bots](multiple-bots.md) | `Nadia.Client`, `Nadia.Polling` |
 | Test without credentials or network calls | [Test Bot Handlers](testing-bots.md) | `Nadia.Client`, `Nadia.HTTPClient` |
-| Upload, reuse, and download files | [Media And Files](examples/media-and-files.md) | `Nadia`, `Nadia.Model.File` |
+| Upload, reuse, and download files | [Media And Files](examples/media-and-files.md) | `Nadia.InputFile`, `Nadia.Model.File` |
 | Handle Telegram errors with bounds | [Errors And Rate Limits](examples/errors-and-rate-limits.md) | `Nadia.Model.Error`, `Nadia.Model.ResponseParameters` |
 | Publish Telegraph pages | [Use The Telegraph API](telegraph.md) | `Nadia.Graph` |
 

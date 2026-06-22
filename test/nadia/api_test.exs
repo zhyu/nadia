@@ -47,6 +47,7 @@ defmodule Nadia.APITest do
     ManagedBotCreated,
     ManagedBotUpdated,
     Location,
+    LivePhoto,
     MenuButtonWebApp,
     MessageReactionUpdated,
     OwnedGiftRegular,
@@ -966,10 +967,7 @@ defmodule Nadia.APITest do
              %PaidMediaVideo{video: %Video{file_id: "paid-video-1"}},
              %PaidMediaLivePhoto{
                type: "live_photo",
-               live_photo: %{
-                 "file_id" => "paid-live-photo-1",
-                 "future_live_photo_field" => "preserved-raw"
-               }
+               live_photo: %LivePhoto{file_id: "paid-live-photo-1", duration: 3}
              },
              %PaidMedia{type: "future_paid_media"}
            ] = paid_media_info.paid_media

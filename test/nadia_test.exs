@@ -348,52 +348,43 @@ defmodule NadiaTest do
     assert {:ok, %File{file_id: "BQADBAADzwADZgctUjisl0we_2qGAg"}} =
              assert_wrapper_call(
                "uploadStickerFile",
-               [{"user_id", "666"}, {"png_sticker", "BQADBAADzwADZgctUjisl0we_2qGAg"}],
+               [
+                 {"user_id", "666"},
+                 {"sticker", "BQADBAADzwADZgctUjisl0we_2qGAg"},
+                 {"sticker_format", "static"}
+               ],
                %{file_id: "BQADBAADzwADZgctUjisl0we_2qGAg"},
                fn -> Nadia.upload_sticker_file(666, "BQADBAADzwADZgctUjisl0we_2qGAg") end
              )
 
-    assert :ok =
-             assert_wrapper_call(
-               "createNewStickerSet",
-               [
-                 {"user_id", "666"},
-                 {"name", "test_sticker_set_by_nadia_bot"},
-                 {"title", "nadia test"},
-                 {"png_sticker", "BQADBAADzwADZgctUjisl0we_2qGAg"},
-                 {"emojis", ":)"}
-               ],
-               true,
-               fn ->
-                 Nadia.create_new_sticker_set(
-                   666,
-                   "test_sticker_set_by_nadia_bot",
-                   "nadia test",
-                   "BQADBAADzwADZgctUjisl0we_2qGAg",
-                   ":)"
-                 )
-               end
-             )
+    stub_telegram_result(true)
 
     assert :ok =
-             assert_wrapper_call(
-               "addStickerToSet",
-               [
-                 {"user_id", "666"},
-                 {"name", "test_sticker_set_by_nadia_bot"},
-                 {"png_sticker", "BQADBAADqgADVTwsUrIHnx5jZ0XkAg"},
-                 {"emojis", ";)"}
-               ],
-               true,
-               fn ->
-                 Nadia.add_sticker_to_set(
-                   666,
-                   "test_sticker_set_by_nadia_bot",
-                   "BQADBAADqgADVTwsUrIHnx5jZ0XkAg",
-                   ";)"
-                 )
-               end
+             Nadia.create_new_sticker_set(
+               666,
+               "test_sticker_set_by_nadia_bot",
+               "nadia test",
+               "BQADBAADzwADZgctUjisl0we_2qGAg",
+               ":)"
              )
+
+    request = assert_telegram_request("createNewStickerSet")
+    params = form_params(request)
+    assert [%{"format" => "static", "emoji_list" => [":)"]}] = Jason.decode!(params["stickers"])
+
+    stub_telegram_result(true)
+
+    assert :ok =
+             Nadia.add_sticker_to_set(
+               666,
+               "test_sticker_set_by_nadia_bot",
+               "BQADBAADqgADVTwsUrIHnx5jZ0XkAg",
+               ";)"
+             )
+
+    request = assert_telegram_request("addStickerToSet")
+    params = form_params(request)
+    assert %{"format" => "static", "emoji_list" => [";)"]} = Jason.decode!(params["sticker"])
 
     assert :ok =
              assert_wrapper_call(

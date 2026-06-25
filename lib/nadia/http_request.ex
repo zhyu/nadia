@@ -19,3 +19,21 @@ defmodule Nadia.HTTPRequest do
           options: keyword
         }
 end
+
+defimpl Inspect, for: Nadia.HTTPRequest do
+  import Inspect.Algebra
+
+  def inspect(request, opts) do
+    fields =
+      request
+      |> Map.from_struct()
+      |> Map.update!(:url, &redact_bot_token/1)
+
+    concat(["#Nadia.HTTPRequest<", to_doc(fields, opts), ">"])
+  end
+
+  defp redact_bot_token(url) when is_binary(url),
+    do: Regex.replace(~r|(/bot)[^/]+|, url, "\\1[REDACTED]")
+
+  defp redact_bot_token(_url), do: "[REDACTED]"
+end

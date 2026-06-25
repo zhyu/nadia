@@ -18,6 +18,10 @@ building bots in an OTP application.
   offline tests.
 * Upload paths, bounded iodata, and known-size streams with explicit
   `Nadia.InputFile` values, including nested media attachments.
+* Build current outgoing media and stickers with `Nadia.InputMedia` and
+  `Nadia.InputSticker`.
+* Stream Telegram downloads to files under a mandatory byte limit, without
+  returning token-bearing URLs.
 * Add optional conversation state without requiring a persistence dependency.
 
 ## Installation
@@ -153,6 +157,20 @@ config :nadia,
 Custom Bot API, file, or Telegraph endpoints can be configured with
 `:base_url`, `:file_base_url`, and `:graph_base_url`. Most applications should
 use the defaults.
+
+A trusted local Bot API server started in local mode can return absolute file
+paths instead of remote download paths. Opt into local filesystem copying
+explicitly:
+
+```elixir
+config :nadia,
+  base_url: "http://bot-api.internal/bot",
+  file_mode: :local
+```
+
+The path must be accessible in Nadia's filesystem namespace. Leave
+`file_mode: :remote` at its default for Telegram's hosted API and for local
+servers that still use HTTP file downloads.
 
 ## Testing
 

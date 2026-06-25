@@ -56,6 +56,19 @@ defmodule Nadia.Behaviour.UpdatesAndFiles do
       @callback get_file(Client.t(), binary) :: {:ok, File.t()} | {:error, Error.t()}
       @callback get_file_link(File.t()) :: {:ok, binary} | {:error, Error.t()}
       @callback get_file_link(Client.t(), File.t()) :: {:ok, binary} | {:error, Error.t()}
+      @callback download_file(binary | File.t(), Path.t(), non_neg_integer) ::
+                  {:ok, Path.t()} | {:error, Error.t()}
+      @callback download_file(binary | File.t(), Path.t(), non_neg_integer, keyword) ::
+                  {:ok, Path.t()} | {:error, Error.t()}
+      @callback download_file(Client.t(), binary | File.t(), Path.t(), non_neg_integer) ::
+                  {:ok, Path.t()} | {:error, Error.t()}
+      @callback download_file(
+                  Client.t(),
+                  binary | File.t(),
+                  Path.t(),
+                  non_neg_integer,
+                  keyword
+                ) :: {:ok, Path.t()} | {:error, Error.t()}
     end
   end
 end

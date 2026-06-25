@@ -9,6 +9,8 @@ defmodule Nadia.Examples.MediaFiles do
 
   alias Nadia.Client
   alias Nadia.InputFile
+  alias Nadia.InputMedia
+  alias Nadia.InputSticker
 
   @type source :: {:file_id, binary} | {:url, binary} | {:path, Path.t()}
 
@@ -60,16 +62,44 @@ defmodule Nadia.Examples.MediaFiles do
   end
 
   @doc """
-  Resolves a Telegram file ID to a credential-bearing download URL.
-
-  This does not download the file. The caller owns the HTTP GET, destination
-  streaming, size limits, and URL secrecy.
+  Sends a typed two-item album with a reusable photo and a bounded path upload.
   """
-  @spec download_url(Client.t(), binary) :: {:ok, binary} | {:error, term}
-  def download_url(%Client{} = client, file_id) when is_binary(file_id) do
-    with {:ok, file} <- Nadia.get_file(client, file_id),
-         {:ok, url} <- Nadia.get_file_link(client, file) do
-      {:ok, url}
-    end
+  @spec send_album(Client.t(), integer | binary, binary, Path.t()) :: term
+  def send_album(%Client{} = client, chat_id, photo_file_id, video_path) do
+    media = [
+      InputMedia.photo(InputFile.file_id(photo_file_id)),
+      InputMedia.video(InputFile.path(video_path, max_bytes: 50_000_000),
+        supports_streaming: true
+      )
+    ]
+
+    Nadia.send_media_group(client, chat_id, media)
+  end
+
+  @doc """
+  Adds a typed static sticker from a bounded local upload.
+  """
+  @spec add_static_sticker(Client.t(), integer, binary, Path.t(), binary) :: term
+  def add_static_sticker(%Client{} = client, user_id, set_name, path, emoji) do
+    sticker =
+      InputSticker.static(
+        InputFile.path(path, max_bytes: 512_000),
+        [emoji]
+      )
+
+    Nadia.add_sticker_to_set(client, user_id, set_name, sticker)
+  end
+
+  @doc """
+  Downloads a Telegram file to a destination under a mandatory byte limit.
+
+  Nadia streams to a same-directory temporary file, refuses an existing
+  destination, and publishes the completed file atomically where supported.
+  """
+  @spec download_file(Client.t(), binary, Path.t(), non_neg_integer) ::
+          {:ok, Path.t()} | {:error, term}
+  def download_file(%Client{} = client, file_id, destination, max_bytes)
+      when is_binary(file_id) do
+    Nadia.download_file(client, file_id, destination, max_bytes)
   end
 end

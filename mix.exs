@@ -92,7 +92,14 @@ defmodule Nadia.Mixfile do
         Project: ["CHANGELOG.md", "LICENSE.md"]
       ],
       groups_for_modules: [
-        "Bot API": [Nadia, Nadia.Behaviour, Nadia.Client, Nadia.InputFile],
+        "Bot API": [
+          Nadia,
+          Nadia.Behaviour,
+          Nadia.Client,
+          Nadia.InputFile,
+          Nadia.InputMedia,
+          Nadia.InputSticker
+        ],
         "Bot Runtime": [
           Nadia.Context,
           Nadia.Dispatcher,
@@ -107,6 +114,8 @@ defmodule Nadia.Mixfile do
           Nadia.Config,
           Nadia.HTTPClient,
           Nadia.HTTPClient.Req,
+          Nadia.HTTPDownloadRequest,
+          Nadia.HTTPDownloadResponse,
           Nadia.HTTPRequest,
           Nadia.HTTPResponse,
           Nadia.Parser

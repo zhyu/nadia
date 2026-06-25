@@ -50,12 +50,38 @@ defmodule Nadia.Behaviour.Stickers do
                   {:ok, [Sticker.t()]} | {:error, Error.t()}
       @callback upload_sticker_file(Client.t(), integer, binary | Nadia.InputFile.t()) ::
                   {:ok, File.t()} | {:error, Error.t()}
+      @callback upload_sticker_file(
+                  Client.t(),
+                  integer,
+                  binary | Nadia.InputFile.t(),
+                  binary
+                ) :: {:ok, File.t()} | {:error, Error.t()}
+      @callback create_new_sticker_set(integer, binary, binary, list | map | binary) ::
+                  :ok | {:error, Error.t()}
+      @callback create_new_sticker_set(
+                  Client.t(),
+                  integer,
+                  binary,
+                  binary,
+                  list | map | binary
+                ) :: :ok | {:error, Error.t()}
       @callback create_new_sticker_set(Client.t(), integer, binary, binary, binary, binary, [
                   {atom, any}
                 ]) ::
                   :ok | {:error, Error.t()}
       @callback add_sticker_to_set(Client.t(), integer, binary, binary, binary, [{atom, any}]) ::
                   :ok | {:error, Error.t()}
+      @callback add_sticker_to_set(
+                  integer,
+                  binary,
+                  Nadia.InputSticker.t() | list | map | binary
+                ) :: :ok | {:error, Error.t()}
+      @callback add_sticker_to_set(
+                  Client.t(),
+                  integer,
+                  binary,
+                  Nadia.InputSticker.t() | list | map | binary
+                ) :: :ok | {:error, Error.t()}
       @callback replace_sticker_in_set(integer, binary, binary, list | map | struct | binary) ::
                   :ok | {:error, Error.t()}
       @callback replace_sticker_in_set(
@@ -89,6 +115,15 @@ defmodule Nadia.Behaviour.Stickers do
                   :ok | {:error, Error.t()}
       @callback set_sticker_set_thumbnail(Client.t(), binary, integer, [{atom, any}] | map) ::
                   :ok | {:error, Error.t()}
+      @callback set_sticker_set_thumbnail(binary, integer, binary, [{atom, any}] | map) ::
+                  :ok | {:error, Error.t()}
+      @callback set_sticker_set_thumbnail(
+                  Client.t(),
+                  binary,
+                  integer,
+                  binary,
+                  [{atom, any}] | map
+                ) :: :ok | {:error, Error.t()}
       @callback set_custom_emoji_sticker_set_thumbnail(binary) :: :ok | {:error, Error.t()}
       @callback set_custom_emoji_sticker_set_thumbnail(binary, [{atom, any}] | map) ::
                   :ok | {:error, Error.t()}

@@ -5,6 +5,8 @@ defmodule Nadia.HTTPClient.Req do
 
   alias Nadia.HTTPRequest
   alias Nadia.HTTPResponse
+  alias Nadia.HTTPDownloadRequest
+  alias Nadia.HTTPDownloadResponse
 
   @req_passthrough_options [
     :adapter,
@@ -14,6 +16,7 @@ defmodule Nadia.HTTPClient.Req do
     :decode_json,
     :finch,
     :finch_options,
+    :finch_request,
     :http_errors,
     :into,
     :max_retries,
@@ -50,6 +53,27 @@ defmodule Nadia.HTTPClient.Req do
     end
   end
 
+  @impl Nadia.HTTPClient
+  def download(%HTTPDownloadRequest{} = request) do
+    with :ok <- ensure_req(),
+         {:ok, options} <- to_req_download_options(request) do
+      try do
+        case Req.request(options) do
+          {:ok, response} ->
+            download_response(response, request)
+
+          {:error, %{__struct__: Req.TransportError, reason: reason}} ->
+            {:error, sanitize_transport_reason(reason)}
+
+          {:error, _error} ->
+            {:error, :request_failed}
+        end
+      rescue
+        _error -> {:error, :request_failed}
+      end
+    end
+  end
+
   @doc false
   @spec to_req_options(HTTPRequest.t()) :: {:ok, keyword} | {:error, term}
   def to_req_options(%HTTPRequest{
@@ -72,6 +96,33 @@ defmodule Nadia.HTTPClient.Req do
        ]
        |> Keyword.merge(body_options)
        |> Keyword.merge(http_options)}
+    end
+  end
+
+  @doc false
+  @spec to_req_download_options(HTTPDownloadRequest.t()) :: {:ok, keyword} | {:error, term}
+  def to_req_download_options(%HTTPDownloadRequest{} = request) do
+    with {:ok, http_options} <- translate_options(request.options) do
+      into = fn {:data, data}, {req, response} ->
+        stream_download_chunk(request, data, req, response)
+      end
+
+      {:ok,
+       [
+         method: :get,
+         url: request.url,
+         headers: request.headers
+       ]
+       |> Keyword.merge(http_options)
+       |> Keyword.merge(
+         into: into,
+         compressed: false,
+         decode_body: false,
+         raw: true,
+         redirect: false,
+         redirect_log_level: false,
+         retry: false
+       )}
     end
   end
 
@@ -367,6 +418,106 @@ defmodule Nadia.HTTPClient.Req do
       {:error, {:missing_dependency, :req}}
     end
   end
+
+  defp stream_download_chunk(request, data, req, response) do
+    cond do
+      response.status != 200 ->
+        {:cont, {req, response}}
+
+      reason = response_preflight_error(response, request) ->
+        response = Req.Response.put_private(response, :nadia_download_error, reason)
+        {:halt, {req, response}}
+
+      true ->
+        case request.sink.(data) do
+          :ok ->
+            bytes = safe_iodata_length(data)
+
+            response =
+              Req.Response.update_private(response, :nadia_download_bytes, bytes, &(&1 + bytes))
+
+            {:cont, {req, response}}
+
+          {:error, reason} ->
+            response = Req.Response.put_private(response, :nadia_download_error, reason)
+            {:halt, {req, response}}
+
+          _other ->
+            response =
+              Req.Response.put_private(response, :nadia_download_error, :invalid_sink_result)
+
+            {:halt, {req, response}}
+        end
+    end
+  end
+
+  defp download_response(response, request) do
+    cond do
+      reason = Req.Response.get_private(response, :nadia_download_error) ->
+        {:error, reason}
+
+      response.status in [301, 302, 303, 307, 308] ->
+        {:error, :redirect_not_allowed}
+
+      response.status != 200 ->
+        {:error, {:http_status, response.status}}
+
+      reason = response_preflight_error(response, request) ->
+        {:error, reason}
+
+      true ->
+        {:ok,
+         %HTTPDownloadResponse{
+           status_code: response.status,
+           bytes_written: Req.Response.get_private(response, :nadia_download_bytes, 0),
+           headers: Req.get_headers_list(response)
+         }}
+    end
+  end
+
+  defp response_preflight_error(response, request) do
+    case content_length(response) do
+      {:ok, length} when length > request.max_bytes ->
+        {:too_large, length, request.max_bytes}
+
+      {:ok, length}
+      when is_integer(request.expected_bytes) and length != request.expected_bytes ->
+        {:size_mismatch, request.expected_bytes, length}
+
+      {:ok, _length} ->
+        nil
+
+      :missing ->
+        nil
+
+      :invalid ->
+        :invalid_content_length
+    end
+  end
+
+  defp content_length(response) do
+    case Req.Response.get_header(response, "content-length") do
+      [] -> :missing
+      [value] -> parse_content_length(value)
+      _values -> :invalid
+    end
+  end
+
+  defp parse_content_length(value) do
+    case Integer.parse(value) do
+      {length, ""} when length >= 0 -> {:ok, length}
+      _other -> :invalid
+    end
+  end
+
+  defp safe_iodata_length(data) do
+    IO.iodata_length(data)
+  rescue
+    _error -> 0
+  end
+
+  defp sanitize_transport_reason(reason) when is_atom(reason), do: reason
+  defp sanitize_transport_reason(_reason), do: :transport_error
 
   defp to_nadia_response(%{__struct__: Req.Response} = response) do
     %HTTPResponse{

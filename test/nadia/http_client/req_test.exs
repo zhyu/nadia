@@ -2,6 +2,8 @@ defmodule Nadia.HTTPClient.ReqTest do
   use ExUnit.Case, async: true
 
   alias Nadia.HTTPClient.Req, as: ReqClient
+  alias Nadia.HTTPDownloadRequest
+  alias Nadia.HTTPDownloadResponse
   alias Nadia.HTTPRequest
   alias Nadia.HTTPResponse
 
@@ -264,6 +266,85 @@ defmodule Nadia.HTTPClient.ReqTest do
     }
 
     assert {:error, :timeout} = ReqClient.post(request)
+  end
+
+  test "download options force streaming without redirects, retries, or decompression" do
+    request = %HTTPDownloadRequest{
+      url: "https://api.example.test/file/bot999:secret/file.bin",
+      sink: fn _chunk -> :ok end,
+      max_bytes: 10,
+      expected_bytes: 10,
+      options: [recv_timeout: 7000, redirect: true, retry: true]
+    }
+
+    assert {:ok, options} = ReqClient.to_req_download_options(request)
+    assert options[:method] == :get
+    assert is_function(options[:into], 2)
+    assert options[:receive_timeout] == 7000
+    assert options[:redirect] == false
+    assert options[:redirect_log_level] == false
+    assert options[:retry] == false
+    assert options[:compressed] == false
+    assert options[:decode_body] == false
+    assert options[:raw] == true
+  end
+
+  test "downloads through Req's into callback without accumulating the response" do
+    parent = self()
+
+    finch_request = fn req, _finch_request, _finch_name, _finch_options ->
+      response =
+        Req.Response.new(status: 200)
+        |> Req.Response.put_header("content-length", "6")
+
+      case req.into.({:data, "abcdef"}, {req, response}) do
+        {:cont, result} -> result
+        {:halt, result} -> result
+      end
+    end
+
+    request = %HTTPDownloadRequest{
+      url: "https://api.example.test/file/bot999:secret/file.bin",
+      sink: fn chunk ->
+        send(parent, {:download_chunk, chunk})
+        :ok
+      end,
+      max_bytes: 6,
+      expected_bytes: 6,
+      options: [finch_request: finch_request]
+    }
+
+    assert {:ok,
+            %HTTPDownloadResponse{
+              status_code: 200,
+              bytes_written: 6,
+              headers: headers
+            }} = ReqClient.download(request)
+
+    assert {"content-length", "6"} in headers
+    assert_receive {:download_chunk, "abcdef"}
+  end
+
+  test "content-length preflight halts before an oversized body is written" do
+    finch_request = fn req, _finch_request, _finch_name, _finch_options ->
+      response =
+        Req.Response.new(status: 200)
+        |> Req.Response.put_header("content-length", "6")
+
+      case req.into.({:data, "abcdef"}, {req, response}) do
+        {:cont, result} -> result
+        {:halt, result} -> result
+      end
+    end
+
+    request = %HTTPDownloadRequest{
+      url: "https://api.example.test/file/bot999:secret/file.bin",
+      sink: fn _chunk -> flunk("oversized response must not reach sink") end,
+      max_bytes: 5,
+      options: [finch_request: finch_request]
+    }
+
+    assert {:error, {:too_large, 6, 5}} = ReqClient.download(request)
   end
 
   defp multipart_body(options) do

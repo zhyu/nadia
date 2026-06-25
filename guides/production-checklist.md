@@ -72,9 +72,17 @@ See [Errors And Rate Limits](examples/errors-and-rate-limits.md) for tested
 * Enforce request body limits and HTTPS at the web server or proxy.
 * Rotate a token with BotFather if it may have leaked.
 * Keep production credentials out of tests; use an explicit fake HTTP client.
-* Treat `getFile` download URLs as credentials because they contain the bot
-  token. Redact them from logs and traces and enforce byte limits while
-  streaming downloads.
+* Prefer `Nadia.download_file/3,4,5` over exposing `getFile` URLs. Always choose
+  an application-owned destination and byte limit; keep no-overwrite behavior
+  unless replacement is intentional.
+* Treat `get_file_link/1,2` results as credentials because they contain the bot
+  token. The default downloader disables redirects, retries, decompression, and
+  token-bearing errors, but custom download adapters must uphold the same
+  contract.
+* Use `file_mode: :local` only for a trusted local Bot API server whose absolute
+  file paths are authorized and accessible from Nadia's filesystem namespace.
+  Remote filesystems without exclusive temp creation and atomic hard-link
+  publication are unsupported.
 
 ## Choose Durable State
 

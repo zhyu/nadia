@@ -736,13 +736,16 @@ defmodule Nadia.Methods.Messages do
 
       @doc group: "Messages"
       @doc """
-      Use this method to send an album of photos, videos, documents or audios.
-      On success, an array of sent Messages is returned.
+      Sends an album of 2-10 photos, live photos, videos, documents, or audios.
+      Documents and audio files can only be grouped with the same type. Typed
+      `Nadia.InputMedia` lists validate these restrictions locally. Raw maps,
+      keyword lists, structs, and pre-encoded JSON remain compatible.
 
       Args:
       * `chat_id` - Unique identifier for the target chat or username of the target channel
       (in the format @channelusername)
-      * `media` - JSON-serializable media array or a pre-encoded JSON string
+      * `media` - `Nadia.InputMedia` list, compatible JSON-serializable array,
+        or pre-encoded JSON
       * `options` - keyword list of options
       """
       @spec send_media_group(integer | binary, list | map | struct | binary, [{atom, any}]) ::
@@ -759,19 +762,31 @@ defmodule Nadia.Methods.Messages do
       end
 
       def send_media_group(chat_id, media, options) do
-        api_request(
-          "sendMediaGroup",
-          [chat_id: chat_id, media: encode_json_payload(media)] ++ options
-        )
+        case Nadia.InputMedia.validate_media_group(media) do
+          :ok ->
+            api_request(
+              "sendMediaGroup",
+              [chat_id: chat_id, media: encode_json_payload(media)] ++ options
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: {:input_media, reason}}}
+        end
       end
 
       @doc group: "Messages"
       def send_media_group(%Client{} = client, chat_id, media, options) do
-        api_request(
-          client,
-          "sendMediaGroup",
-          [chat_id: chat_id, media: encode_json_payload(media)] ++ options
-        )
+        case Nadia.InputMedia.validate_media_group(media) do
+          :ok ->
+            api_request(
+              client,
+              "sendMediaGroup",
+              [chat_id: chat_id, media: encode_json_payload(media)] ++ options
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: {:input_media, reason}}}
+        end
       end
 
       @doc group: "Messages"

@@ -190,6 +190,20 @@ defmodule Nadia.API do
     end
   end
 
+  defp normalize_json_value(%Nadia.InputMedia{} = input_media, state) do
+    case Nadia.InputMedia.to_map(input_media) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_media, reason}}
+    end
+  end
+
+  defp normalize_json_value(%Nadia.InputSticker{} = input_sticker, state) do
+    case Nadia.InputSticker.to_map(input_sticker) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_sticker, reason}}
+    end
+  end
+
   defp normalize_json_value(value, state) when is_list(value) do
     value
     |> Enum.reduce_while({:ok, [], state}, fn item, {:ok, normalized, state} ->
@@ -365,6 +379,20 @@ defmodule Nadia.API do
 
   defp collect_attach_names(%JSONPayload{value: value}, names),
     do: collect_attach_names(value, names)
+
+  defp collect_attach_names(%Nadia.InputMedia{} = value, names) do
+    case Nadia.InputMedia.to_map(value) do
+      {:ok, value} -> collect_attach_names(value, names)
+      {:error, _reason} -> names
+    end
+  end
+
+  defp collect_attach_names(%Nadia.InputSticker{} = value, names) do
+    case Nadia.InputSticker.to_map(value) do
+      {:ok, value} -> collect_attach_names(value, names)
+      {:error, _reason} -> names
+    end
+  end
 
   defp collect_attach_names(%InputFile{}, names), do: names
 

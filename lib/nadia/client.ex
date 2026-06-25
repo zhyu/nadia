@@ -1,17 +1,23 @@
 defmodule Nadia.Client do
   @moduledoc """
   Immutable Telegram Bot API client configuration.
+
+  `file_mode` defaults to `:remote`. Set it to `:local` only for a trusted
+  local Bot API server that returns absolute paths accessible in Nadia's
+  filesystem namespace.
   """
 
   @default_timeout 5
   @default_base_url "https://api.telegram.org/bot"
   @default_file_base_url "https://api.telegram.org/file/bot"
+  @default_file_mode :remote
   @default_api_environment :production
   @default_http_client Nadia.HTTPClient.Req
 
   defstruct token: nil,
             base_url: @default_base_url,
             file_base_url: @default_file_base_url,
+            file_mode: @default_file_mode,
             api_environment: @default_api_environment,
             recv_timeout: @default_timeout,
             proxy: nil,
@@ -19,11 +25,13 @@ defmodule Nadia.Client do
             http_client: @default_http_client
 
   @type api_environment :: :production | :test
+  @type file_mode :: :remote | :local
 
   @type t :: %__MODULE__{
           token: binary | nil,
           base_url: binary,
           file_base_url: binary,
+          file_mode: file_mode,
           api_environment: api_environment,
           recv_timeout: non_neg_integer,
           proxy: term,
@@ -35,6 +43,7 @@ defmodule Nadia.Client do
     :token,
     :base_url,
     :file_base_url,
+    :file_mode,
     :api_environment,
     :recv_timeout,
     :proxy,
@@ -55,6 +64,11 @@ defmodule Nadia.Client do
       file_base_url:
         resolve(Keyword.get(opts, :file_base_url, @default_file_base_url)) ||
           @default_file_base_url,
+      file_mode:
+        opts
+        |> Keyword.get(:file_mode, @default_file_mode)
+        |> resolve()
+        |> normalize_file_mode(),
       api_environment:
         opts
         |> Keyword.get(:api_environment, @default_api_environment)
@@ -138,6 +152,10 @@ defmodule Nadia.Client do
   defp normalize_api_environment(:test), do: :test
   defp normalize_api_environment("test"), do: :test
   defp normalize_api_environment(_), do: :production
+
+  defp normalize_file_mode(:local), do: :local
+  defp normalize_file_mode("local"), do: :local
+  defp normalize_file_mode(_), do: :remote
 end
 
 defimpl Inspect, for: Nadia.Client do

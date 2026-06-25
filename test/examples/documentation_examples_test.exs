@@ -9,6 +9,8 @@ defmodule Nadia.DocumentationExamplesTest do
 
   alias Nadia.Client
   alias Nadia.Context
+  alias Nadia.HTTPDownloadRequest
+  alias Nadia.HTTPDownloadResponse
   alias Nadia.HTTPRequest
   alias Nadia.HTTPResponse
   alias Nadia.Model.{CallbackQuery, Chat, Error, Message, ResponseParameters, Update, User}
@@ -54,6 +56,18 @@ defmodule Nadia.DocumentationExamplesTest do
               file_path: "documents/file_1.txt"
             }
 
+          String.ends_with?(request.url, "/sendMediaGroup") ->
+            [
+              %{
+                message_id: 2,
+                date: 1_700_000_001,
+                chat: %{id: 123, type: "private"}
+              }
+            ]
+
+          String.ends_with?(request.url, "/addStickerToSet") ->
+            true
+
           true ->
             %{
               message_id: 2,
@@ -68,6 +82,21 @@ defmodule Nadia.DocumentationExamplesTest do
          status_code: 200,
          body: Jason.encode!(%{ok: true, result: result})
        }}
+    end
+
+    @impl Nadia.HTTPClient
+    def download(%HTTPDownloadRequest{} = request) do
+      send(self(), {:nadia_download_request, request, inspect(request)})
+
+      with :ok <- request.sink.("file-"),
+           :ok <- request.sink.("content") do
+        {:ok,
+         %HTTPDownloadResponse{
+           status_code: 200,
+           bytes_written: 12,
+           headers: [{"content-length", "12"}]
+         }}
+      end
     end
   end
 
@@ -197,9 +226,29 @@ defmodule Nadia.DocumentationExamplesTest do
                123,
                {:url, "file:///tmp/manual.pdf"}
              )
+
+    assert {:ok, [%Message{}]} =
+             Nadia.Examples.MediaFiles.send_album(client, 123, "photo-file-id", path)
+
+    assert_receive {:nadia_request, %HTTPRequest{body: {:multipart, album_parts}}}
+    assert {"media", encoded_media} = List.keyfind(album_parts, "media", 0)
+    assert [%{"type" => "photo"}, %{"type" => "video"}] = Jason.decode!(encoded_media)
+
+    assert :ok =
+             Nadia.Examples.MediaFiles.add_static_sticker(
+               client,
+               456,
+               "nadia_by_bot",
+               path,
+               "one"
+             )
+
+    assert_receive {:nadia_request, %HTTPRequest{body: {:multipart, sticker_parts}}}
+    assert {"sticker", encoded_sticker} = List.keyfind(sticker_parts, "sticker", 0)
+    assert Jason.decode!(encoded_sticker)["format"] == "static"
   end
 
-  test "media example resolves getFile metadata to an explicit-client URL" do
+  test "media example streams a bounded download without exposing the token" do
     client =
       Client.new(
         token: "999:file-token",
@@ -207,21 +256,23 @@ defmodule Nadia.DocumentationExamplesTest do
         http_client: FakeHTTPClient
       )
 
-    assert {:ok,
-            %Nadia.Model.File{
-              file_id: "file-1",
-              file_unique_id: "unique-1",
-              file_path: "documents/file_1.txt"
-            }} = Nadia.get_file(client, "file-1")
+    destination =
+      Path.join(
+        System.tmp_dir!(),
+        "nadia-example-download-#{System.unique_integer([:positive])}.txt"
+      )
 
-    assert_receive {:nadia_request, %HTTPRequest{body: {:form, metadata_params}}}
-    assert {"file_id", "file-1"} in metadata_params
+    on_exit(fn -> File.rm(destination) end)
 
-    assert {:ok, "https://files.example/bot999:file-token/documents/file_1.txt"} =
-             Nadia.Examples.MediaFiles.download_url(client, "file-1")
+    assert {:ok, ^destination} =
+             Nadia.Examples.MediaFiles.download_file(client, "file-1", destination, 12)
 
     assert_receive {:nadia_request, %HTTPRequest{body: {:form, params}}}
     assert {"file_id", "file-1"} in params
+    assert_receive {:nadia_download_request, request, inspected}
+    assert request.max_bytes == 12
+    refute inspected =~ "file-token"
+    assert File.read!(destination) == "file-content"
   end
 
   test "disk session example persists and serializes updates" do

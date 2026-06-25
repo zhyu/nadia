@@ -89,85 +89,202 @@ defmodule Nadia.Methods.Stickers do
 
       @doc group: "Stickers"
       @doc """
-      Use this method to upload a .png file with a sticker for later use in
-      createNewStickerSet and addStickerToSet methods (can be used multiple times).
-      Returns the uploaded File on success.
+      Uploads a sticker file for later use in sticker-set methods.
 
       Args:
       * `user_id` - User identifier of sticker file owner
-      * `png_sticker` - Png image with the sticker, must be up to 512 kilobytes in size,
-      dimensions must not exceed 512px, and either width or height must be exactly 512px.
-      Either a `file_id` to resend a file that is already on the Telegram servers,
-      or a `file_path` to upload a new file from local, or a `HTTP URL` to get a file
-      from the internet.
+      * `sticker` - A new WEBP, PNG, TGS, or WEBM upload
+      * `sticker_format` - `"static"`, `"animated"`, or `"video"`
+
+      The historical two-argument form remains as a static-sticker compatibility
+      shim. It now sends Telegram's current `sticker` and `sticker_format` fields.
       """
       @spec upload_sticker_file(integer, binary | Nadia.InputFile.t()) ::
               {:ok, File.t()} | {:error, Error.t()}
+      @spec upload_sticker_file(integer, binary | Nadia.InputFile.t(), binary) ::
+              {:ok, File.t()} | {:error, Error.t()}
       @spec upload_sticker_file(Client.t(), integer, binary | Nadia.InputFile.t()) ::
               {:ok, File.t()} | {:error, Error.t()}
-      def upload_sticker_file(user_id, png_sticker) do
+      @spec upload_sticker_file(Client.t(), integer, binary | Nadia.InputFile.t(), binary) ::
+              {:ok, File.t()} | {:error, Error.t()}
+      def upload_sticker_file(user_id, sticker) do
+        upload_sticker_file(user_id, sticker, "static")
+      end
+
+      @doc group: "Stickers"
+      def upload_sticker_file(%Client{} = client, user_id, sticker) do
+        upload_sticker_file(client, user_id, sticker, "static")
+      end
+
+      def upload_sticker_file(user_id, sticker, sticker_format) do
         api_request(
           "uploadStickerFile",
-          [user_id: user_id, png_sticker: png_sticker],
-          :png_sticker
+          [user_id: user_id, sticker: sticker, sticker_format: sticker_format],
+          :sticker
         )
       end
 
       @doc group: "Stickers"
-      def upload_sticker_file(%Client{} = client, user_id, png_sticker) do
+      def upload_sticker_file(%Client{} = client, user_id, sticker, sticker_format) do
         api_request(
           client,
           "uploadStickerFile",
-          [user_id: user_id, png_sticker: png_sticker],
-          :png_sticker
+          [user_id: user_id, sticker: sticker, sticker_format: sticker_format],
+          :sticker
         )
       end
 
       @doc group: "Stickers"
       @doc """
-      Use this method to create new sticker set owned by a user. The bot will be able to
-      edit the created sticker set. Returns True on success.
+      Creates a sticker set owned by a user.
 
       Args:
       * `user_id` - User identifier of created sticker set owner
-      * `name` - Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals).
-      Can contain only english letters, digits and underscores. Must begin with a letter,
-      can't contain consecutive underscores and must end in “_by_<bot username>”. <bot_username>
-      is case insensitive. 1-64 characters.
+      * `name` - Sticker-set short name
       * `title` - Sticker set title, 1-64 characters
-      * `png_sticker` - Png image with the sticker, must be up to 512 kilobytes in size,
-      dimensions must not exceed 512px, and either width or height must be exactly 512px.
-      Either a `file_id` to resend a file that is already on the Telegram servers,
-      or a `file_path` to upload a new file from local, or a `HTTP URL` to get a file
-      from the internet.
-      * `emojis` - One or more emoji corresponding to the sticker
+      * `stickers` - A list of 1-50 `Nadia.InputSticker` values, compatible raw
+        objects, or pre-encoded JSON
 
       Options:
-      * `contains_masks` - Pass True, if a set of mask stickers should be created
-      * `mask_position` - A `Nadia.Model.MaskPosition` object for position where the mask
-      should be placed on faces
+      * `sticker_type` - `"regular"`, `"mask"`, or `"custom_emoji"`
+      * `needs_repainting` - Repaint custom emoji to the surrounding text color
+
+      Historical PNG-and-emoji arities remain supported. They are translated to
+      one static `Nadia.InputSticker`; `contains_masks: true` becomes
+      `sticker_type: "mask"`, and `mask_position` moves into that sticker.
       """
+      @spec create_new_sticker_set(integer, binary, binary, list | map | binary) ::
+              :ok | {:error, Error.t()}
+      @spec create_new_sticker_set(
+              integer,
+              binary,
+              binary,
+              list | map | binary,
+              keyword | map
+            ) :: :ok | {:error, Error.t()}
       @spec create_new_sticker_set(integer, binary, binary, binary, binary, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+      @spec create_new_sticker_set(Client.t(), integer, binary, binary, list | map | binary) ::
               :ok | {:error, Error.t()}
       @spec create_new_sticker_set(Client.t(), integer, binary, binary, binary, binary, [
               {atom, any}
             ]) ::
               :ok | {:error, Error.t()}
-      def create_new_sticker_set(user_id, name, title, png_sticker, emojis) do
-        create_new_sticker_set(user_id, name, title, png_sticker, emojis, [])
+      def create_new_sticker_set(user_id, name, title, stickers) do
+        case Nadia.InputSticker.validate_sticker_set(stickers) do
+          :ok ->
+            api_request(
+              "createNewStickerSet",
+              user_id: user_id,
+              name: name,
+              title: title,
+              stickers: encode_json_array_payload(stickers)
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: {:input_sticker, reason}}}
+        end
       end
 
       @doc group: "Stickers"
-      def create_new_sticker_set(%Client{} = client, user_id, name, title, png_sticker, emojis) do
-        create_new_sticker_set(client, user_id, name, title, png_sticker, emojis, [])
+      def create_new_sticker_set(%Client{} = client, user_id, name, title, stickers) do
+        case Nadia.InputSticker.validate_sticker_set(stickers) do
+          :ok ->
+            api_request(
+              client,
+              "createNewStickerSet",
+              user_id: user_id,
+              name: name,
+              title: title,
+              stickers: encode_json_array_payload(stickers)
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: {:input_sticker, reason}}}
+        end
+      end
+
+      def create_new_sticker_set(user_id, name, title, stickers_or_png, options_or_emojis) do
+        if current_sticker_options?(options_or_emojis) do
+          case Nadia.InputSticker.validate_sticker_set(stickers_or_png) do
+            :ok ->
+              api_request(
+                "createNewStickerSet",
+                request_options(
+                  [
+                    user_id: user_id,
+                    name: name,
+                    title: title,
+                    stickers: encode_json_array_payload(stickers_or_png)
+                  ],
+                  options_or_emojis
+                )
+              )
+
+            {:error, reason} ->
+              {:error, %Error{reason: {:input_sticker, reason}}}
+          end
+        else
+          create_new_sticker_set(user_id, name, title, stickers_or_png, options_or_emojis, [])
+        end
+      end
+
+      @doc group: "Stickers"
+      def create_new_sticker_set(
+            %Client{} = client,
+            user_id,
+            name,
+            title,
+            stickers_or_png,
+            options_or_emojis
+          ) do
+        if current_sticker_options?(options_or_emojis) do
+          case Nadia.InputSticker.validate_sticker_set(stickers_or_png) do
+            :ok ->
+              api_request(
+                client,
+                "createNewStickerSet",
+                request_options(
+                  [
+                    user_id: user_id,
+                    name: name,
+                    title: title,
+                    stickers: encode_json_array_payload(stickers_or_png)
+                  ],
+                  options_or_emojis
+                )
+              )
+
+            {:error, reason} ->
+              {:error, %Error{reason: {:input_sticker, reason}}}
+          end
+        else
+          create_new_sticker_set(
+            client,
+            user_id,
+            name,
+            title,
+            stickers_or_png,
+            options_or_emojis,
+            []
+          )
+        end
       end
 
       def create_new_sticker_set(user_id, name, title, png_sticker, emojis, options) do
+        sticker = legacy_input_sticker(png_sticker, emojis, options)
+
         api_request(
           "createNewStickerSet",
-          [user_id: user_id, name: name, title: title, png_sticker: png_sticker, emojis: emojis] ++
-            options,
-          :png_sticker
+          request_options(
+            [
+              user_id: user_id,
+              name: name,
+              title: title,
+              stickers: encode_json_array_payload([sticker])
+            ],
+            current_sticker_set_options(options)
+          )
         )
       end
 
@@ -181,37 +298,66 @@ defmodule Nadia.Methods.Stickers do
             emojis,
             options
           ) do
+        sticker = legacy_input_sticker(png_sticker, emojis, options)
+
         api_request(
           client,
           "createNewStickerSet",
-          [user_id: user_id, name: name, title: title, png_sticker: png_sticker, emojis: emojis] ++
-            options,
-          :png_sticker
+          request_options(
+            [
+              user_id: user_id,
+              name: name,
+              title: title,
+              stickers: encode_json_array_payload([sticker])
+            ],
+            current_sticker_set_options(options)
+          )
         )
       end
 
       @doc group: "Stickers"
       @doc """
-      Use this method to add a new sticker to a set created by the bot. Returns True on success.
+      Adds one current `Nadia.InputSticker` or compatible raw object to a set.
 
       Args:
       * `user_id` - User identifier of created sticker set owner
       * `name` - Sticker set name
-      * `png_sticker` - Png image with the sticker, must be up to 512 kilobytes in size,
-      dimensions must not exceed 512px, and either width or height must be exactly 512px.
-      Either a `file_id` to resend a file that is already on the Telegram servers,
-      or a `file_path` to upload a new file from local, or a `HTTP URL` to get a file
-      from the internet.
-      * `emojis` - One or more emoji corresponding to the sticker
+      * `sticker` - A typed or compatible raw InputSticker object
 
-      Options:
-      * `mask_position` - A `Nadia.Model.MaskPosition` object for position where the mask
-      should be placed on faces
+      Historical PNG-and-emoji arities remain as static-sticker shims.
       """
+      @spec add_sticker_to_set(integer, binary, Nadia.InputSticker.t() | list | map | binary) ::
+              :ok | {:error, Error.t()}
       @spec add_sticker_to_set(integer, binary, binary, binary, [{atom, any}]) ::
               :ok | {:error, Error.t()}
+      @spec add_sticker_to_set(
+              Client.t(),
+              integer,
+              binary,
+              Nadia.InputSticker.t() | list | map | binary
+            ) :: :ok | {:error, Error.t()}
       @spec add_sticker_to_set(Client.t(), integer, binary, binary, binary, [{atom, any}]) ::
               :ok | {:error, Error.t()}
+      def add_sticker_to_set(user_id, name, sticker) do
+        api_request(
+          "addStickerToSet",
+          user_id: user_id,
+          name: name,
+          sticker: encode_json_payload(sticker)
+        )
+      end
+
+      @doc group: "Stickers"
+      def add_sticker_to_set(%Client{} = client, user_id, name, sticker) do
+        api_request(
+          client,
+          "addStickerToSet",
+          user_id: user_id,
+          name: name,
+          sticker: encode_json_payload(sticker)
+        )
+      end
+
       def add_sticker_to_set(user_id, name, png_sticker, emojis) do
         add_sticker_to_set(user_id, name, png_sticker, emojis, [])
       end
@@ -222,20 +368,26 @@ defmodule Nadia.Methods.Stickers do
       end
 
       def add_sticker_to_set(user_id, name, png_sticker, emojis, options) do
+        sticker = legacy_input_sticker(png_sticker, emojis, options)
+
         api_request(
           "addStickerToSet",
-          [user_id: user_id, name: name, png_sticker: png_sticker, emojis: emojis] ++ options,
-          :png_sticker
+          user_id: user_id,
+          name: name,
+          sticker: encode_json_payload(sticker)
         )
       end
 
       @doc group: "Stickers"
       def add_sticker_to_set(%Client{} = client, user_id, name, png_sticker, emojis, options) do
+        sticker = legacy_input_sticker(png_sticker, emojis, options)
+
         api_request(
           client,
           "addStickerToSet",
-          [user_id: user_id, name: name, png_sticker: png_sticker, emojis: emojis] ++ options,
-          :png_sticker
+          user_id: user_id,
+          name: name,
+          sticker: encode_json_payload(sticker)
         )
       end
 
@@ -418,10 +570,12 @@ defmodule Nadia.Methods.Stickers do
       Args:
       * `name` - Sticker set name
       * `user_id` - User identifier of the sticker set owner
+      * `format` - `"static"`, `"animated"`, or `"video"`
 
       Options:
-      * `thumbnail` - Sticker set thumbnail as a file identifier, URL, or attach reference
-      * `format` - Format of the thumbnail
+      * `thumbnail` - New thumbnail upload, or `nil` to remove it
+
+      Historical no-format arities remain as static compatibility shims.
       """
       @spec set_sticker_set_thumbnail(binary, integer) :: :ok | {:error, Error.t()}
       @spec set_sticker_set_thumbnail(binary, integer, [{atom, any}] | map) ::
@@ -429,27 +583,68 @@ defmodule Nadia.Methods.Stickers do
       @spec set_sticker_set_thumbnail(Client.t(), binary, integer) :: :ok | {:error, Error.t()}
       @spec set_sticker_set_thumbnail(Client.t(), binary, integer, [{atom, any}] | map) ::
               :ok | {:error, Error.t()}
+      @spec set_sticker_set_thumbnail(binary, integer, binary, [{atom, any}] | map) ::
+              :ok | {:error, Error.t()}
+      @spec set_sticker_set_thumbnail(
+              Client.t(),
+              binary,
+              integer,
+              binary,
+              [{atom, any}] | map
+            ) :: :ok | {:error, Error.t()}
       def set_sticker_set_thumbnail(name, user_id),
-        do: set_sticker_set_thumbnail(name, user_id, [])
+        do: set_sticker_set_thumbnail(name, user_id, "static", [])
 
       @doc group: "Stickers"
       def set_sticker_set_thumbnail(%Client{} = client, name, user_id) do
-        set_sticker_set_thumbnail(client, name, user_id, [])
+        set_sticker_set_thumbnail(client, name, user_id, "static", [])
       end
 
-      def set_sticker_set_thumbnail(name, user_id, options) do
+      def set_sticker_set_thumbnail(name, user_id, format_or_options) do
+        if is_binary(format_or_options) do
+          set_sticker_set_thumbnail(name, user_id, format_or_options, [])
+        else
+          format = option_value(format_or_options, :format) || "static"
+
+          set_sticker_set_thumbnail(
+            name,
+            user_id,
+            format,
+            delete_option(format_or_options, :format)
+          )
+        end
+      end
+
+      @doc group: "Stickers"
+      def set_sticker_set_thumbnail(%Client{} = client, name, user_id, format_or_options) do
+        if is_binary(format_or_options) do
+          set_sticker_set_thumbnail(client, name, user_id, format_or_options, [])
+        else
+          format = option_value(format_or_options, :format) || "static"
+
+          set_sticker_set_thumbnail(
+            client,
+            name,
+            user_id,
+            format,
+            delete_option(format_or_options, :format)
+          )
+        end
+      end
+
+      def set_sticker_set_thumbnail(name, user_id, format, options) do
         api_request(
           "setStickerSetThumbnail",
-          request_options([name: name, user_id: user_id], options)
+          request_options([name: name, user_id: user_id, format: format], options)
         )
       end
 
       @doc group: "Stickers"
-      def set_sticker_set_thumbnail(%Client{} = client, name, user_id, options) do
+      def set_sticker_set_thumbnail(%Client{} = client, name, user_id, format, options) do
         api_request(
           client,
           "setStickerSetThumbnail",
-          request_options([name: name, user_id: user_id], options)
+          request_options([name: name, user_id: user_id, format: format], options)
         )
       end
 

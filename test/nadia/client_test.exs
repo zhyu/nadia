@@ -17,6 +17,7 @@ defmodule Nadia.ClientTest do
       :token,
       :base_url,
       :file_base_url,
+      :file_mode,
       :api_environment,
       :recv_timeout,
       :proxy,
@@ -42,6 +43,7 @@ defmodule Nadia.ClientTest do
     assert client.token == "123:test-token"
     assert client.base_url == "https://api.telegram.org/bot"
     assert client.file_base_url == "https://api.telegram.org/file/bot"
+    assert client.file_mode == :remote
     assert client.api_environment == :production
     assert client.recv_timeout == 5
     assert client.proxy == nil
@@ -63,6 +65,7 @@ defmodule Nadia.ClientTest do
         token: {:system, "NADIA_CLIENT_TOKEN"},
         base_url: {:system, "NADIA_CLIENT_BASE_URL"},
         file_base_url: {:system, "NADIA_CLIENT_FILE_BASE_URL", "https://files.test/bot"},
+        file_mode: "local",
         api_environment: "test",
         recv_timeout: 10
       )
@@ -70,6 +73,7 @@ defmodule Nadia.ClientTest do
     assert client.token == "env-token"
     assert client.base_url == "https://example.test/bot"
     assert client.file_base_url == "https://files.test/bot"
+    assert client.file_mode == :local
     assert client.api_environment == :test
     assert client.recv_timeout == 10
   end
@@ -78,6 +82,7 @@ defmodule Nadia.ClientTest do
     Application.put_env(:nadia, :token, "global-token")
     Application.put_env(:nadia, :base_url, "https://global.test/bot")
     Application.put_env(:nadia, :file_base_url, "https://global-files.test/bot")
+    Application.put_env(:nadia, :file_mode, :local)
     Application.put_env(:nadia, :api_environment, :test)
     Application.put_env(:nadia, :recv_timeout, 12)
     Application.put_env(:nadia, :proxy, "http://proxy.test")
@@ -89,6 +94,7 @@ defmodule Nadia.ClientTest do
     assert client.token == "global-token"
     assert client.base_url == "https://global.test/bot"
     assert client.file_base_url == "https://global-files.test/bot"
+    assert client.file_mode == :local
     assert client.api_environment == :test
     assert client.recv_timeout == 12
     assert client.proxy == "http://proxy.test"

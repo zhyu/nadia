@@ -229,36 +229,46 @@ defmodule Nadia.ClientPublicAPITest do
     assert_client_call(
       client,
       "uploadStickerFile",
-      [{"user_id", "456"}, {"png_sticker", "sticker-file"}],
+      [{"user_id", "456"}, {"sticker", "sticker-file"}, {"sticker_format", "static"}],
       fn -> Nadia.upload_sticker_file(client, 456, "sticker-file") end
     )
 
-    assert_client_call(
-      client,
-      "createNewStickerSet",
-      [
-        {"user_id", "456"},
-        {"name", "set_name"},
-        {"title", "Set Title"},
-        {"png_sticker", "sticker-file"},
-        {"emojis", ":)"}
-      ],
-      fn ->
-        Nadia.create_new_sticker_set(client, 456, "set_name", "Set Title", "sticker-file", ":)")
-      end
-    )
+    stub_telegram_result(true)
 
-    assert_client_call(
-      client,
-      "addStickerToSet",
-      [
-        {"user_id", "456"},
-        {"name", "set_name"},
-        {"png_sticker", "sticker-file"},
-        {"emojis", ":)"}
-      ],
-      fn -> Nadia.add_sticker_to_set(client, 456, "set_name", "sticker-file", ":)") end
-    )
+    assert :ok =
+             Nadia.create_new_sticker_set(
+               client,
+               456,
+               "set_name",
+               "Set Title",
+               "sticker-file",
+               ":)"
+             )
+
+    request = assert_http_request(method: :post, url: api_url(client, "createNewStickerSet"))
+    params = form_params(request)
+    assert params["user_id"] == "456"
+    assert params["name"] == "set_name"
+    assert params["title"] == "Set Title"
+
+    assert Jason.decode!(params["stickers"]) == [
+             %{
+               "sticker" => "sticker-file",
+               "format" => "static",
+               "emoji_list" => [":)"]
+             }
+           ]
+
+    stub_telegram_result(true)
+    assert :ok = Nadia.add_sticker_to_set(client, 456, "set_name", "sticker-file", ":)")
+    request = assert_http_request(method: :post, url: api_url(client, "addStickerToSet"))
+    params = form_params(request)
+
+    assert Jason.decode!(params["sticker"]) == %{
+             "sticker" => "sticker-file",
+             "format" => "static",
+             "emoji_list" => [":)"]
+           }
 
     assert_client_call(
       client,

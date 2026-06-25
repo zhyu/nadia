@@ -135,6 +135,8 @@ defmodule Nadia do
   end
 
   defp json_payload_value(%Nadia.InputFile{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputMedia{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputSticker{} = payload), do: payload
 
   defp json_payload_value(%_{} = payload) do
     payload
@@ -151,11 +153,17 @@ defmodule Nadia do
   defp json_payload_value(payload), do: payload
 
   defp encode_poll_options(params) when is_list(params) do
-    Keyword.update(params, :options, nil, &encode_json_payload/1)
+    params
+    |> Keyword.update(:options, nil, &encode_json_payload/1)
+    |> Keyword.update(:media, nil, &encode_json_payload/1)
+    |> Keyword.update(:explanation_media, nil, &encode_json_payload/1)
   end
 
   defp encode_poll_options(params) when is_map(params) do
-    Map.update(params, :options, nil, &encode_json_payload/1)
+    params
+    |> Map.update(:options, nil, &encode_json_payload/1)
+    |> Map.update(:media, nil, &encode_json_payload/1)
+    |> Map.update(:explanation_media, nil, &encode_json_payload/1)
   end
 
   defp do_answer_guest_query(client, guest_query_id, result, options) do
@@ -297,6 +305,56 @@ defmodule Nadia do
   defp reject_nil_values(map) do
     for {key, value} <- map, value != nil, into: %{}, do: {key, value}
   end
+
+  defp legacy_input_sticker(sticker, emojis, options) do
+    emoji_list = if is_list(emojis), do: emojis, else: [emojis]
+
+    sticker_options = []
+
+    sticker_options =
+      case option_value(options, :mask_position) do
+        nil -> sticker_options
+        mask_position -> Keyword.put(sticker_options, :mask_position, mask_position)
+      end
+
+    sticker_options =
+      case option_value(options, :keywords) do
+        nil -> sticker_options
+        keywords -> Keyword.put(sticker_options, :keywords, keywords)
+      end
+
+    Nadia.InputSticker.static(sticker, emoji_list, sticker_options)
+  end
+
+  defp current_sticker_set_options(options) do
+    options
+    |> delete_option(:mask_position)
+    |> delete_option(:keywords)
+    |> rename_legacy_mask_option()
+  end
+
+  defp current_sticker_options?(options) when is_map(options), do: true
+
+  defp current_sticker_options?(options) when is_list(options),
+    do: Keyword.keyword?(options)
+
+  defp current_sticker_options?(_options), do: false
+
+  defp rename_legacy_mask_option(options) do
+    case option_value(options, :contains_masks) do
+      true -> options |> delete_option(:contains_masks) |> put_option(:sticker_type, "mask")
+      _ -> delete_option(options, :contains_masks)
+    end
+  end
+
+  defp option_value(options, key) when is_list(options), do: Keyword.get(options, key)
+  defp option_value(options, key) when is_map(options), do: Map.get(options, key)
+
+  defp delete_option(options, key) when is_list(options), do: Keyword.delete(options, key)
+  defp delete_option(options, key) when is_map(options), do: Map.delete(options, key)
+
+  defp put_option(options, key, value) when is_list(options), do: Keyword.put(options, key, value)
+  defp put_option(options, key, value) when is_map(options), do: Map.put(options, key, value)
 
   use Nadia.Methods.BotAccount
   use Nadia.Methods.GiftsAndVerification

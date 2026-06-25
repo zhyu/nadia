@@ -171,6 +171,8 @@ defmodule Nadia.Methods.UpdatesAndFiles do
       The URL contains the bot token and should not be logged or exposed as a
       public permanent URL. If Telegram omits the optional `file_path`, this
       function returns an error with reason `:file_path_unavailable`.
+      Absolute local-server paths are never concatenated into a URL; use
+      `download_file` with `file_mode: :local` instead.
 
           iex> Nadia.get_file_link(%Nadia.Model.File{file_id: "BQADBQADBgADmEjsA1aqdSxtzvvVAg",
           ...> file_path: "document/file_10", file_size: 17680})
@@ -181,17 +183,96 @@ defmodule Nadia.Methods.UpdatesAndFiles do
       @spec get_file_link(File.t()) :: {:ok, binary} | {:error, Error.t()}
       @spec get_file_link(Client.t(), File.t()) :: {:ok, binary} | {:error, Error.t()}
       def get_file_link(%File{file_path: file_path}) when is_binary(file_path),
-        do: {:ok, build_file_url(file_path)}
+        do: file_link(Client.default(), file_path)
 
       def get_file_link(%File{}), do: {:error, %Error{reason: :file_path_unavailable}}
 
       @doc group: "Updates And Files"
       def get_file_link(%Client{} = client, %File{file_path: file_path})
           when is_binary(file_path),
-          do: {:ok, build_file_url(client, file_path)}
+          do: file_link(client, file_path)
 
       def get_file_link(%Client{}, %File{}),
         do: {:error, %Error{reason: :file_path_unavailable}}
+
+      @doc group: "Updates And Files"
+      @doc """
+      Downloads a Telegram file to an application-chosen path without buffering
+      the complete response.
+
+      `max_bytes` is mandatory. Nadia checks Telegram's optional `file_size`
+      before transfer and enforces the same cap against every emitted chunk.
+      The destination is not overwritten by default. A hidden, exclusive temp
+      file is created in the destination directory, synced, and atomically
+      published only after status and size validation.
+
+      In the default `file_mode: :remote`, redirects and retries are disabled
+      and token-bearing URLs never appear in results or normalized errors. Set
+      `file_mode: :local` only for a trusted local Bot API server whose absolute
+      `file_path` is accessible in Nadia's filesystem namespace.
+
+      Options:
+      * `:overwrite` - atomically replace the destination; defaults to `false`
+      * `:receive_timeout` - receive timeout in milliseconds
+
+      Existing custom HTTP adapters remain compatible. Downloads require the
+      optional HTTP adapter download callback and fail with
+      `{:download, :unsupported_http_adapter}` when it is absent.
+      """
+      @spec download_file(binary | File.t(), Path.t(), non_neg_integer) ::
+              {:ok, Path.t()} | {:error, Error.t()}
+      @spec download_file(binary | File.t(), Path.t(), non_neg_integer, keyword) ::
+              {:ok, Path.t()} | {:error, Error.t()}
+      @spec download_file(Client.t(), binary | File.t(), Path.t(), non_neg_integer) ::
+              {:ok, Path.t()} | {:error, Error.t()}
+      @spec download_file(Client.t(), binary | File.t(), Path.t(), non_neg_integer, keyword) ::
+              {:ok, Path.t()} | {:error, Error.t()}
+      def download_file(file_or_id, destination, max_bytes) do
+        Nadia.FileDownload.download(Client.default(), file_or_id, destination, max_bytes, [])
+      end
+
+      @doc group: "Updates And Files"
+      @doc """
+      Downloads with either an explicit client or default-client options.
+
+      See `download_file/3` for bounds, filesystem publication, adapter, and
+      security behavior.
+      """
+      def download_file(%Client{} = client, file_or_id, destination, max_bytes) do
+        Nadia.FileDownload.download(client, file_or_id, destination, max_bytes, [])
+      end
+
+      def download_file(file_or_id, destination, max_bytes, options) do
+        Nadia.FileDownload.download(
+          Client.default(),
+          file_or_id,
+          destination,
+          max_bytes,
+          options
+        )
+      end
+
+      @doc group: "Updates And Files"
+      @doc """
+      Downloads with an explicit client and options.
+
+      See `download_file/3` for bounds, filesystem publication, adapter, and
+      security behavior.
+      """
+      def download_file(%Client{} = client, file_or_id, destination, max_bytes, options) do
+        Nadia.FileDownload.download(client, file_or_id, destination, max_bytes, options)
+      end
+
+      defp file_link(%Client{file_mode: :remote} = client, file_path) do
+        if Path.type(file_path) == :relative do
+          {:ok, build_file_url(client, file_path)}
+        else
+          {:error, %Error{reason: :absolute_file_path_not_allowed}}
+        end
+      end
+
+      defp file_link(%Client{file_mode: :local}, _file_path),
+        do: {:error, %Error{reason: :local_file_path}}
     end
   end
 end

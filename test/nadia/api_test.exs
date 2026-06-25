@@ -2787,13 +2787,13 @@ defmodule Nadia.APITest do
 
     media = [
       [type: "photo", media: "paid-photo-file-id"],
-      %{type: "preview", width: 320, height: nil}
+      %{type: "video", media: "paid-video-file-id", width: 320, height: nil}
     ]
 
     encoded_media =
       Jason.encode!([
         %{type: "photo", media: "paid-photo-file-id"},
-        %{type: "preview", width: 320}
+        %{type: "video", media: "paid-video-file-id", width: 320}
       ])
 
     assert {:ok, %Message{message_id: 9201}} =
@@ -2818,7 +2818,7 @@ defmodule Nadia.APITest do
 
     assert Jason.decode!(form_params(request)["media"]) == [
              %{"type" => "photo", "media" => "paid-photo-file-id"},
-             %{"type" => "preview", "width" => 320}
+             %{"type" => "video", "media" => "paid-video-file-id", "width" => 320}
            ]
   end
 
@@ -3959,9 +3959,11 @@ defmodule Nadia.APITest do
     )
 
     assert :ok ==
-             Nadia.set_sticker_set_thumbnail("nadia_modern_by_bot", 12001,
-               thumbnail: "attach://thumbnail",
-               format: "static"
+             Nadia.set_sticker_set_thumbnail(
+               "nadia_modern_by_bot",
+               12001,
+               "static",
+               thumbnail: "attach://thumbnail"
              )
 
     assert_telegram_request("setStickerSetThumbnail",
@@ -3970,8 +3972,8 @@ defmodule Nadia.APITest do
          [
            {"name", "nadia_modern_by_bot"},
            {"user_id", "12001"},
-           {"thumbnail", "attach://thumbnail"},
-           {"format", "static"}
+           {"format", "static"},
+           {"thumbnail", "attach://thumbnail"}
          ]},
       options: [recv_timeout: 5000]
     )
@@ -4573,6 +4575,18 @@ defmodule Nadia.APITest do
   test "get_file_link returns an error when Telegram omits file_path" do
     assert {:error, %Error{reason: :file_path_unavailable}} =
              Nadia.get_file_link(%Nadia.Model.File{file_id: "file-1"})
+  end
+
+  test "get_file_link never concatenates local absolute paths into token URLs" do
+    file = %Nadia.Model.File{file_id: "file-1", file_path: "/srv/telegram/file.bin"}
+
+    assert {:error, %Error{reason: :absolute_file_path_not_allowed}} =
+             Nadia.get_file_link(file)
+
+    client = Client.new(token: "999:local", file_mode: :local)
+
+    assert {:error, %Error{reason: :local_file_path}} =
+             Nadia.get_file_link(client, file)
   end
 
   defp existing_atom?(name) do

@@ -1782,8 +1782,8 @@ defmodule Nadia.Model do
     @type t :: %File{
             file_id: binary,
             file_unique_id: binary,
-            file_size: integer,
-            file_path: binary
+            file_size: non_neg_integer | nil,
+            file_path: binary | nil
           }
   end
 

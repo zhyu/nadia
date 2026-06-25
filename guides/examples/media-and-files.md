@@ -3,7 +3,8 @@
 Telegram accepts file IDs, selected HTTP URLs, and multipart uploads. Nadia
 keeps existing binary arguments compatible and provides `Nadia.InputFile` when
 source intent, upload metadata, or nested `attach://` composition must be
-explicit.
+explicit. `Nadia.InputMedia` and `Nadia.InputSticker` add fixed-discriminator
+builders, while `Nadia.download_file/3,4,5` provides bounded download-to-file.
 
 The complete tested helper is
 [`examples/media_files.ex`](https://github.com/zhyu/nadia/blob/master/examples/media_files.ex).
@@ -50,35 +51,110 @@ files. Individual methods can be narrower. Treat the official
 [Sending files](https://core.telegram.org/bots/api#sending-files) section as
 authoritative.
 
-## Compose Nested Uploads
+## Build Typed Media
 
-Pass structured maps, keyword lists, or structs containing `InputFile` values.
-Nadia assigns collision-safe binary attachment names, replaces each nested
-value with `attach://name`, and adds every multipart part:
+The six official `InputMedia` variants have public builders:
 
 ```elixir
+alias Nadia.InputFile
+alias Nadia.InputMedia
+
 media = [
-  %{
-    type: "video",
-    media: InputFile.path("/srv/media/demo.mp4"),
+  InputMedia.video(
+    InputFile.path("/srv/media/demo.mp4"),
     thumbnail: InputFile.bytes(thumbnail, "thumbnail.jpg", max_bytes: 200_000),
-    cover: InputFile.path("/srv/media/cover.jpg")
-  },
-  %{
-    type: "document",
-    media: InputFile.path("/srv/media/notes.pdf")
-  }
+    cover: InputFile.path("/srv/media/cover.jpg"),
+    supports_streaming: true
+  ),
+  InputMedia.photo(InputFile.file_id(photo.file_id), has_spoiler: false)
 ]
 
 Nadia.send_media_group(client, chat_id, media)
 ```
 
-The same traversal supports paid media, edited media, profile photos, stories,
-stickers, and other JSON payloads used by Nadia wrappers. Pre-encoded JSON
-strings remain pass-through values; use a structured payload when Nadia must
-discover `InputFile` values. An optional `:attach_name` is validated and made
-unique within the request. Attachment names, filenames, paths, and parameter
-keys never create atoms.
+Builders fix `type`, reject missing required fields, omit `nil`, and preserve
+explicit `false`. Multiple nested files receive collision-safe binary
+attachment names and become `attach://name` references. An explicit
+`:attach_name` is validated and made unique within the request. Attachment
+names, filenames, paths, IDs, and parameter keys never create atoms.
+
+| Builder | Edit media | Media group | Poll media |
+| --- | --- | --- | --- |
+| `animation/2` | Yes | No | Description, explanation, and option |
+| `audio/2` | Yes | Yes, audio-only album | Description or explanation |
+| `document/2` | Yes | Yes, document-only album | Description or explanation |
+| `live_photo/3` | Yes | Yes | Description, explanation, and option |
+| `photo/2` | Yes | Yes | Description, explanation, and option |
+| `video/2` | Yes | Yes | Description, explanation, and option |
+
+Typed media groups are checked locally: they must contain 2-10 items,
+animations are rejected, audio/document albums must be homogeneous, and
+photo/live-photo/video items may mix. An inline `editMessageMedia` call cannot
+upload a new file; use file IDs or a supported URL. Live-photo video and photo
+fields do not support URLs.
+
+Thumbnails are new JPEG multipart uploads only, under 200 KB and at most
+320x320. They cannot be file IDs or URLs. Video covers may be file IDs, URLs,
+or uploads.
+
+Poll-only media also includes location and venue, plus link and sticker for
+poll options. Those remain raw structured objects in this slice.
+`InputPaidMedia`, `InputProfilePhoto`, and `InputStoryContent` are separate
+Telegram types and must not be replaced with an `InputMedia` builder. Their raw
+maps, keyword lists, structs, pre-encoded JSON, and nested `InputFile` values
+remain supported.
+
+## Build Typed Stickers
+
+Use the format-specific builders with the current sticker-set methods:
+
+```elixir
+alias Nadia.InputSticker
+
+stickers = [
+  InputSticker.static(
+    InputFile.path("/srv/stickers/hello.webp", max_bytes: 512_000),
+    ["👋"],
+    keywords: ["hello", "wave"]
+  ),
+  InputSticker.video(
+    InputFile.path("/srv/stickers/party.webm"),
+    ["🎉"]
+  )
+]
+
+Nadia.create_new_sticker_set(
+  client,
+  owner_user_id,
+  "nadia_by_bot",
+  "Nadia",
+  stickers,
+  sticker_type: "regular"
+)
+```
+
+| Builder | Fixed format | Accepted source |
+| --- | --- | --- |
+| `static/3` | `static` | file ID, HTTP URL, or WEBP/PNG upload |
+| `animated/3` | `animated` | file ID or TGS upload; no URL |
+| `video/3` | `video` | file ID or WEBM upload; no URL |
+
+Each sticker requires 1-20 emoji strings. Keywords accept 0-20 strings with a
+combined length of at most 64 characters. `mask_position` is for mask sets;
+keywords are for regular and custom-emoji sets.
+
+Current `upload_sticker_file/3,4`, `create_new_sticker_set/4,5,6`,
+`add_sticker_to_set/3,4`, and `replace_sticker_in_set/4,5` shapes are exposed.
+Historical PNG-and-emoji create/add calls remain compatible and are translated
+to one static `InputSticker`. `contains_masks: true` becomes
+`sticker_type: "mask"`, and the legacy `mask_position` moves inside the
+sticker. Migrate new code to the typed forms because the old request fields no
+longer describe Telegram's current API.
+
+Raw media and sticker maps, keyword lists, arbitrary structs, and pre-encoded
+JSON remain pass-through values. Use a structured value when Nadia must
+discover `InputFile` uploads; a pre-encoded JSON string cannot contain a live
+Elixir `InputFile`.
 
 ## Bound Memory And Streams
 
@@ -118,26 +194,80 @@ devices, rewind/replay, or automatic ownership of caller-opened resources.
 cleanup behavior of custom `Stream.resource/3` producers. Never blindly retry
 an ambiguous upload failure.
 
-## Resolve A Download URL
+## Download To A File
 
-`getFile` returns metadata, not bytes. `Nadia.get_file_link/2` builds a URL only
-when `file_path` is present. The URL embeds the bot token and is a credential:
-redact it from logs, traces, analytics, and error reports; never redirect an
-untrusted browser or client to it; and do not store it as a public permanent
-URL.
+Use a mandatory application limit:
+
+```elixir
+Nadia.download_file(
+  client,
+  document.file_id,
+  "/srv/my_app/downloads/report.pdf",
+  20_000_000,
+  receive_timeout: 30_000
+)
+```
+
+A file ID performs one fresh `getFile` metadata request. Passing an existing
+`%Nadia.Model.File{}` skips that request and may therefore use an expired path.
+Telegram's optional `file_size` is checked before transfer when available; the
+real byte count is enforced on every chunk and checked against `Content-Length`
+and the final file.
+
+The default Req adapter:
+
+* never buffers the whole response and keeps only one transport chunk in
+  Nadia-managed memory;
+* disables redirects, retries, decompression, and response-body decoding;
+* refuses an existing destination unless `overwrite: true` is explicit;
+* writes an exclusive hidden temp in the destination directory, syncs it, and
+  publishes only after status and size validation;
+* removes partial temps after ordinary status, timeout, transport, size,
+  write, and publication failures;
+* returns normalized errors without the URL, token, redirect location,
+  response body, or raw Req exception.
+
+No-overwrite publication uses a same-filesystem hard link so a racing
+destination cannot be replaced. Filesystems without reliable exclusive
+creation and hard-link semantics fail with
+`:atomic_publication_unsupported`. Explicit overwrite uses a same-directory
+rename. A VM or host crash can still leave a hidden `.nadia-download-*` temp;
+operations teams may scavenge old files with that pattern.
 
 On Telegram's hosted API, downloads are currently limited to 20 MB and the URL
-is guaranteed valid for **at least** one hour. Request `getFile` again after
-expiry. Preserve the original message's filename and MIME type before calling
-`getFile`, because the download metadata may lose them. Preflight the optional
-`file_size`, but enforce the real byte cap while streaming because the field can
-be absent or stale. The application-owned downloader must also bound redirects,
-timeouts, destination size, partial-file cleanup, and backpressure.
+is guaranteed valid for at least one hour. Preserve the original message's
+filename and MIME type before `getFile`, because its download metadata may lose
+them. Nadia does not silently retry an expired path, timeout, partial transfer,
+or ambiguous failure.
 
-A self-hosted local Bot API server permits uploads up to 2000 MB, downloads
-without a size limit, local paths/file URIs, and may return an absolute local
-`file_path`. Authorize and handle that as server-local filesystem data. Do not
-concatenate an absolute path into Nadia's token-bearing hosted file URL.
-`InputFile.path/2` always means “multipart-upload this path from Nadia's host”;
-pass a server-local file URI as a plain Telegram string only when that local
-Bot API deployment and its filesystem authorization are intentional.
+For a trusted local Bot API server started in local mode, configure:
+
+```elixir
+client =
+  Nadia.Client.new(
+    token: token,
+    base_url: "http://bot-api.internal/bot",
+    file_mode: :local
+  )
+```
+
+Local mode requires the absolute `file_path` returned by Telegram to be
+accessible in Nadia's filesystem namespace. Nadia performs the same bounded
+temp-file copy without constructing a token URL. Remote mode rejects absolute
+paths; local mode rejects relative paths. A local Bot API server on another
+host without a shared filesystem is unsupported.
+
+Custom adapters keep their existing `post/1` compatibility. To support
+downloads they must implement Nadia's optional adapter download callback and
+obey `Nadia.HTTPDownloadRequest`'s no-buffer, no-redirect, no-retry,
+no-token-log contract. Nadia cannot enforce those properties inside an
+untrusted custom adapter.
+
+Arbitrary sinks, caller-owned IO devices, in-memory binary downloads, ranges,
+resume, automatic retries, redirects, remote object stores, and filesystems
+without atomic local publication are intentionally unsupported.
+
+`Nadia.get_file_link/1,2` remains a lower-level compatibility helper for remote
+relative paths. Its result embeds the bot token and must be treated as a
+credential. It rejects absolute local paths and is not used by the recommended
+download flow.

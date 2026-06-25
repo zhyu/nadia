@@ -21,6 +21,19 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added `Nadia.InputFile` for explicit file IDs, URLs, validated local paths,
   bounded iodata, and known-size streaming uploads, including multiple nested
   `attach://` parts without creating atoms from attachment names.
+- Added `Nadia.InputMedia` builders for animation, audio, document, live photo,
+  photo, and video payloads with fixed discriminators, typed album validation,
+  and nested `Nadia.InputFile` support.
+- Added `Nadia.InputSticker` static, animated, and video builders plus current
+  sticker upload, creation, addition, replacement, and thumbnail request
+  shapes. Historical PNG-and-emoji entry points remain compatibility shims.
+- Added `Nadia.download_file/3,4,5`, a bounded streaming download-to-file API
+  with metadata and actual-byte enforcement, no-overwrite atomic publication,
+  partial cleanup, redirect/retry suppression, token-safe errors, and explicit
+  hosted-versus-local Bot API behavior.
+- Added an optional streaming download capability for HTTP adapters and
+  redacted `Nadia.HTTPDownloadRequest`/`Nadia.HTTPRequest` inspection without
+  breaking existing post-only custom adapters.
 - Added current file identity and metadata parsing for animation, audio,
   document, live photo, sticker, video, video note, voice, video quality, chat
   photo, and sticker-set responses while retaining legacy `thumb` fields.
@@ -45,6 +58,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Expanded persistent-session, media/download, and production guidance with
   database concurrency, outbox, duplicate-delivery, token exposure, memory,
   cleanup, and local Bot API caveats.
+- Updated poll media encoding, media-group and edit-media guidance, sticker
+  wrapper signatures, the tested media example, ExDoc navigation, and package
+  documentation for typed outgoing media and bounded downloads.
 
 ## 1.5.0 - 2026-06-13
 

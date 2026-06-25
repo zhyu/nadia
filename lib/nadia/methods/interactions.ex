@@ -609,8 +609,13 @@ defmodule Nadia.Methods.Interactions do
       returned, or `:ok` is returned when editing an inline message.
 
       Args:
-      * `media` - JSON-serializable media object or a pre-encoded JSON string
+      * `media` - `Nadia.InputMedia` value, compatible JSON-serializable object,
+        or pre-encoded JSON
       * `options` - keyword list of options
+
+      Inline messages cannot upload new files; use file IDs or supported URLs.
+      Album messages retain Telegram's audio-only, document-only, or visual
+      media-family replacement restrictions.
       """
       @spec edit_message_media(list | map | struct | binary, [{atom, any}]) ::
               :ok | {:ok, Message.t()} | {:error, Error.t()}

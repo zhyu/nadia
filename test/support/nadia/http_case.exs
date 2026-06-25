@@ -13,6 +13,7 @@ defmodule Nadia.HTTPCase do
     :base_url,
     :graph_base_url,
     :file_base_url,
+    :file_mode,
     :api_environment,
     :recv_timeout,
     :proxy,
@@ -51,6 +52,7 @@ defmodule Nadia.HTTPCase do
     Application.delete_env(:nadia, :base_url)
     Application.delete_env(:nadia, :graph_base_url)
     Application.delete_env(:nadia, :file_base_url)
+    Application.delete_env(:nadia, :file_mode)
     Application.delete_env(:nadia, :api_environment)
     Application.delete_env(:nadia, :recv_timeout)
     Application.delete_env(:nadia, :proxy)

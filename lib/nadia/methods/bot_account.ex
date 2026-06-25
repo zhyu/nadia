@@ -282,9 +282,17 @@ defmodule Nadia.Methods.BotAccount do
       @doc """
       Use this method to change the bot's profile photo.
       Returns `:ok` on success.
+
+      Pass a typed `Nadia.InputProfilePhoto` to require a new multipart upload
+      and validate its discriminator locally. Raw JSON-serializable objects and
+      pre-encoded JSON strings remain supported for compatibility.
       """
-      @spec set_my_profile_photo(list | map | struct | binary) :: :ok | {:error, Error.t()}
-      @spec set_my_profile_photo(Client.t(), list | map | struct | binary) ::
+      @spec set_my_profile_photo(Nadia.InputProfilePhoto.t() | list | map | struct | binary) ::
+              :ok | {:error, Error.t()}
+      @spec set_my_profile_photo(
+              Client.t(),
+              Nadia.InputProfilePhoto.t() | list | map | struct | binary
+            ) ::
               :ok | {:error, Error.t()}
       def set_my_profile_photo(photo) do
         api_request("setMyProfilePhoto", photo: encode_json_payload(photo))

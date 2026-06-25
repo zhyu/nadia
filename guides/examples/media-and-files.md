@@ -4,7 +4,10 @@ Telegram accepts file IDs, selected HTTP URLs, and multipart uploads. Nadia
 keeps existing binary arguments compatible and provides `Nadia.InputFile` when
 source intent, upload metadata, or nested `attach://` composition must be
 explicit. `Nadia.InputMedia` and `Nadia.InputSticker` add fixed-discriminator
-builders, while `Nadia.download_file/3,4,5` provides bounded download-to-file.
+builders. `Nadia.InputPaidMedia`, `Nadia.InputPollMedia`,
+`Nadia.InputProfilePhoto`, and `Nadia.InputStoryContent` cover the other
+current outgoing-content families, while `Nadia.download_file/3,4,5` provides
+bounded download-to-file.
 
 The complete tested helper is
 [`examples/media_files.ex`](https://github.com/zhyu/nadia/blob/master/examples/media_files.ex).
@@ -53,7 +56,7 @@ authoritative.
 
 ## Build Typed Media
 
-The six official `InputMedia` variants have public builders:
+The six members of Telegram's `InputMedia` union have public builders:
 
 ```elixir
 alias Nadia.InputFile
@@ -78,14 +81,18 @@ attachment names and become `attach://name` references. An explicit
 `:attach_name` is validated and made unique within the request. Attachment
 names, filenames, paths, IDs, and parameter keys never create atoms.
 
-| Builder | Edit media | Media group | Poll media |
-| --- | --- | --- | --- |
-| `animation/2` | Yes | No | Description, explanation, and option |
-| `audio/2` | Yes | Yes, audio-only album | Description or explanation |
-| `document/2` | Yes | Yes, document-only album | Description or explanation |
-| `live_photo/3` | Yes | Yes | Description, explanation, and option |
-| `photo/2` | Yes | Yes | Description, explanation, and option |
-| `video/2` | Yes | Yes | Description, explanation, and option |
+| Variant | Edit | Album | Paid media | Poll description / explanation | Poll option |
+| --- | --- | --- | --- | --- | --- |
+| Animation | Yes | No | No | Yes | Yes |
+| Audio | Yes | Audio-only | No | Yes | No |
+| Document | Yes | Document-only | No | Yes | No |
+| Live photo | Yes | Yes | Yes | Yes | Yes |
+| Photo | Yes | Yes | Yes | Yes | Yes |
+| Video | Yes | Yes | Yes | Yes | Yes |
+| Location | No | No | No | Yes | Yes |
+| Venue | No | No | No | Yes | Yes |
+| Link | No | No | No | No | Yes |
+| Sticker | No | No | No | No | Yes |
 
 Typed media groups are checked locally: they must contain 2-10 items,
 animations are rejected, audio/document albums must be homogeneous, and
@@ -97,12 +104,101 @@ Thumbnails are new JPEG multipart uploads only, under 200 KB and at most
 320x320. They cannot be file IDs or URLs. Video covers may be file IDs, URLs,
 or uploads.
 
-Poll-only media also includes location and venue, plus link and sticker for
-poll options. Those remain raw structured objects in this slice.
-`InputPaidMedia`, `InputProfilePhoto`, and `InputStoryContent` are separate
-Telegram types and must not be replaced with an `InputMedia` builder. Their raw
-maps, keyword lists, structs, pre-encoded JSON, and nested `InputFile` values
-remain supported.
+Poll-only values use a separate module because they are invalid for albums and
+media edits:
+
+```elixir
+options = [
+  %{
+    text: "Read the guide",
+    media: Nadia.InputPollMedia.link("https://hexdocs.pm/nadia")
+  },
+  %{text: "Visit the office"}
+]
+
+Nadia.send_poll(
+  client,
+  chat_id,
+  "Where next?",
+  options: options,
+  media: Nadia.InputPollMedia.location(35.6762, 139.6503),
+  allows_revoting: false
+)
+```
+
+`link/1` is poll-option-only. `sticker/2` is also option-only; HTTP sticker
+URLs must identify WEBP files, while uploads use WEBP, TGS, or WEBM filenames.
+`location/3` and `venue/5` work in descriptions, quiz explanations, and
+options. Typed quiz explanation media requires `type: "quiz"`.
+
+## Build Paid Media
+
+```elixir
+paid_media = [
+  Nadia.InputPaidMedia.photo(Nadia.InputFile.file_id(photo_id)),
+  Nadia.InputPaidMedia.video(
+    Nadia.InputFile.path("/srv/media/paid.mp4"),
+    thumbnail: Nadia.InputFile.path("/srv/media/paid-thumb.jpg"),
+    supports_streaming: false
+  )
+]
+
+Nadia.send_paid_media(client, chat_id, 25, paid_media)
+```
+
+Typed paid-media lists contain 1-10 live photos, photos, or videos. Live-photo
+video and photo fields do not accept URLs. Video thumbnails must be new
+multipart uploads; covers can be file IDs, URLs, or uploads. Telegram enforces
+the 1-25,000 Star price, payload and caption lengths, media contents, and
+thumbnail JPEG dimensions. Nadia validates only the typed list shape and
+locally inspectable source rules.
+
+## Upload Profile Photos And Stories
+
+These typed families intentionally accept only explicit new uploads:
+
+```elixir
+profile =
+  Nadia.InputProfilePhoto.static(
+    Nadia.InputFile.path("/srv/media/profile.jpg", max_bytes: 10_000_000)
+  )
+
+story =
+  Nadia.InputStoryContent.video(
+    Nadia.InputFile.path("/srv/media/story.mp4", max_bytes: 30_000_000),
+    duration: 12.5,
+    cover_frame_timestamp: 0,
+    is_animation: false
+  )
+
+Nadia.set_my_profile_photo(client, profile)
+Nadia.post_story(client, business_connection_id, story, 86_400)
+```
+
+Typed profile photos and stories reject bare binaries, file IDs, URLs, and
+manual `attach://` references because Telegram forbids reuse. Paths, bounded
+iodata, and known-size streams are supported. Nadia validates timestamps,
+story duration, and booleans. It does not decode media to verify JPG/MPEG4
+format, 1080x1920 story photos, 720x1280 H.265 streamable story videos,
+one-second keyframes, sound, or actual dimensions. Telegram enforces those
+content rules. Caller `:max_bytes` bounds provide local size policy.
+
+## Compatibility
+
+| Existing input | Behavior after typed builders |
+| --- | --- |
+| Raw map or keyword object | Preserved and JSON encoded |
+| Arbitrary struct | Preserved through its fields |
+| Pre-encoded JSON binary | Preserved without re-encoding |
+| Nested `Nadia.InputFile` in structured values | Discovered as multipart |
+| Valid typed value | Validated, encoded, and traversed |
+| Malformed typed value | Returns `%Nadia.Model.Error{}` before HTTP |
+| Mixed typed and raw paid/poll list | Typed members validate; raw members pass through |
+| Mixed typed and raw media-group list | Preserved as the existing raw compatibility path |
+
+Raw values remain useful for forward compatibility, but Nadia cannot enforce
+context, discriminator, or upload-only rules for them. A pre-encoded JSON
+string cannot contain a live Elixir `InputFile`.
 
 ## Build Typed Stickers
 
@@ -151,10 +247,9 @@ to one static `InputSticker`. `contains_masks: true` becomes
 sticker. Migrate new code to the typed forms because the old request fields no
 longer describe Telegram's current API.
 
-Raw media and sticker maps, keyword lists, arbitrary structs, and pre-encoded
+Raw outgoing-content maps, keyword lists, arbitrary structs, and pre-encoded
 JSON remain pass-through values. Use a structured value when Nadia must
-discover `InputFile` uploads; a pre-encoded JSON string cannot contain a live
-Elixir `InputFile`.
+discover `InputFile` uploads.
 
 ## Bound Memory And Streams
 

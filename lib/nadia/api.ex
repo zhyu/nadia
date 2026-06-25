@@ -197,10 +197,38 @@ defmodule Nadia.API do
     end
   end
 
+  defp normalize_json_value(%Nadia.InputPaidMedia{} = input_paid_media, state) do
+    case Nadia.InputPaidMedia.to_map(input_paid_media) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_paid_media, reason}}
+    end
+  end
+
+  defp normalize_json_value(%Nadia.InputPollMedia{} = input_poll_media, state) do
+    case Nadia.InputPollMedia.to_map(input_poll_media) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_poll_media, reason}}
+    end
+  end
+
+  defp normalize_json_value(%Nadia.InputProfilePhoto{} = input_profile_photo, state) do
+    case Nadia.InputProfilePhoto.to_map(input_profile_photo) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_profile_photo, reason}}
+    end
+  end
+
   defp normalize_json_value(%Nadia.InputSticker{} = input_sticker, state) do
     case Nadia.InputSticker.to_map(input_sticker) do
       {:ok, value} -> normalize_json_value(value, state)
       {:error, reason} -> {:error, {:input_sticker, reason}}
+    end
+  end
+
+  defp normalize_json_value(%Nadia.InputStoryContent{} = input_story_content, state) do
+    case Nadia.InputStoryContent.to_map(input_story_content) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_story_content, reason}}
     end
   end
 
@@ -387,8 +415,36 @@ defmodule Nadia.API do
     end
   end
 
+  defp collect_attach_names(%Nadia.InputPaidMedia{} = value, names) do
+    case Nadia.InputPaidMedia.to_map(value) do
+      {:ok, value} -> collect_attach_names(value, names)
+      {:error, _reason} -> names
+    end
+  end
+
+  defp collect_attach_names(%Nadia.InputPollMedia{} = value, names) do
+    case Nadia.InputPollMedia.to_map(value) do
+      {:ok, value} -> collect_attach_names(value, names)
+      {:error, _reason} -> names
+    end
+  end
+
+  defp collect_attach_names(%Nadia.InputProfilePhoto{} = value, names) do
+    case Nadia.InputProfilePhoto.to_map(value) do
+      {:ok, value} -> collect_attach_names(value, names)
+      {:error, _reason} -> names
+    end
+  end
+
   defp collect_attach_names(%Nadia.InputSticker{} = value, names) do
     case Nadia.InputSticker.to_map(value) do
+      {:ok, value} -> collect_attach_names(value, names)
+      {:error, _reason} -> names
+    end
+  end
+
+  defp collect_attach_names(%Nadia.InputStoryContent{} = value, names) do
+    case Nadia.InputStoryContent.to_map(value) do
       {:ok, value} -> collect_attach_names(value, names)
       {:error, _reason} -> names
     end

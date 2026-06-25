@@ -136,7 +136,11 @@ defmodule Nadia do
 
   defp json_payload_value(%Nadia.InputFile{} = payload), do: payload
   defp json_payload_value(%Nadia.InputMedia{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputPaidMedia{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputPollMedia{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputProfilePhoto{} = payload), do: payload
   defp json_payload_value(%Nadia.InputSticker{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputStoryContent{} = payload), do: payload
 
   defp json_payload_value(%_{} = payload) do
     payload
@@ -154,17 +158,100 @@ defmodule Nadia do
 
   defp encode_poll_options(params) when is_list(params) do
     params
-    |> Keyword.update(:options, nil, &encode_json_payload/1)
-    |> Keyword.update(:media, nil, &encode_json_payload/1)
-    |> Keyword.update(:explanation_media, nil, &encode_json_payload/1)
+    |> encode_json_array_option(:options)
+    |> encode_json_array_option(:question_entities)
+    |> encode_json_array_option(:country_codes)
+    |> encode_json_array_option(:correct_option_ids)
+    |> encode_json_array_option(:explanation_entities)
+    |> encode_json_array_option(:description_entities)
+    |> encode_json_option(:media)
+    |> encode_json_option(:explanation_media)
+    |> encode_json_option(:reply_parameters)
   end
 
   defp encode_poll_options(params) when is_map(params) do
     params
-    |> Map.update(:options, nil, &encode_json_payload/1)
-    |> Map.update(:media, nil, &encode_json_payload/1)
-    |> Map.update(:explanation_media, nil, &encode_json_payload/1)
+    |> encode_json_array_option(:options)
+    |> encode_json_array_option(:question_entities)
+    |> encode_json_array_option(:country_codes)
+    |> encode_json_array_option(:correct_option_ids)
+    |> encode_json_array_option(:explanation_entities)
+    |> encode_json_array_option(:description_entities)
+    |> encode_json_option(:media)
+    |> encode_json_option(:explanation_media)
+    |> encode_json_option(:reply_parameters)
   end
+
+  defp validate_poll_options(params) do
+    with :ok <- validate_poll_media(option_value(params, :media), :description),
+         :ok <- validate_poll_explanation_media(params),
+         :ok <- validate_poll_option_media(option_value(params, :options)) do
+      :ok
+    end
+  end
+
+  defp validate_poll_explanation_media(params) do
+    explanation_media = option_value(params, :explanation_media)
+
+    if typed_poll_media?(explanation_media) do
+      case option_value(params, :type) do
+        type when type in ["quiz", :quiz] ->
+          validate_poll_media(explanation_media, :explanation)
+
+        _type ->
+          {:error, :explanation_media_requires_quiz}
+      end
+    else
+      :ok
+    end
+  end
+
+  defp validate_poll_option_media(options) when is_list(options) do
+    if Keyword.keyword?(options) do
+      :ok
+    else
+      typed? = Enum.any?(options, &typed_poll_media?(poll_option_media(&1)))
+
+      cond do
+        typed? and length(options) not in 1..12 ->
+          {:error, {:poll_option_size, length(options)}}
+
+        true ->
+          Enum.reduce_while(options, :ok, fn option, :ok ->
+            case validate_poll_media(poll_option_media(option), :option) do
+              :ok -> {:cont, :ok}
+              {:error, reason} -> {:halt, {:error, reason}}
+            end
+          end)
+      end
+    end
+  end
+
+  defp validate_poll_option_media(_options), do: :ok
+
+  defp validate_poll_media(media, context) do
+    if typed_poll_media?(media) do
+      Nadia.InputPollMedia.validate_context(media, context)
+    else
+      :ok
+    end
+  end
+
+  defp typed_poll_media?(%Nadia.InputMedia{}), do: true
+  defp typed_poll_media?(%Nadia.InputPollMedia{}), do: true
+  defp typed_poll_media?(_media), do: false
+
+  defp poll_option_media(option) when is_list(option) do
+    if Keyword.keyword?(option), do: Keyword.get(option, :media), else: nil
+  end
+
+  defp poll_option_media(%_{} = option), do: option |> Map.from_struct() |> poll_option_media()
+
+  defp poll_option_media(option) when is_map(option) do
+    Map.get(option, :media, Map.get(option, "media"))
+  end
+
+  defp poll_option_media(_option), do: nil
 
   defp do_answer_guest_query(client, guest_query_id, result, options) do
     args = [guest_query_id: guest_query_id, result: encode_inline_query_result(result)]
@@ -236,6 +323,13 @@ defmodule Nadia do
     options
     |> encode_json_array_option(:suggested_tip_amounts)
     |> encode_json_option(:provider_data)
+    |> encode_json_option(:suggested_post_parameters)
+    |> encode_json_option(:reply_parameters)
+  end
+
+  defp encode_paid_media_options(options) do
+    options
+    |> encode_json_array_option(:caption_entities)
     |> encode_json_option(:suggested_post_parameters)
     |> encode_json_option(:reply_parameters)
   end
@@ -348,7 +442,9 @@ defmodule Nadia do
   end
 
   defp option_value(options, key) when is_list(options), do: Keyword.get(options, key)
-  defp option_value(options, key) when is_map(options), do: Map.get(options, key)
+
+  defp option_value(options, key) when is_map(options),
+    do: Map.get(options, key, Map.get(options, Atom.to_string(key)))
 
   defp delete_option(options, key) when is_list(options), do: Keyword.delete(options, key)
   defp delete_option(options, key) when is_map(options), do: Map.delete(options, key)

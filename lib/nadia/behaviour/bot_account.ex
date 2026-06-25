@@ -96,8 +96,12 @@ defmodule Nadia.Behaviour.BotAccount do
                   {:ok, BotShortDescription.t()} | {:error, Error.t()}
       @callback get_my_short_description(Client.t(), [{atom, any}] | map) ::
                   {:ok, BotShortDescription.t()} | {:error, Error.t()}
-      @callback set_my_profile_photo(list | map | struct | binary) :: :ok | {:error, Error.t()}
-      @callback set_my_profile_photo(Client.t(), list | map | struct | binary) ::
+      @callback set_my_profile_photo(Nadia.InputProfilePhoto.t() | list | map | struct | binary) ::
+                  :ok | {:error, Error.t()}
+      @callback set_my_profile_photo(
+                  Client.t(),
+                  Nadia.InputProfilePhoto.t() | list | map | struct | binary
+                ) ::
                   :ok | {:error, Error.t()}
       @callback remove_my_profile_photo() :: :ok | {:error, Error.t()}
       @callback remove_my_profile_photo([{atom, any}] | map) :: :ok | {:error, Error.t()}

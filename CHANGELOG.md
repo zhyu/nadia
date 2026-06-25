@@ -24,6 +24,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added `Nadia.InputMedia` builders for animation, audio, document, live photo,
   photo, and video payloads with fixed discriminators, typed album validation,
   and nested `Nadia.InputFile` support.
+- Added `Nadia.InputPaidMedia` builders for live photos, photos, and videos,
+  including typed 1-10 item validation and nested uploads for `sendPaidMedia`.
+- Added `Nadia.InputPollMedia` link, location, sticker, and venue builders with
+  context-aware validation for poll descriptions, quiz explanations, and poll
+  options.
+- Added upload-only `Nadia.InputProfilePhoto` and `Nadia.InputStoryContent`
+  builders with fixed discriminators and locally enforceable timestamp,
+  duration, source, and boolean validation.
 - Added `Nadia.InputSticker` static, animated, and video builders plus current
   sticker upload, creation, addition, replacement, and thumbnail request
   shapes. Historical PNG-and-emoji entry points remain compatibility shims.
@@ -61,6 +69,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Updated poll media encoding, media-group and edit-media guidance, sticker
   wrapper signatures, the tested media example, ExDoc navigation, and package
   documentation for typed outgoing media and bounded downloads.
+- Expanded paid-media and poll structured-field encoding, preserved explicit
+  false values, and integrated typed profile-photo and story uploads without
+  narrowing raw map, keyword, struct, or pre-encoded JSON compatibility.
 
 ## 1.5.0 - 2026-06-13
 

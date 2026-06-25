@@ -4,7 +4,8 @@ defmodule Nadia.InputMedia do
 
   The builder fixes the Telegram `type` discriminator, omits `nil` options,
   and preserves explicit `false` values. Values can be passed directly to
-  `Nadia.send_media_group/3,4` and `Nadia.edit_message_media/2,3`.
+  `Nadia.send_media_group/3,4`, `Nadia.edit_message_media/2,3`, and compatible
+  media positions in `Nadia.send_poll/3,4`.
 
   Media and cover fields accept Telegram file IDs, supported HTTP URLs, or
   `Nadia.InputFile` values. Thumbnails are new JPEG multipart uploads only;
@@ -14,6 +15,11 @@ defmodule Nadia.InputMedia do
   `sendMediaGroup` accepts 2-10 audio, document, live-photo, photo, or video
   items. Audio and document albums must be homogeneous. Animation is supported
   by `editMessageMedia`, but not by `sendMediaGroup`.
+
+  Poll descriptions and quiz explanations accept every variant in this module.
+  Poll options accept animation, live photo, photo, and video; audio and
+  document are rejected locally when used as typed option media. See
+  `Nadia.InputPollMedia` for typed link, location, sticker, and venue values.
   """
 
   alias Nadia.InputFile

@@ -798,14 +798,28 @@ defmodule Nadia.Methods.Messages do
       * `chat_id` - Unique identifier for the target chat or username of the target channel
       (in the format @channelusername)
       * `star_count` - Amount of Telegram Stars to be paid for the media
-      * `media` - JSON-serializable paid media array or a pre-encoded JSON string
+      * `media` - List of `Nadia.InputPaidMedia` values, a compatible
+        JSON-serializable paid media array, or a pre-encoded JSON string
       * `options` - keyword list of options
+
+      Typed lists are validated locally as 1-10 items. Raw maps, keyword
+      lists, structs, mixed values, and pre-encoded JSON remain compatibility
+      escape hatches and are sent without typed-list validation.
       """
-      @spec send_paid_media(integer | binary, integer, list | map | struct | binary, [{atom, any}]) ::
+      @spec send_paid_media(
+              integer | binary,
+              integer,
+              [Nadia.InputPaidMedia.t()] | list | map | struct | binary,
+              [{atom, any}]
+            ) ::
               {:ok, Message.t()} | {:error, Error.t()}
-      @spec send_paid_media(Client.t(), integer | binary, integer, list | map | struct | binary, [
-              {atom, any}
-            ]) ::
+      @spec send_paid_media(
+              Client.t(),
+              integer | binary,
+              integer,
+              [Nadia.InputPaidMedia.t()] | list | map | struct | binary,
+              [{atom, any}]
+            ) ::
               {:ok, Message.t()} | {:error, Error.t()}
       def send_paid_media(chat_id, star_count, media) do
         send_paid_media(chat_id, star_count, media, [])
@@ -817,19 +831,39 @@ defmodule Nadia.Methods.Messages do
       end
 
       def send_paid_media(chat_id, star_count, media, options) do
-        api_request(
-          "sendPaidMedia",
-          [chat_id: chat_id, star_count: star_count, media: encode_json_payload(media)] ++ options
-        )
+        case Nadia.InputPaidMedia.validate_media(media) do
+          :ok ->
+            api_request(
+              "sendPaidMedia",
+              [
+                chat_id: chat_id,
+                star_count: star_count,
+                media: encode_json_payload(media)
+              ] ++ encode_paid_media_options(options)
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: {:input_paid_media, reason}}}
+        end
       end
 
       @doc group: "Messages"
       def send_paid_media(%Client{} = client, chat_id, star_count, media, options) do
-        api_request(
-          client,
-          "sendPaidMedia",
-          [chat_id: chat_id, star_count: star_count, media: encode_json_payload(media)] ++ options
-        )
+        case Nadia.InputPaidMedia.validate_media(media) do
+          :ok ->
+            api_request(
+              client,
+              "sendPaidMedia",
+              [
+                chat_id: chat_id,
+                star_count: star_count,
+                media: encode_json_payload(media)
+              ] ++ encode_paid_media_options(options)
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: {:input_paid_media, reason}}}
+        end
       end
 
       @doc group: "Messages"
@@ -842,47 +876,79 @@ defmodule Nadia.Methods.Messages do
       (in the format @channelusername)
       * `question` - Poll question
       * `params` - keyword list or map of Telegram parameters, including required `:options`
+
+      Poll descriptions and quiz explanations accept the compatible
+      `Nadia.InputMedia` variants plus `Nadia.InputPollMedia.location/3` and
+      `Nadia.InputPollMedia.venue/5`. Poll options additionally accept
+      `Nadia.InputPollMedia.link/1` and `Nadia.InputPollMedia.sticker/2`, but
+      do not accept audio or document media. Typed quiz explanation media
+      requires `type: "quiz"`. Raw structured values and pre-encoded JSON
+      remain pass-through compatibility inputs.
       """
       @spec send_poll(integer | binary, binary, [{atom, any}] | map) ::
               {:ok, Message.t()} | {:error, Error.t()}
       @spec send_poll(Client.t(), integer | binary, binary, [{atom, any}] | map) ::
               {:ok, Message.t()} | {:error, Error.t()}
       def send_poll(chat_id, question, params) when is_list(params) do
-        api_request(
-          "sendPoll",
-          [chat_id: chat_id, question: question] ++ encode_poll_options(params)
-        )
+        case validate_poll_options(params) do
+          :ok ->
+            api_request(
+              "sendPoll",
+              [chat_id: chat_id, question: question] ++ encode_poll_options(params)
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: {:input_poll_media, reason}}}
+        end
       end
 
       def send_poll(chat_id, question, params) when is_map(params) do
-        api_request(
-          "sendPoll",
-          params
-          |> encode_poll_options()
-          |> Map.put(:chat_id, chat_id)
-          |> Map.put(:question, question)
-        )
+        case validate_poll_options(params) do
+          :ok ->
+            api_request(
+              "sendPoll",
+              params
+              |> encode_poll_options()
+              |> Map.put(:chat_id, chat_id)
+              |> Map.put(:question, question)
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: {:input_poll_media, reason}}}
+        end
       end
 
       @doc group: "Messages"
       def send_poll(%Client{} = client, chat_id, question, params) when is_list(params) do
-        api_request(
-          client,
-          "sendPoll",
-          [chat_id: chat_id, question: question] ++ encode_poll_options(params)
-        )
+        case validate_poll_options(params) do
+          :ok ->
+            api_request(
+              client,
+              "sendPoll",
+              [chat_id: chat_id, question: question] ++ encode_poll_options(params)
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: {:input_poll_media, reason}}}
+        end
       end
 
       @doc group: "Messages"
       def send_poll(%Client{} = client, chat_id, question, params) when is_map(params) do
-        api_request(
-          client,
-          "sendPoll",
-          params
-          |> encode_poll_options()
-          |> Map.put(:chat_id, chat_id)
-          |> Map.put(:question, question)
-        )
+        case validate_poll_options(params) do
+          :ok ->
+            api_request(
+              client,
+              "sendPoll",
+              params
+              |> encode_poll_options()
+              |> Map.put(:chat_id, chat_id)
+              |> Map.put(:question, question)
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: {:input_poll_media, reason}}}
+        end
       end
 
       @doc group: "Messages"

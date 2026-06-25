@@ -65,6 +65,15 @@ defmodule Nadia.DocumentationExamplesTest do
               }
             ]
 
+          String.ends_with?(request.url, "/setMyProfilePhoto") ->
+            true
+
+          String.ends_with?(request.url, "/postStory") ->
+            %{
+              chat: %{id: -1001, type: "channel", title: "Example Story"},
+              id: 1
+            }
+
           String.ends_with?(request.url, "/addStickerToSet") ->
             true
 
@@ -246,6 +255,38 @@ defmodule Nadia.DocumentationExamplesTest do
     assert_receive {:nadia_request, %HTTPRequest{body: {:multipart, sticker_parts}}}
     assert {"sticker", encoded_sticker} = List.keyfind(sticker_parts, "sticker", 0)
     assert Jason.decode!(encoded_sticker)["format"] == "static"
+
+    assert {:ok, %Message{}} =
+             Nadia.Examples.MediaFiles.send_paid_media(
+               client,
+               123,
+               "paid-photo-id",
+               path
+             )
+
+    assert_receive {:nadia_request, %HTTPRequest{body: {:multipart, paid_parts}}}
+    assert {"media", encoded_paid} = List.keyfind(paid_parts, "media", 0)
+    assert [%{"type" => "photo"}, %{"type" => "video"}] = Jason.decode!(encoded_paid)
+
+    assert :ok = Nadia.Examples.MediaFiles.set_profile_photo(client, path)
+    assert_receive {:nadia_request, %HTTPRequest{body: {:multipart, profile_parts}}}
+    assert {"photo", encoded_profile} = List.keyfind(profile_parts, "photo", 0)
+    assert Jason.decode!(encoded_profile)["type"] == "static"
+
+    assert {:ok, %Nadia.Model.Story{id: 1}} =
+             Nadia.Examples.MediaFiles.post_photo_story(client, "business-1", path, 86_400)
+
+    assert_receive {:nadia_request, %HTTPRequest{body: {:multipart, story_parts}}}
+    assert {"content", encoded_story} = List.keyfind(story_parts, "content", 0)
+    assert Jason.decode!(encoded_story)["type"] == "photo"
+
+    assert {:ok, %Message{}} = Nadia.Examples.MediaFiles.send_media_poll(client, 123)
+    assert_receive {:nadia_request, %HTTPRequest{body: {:form, poll_params}}}
+    assert {"media", encoded_poll_media} = List.keyfind(poll_params, "media", 0)
+    assert Jason.decode!(encoded_poll_media)["type"] == "location"
+    assert {"options", encoded_poll_options} = List.keyfind(poll_params, "options", 0)
+    assert [first_option, _] = Jason.decode!(encoded_poll_options)
+    assert first_option["media"]["type"] == "link"
   end
 
   test "media example streams a bounded download without exposing the token" do

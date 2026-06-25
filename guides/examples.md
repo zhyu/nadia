@@ -31,7 +31,7 @@ exercises every published example directly.
 | Receive updates over HTTP | [Receive Webhook Updates](receive-webhook-updates.md) | `Nadia.Webhook` |
 | Run several bot identities | [Run Multiple Bots](multiple-bots.md) | `Nadia.Client`, `Nadia.Polling` |
 | Test without credentials or network calls | [Test Bot Handlers](testing-bots.md) | `Nadia.Client`, `Nadia.HTTPClient` |
-| Typed media, stickers, uploads, and downloads | [Media And Files](examples/media-and-files.md) | `Nadia.InputMedia`, `Nadia.InputSticker`, `Nadia.InputFile` |
+| Typed media, stories, uploads, and downloads | [Media And Files](examples/media-and-files.md) | `Nadia.InputMedia`, `Nadia.InputPaidMedia`, `Nadia.InputPollMedia`, `Nadia.InputFile` |
 | Handle Telegram errors with bounds | [Errors And Rate Limits](examples/errors-and-rate-limits.md) | `Nadia.Model.Error`, `Nadia.Model.ResponseParameters` |
 | Publish Telegraph pages | [Use The Telegraph API](telegraph.md) | `Nadia.Graph` |
 

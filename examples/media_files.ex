@@ -10,7 +10,11 @@ defmodule Nadia.Examples.MediaFiles do
   alias Nadia.Client
   alias Nadia.InputFile
   alias Nadia.InputMedia
+  alias Nadia.InputPaidMedia
+  alias Nadia.InputPollMedia
+  alias Nadia.InputProfilePhoto
   alias Nadia.InputSticker
+  alias Nadia.InputStoryContent
 
   @type source :: {:file_id, binary} | {:url, binary} | {:path, Path.t()}
 
@@ -74,6 +78,66 @@ defmodule Nadia.Examples.MediaFiles do
     ]
 
     Nadia.send_media_group(client, chat_id, media)
+  end
+
+  @doc """
+  Sends paid media with a reusable photo and a bounded video upload.
+  """
+  @spec send_paid_media(Client.t(), integer | binary, binary, Path.t()) :: term
+  def send_paid_media(%Client{} = client, chat_id, photo_file_id, video_path) do
+    media = [
+      InputPaidMedia.photo(InputFile.file_id(photo_file_id)),
+      InputPaidMedia.video(
+        InputFile.path(video_path, max_bytes: 50_000_000),
+        supports_streaming: true
+      )
+    ]
+
+    Nadia.send_paid_media(client, chat_id, 25, media)
+  end
+
+  @doc """
+  Sets a static bot profile photo from a new bounded JPG upload.
+  """
+  @spec set_profile_photo(Client.t(), Path.t()) :: term
+  def set_profile_photo(%Client{} = client, path) do
+    photo =
+      path
+      |> InputFile.path(max_bytes: 10_000_000)
+      |> InputProfilePhoto.static()
+
+    Nadia.set_my_profile_photo(client, photo)
+  end
+
+  @doc """
+  Posts a business story from a new bounded 1080x1920 photo upload.
+  """
+  @spec post_photo_story(Client.t(), binary, Path.t(), integer) :: term
+  def post_photo_story(%Client{} = client, business_connection_id, path, active_period) do
+    content =
+      path
+      |> InputFile.path(max_bytes: 10_000_000)
+      |> InputStoryContent.photo()
+
+    Nadia.post_story(client, business_connection_id, content, active_period)
+  end
+
+  @doc """
+  Sends a poll with location description media and a link on one option.
+  """
+  @spec send_media_poll(Client.t(), integer | binary) :: term
+  def send_media_poll(%Client{} = client, chat_id) do
+    Nadia.send_poll(client, chat_id, "Where should we read the guide?",
+      options: [
+        %{
+          text: "Documentation",
+          media: InputPollMedia.link("https://hexdocs.pm/nadia")
+        },
+        %{text: "At the office"}
+      ],
+      media: InputPollMedia.location(35.6762, 139.6503),
+      allows_revoting: false
+    )
   end
 
   @doc """

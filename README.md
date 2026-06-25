@@ -18,8 +18,8 @@ building bots in an OTP application.
   offline tests.
 * Upload paths, bounded iodata, and known-size streams with explicit
   `Nadia.InputFile` values, including nested media attachments.
-* Build current outgoing media and stickers with `Nadia.InputMedia` and
-  `Nadia.InputSticker`.
+* Build current outgoing media with fixed-discriminator helpers for ordinary
+  media, paid media, poll-only media, profile photos, stories, and stickers.
 * Stream Telegram downloads to files under a mandatory byte limit, without
   returning token-bearing URLs.
 * Add optional conversation state without requiring a persistence dependency.
@@ -202,6 +202,12 @@ Use the [`Nadia` reference](https://hexdocs.pm/nadia/Nadia.html) for Elixir
 signatures and the [official Telegram Bot API
 documentation](https://core.telegram.org/bots/api) for Telegram's field
 semantics.
+
+Typed outgoing-content helpers include `Nadia.InputMedia`,
+`Nadia.InputPaidMedia`, `Nadia.InputPollMedia`, `Nadia.InputProfilePhoto`,
+`Nadia.InputStoryContent`, and `Nadia.InputSticker`. Their constructors reject
+locally detectable mistakes; raw maps, keyword lists, structs, and pre-encoded
+JSON remain available as compatibility escape hatches.
 
 ## License
 

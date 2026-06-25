@@ -83,6 +83,14 @@ See [Errors And Rate Limits](examples/errors-and-rate-limits.md) for tested
   file paths are authorized and accessible from Nadia's filesystem namespace.
   Remote filesystems without exclusive temp creation and atomic hard-link
   publication are unsupported.
+* Prefer typed outgoing-content builders when uploads have context-specific
+  rules. Profile-photo and story builders reject reusable file IDs and URLs;
+  paid and poll media validate their typed variant contexts before HTTP.
+* Set `:max_bytes` on application-controlled uploads. Nadia does not inspect
+  image dimensions, codecs, keyframes, MIME truth, or sticker contents, so
+  Telegram can still reject a locally valid typed payload.
+* Known-size upload streams are single-use. Do not automatically retry an
+  ambiguous timeout after a stream may have been consumed.
 
 ## Choose Durable State
 

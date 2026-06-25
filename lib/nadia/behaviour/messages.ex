@@ -161,18 +161,19 @@ defmodule Nadia.Behaviour.Messages do
                   {atom, any}
                 ]) ::
                   {:ok, [Message.t()]} | {:error, Error.t()}
-      @callback send_paid_media(integer | binary, integer, list | map | struct | binary, [
-                  {atom, any}
-                ]) ::
+      @callback send_paid_media(
+                  integer | binary,
+                  integer,
+                  [Nadia.InputPaidMedia.t()] | list | map | struct | binary,
+                  [{atom, any}]
+                ) ::
                   {:ok, Message.t()} | {:error, Error.t()}
       @callback send_paid_media(
                   Client.t(),
                   integer | binary,
                   integer,
-                  list | map | struct | binary,
-                  [
-                    {atom, any}
-                  ]
+                  [Nadia.InputPaidMedia.t()] | list | map | struct | binary,
+                  [{atom, any}]
                 ) ::
                   {:ok, Message.t()} | {:error, Error.t()}
       @callback send_poll(integer | binary, binary, [{atom, any}] | map) ::

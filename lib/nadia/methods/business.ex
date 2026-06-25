@@ -337,27 +337,39 @@ defmodule Nadia.Methods.Business do
       Use this method to change the profile photo of a managed business account.
       Returns `:ok` on success.
 
+      Pass a typed `Nadia.InputProfilePhoto` to require a new multipart upload
+      and validate its discriminator locally. Raw JSON-serializable objects and
+      pre-encoded JSON strings remain supported for compatibility.
+
       Args:
       * `business_connection_id` - Unique identifier of the business connection
-      * `photo` - JSON-serializable profile photo object or a pre-encoded JSON string
+      * `photo` - Typed profile photo, compatible JSON-serializable object, or
+        a pre-encoded JSON string
       * `options` - keyword list of options
 
       Options:
       * `:is_public` - Pass true to set the public profile photo
       """
-      @spec set_business_account_profile_photo(binary, list | map | struct | binary) ::
+      @spec set_business_account_profile_photo(
+              binary,
+              Nadia.InputProfilePhoto.t() | list | map | struct | binary
+            ) ::
               :ok | {:error, Error.t()}
       @spec set_business_account_profile_photo(
               binary,
-              list | map | struct | binary,
+              Nadia.InputProfilePhoto.t() | list | map | struct | binary,
               [{atom, any}] | map
             ) :: :ok | {:error, Error.t()}
-      @spec set_business_account_profile_photo(Client.t(), binary, list | map | struct | binary) ::
+      @spec set_business_account_profile_photo(
+              Client.t(),
+              binary,
+              Nadia.InputProfilePhoto.t() | list | map | struct | binary
+            ) ::
               :ok | {:error, Error.t()}
       @spec set_business_account_profile_photo(
               Client.t(),
               binary,
-              list | map | struct | binary,
+              Nadia.InputProfilePhoto.t() | list | map | struct | binary,
               [{atom, any}] | map
             ) :: :ok | {:error, Error.t()}
       def set_business_account_profile_photo(business_connection_id, photo) do
@@ -679,7 +691,8 @@ defmodule Nadia.Methods.Business do
 
       Args:
       * `business_connection_id` - Unique identifier of the business connection
-      * `content` - JSON-serializable story content object or a pre-encoded JSON string
+      * `content` - `Nadia.InputStoryContent` value, compatible
+        JSON-serializable story content object, or a pre-encoded JSON string
       * `active_period` - Period after which the story is moved to the archive, in seconds
       * `options` - keyword list or map of options
 
@@ -691,16 +704,30 @@ defmodule Nadia.Methods.Business do
       * `:post_to_chat_page` - Pass true to keep the story accessible after it expires
       * `:protect_content` - Pass true if the content of the story must be protected
       """
-      @spec post_story(binary, list | map | struct | binary, integer) ::
+      @spec post_story(
+              binary,
+              Nadia.InputStoryContent.t() | list | map | struct | binary,
+              integer
+            ) ::
               {:ok, Story.t()} | {:error, Error.t()}
-      @spec post_story(binary, list | map | struct | binary, integer, [{atom, any}] | map) ::
-              {:ok, Story.t()} | {:error, Error.t()}
-      @spec post_story(Client.t(), binary, list | map | struct | binary, integer) ::
+      @spec post_story(
+              binary,
+              Nadia.InputStoryContent.t() | list | map | struct | binary,
+              integer,
+              [{atom, any}] | map
+            ) ::
               {:ok, Story.t()} | {:error, Error.t()}
       @spec post_story(
               Client.t(),
               binary,
-              list | map | struct | binary,
+              Nadia.InputStoryContent.t() | list | map | struct | binary,
+              integer
+            ) ::
+              {:ok, Story.t()} | {:error, Error.t()}
+      @spec post_story(
+              Client.t(),
+              binary,
+              Nadia.InputStoryContent.t() | list | map | struct | binary,
               integer,
               [{atom, any}] | map
             ) :: {:ok, Story.t()} | {:error, Error.t()}
@@ -751,7 +778,8 @@ defmodule Nadia.Methods.Business do
       Args:
       * `business_connection_id` - Unique identifier of the business connection
       * `story_id` - Unique identifier of the story to edit
-      * `content` - JSON-serializable story content object or a pre-encoded JSON string
+      * `content` - `Nadia.InputStoryContent` value, compatible
+        JSON-serializable story content object, or a pre-encoded JSON string
       * `options` - keyword list or map of options
 
       Options:
@@ -760,17 +788,31 @@ defmodule Nadia.Methods.Business do
       * `:caption_entities` - JSON-serializable caption entities array or a pre-encoded JSON string
       * `:areas` - JSON-serializable story areas array or a pre-encoded JSON string
       """
-      @spec edit_story(binary, integer, list | map | struct | binary) ::
+      @spec edit_story(
+              binary,
+              integer,
+              Nadia.InputStoryContent.t() | list | map | struct | binary
+            ) ::
               {:ok, Story.t()} | {:error, Error.t()}
-      @spec edit_story(binary, integer, list | map | struct | binary, [{atom, any}] | map) ::
-              {:ok, Story.t()} | {:error, Error.t()}
-      @spec edit_story(Client.t(), binary, integer, list | map | struct | binary) ::
+      @spec edit_story(
+              binary,
+              integer,
+              Nadia.InputStoryContent.t() | list | map | struct | binary,
+              [{atom, any}] | map
+            ) ::
               {:ok, Story.t()} | {:error, Error.t()}
       @spec edit_story(
               Client.t(),
               binary,
               integer,
-              list | map | struct | binary,
+              Nadia.InputStoryContent.t() | list | map | struct | binary
+            ) ::
+              {:ok, Story.t()} | {:error, Error.t()}
+      @spec edit_story(
+              Client.t(),
+              binary,
+              integer,
+              Nadia.InputStoryContent.t() | list | map | struct | binary,
               [{atom, any}] | map
             ) :: {:ok, Story.t()} | {:error, Error.t()}
       def edit_story(business_connection_id, story_id, content) do

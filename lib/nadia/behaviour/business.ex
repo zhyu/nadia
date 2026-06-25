@@ -82,22 +82,25 @@ defmodule Nadia.Behaviour.Business do
       @callback set_business_account_bio(Client.t(), binary) :: :ok | {:error, Error.t()}
       @callback set_business_account_bio(Client.t(), binary, [{atom, any}] | map) ::
                   :ok | {:error, Error.t()}
-      @callback set_business_account_profile_photo(binary, list | map | struct | binary) ::
+      @callback set_business_account_profile_photo(
+                  binary,
+                  Nadia.InputProfilePhoto.t() | list | map | struct | binary
+                ) ::
                   :ok | {:error, Error.t()}
       @callback set_business_account_profile_photo(
                   binary,
-                  list | map | struct | binary,
+                  Nadia.InputProfilePhoto.t() | list | map | struct | binary,
                   [{atom, any}] | map
                 ) :: :ok | {:error, Error.t()}
       @callback set_business_account_profile_photo(
                   Client.t(),
                   binary,
-                  list | map | struct | binary
+                  Nadia.InputProfilePhoto.t() | list | map | struct | binary
                 ) :: :ok | {:error, Error.t()}
       @callback set_business_account_profile_photo(
                   Client.t(),
                   binary,
-                  list | map | struct | binary,
+                  Nadia.InputProfilePhoto.t() | list | map | struct | binary,
                   [{atom, any}] | map
                 ) :: :ok | {:error, Error.t()}
       @callback remove_business_account_profile_photo(binary) :: :ok | {:error, Error.t()}
@@ -132,30 +135,58 @@ defmodule Nadia.Behaviour.Business do
       @callback transfer_gift(Client.t(), binary, binary, integer) :: :ok | {:error, Error.t()}
       @callback transfer_gift(Client.t(), binary, binary, integer, [{atom, any}] | map) ::
                   :ok | {:error, Error.t()}
-      @callback post_story(binary, list | map | struct | binary, integer) ::
+      @callback post_story(
+                  binary,
+                  Nadia.InputStoryContent.t() | list | map | struct | binary,
+                  integer
+                ) ::
                   {:ok, Story.t()} | {:error, Error.t()}
-      @callback post_story(binary, list | map | struct | binary, integer, [{atom, any}] | map) ::
-                  {:ok, Story.t()} | {:error, Error.t()}
-      @callback post_story(Client.t(), binary, list | map | struct | binary, integer) ::
+      @callback post_story(
+                  binary,
+                  Nadia.InputStoryContent.t() | list | map | struct | binary,
+                  integer,
+                  [{atom, any}] | map
+                ) ::
                   {:ok, Story.t()} | {:error, Error.t()}
       @callback post_story(
                   Client.t(),
                   binary,
-                  list | map | struct | binary,
+                  Nadia.InputStoryContent.t() | list | map | struct | binary,
+                  integer
+                ) ::
+                  {:ok, Story.t()} | {:error, Error.t()}
+      @callback post_story(
+                  Client.t(),
+                  binary,
+                  Nadia.InputStoryContent.t() | list | map | struct | binary,
                   integer,
                   [{atom, any}] | map
                 ) :: {:ok, Story.t()} | {:error, Error.t()}
-      @callback edit_story(binary, integer, list | map | struct | binary) ::
+      @callback edit_story(
+                  binary,
+                  integer,
+                  Nadia.InputStoryContent.t() | list | map | struct | binary
+                ) ::
                   {:ok, Story.t()} | {:error, Error.t()}
-      @callback edit_story(binary, integer, list | map | struct | binary, [{atom, any}] | map) ::
-                  {:ok, Story.t()} | {:error, Error.t()}
-      @callback edit_story(Client.t(), binary, integer, list | map | struct | binary) ::
+      @callback edit_story(
+                  binary,
+                  integer,
+                  Nadia.InputStoryContent.t() | list | map | struct | binary,
+                  [{atom, any}] | map
+                ) ::
                   {:ok, Story.t()} | {:error, Error.t()}
       @callback edit_story(
                   Client.t(),
                   binary,
                   integer,
-                  list | map | struct | binary,
+                  Nadia.InputStoryContent.t() | list | map | struct | binary
+                ) ::
+                  {:ok, Story.t()} | {:error, Error.t()}
+      @callback edit_story(
+                  Client.t(),
+                  binary,
+                  integer,
+                  Nadia.InputStoryContent.t() | list | map | struct | binary,
                   [{atom, any}] | map
                 ) :: {:ok, Story.t()} | {:error, Error.t()}
       @callback delete_story(binary, integer) :: :ok | {:error, Error.t()}

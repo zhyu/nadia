@@ -98,7 +98,11 @@ defmodule Nadia.Mixfile do
           Nadia.Client,
           Nadia.InputFile,
           Nadia.InputMedia,
-          Nadia.InputSticker
+          Nadia.InputPaidMedia,
+          Nadia.InputPollMedia,
+          Nadia.InputProfilePhoto,
+          Nadia.InputSticker,
+          Nadia.InputStoryContent
         ],
         "Bot Runtime": [
           Nadia.Context,

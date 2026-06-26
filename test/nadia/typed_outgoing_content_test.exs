@@ -8,9 +8,15 @@ defmodule Nadia.TypedOutgoingContentTest do
   alias Nadia.InputPollOption
   alias Nadia.InputPollMedia
   alias Nadia.InputProfilePhoto
+  alias Nadia.InputContactMessageContent
+  alias Nadia.InputInvoiceMessageContent
+  alias Nadia.InputLocationMessageContent
   alias Nadia.InputRichMessage
   alias Nadia.InputRichMessageContent
   alias Nadia.InputStoryContent
+  alias Nadia.InputTextMessageContent
+  alias Nadia.InputVenueMessageContent
+  alias Nadia.LabeledPrice
   alias Nadia.ReactionType
   alias Nadia.StoryArea
   alias Nadia.Model.Error
@@ -26,6 +32,14 @@ defmodule Nadia.TypedOutgoingContentTest do
 
   defmodule LegacyRichMessage do
     defstruct [:html, :is_rtl, :future_nil]
+  end
+
+  defmodule LegacyInputMessageContent do
+    defstruct [:message_text, :link_preview_options, :future_nil]
+  end
+
+  defmodule LegacyInlineResult do
+    defstruct [:type, :id, :title, :input_message_content, :future_nil]
   end
 
   defmodule LegacyStoryArea do
@@ -494,6 +508,245 @@ defmodule Nadia.TypedOutgoingContentTest do
     refute_receive {:nadia_http_request, _request}
   end
 
+  test "typed input message content variants traverse every inline-result request path" do
+    cases = [
+      {
+        InputTextMessageContent.new("Typed text",
+          link_preview_options: [is_disabled: false, show_above_text: false]
+        ),
+        %{
+          "message_text" => "Typed text",
+          "link_preview_options" => %{"is_disabled" => false, "show_above_text" => false}
+        }
+      },
+      {
+        InputInvoiceMessageContent.stars(
+          "Stars",
+          "Inline Stars",
+          "stars-payload",
+          LabeledPrice.new("Stars", 50),
+          need_email: false
+        ),
+        %{
+          "title" => "Stars",
+          "description" => "Inline Stars",
+          "payload" => "stars-payload",
+          "currency" => "XTR",
+          "prices" => [%{"label" => "Stars", "amount" => 50}],
+          "provider_token" => "",
+          "need_email" => false
+        }
+      },
+      {
+        InputLocationMessageContent.new(35.6762, 139.6503,
+          horizontal_accuracy: 0,
+          live_period: 60
+        ),
+        %{
+          "latitude" => 35.6762,
+          "longitude" => 139.6503,
+          "horizontal_accuracy" => 0,
+          "live_period" => 60
+        }
+      },
+      {
+        InputVenueMessageContent.new(35.6762, 139.6503, "Nadia Cafe", "1 Bot Street",
+          google_place_type: "cafe"
+        ),
+        %{
+          "latitude" => 35.6762,
+          "longitude" => 139.6503,
+          "title" => "Nadia Cafe",
+          "address" => "1 Bot Street",
+          "google_place_type" => "cafe"
+        }
+      },
+      {
+        InputContactMessageContent.new("+15550123", "Nadia",
+          last_name: "",
+          vcard: "BEGIN:VCARD\nEND:VCARD"
+        ),
+        %{
+          "phone_number" => "+15550123",
+          "first_name" => "Nadia",
+          "last_name" => "",
+          "vcard" => "BEGIN:VCARD\nEND:VCARD"
+        }
+      }
+    ]
+
+    for {content, expected_content} <- cases do
+      result = %InlineQueryResult.Article{
+        id: "typed-content-#{System.unique_integer([:positive])}",
+        title: "Typed content",
+        input_message_content: content
+      }
+
+      for {method, field, response, call} <- inline_result_paths(result) do
+        stub_telegram_result(response)
+
+        case call.() do
+          :ok -> :ok
+          {:ok, _value} -> :ok
+        end
+
+        assert expected_content ==
+                 assert_inline_result_input_content(assert_telegram_request(method), field)
+      end
+    end
+  end
+
+  test "typed labeled prices integrate with invoice wrappers" do
+    stub_telegram_result(message_result())
+
+    assert {:ok, %Nadia.Model.Message{}} =
+             Nadia.send_invoice(
+               123,
+               "Typed prices",
+               "Existing invoice wrapper",
+               "payload",
+               "USD",
+               [LabeledPrice.new("Base", 100), LabeledPrice.new("Discount", -10)],
+               need_email: false
+             )
+
+    params = form_params(assert_telegram_request("sendInvoice"))
+
+    assert Jason.decode!(params["prices"]) == [
+             %{"label" => "Base", "amount" => 100},
+             %{"label" => "Discount", "amount" => -10}
+           ]
+
+    assert params["need_email"] == "false"
+
+    malformed = struct(LabeledPrice, fields: %{label: "Base", amount: "100"})
+
+    assert {:error, %Error{reason: {:labeled_price, {:invalid_amount, "100"}}}} =
+             Nadia.create_invoice_link(
+               "Bad",
+               "Malformed typed price",
+               "payload",
+               "USD",
+               [malformed]
+             )
+
+    refute_receive {:nadia_http_request, _request}
+  end
+
+  test "malformed typed input message content fails before HTTP" do
+    cases = [
+      {struct(InputTextMessageContent, fields: %{message_text: ""}),
+       {:input_text_message_content, :invalid_message_text}},
+      {struct(InputInvoiceMessageContent, fields: invoice_content_fields(%{prices: []})),
+       {:input_invoice_message_content, {:prices_size, 0}}},
+      {struct(InputLocationMessageContent, fields: %{latitude: 91, longitude: 0}),
+       {:input_location_message_content, {:out_of_range, :latitude, 91, -90, 90}}},
+      {struct(InputVenueMessageContent,
+         fields: %{latitude: 0, longitude: 181, title: "T", address: "A"}
+       ), {:input_venue_message_content, {:out_of_range, :longitude, 181, -180, 180}}},
+      {struct(InputContactMessageContent, fields: %{phone_number: "", first_name: "Nadia"}),
+       {:input_contact_message_content, {:required, :phone_number}}}
+    ]
+
+    for {content, expected_reason} <- cases do
+      result = %InlineQueryResult.Article{
+        id: "malformed-content",
+        title: "Malformed content",
+        input_message_content: content
+      }
+
+      assert {:error, %Error{reason: ^expected_reason}} =
+               Nadia.answer_inline_query("query", [result])
+
+      refute_receive {:nadia_http_request, _request}
+    end
+  end
+
+  test "raw mixed and preencoded input message content compatibility remains pass-through" do
+    mixed = [
+      %InlineQueryResult.Article{
+        id: "typed",
+        title: "Typed",
+        input_message_content: InputTextMessageContent.new("Typed")
+      },
+      %{
+        type: "article",
+        id: "raw-map",
+        title: "Raw map",
+        input_message_content: %{
+          "message_text" => "Raw map",
+          "future" => false
+        }
+      },
+      [
+        type: "article",
+        id: "keyword",
+        title: "Keyword",
+        input_message_content: [
+          message_text: "Keyword content",
+          link_preview_options: [is_disabled: false],
+          future_nil: nil
+        ]
+      ],
+      %LegacyInlineResult{
+        type: "article",
+        id: "struct",
+        title: "Struct",
+        input_message_content: %LegacyInputMessageContent{
+          message_text: "Struct content",
+          link_preview_options: %{is_disabled: false},
+          future_nil: nil
+        },
+        future_nil: nil
+      }
+    ]
+
+    stub_telegram_result(true)
+    assert :ok = Nadia.answer_inline_query("query", mixed)
+
+    params = form_params(assert_telegram_request("answerInlineQuery"))
+    assert [typed, raw_map, keyword, struct_result] = Jason.decode!(params["results"])
+
+    assert typed["input_message_content"] == %{"message_text" => "Typed"}
+    assert raw_map["input_message_content"]["future"] == false
+
+    assert keyword["input_message_content"] == %{
+             "message_text" => "Keyword content",
+             "link_preview_options" => %{"is_disabled" => false}
+           }
+
+    assert struct_result["input_message_content"] == %{
+             "message_text" => "Struct content",
+             "link_preview_options" => %{"is_disabled" => false}
+           }
+
+    preencoded_results =
+      Jason.encode!([
+        %{type: "article", id: "json", title: "JSON", input_message_content: %{future: false}}
+      ])
+
+    stub_telegram_result(true)
+    assert :ok = Nadia.answer_inline_query("query", preencoded_results)
+
+    assert form_params(assert_telegram_request("answerInlineQuery"))["results"] ==
+             preencoded_results
+
+    preencoded_result =
+      Jason.encode!(%{
+        type: "article",
+        id: "json-result",
+        title: "JSON result",
+        input_message_content: %{future: false}
+      })
+
+    stub_telegram_result(%{inline_message_id: "preencoded-guest"})
+
+    assert {:ok, %Nadia.Model.SentGuestMessage{}} =
+             Nadia.answer_guest_query("guest", preencoded_result)
+
+    assert form_params(assert_telegram_request("answerGuestQuery"))["result"] == preencoded_result
+  end
+
   test "typed story areas integrate with post and edit and enforce variant limits" do
     position = StoryArea.position(50, 50, 20, 10, 0, 2)
 
@@ -805,6 +1058,39 @@ defmodule Nadia.TypedOutgoingContentTest do
     }
   end
 
+  defp inline_result_paths(result) do
+    [
+      {"answerInlineQuery", "results", true,
+       fn ->
+         Nadia.answer_inline_query("query", [result])
+       end},
+      {"answerGuestQuery", "result", %{inline_message_id: "guest-inline"},
+       fn ->
+         Nadia.answer_guest_query("guest", result)
+       end},
+      {"answerWebAppQuery", "result", %{inline_message_id: "web-app-inline"},
+       fn ->
+         Nadia.answer_web_app_query("web-app", result)
+       end},
+      {"savePreparedInlineMessage", "result", %{id: "prepared", expiration_date: 1_800_000_000},
+       fn ->
+         Nadia.save_prepared_inline_message(123, result)
+       end}
+    ]
+  end
+
+  defp assert_inline_result_input_content(request, field) do
+    request
+    |> form_params()
+    |> Map.fetch!(field)
+    |> Jason.decode!()
+    |> case do
+      [result] -> result
+      result -> result
+    end
+    |> Map.fetch!("input_message_content")
+  end
+
   defp assert_typed_rich_inline_result(request, field) do
     result =
       request
@@ -815,6 +1101,19 @@ defmodule Nadia.TypedOutgoingContentTest do
     assert result["input_message_content"] == %{
              "rich_message" => %{"markdown" => "**Inline**", "is_rtl" => false}
            }
+  end
+
+  defp invoice_content_fields(overrides) do
+    Map.merge(
+      %{
+        title: "Title",
+        description: "Description",
+        payload: "payload",
+        currency: "USD",
+        prices: [LabeledPrice.new("Base", 100)]
+      },
+      overrides
+    )
   end
 
   defp temporary_file(filename, contents) do

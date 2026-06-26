@@ -94,6 +94,11 @@ Nadia.answer_inline_query(client, inline_query_id, [result])
 
 Typed inline content is traversed by the same JSON encoder used for inline
 queries, guest replies, Web App replies, and prepared inline messages.
+The other current inline content variants have typed builders too:
+`Nadia.InputTextMessageContent`, `Nadia.InputInvoiceMessageContent`,
+`Nadia.InputLocationMessageContent`, `Nadia.InputVenueMessageContent`, and
+`Nadia.InputContactMessageContent`. Invoice price portions can use
+`Nadia.LabeledPrice`.
 
 ## Add Clickable Story Areas
 
@@ -157,6 +162,7 @@ Suggested reactions support `ReactionType.emoji/1`,
 | --- | --- | --- | --- | --- | --- |
 | `InputRichMessage` | Yes | Yes | Yes | Through `InputRichMessageContent` | No |
 | `<tg-thinking>` in typed rich content | No | Yes | No | No | No |
+| `Input*MessageContent` | No | No | No | Yes | No |
 | `InputPollOption` | `sendPoll` only | No | No | No | No |
 | `StoryArea` | No | No | No | No | Yes |
 

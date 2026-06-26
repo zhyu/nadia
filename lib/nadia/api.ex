@@ -190,6 +190,27 @@ defmodule Nadia.API do
     end
   end
 
+  defp normalize_json_value(%Nadia.InputContactMessageContent{} = input_content, state) do
+    case Nadia.InputContactMessageContent.to_map(input_content) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_contact_message_content, reason}}
+    end
+  end
+
+  defp normalize_json_value(%Nadia.InputInvoiceMessageContent{} = input_content, state) do
+    case Nadia.InputInvoiceMessageContent.to_map(input_content) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_invoice_message_content, reason}}
+    end
+  end
+
+  defp normalize_json_value(%Nadia.InputLocationMessageContent{} = input_content, state) do
+    case Nadia.InputLocationMessageContent.to_map(input_content) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_location_message_content, reason}}
+    end
+  end
+
   defp normalize_json_value(%Nadia.InputMedia{} = input_media, state) do
     case Nadia.InputMedia.to_map(input_media) do
       {:ok, value} -> normalize_json_value(value, state)
@@ -239,6 +260,27 @@ defmodule Nadia.API do
     case Nadia.InputRichMessageContent.to_map(input_rich_message_content) do
       {:ok, value} -> normalize_json_value(value, state)
       {:error, reason} -> {:error, {:input_rich_message_content, reason}}
+    end
+  end
+
+  defp normalize_json_value(%Nadia.InputTextMessageContent{} = input_content, state) do
+    case Nadia.InputTextMessageContent.to_map(input_content) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_text_message_content, reason}}
+    end
+  end
+
+  defp normalize_json_value(%Nadia.InputVenueMessageContent{} = input_content, state) do
+    case Nadia.InputVenueMessageContent.to_map(input_content) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_venue_message_content, reason}}
+    end
+  end
+
+  defp normalize_json_value(%Nadia.LabeledPrice{} = labeled_price, state) do
+    case Nadia.LabeledPrice.to_map(labeled_price) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:labeled_price, reason}}
     end
   end
 
@@ -445,6 +487,13 @@ defmodule Nadia.API do
 
   defp collect_attach_names(%JSONPayload{value: value}, names),
     do: collect_attach_names(value, names)
+
+  defp collect_attach_names(%Nadia.InputContactMessageContent{}, names), do: names
+  defp collect_attach_names(%Nadia.InputInvoiceMessageContent{}, names), do: names
+  defp collect_attach_names(%Nadia.InputLocationMessageContent{}, names), do: names
+  defp collect_attach_names(%Nadia.InputTextMessageContent{}, names), do: names
+  defp collect_attach_names(%Nadia.InputVenueMessageContent{}, names), do: names
+  defp collect_attach_names(%Nadia.LabeledPrice{}, names), do: names
 
   defp collect_attach_names(%Nadia.InputMedia{} = value, names) do
     case Nadia.InputMedia.to_map(value) do

@@ -207,11 +207,13 @@ semantics.
 Typed outgoing-content helpers include `Nadia.InputMedia`,
 `Nadia.InputPaidMedia`, `Nadia.InputPollMedia`, `Nadia.InputPollOption`,
 `Nadia.InputProfilePhoto`, `Nadia.InputRichMessage`,
-`Nadia.InputRichMessageContent`, `Nadia.InputStoryContent`,
-`Nadia.InputSticker`, `Nadia.ReactionType`, and `Nadia.StoryArea`. Their
-constructors reject locally detectable mistakes; raw maps, keyword lists,
-structs, mixed lists, and pre-encoded JSON remain available as compatibility
-escape hatches.
+`Nadia.InputRichMessageContent`, `Nadia.InputTextMessageContent`,
+`Nadia.InputInvoiceMessageContent`, `Nadia.InputLocationMessageContent`,
+`Nadia.InputVenueMessageContent`, `Nadia.InputContactMessageContent`,
+`Nadia.InputStoryContent`, `Nadia.InputSticker`, `Nadia.LabeledPrice`,
+`Nadia.ReactionType`, and `Nadia.StoryArea`. Their constructors reject locally
+detectable mistakes; raw maps, keyword lists, structs, mixed lists, and
+pre-encoded JSON remain available as compatibility escape hatches.
 
 ## License
 

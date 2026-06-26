@@ -1,10 +1,15 @@
 defmodule Nadia.Model.InputMessageContent do
   @type t ::
           Nadia.Model.InputMessageContent.Text.t()
+          | Nadia.InputTextMessageContent.t()
+          | Nadia.InputInvoiceMessageContent.t()
           | Nadia.InputRichMessageContent.t()
           | Nadia.Model.InputMessageContent.Location.t()
+          | Nadia.InputLocationMessageContent.t()
           | Nadia.Model.InputMessageContent.Venue.t()
+          | Nadia.InputVenueMessageContent.t()
           | Nadia.Model.InputMessageContent.Contact.t()
+          | Nadia.InputContactMessageContent.t()
 
   defmodule Text do
     @derive Jason.Encoder

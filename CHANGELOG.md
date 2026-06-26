@@ -39,6 +39,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added complete typed `Nadia.StoryArea` and `Nadia.ReactionType` construction
   for positions, location addresses, locations, suggested reactions, links,
   weather, and unique gifts, including official per-story variant limits.
+- Added typed inline `InputMessageContent` builders for text, invoice,
+  location, venue, and contact content, plus `Nadia.LabeledPrice` for invoice
+  price portions.
 - Added upload-only `Nadia.InputProfilePhoto` and `Nadia.InputStoryContent`
   builders with fixed discriminators and locally enforceable timestamp,
   duration, source, and boolean validation.
@@ -82,9 +85,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Expanded paid-media and poll structured-field encoding, preserved explicit
   false values, and integrated typed profile-photo and story uploads without
   narrowing raw map, keyword, struct, or pre-encoded JSON compatibility.
-- Expanded poll, rich-message, inline-result, and story-area encoding without
-  narrowing raw maps, keyword lists, arbitrary structs, mixed lists, or
-  pre-encoded JSON compatibility; malformed typed values now fail before HTTP.
+- Expanded poll, rich-message, inline-result, inline-message-content, and
+  story-area encoding without narrowing raw maps, keyword lists, arbitrary
+  structs, mixed lists, or pre-encoded JSON compatibility; malformed typed
+  values now fail before HTTP.
 
 ## 1.5.0 - 2026-06-13
 

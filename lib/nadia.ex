@@ -135,6 +135,9 @@ defmodule Nadia do
   end
 
   defp json_payload_value(%Nadia.InputFile{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputContactMessageContent{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputInvoiceMessageContent{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputLocationMessageContent{} = payload), do: payload
   defp json_payload_value(%Nadia.InputMedia{} = payload), do: payload
   defp json_payload_value(%Nadia.InputPaidMedia{} = payload), do: payload
   defp json_payload_value(%Nadia.InputPollOption{} = payload), do: payload
@@ -142,6 +145,9 @@ defmodule Nadia do
   defp json_payload_value(%Nadia.InputProfilePhoto{} = payload), do: payload
   defp json_payload_value(%Nadia.InputRichMessage{} = payload), do: payload
   defp json_payload_value(%Nadia.InputRichMessageContent{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputTextMessageContent{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputVenueMessageContent{} = payload), do: payload
+  defp json_payload_value(%Nadia.LabeledPrice{} = payload), do: payload
   defp json_payload_value(%Nadia.ReactionType{} = payload), do: payload
   defp json_payload_value(%Nadia.InputSticker{} = payload), do: payload
   defp json_payload_value(%Nadia.StoryArea{} = payload), do: payload

@@ -4442,6 +4442,28 @@ defmodule Nadia.APITest do
     )
   end
 
+  test "request rejects invalid option shapes before HTTP" do
+    assert {:error, %Error{reason: :invalid_options}} = API.request("getUpdates", 43)
+    refute_received {:nadia_http_request, _request}
+
+    assert {:error, %Error{reason: :invalid_options}} = API.request("getUpdates", [:limit])
+    refute_received {:nadia_http_request, _request}
+  end
+
+  test "request rejects missing default tokens before HTTP" do
+    Application.delete_env(:nadia, :token)
+
+    assert {:error, %Error{reason: :missing_token}} = API.request("getMe")
+    refute_received {:nadia_http_request, _request}
+  end
+
+  test "request/4 rejects explicit clients with missing tokens before HTTP" do
+    client = Client.new(token: nil, http_client: Nadia.HTTPCase.StubHTTPClient)
+
+    assert {:error, %Error{reason: :missing_token}} = API.request(client, "getMe", [], nil)
+    refute_received {:nadia_http_request, _request}
+  end
+
   test "request returns :ok for true responses" do
     stub_telegram_result(true)
 

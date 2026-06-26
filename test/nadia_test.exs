@@ -4,6 +4,7 @@ defmodule NadiaTest do
   doctest Nadia, only: [get_file_link: 1]
 
   alias Nadia.Model.{
+    Error,
     File,
     InlineQueryResult,
     Message,
@@ -156,6 +157,9 @@ defmodule NadiaTest do
       )
 
     assert [%Nadia.Model.Update{message: %Message{text: "hello"}}] = updates
+
+    assert {:error, %Error{reason: :invalid_options}} = Nadia.get_updates(43)
+    refute_received {:nadia_http_request, _request}
 
     assert {:ok, []} =
              assert_wrapper_call(

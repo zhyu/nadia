@@ -17,6 +17,28 @@ defmodule Nadia.API do
 
   defp build_url(%Client{} = client, method), do: client.base_url <> client.token <> "/" <> method
 
+  defp validate_request(%Client{} = client, options) do
+    with :ok <- validate_token(client.token),
+         :ok <- validate_options(options) do
+      :ok
+    end
+  end
+
+  defp validate_token(token) when is_binary(token) and byte_size(token) > 0, do: :ok
+  defp validate_token(_token), do: {:error, :missing_token}
+
+  defp validate_options(options) when is_map(options), do: :ok
+
+  defp validate_options(options) when is_list(options) do
+    if Enum.all?(options, &match?({_key, _value}, &1)) do
+      :ok
+    else
+      {:error, :invalid_options}
+    end
+  end
+
+  defp validate_options(_options), do: {:error, :invalid_options}
+
   defp process_response(response, method) do
     case decode_response(response) do
       {:ok, true} ->
@@ -626,18 +648,18 @@ defmodule Nadia.API do
   @spec request(Client.t(), binary, [{atom, any}] | map, atom | nil) ::
           :ok | {:error, Error.t()} | {:ok, any}
   def request(%Client{} = client, method, options, file_field) do
-    case build_request(options, file_field) do
-      {:ok, body} ->
-        %HTTPRequest{
-          method: :post,
-          url: build_url(client, method),
-          body: body,
-          headers: [],
-          options: build_options(client, options)
-        }
-        |> then(&HTTPClient.post(client.http_client, &1))
-        |> process_response(method)
-
+    with :ok <- validate_request(client, options),
+         {:ok, body} <- build_request(options, file_field) do
+      %HTTPRequest{
+        method: :post,
+        url: build_url(client, method),
+        body: body,
+        headers: [],
+        options: build_options(client, options)
+      }
+      |> then(&HTTPClient.post(client.http_client, &1))
+      |> process_response(method)
+    else
       {:error, reason} ->
         {:error, %Error{reason: reason}}
     end

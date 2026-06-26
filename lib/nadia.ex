@@ -394,6 +394,8 @@ defmodule Nadia do
     update_map_option(options, key, &encode_json_payload/1)
   end
 
+  defp encode_json_option(options, _key), do: options
+
   defp encode_json_array_option(options, key) when is_list(options) do
     Keyword.update(options, key, nil, &encode_json_array_payload/1)
   end
@@ -401,6 +403,8 @@ defmodule Nadia do
   defp encode_json_array_option(options, key) when is_map(options) do
     update_map_option(options, key, &encode_json_array_payload/1)
   end
+
+  defp encode_json_array_option(options, _key), do: options
 
   defp update_map_option(options, key, encoder) do
     string_key = Atom.to_string(key)

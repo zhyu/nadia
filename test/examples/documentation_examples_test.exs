@@ -279,6 +279,8 @@ defmodule Nadia.DocumentationExamplesTest do
     assert_receive {:nadia_request, %HTTPRequest{body: {:multipart, story_parts}}}
     assert {"content", encoded_story} = List.keyfind(story_parts, "content", 0)
     assert Jason.decode!(encoded_story)["type"] == "photo"
+    assert {"areas", encoded_story_areas} = List.keyfind(story_parts, "areas", 0)
+    assert [%{"type" => %{"type" => "link"}}] = Jason.decode!(encoded_story_areas)
 
     assert {:ok, %Message{}} = Nadia.Examples.MediaFiles.send_media_poll(client, 123)
     assert_receive {:nadia_request, %HTTPRequest{body: {:form, poll_params}}}
@@ -287,6 +289,13 @@ defmodule Nadia.DocumentationExamplesTest do
     assert {"options", encoded_poll_options} = List.keyfind(poll_params, "options", 0)
     assert [first_option, _] = Jason.decode!(encoded_poll_options)
     assert first_option["media"]["type"] == "link"
+
+    assert {:ok, %Message{}} = Nadia.Examples.MediaFiles.send_rich_message(client, 123)
+    assert_receive {:nadia_request, %HTTPRequest{body: {:form, rich_params}}}
+    assert {"rich_message", encoded_rich_message} = List.keyfind(rich_params, "rich_message", 0)
+
+    assert %{"html" => "<h2>Nadia</h2><p>Typed Telegram Bot API helpers.</p>"} =
+             Jason.decode!(encoded_rich_message)
   end
 
   test "media example streams a bounded download without exposing the token" do

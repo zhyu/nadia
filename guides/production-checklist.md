@@ -86,6 +86,11 @@ See [Errors And Rate Limits](examples/errors-and-rate-limits.md) for tested
 * Prefer typed outgoing-content builders when uploads have context-specific
   rules. Profile-photo and story builders reject reusable file IDs and URLs;
   paid and poll media validate their typed variant contexts before HTTP.
+  Typed poll options validate locally knowable option and quiz relationships,
+  while typed story areas enforce documented per-variant counts.
+* Treat rich HTML and Markdown as untrusted structured input. Nadia validates
+  UTF-8, length, flags, and typed context, but Telegram remains the parser and
+  enforces syntax, nesting, media permissions, rendered structure, and layout.
 * Set `:max_bytes` on application-controlled uploads. Nadia does not inspect
   image dimensions, codecs, keyframes, MIME truth, or sticker contents, so
   Telegram can still reject a locally valid typed payload.

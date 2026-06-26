@@ -95,19 +95,23 @@ defmodule Nadia.Behaviour.Interactions do
                   {:ok, PreparedKeyboardButton.t()} | {:error, Error.t()}
       @callback save_prepared_keyboard_button(Client.t(), integer, list | map | struct | binary) ::
                   {:ok, PreparedKeyboardButton.t()} | {:error, Error.t()}
-      @callback edit_message_text(integer | binary, integer | nil, binary | nil, binary | nil, [
-                  {atom, any}
-                ]) ::
-                  {:ok, Message.t()} | {:error, Error.t()}
       @callback edit_message_text(
-                  Client.t(),
-                  integer | binary,
+                  integer | binary | nil,
                   integer | nil,
                   binary | nil,
                   binary | nil,
-                  [{atom, any}]
+                  [{atom, any}] | map
                 ) ::
-                  {:ok, Message.t()} | {:error, Error.t()}
+                  :ok | {:ok, Message.t()} | {:error, Error.t()}
+      @callback edit_message_text(
+                  Client.t(),
+                  integer | binary | nil,
+                  integer | nil,
+                  binary | nil,
+                  binary | nil,
+                  [{atom, any}] | map
+                ) ::
+                  :ok | {:ok, Message.t()} | {:error, Error.t()}
       @callback edit_message_caption(integer | binary, integer, binary, [{atom, any}]) ::
                   {:ok, Message.t()} | {:error, Error.t()}
       @callback edit_message_caption(Client.t(), integer | binary, integer, binary, [{atom, any}]) ::

@@ -29,6 +29,16 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added `Nadia.InputPollMedia` link, location, sticker, and venue builders with
   context-aware validation for poll descriptions, quiz explanations, and poll
   options.
+- Added `Nadia.InputPollOption` with UTF-8 and text-length validation, typed
+  option-media validation, and locally knowable option-count and quiz
+  `correct_option_ids` checks.
+- Added `Nadia.InputRichMessage` HTML and Markdown builders plus
+  `Nadia.InputRichMessageContent` for inline results, with context-aware
+  draft-only construct checks and typed integration across send, draft, edit,
+  guest, Web App, prepared-inline, and inline-query result paths.
+- Added complete typed `Nadia.StoryArea` and `Nadia.ReactionType` construction
+  for positions, location addresses, locations, suggested reactions, links,
+  weather, and unique gifts, including official per-story variant limits.
 - Added upload-only `Nadia.InputProfilePhoto` and `Nadia.InputStoryContent`
   builders with fixed discriminators and locally enforceable timestamp,
   duration, source, and boolean validation.
@@ -72,6 +82,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Expanded paid-media and poll structured-field encoding, preserved explicit
   false values, and integrated typed profile-photo and story uploads without
   narrowing raw map, keyword, struct, or pre-encoded JSON compatibility.
+- Expanded poll, rich-message, inline-result, and story-area encoding without
+  narrowing raw maps, keyword lists, arbitrary structs, mixed lists, or
+  pre-encoded JSON compatibility; malformed typed values now fail before HTTP.
 
 ## 1.5.0 - 2026-06-13
 

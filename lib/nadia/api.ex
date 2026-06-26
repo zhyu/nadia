@@ -204,6 +204,13 @@ defmodule Nadia.API do
     end
   end
 
+  defp normalize_json_value(%Nadia.InputPollOption{} = input_poll_option, state) do
+    case Nadia.InputPollOption.to_map(input_poll_option) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_poll_option, reason}}
+    end
+  end
+
   defp normalize_json_value(%Nadia.InputPollMedia{} = input_poll_media, state) do
     case Nadia.InputPollMedia.to_map(input_poll_media) do
       {:ok, value} -> normalize_json_value(value, state)
@@ -218,10 +225,41 @@ defmodule Nadia.API do
     end
   end
 
+  defp normalize_json_value(%Nadia.InputRichMessage{} = input_rich_message, state) do
+    case Nadia.InputRichMessage.to_map(input_rich_message) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_rich_message, reason}}
+    end
+  end
+
+  defp normalize_json_value(
+         %Nadia.InputRichMessageContent{} = input_rich_message_content,
+         state
+       ) do
+    case Nadia.InputRichMessageContent.to_map(input_rich_message_content) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:input_rich_message_content, reason}}
+    end
+  end
+
+  defp normalize_json_value(%Nadia.ReactionType{} = reaction_type, state) do
+    case Nadia.ReactionType.to_map(reaction_type) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:reaction_type, reason}}
+    end
+  end
+
   defp normalize_json_value(%Nadia.InputSticker{} = input_sticker, state) do
     case Nadia.InputSticker.to_map(input_sticker) do
       {:ok, value} -> normalize_json_value(value, state)
       {:error, reason} -> {:error, {:input_sticker, reason}}
+    end
+  end
+
+  defp normalize_json_value(%Nadia.StoryArea{} = story_area, state) do
+    case Nadia.StoryArea.to_map(story_area) do
+      {:ok, value} -> normalize_json_value(value, state)
+      {:error, reason} -> {:error, {:story_area, reason}}
     end
   end
 
@@ -422,6 +460,13 @@ defmodule Nadia.API do
     end
   end
 
+  defp collect_attach_names(%Nadia.InputPollOption{} = value, names) do
+    case Nadia.InputPollOption.to_map(value) do
+      {:ok, value} -> collect_attach_names(value, names)
+      {:error, _reason} -> names
+    end
+  end
+
   defp collect_attach_names(%Nadia.InputPollMedia{} = value, names) do
     case Nadia.InputPollMedia.to_map(value) do
       {:ok, value} -> collect_attach_names(value, names)
@@ -436,8 +481,36 @@ defmodule Nadia.API do
     end
   end
 
+  defp collect_attach_names(%Nadia.InputRichMessage{} = value, names) do
+    case Nadia.InputRichMessage.to_map(value) do
+      {:ok, value} -> collect_attach_names(value, names)
+      {:error, _reason} -> names
+    end
+  end
+
+  defp collect_attach_names(%Nadia.InputRichMessageContent{} = value, names) do
+    case Nadia.InputRichMessageContent.to_map(value) do
+      {:ok, value} -> collect_attach_names(value, names)
+      {:error, _reason} -> names
+    end
+  end
+
+  defp collect_attach_names(%Nadia.ReactionType{} = value, names) do
+    case Nadia.ReactionType.to_map(value) do
+      {:ok, value} -> collect_attach_names(value, names)
+      {:error, _reason} -> names
+    end
+  end
+
   defp collect_attach_names(%Nadia.InputSticker{} = value, names) do
     case Nadia.InputSticker.to_map(value) do
+      {:ok, value} -> collect_attach_names(value, names)
+      {:error, _reason} -> names
+    end
+  end
+
+  defp collect_attach_names(%Nadia.StoryArea{} = value, names) do
+    case Nadia.StoryArea.to_map(value) do
       {:ok, value} -> collect_attach_names(value, names)
       {:error, _reason} -> names
     end

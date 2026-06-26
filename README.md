@@ -18,8 +18,8 @@ building bots in an OTP application.
   offline tests.
 * Upload paths, bounded iodata, and known-size streams with explicit
   `Nadia.InputFile` values, including nested media attachments.
-* Build current outgoing media with fixed-discriminator helpers for ordinary
-  media, paid media, poll-only media, profile photos, stories, and stickers.
+* Build current outgoing media, poll options, rich messages, and story areas
+  with fixed-shape typed helpers while retaining raw compatibility inputs.
 * Stream Telegram downloads to files under a mandatory byte limit, without
   returning token-bearing URLs.
 * Add optional conversation state without requiring a persistence dependency.
@@ -107,6 +107,7 @@ API reference to complete bot-building tasks.
 | A multi-step conversation | [Conversation State](guides/examples/conversation-state.md) |
 | Durable conversation state | [Persistent Session Backends](guides/examples/persistent-sessions.md) |
 | Media uploads and downloads | [Media And Files](guides/examples/media-and-files.md) |
+| Rich messages and clickable story areas | [Rich Messages And Stories](guides/examples/rich-messages-and-stories.md) |
 | Bounded Telegram retries | [Errors And Rate Limits](guides/examples/errors-and-rate-limits.md) |
 | An HTTP endpoint | [Receive Webhook Updates](guides/receive-webhook-updates.md) |
 | Several bot identities | [Run Multiple Bots](guides/multiple-bots.md) |
@@ -204,10 +205,13 @@ documentation](https://core.telegram.org/bots/api) for Telegram's field
 semantics.
 
 Typed outgoing-content helpers include `Nadia.InputMedia`,
-`Nadia.InputPaidMedia`, `Nadia.InputPollMedia`, `Nadia.InputProfilePhoto`,
-`Nadia.InputStoryContent`, and `Nadia.InputSticker`. Their constructors reject
-locally detectable mistakes; raw maps, keyword lists, structs, and pre-encoded
-JSON remain available as compatibility escape hatches.
+`Nadia.InputPaidMedia`, `Nadia.InputPollMedia`, `Nadia.InputPollOption`,
+`Nadia.InputProfilePhoto`, `Nadia.InputRichMessage`,
+`Nadia.InputRichMessageContent`, `Nadia.InputStoryContent`,
+`Nadia.InputSticker`, `Nadia.ReactionType`, and `Nadia.StoryArea`. Their
+constructors reject locally detectable mistakes; raw maps, keyword lists,
+structs, mixed lists, and pre-encoded JSON remain available as compatibility
+escape hatches.
 
 ## License
 

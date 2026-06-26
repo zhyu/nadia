@@ -109,11 +109,11 @@ media edits:
 
 ```elixir
 options = [
-  %{
-    text: "Read the guide",
+  Nadia.InputPollOption.new(
+    "Read the guide",
     media: Nadia.InputPollMedia.link("https://hexdocs.pm/nadia")
-  },
-  %{text: "Visit the office"}
+  ),
+  Nadia.InputPollOption.new("Visit the office")
 ]
 
 Nadia.send_poll(
@@ -130,6 +130,13 @@ Nadia.send_poll(
 URLs must identify WEBP files, while uploads use WEBP, TGS, or WEBM filenames.
 `location/3` and `venue/5` work in descriptions, quiz explanations, and
 options. Typed quiz explanation media requires `type: "quiz"`.
+
+`Nadia.InputPollOption.new/2` validates 1-100 UTF-8 characters, makes
+`:text_parse_mode` and `:text_entities` mutually exclusive, and checks typed
+media against the official option context. When typed options are present,
+Nadia also validates the 1-12 option count and locally inspectable quiz
+`correct_option_ids` ordering, uniqueness, and bounds. Telegram still validates
+entity offsets and the current custom-emoji-only option formatting rule.
 
 ## Build Paid Media
 
@@ -182,6 +189,9 @@ story duration, and booleans. It does not decode media to verify JPG/MPEG4
 format, 1080x1920 story photos, 720x1280 H.265 streamable story videos,
 one-second keyframes, sound, or actual dimensions. Telegram enforces those
 content rules. Caller `:max_bytes` bounds provide local size policy.
+
+See [Rich Messages And Stories](rich-messages-and-stories.md) for complete
+typed story-area construction and the rich-message formatting boundary.
 
 ## Compatibility
 

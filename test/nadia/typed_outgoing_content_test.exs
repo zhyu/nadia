@@ -5,13 +5,31 @@ defmodule Nadia.TypedOutgoingContentTest do
   alias Nadia.InputFile
   alias Nadia.InputMedia
   alias Nadia.InputPaidMedia
+  alias Nadia.InputPollOption
   alias Nadia.InputPollMedia
   alias Nadia.InputProfilePhoto
+  alias Nadia.InputRichMessage
+  alias Nadia.InputRichMessageContent
   alias Nadia.InputStoryContent
+  alias Nadia.ReactionType
+  alias Nadia.StoryArea
   alias Nadia.Model.Error
+  alias Nadia.Model.InlineQueryResult
 
   defmodule LegacyProfilePhoto do
     defstruct [:type, :photo, :future_nil]
+  end
+
+  defmodule LegacyPollOption do
+    defstruct [:text, :media, :future_nil]
+  end
+
+  defmodule LegacyRichMessage do
+    defstruct [:html, :is_rtl, :future_nil]
+  end
+
+  defmodule LegacyStoryArea do
+    defstruct [:position, :type, :future_nil]
   end
 
   test "typed paid media discovers multiple uploads and collision-safe binary names" do
@@ -197,6 +215,418 @@ defmodule Nadia.TypedOutgoingContentTest do
     assert_telegram_request("sendPoll")
   end
 
+  test "typed poll options validate counts and correct option relationships" do
+    stub_telegram_result(message_result())
+
+    assert {:ok, %Nadia.Model.Message{}} =
+             Nadia.send_poll(123, "Choose",
+               options: [InputPollOption.new("One")],
+               allows_revoting: false
+             )
+
+    request = assert_telegram_request("sendPoll")
+    assert [%{"text" => "One"}] = Jason.decode!(form_params(request)["options"])
+
+    stub_telegram_result(message_result())
+
+    assert {:ok, %Nadia.Model.Message{}} =
+             Nadia.send_poll(123, "Choose",
+               type: "quiz",
+               options:
+                 Enum.map(1..12, fn index ->
+                   InputPollOption.new("Option #{index}")
+                 end),
+               correct_option_ids: [0, 11]
+             )
+
+    assert_telegram_request("sendPoll")
+
+    for {options, ids, expected} <- [
+          {[], nil, {:option_count, 0}},
+          {List.duplicate(InputPollOption.new("One"), 13), nil, {:option_count, 13}},
+          {[InputPollOption.new("One")], nil, {:correct_option_ids, :required}},
+          {[InputPollOption.new("One"), InputPollOption.new("Two")], [1, 0],
+           {:correct_option_ids, :not_strictly_increasing}},
+          {[InputPollOption.new("One"), InputPollOption.new("Two")], [0, 0],
+           {:correct_option_ids, :not_strictly_increasing}},
+          {[InputPollOption.new("One"), InputPollOption.new("Two")], [-1],
+           {:correct_option_ids, {:out_of_bounds, -1, 2}}},
+          {[InputPollOption.new("One"), InputPollOption.new("Two")], [2],
+           {:correct_option_ids, {:out_of_bounds, 2, 2}}}
+        ] do
+      params =
+        [type: "quiz", options: options]
+        |> then(fn params ->
+          if is_nil(ids), do: params, else: Keyword.put(params, :correct_option_ids, ids)
+        end)
+
+      assert {:error, %Error{reason: {:input_poll_option, ^expected}}} =
+               Nadia.send_poll(123, "Choose", params)
+
+      refute_receive {:nadia_http_request, _request}
+    end
+  end
+
+  test "typed poll options discover nested uploads without attachment collisions" do
+    stub_telegram_result(message_result())
+    collision = "typed_poll_#{System.unique_integer([:positive])}"
+    refute existing_atom?(collision)
+
+    options = [
+      InputPollOption.new("First",
+        media: InputPollMedia.sticker(InputFile.bytes("one", "one.webp", attach_name: collision))
+      ),
+      InputPollOption.new("Second",
+        media:
+          InputMedia.video(
+            InputFile.bytes("video", "video.mp4", attach_name: "chat_id"),
+            thumbnail: InputFile.bytes("two", "two.jpg", attach_name: collision),
+            supports_streaming: false
+          )
+      )
+    ]
+
+    assert {:ok, %Nadia.Model.Message{}} =
+             Nadia.send_poll(123, "Choose", options: options)
+
+    request = assert_telegram_request("sendPoll")
+    assert {:multipart, parts} = request.body
+    params = Map.new(for {key, value} <- parts, is_binary(key), do: {key, value})
+    assert [first, second] = Jason.decode!(params["options"])
+    assert first["media"]["media"] == "attach://#{collision}"
+    assert second["media"]["media"] == "attach://chat_id_1"
+    assert second["media"]["thumbnail"] == "attach://#{collision}_1"
+    assert second["media"]["supports_streaming"] == false
+    refute existing_atom?(collision)
+  end
+
+  test "raw and mixed poll-option compatibility remains pass-through" do
+    stub_telegram_result(message_result())
+
+    mixed = [
+      InputPollOption.new("Typed"),
+      [text: "Keyword", future_nil: nil],
+      %LegacyPollOption{text: "Struct", media: %{type: "future"}, future_nil: nil},
+      %{"text" => "String keys", "future" => false}
+    ]
+
+    assert {:ok, %Nadia.Model.Message{}} =
+             Nadia.send_poll(123, "Question", %{"options" => mixed})
+
+    request = assert_telegram_request("sendPoll")
+    assert [typed, keyword, legacy, string_keys] = Jason.decode!(form_params(request)["options"])
+    assert typed == %{"text" => "Typed"}
+    assert keyword == %{"text" => "Keyword"}
+    assert legacy == %{"text" => "Struct", "media" => %{"type" => "future"}}
+    assert string_keys["future"] == false
+
+    stub_telegram_result(message_result())
+    encoded = Jason.encode!([%{text: "Already JSON"}])
+    assert {:ok, %Nadia.Model.Message{}} = Nadia.send_poll(123, "Question", options: encoded)
+    assert form_params(assert_telegram_request("sendPoll"))["options"] == encoded
+  end
+
+  test "typed rich messages integrate with send, draft, edit, and inline content" do
+    stub_telegram_result(message_result())
+
+    assert {:ok, %Nadia.Model.Message{}} =
+             Nadia.send_rich_message(
+               123,
+               InputRichMessage.html("<h2>Hello</h2>", is_rtl: false)
+             )
+
+    params = form_params(assert_telegram_request("sendRichMessage"))
+
+    assert Jason.decode!(params["rich_message"]) == %{
+             "html" => "<h2>Hello</h2>",
+             "is_rtl" => false
+           }
+
+    stub_telegram_result(true)
+
+    assert :ok =
+             Nadia.send_rich_message_draft(
+               123,
+               7,
+               InputRichMessage.markdown("<tg-thinking>Working</tg-thinking>")
+             )
+
+    assert_telegram_request("sendRichMessageDraft")
+
+    stub_telegram_result(message_result())
+
+    assert {:ok, %Nadia.Model.Message{}} =
+             Nadia.edit_message_text(
+               123,
+               9,
+               nil,
+               nil,
+               rich_message: InputRichMessage.markdown("**Edited**", skip_entity_detection: false)
+             )
+
+    params = form_params(assert_telegram_request("editMessageText"))
+
+    assert Jason.decode!(params["rich_message"]) == %{
+             "markdown" => "**Edited**",
+             "skip_entity_detection" => false
+           }
+
+    stub_telegram_result(true)
+
+    result = %InlineQueryResult.Article{
+      id: "rich-inline",
+      title: "Rich",
+      input_message_content: InputRichMessageContent.new(InputRichMessage.html("<p>Inline</p>"))
+    }
+
+    assert :ok = Nadia.answer_inline_query("query", [result])
+    params = form_params(assert_telegram_request("answerInlineQuery"))
+    assert [encoded_result] = Jason.decode!(params["results"])
+
+    assert encoded_result["input_message_content"] == %{
+             "rich_message" => %{"html" => "<p>Inline</p>"}
+           }
+  end
+
+  test "invalid typed rich messages fail before HTTP while raw inputs remain compatible" do
+    stub_telegram_result(message_result())
+
+    thinking = InputRichMessage.html("<tg-thinking>Working</tg-thinking>")
+
+    for operation <- [
+          fn -> Nadia.send_rich_message(123, thinking) end,
+          fn -> Nadia.edit_message_text(123, 1, nil, nil, rich_message: thinking) end
+        ] do
+      assert {:error,
+              %Error{
+                reason: {:input_rich_message, {:unsupported_context, _context, :tg_thinking}}
+              }} = operation.()
+
+      refute_receive {:nadia_http_request, _request}
+    end
+
+    malformed =
+      struct(InputRichMessage,
+        mode: :html,
+        fields: %{html: "one", markdown: "two"}
+      )
+
+    assert {:error,
+            %Error{
+              reason: {:input_rich_message, {:invalid_content_fields, :both}}
+            }} = Nadia.send_rich_message(123, malformed)
+
+    refute_receive {:nadia_http_request, _request}
+
+    assert {:ok, %Nadia.Model.Message{}} =
+             Nadia.send_rich_message(123, %{html: "<future-tag/>", future: false})
+
+    assert_telegram_request("sendRichMessage")
+
+    stub_telegram_result(message_result())
+
+    assert {:ok, %Nadia.Model.Message{}} =
+             Nadia.send_rich_message(
+               123,
+               %LegacyRichMessage{html: "<p>Struct</p>", is_rtl: false, future_nil: nil}
+             )
+
+    params = form_params(assert_telegram_request("sendRichMessage"))
+
+    assert Jason.decode!(params["rich_message"]) == %{
+             "html" => "<p>Struct</p>",
+             "is_rtl" => false
+           }
+
+    stub_telegram_result(message_result())
+    encoded = Jason.encode!(%{markdown: "**already encoded**"})
+
+    assert {:ok, %Nadia.Model.Message{}} =
+             Nadia.send_rich_message(123, encoded)
+
+    assert form_params(assert_telegram_request("sendRichMessage"))["rich_message"] == encoded
+  end
+
+  test "typed rich inline content traverses every inline-result request path" do
+    content =
+      InputRichMessageContent.new(InputRichMessage.markdown("**Inline**", is_rtl: false))
+
+    result = %InlineQueryResult.Article{
+      id: "typed-rich-result",
+      title: "Typed rich result",
+      input_message_content: content
+    }
+
+    stub_telegram_result(%{inline_message_id: "guest-inline"})
+    assert {:ok, %Nadia.Model.SentGuestMessage{}} = Nadia.answer_guest_query("guest", result)
+    assert_typed_rich_inline_result(assert_telegram_request("answerGuestQuery"), "result")
+
+    stub_telegram_result(%{inline_message_id: "web-app-inline"})
+    assert {:ok, %Nadia.Model.SentWebAppMessage{}} = Nadia.answer_web_app_query("web-app", result)
+    assert_typed_rich_inline_result(assert_telegram_request("answerWebAppQuery"), "result")
+
+    stub_telegram_result(%{id: "prepared", expiration_date: 1_800_000_000})
+
+    assert {:ok, %Nadia.Model.PreparedInlineMessage{}} =
+             Nadia.save_prepared_inline_message(123, result)
+
+    assert_typed_rich_inline_result(
+      assert_telegram_request("savePreparedInlineMessage"),
+      "result"
+    )
+
+    malformed_rich =
+      struct(InputRichMessage,
+        mode: :html,
+        fields: %{html: "one", markdown: "two"}
+      )
+
+    malformed_content = struct(InputRichMessageContent, rich_message: malformed_rich)
+    malformed_result = %{result | input_message_content: malformed_content}
+
+    assert {:error,
+            %Error{
+              reason:
+                {:input_rich_message_content,
+                 {:input_rich_message, {:invalid_content_fields, :both}}}
+            }} = Nadia.answer_inline_query("query", [malformed_result])
+
+    refute_receive {:nadia_http_request, _request}
+  end
+
+  test "typed story areas integrate with post and edit and enforce variant limits" do
+    position = StoryArea.position(50, 50, 20, 10, 0, 2)
+
+    areas = [
+      StoryArea.location(
+        position,
+        35.6762,
+        139.6503,
+        address: StoryArea.location_address("JP", city: "Tokyo")
+      ),
+      StoryArea.suggested_reaction(
+        position,
+        ReactionType.custom_emoji("custom-id"),
+        is_dark: false,
+        is_flipped: false
+      ),
+      StoryArea.link(position, "tg://resolve?domain=telegram"),
+      StoryArea.weather(position, 24.5, "☀️", 0xFF112233),
+      StoryArea.unique_gift(position, "Nadia Gift")
+    ]
+
+    stub_telegram_result(%{chat: %{id: -1001, type: "channel"}, id: 10})
+
+    assert {:ok, %Nadia.Model.Story{id: 10}} =
+             Nadia.post_story(
+               "business-1",
+               InputStoryContent.photo(InputFile.bytes("photo", "story.jpg")),
+               86_400,
+               areas: areas
+             )
+
+    request = assert_telegram_request("postStory")
+    assert {:multipart, parts} = request.body
+    params = Map.new(for {key, value} <- parts, is_binary(key), do: {key, value})
+    assert decoded_areas = Jason.decode!(params["areas"])
+
+    assert Enum.map(decoded_areas, & &1["type"]["type"]) == [
+             "location",
+             "suggested_reaction",
+             "link",
+             "weather",
+             "unique_gift"
+           ]
+
+    assert Enum.at(decoded_areas, 1)["type"]["is_dark"] == false
+
+    for {area, count, variant, limit} <- [
+          {StoryArea.location(position, 0, 0), 11, :location, 10},
+          {StoryArea.suggested_reaction(position, ReactionType.emoji("👍")), 6,
+           :suggested_reaction, 5},
+          {StoryArea.link(position, "https://example.test"), 4, :link, 3},
+          {StoryArea.weather(position, 20, "☀️", 0), 4, :weather, 3},
+          {StoryArea.unique_gift(position, "gift"), 2, :unique_gift, 1}
+        ] do
+      assert {:error,
+              %Error{
+                reason: {:story_area, {:area_count, ^variant, ^count, ^limit}}
+              }} =
+               Nadia.edit_story(
+                 "business-1",
+                 10,
+                 InputStoryContent.photo(InputFile.bytes("photo", "story.jpg")),
+                 areas: List.duplicate(area, count)
+               )
+
+      refute_receive {:nadia_http_request, _request}
+    end
+  end
+
+  test "malformed typed story areas fail locally while raw and mixed values pass" do
+    content = InputStoryContent.photo(InputFile.bytes("photo", "story.jpg"))
+
+    malformed =
+      struct(StoryArea,
+        variant: :weather,
+        fields: %{
+          position: StoryArea.position(0, 0, 1, 1, 0, 0),
+          temperature: 20,
+          emoji: "☀️",
+          background_color: -1
+        }
+      )
+
+    assert {:error, %Error{reason: {:story_area, {:invalid_argb, -1}}}} =
+             Nadia.post_story("business-1", content, 86_400, areas: [malformed])
+
+    refute_receive {:nadia_http_request, _request}
+
+    stub_telegram_result(%{chat: %{id: -1001, type: "channel"}, id: 11})
+
+    raw = [
+      position: [x_percentage: "future"],
+      type: [type: "future", is_visible: false]
+    ]
+
+    raw_struct = %LegacyStoryArea{
+      position: %{x_percentage: "struct"},
+      type: %{type: "future_struct", is_visible: false},
+      future_nil: nil
+    }
+
+    assert {:ok, %Nadia.Model.Story{id: 11}} =
+             Nadia.edit_story(
+               "business-1",
+               10,
+               content,
+               areas: [
+                 StoryArea.link(StoryArea.position(0, 0, 1, 1, 0, 0), "https://x.test"),
+                 raw,
+                 raw_struct
+               ]
+             )
+
+    request = assert_telegram_request("editStory")
+    assert {:multipart, parts} = request.body
+    params = Map.new(for {key, value} <- parts, is_binary(key), do: {key, value})
+
+    assert [_typed, raw_encoded, struct_encoded] = Jason.decode!(params["areas"])
+    assert raw_encoded["type"]["is_visible"] == false
+    assert struct_encoded["type"] == %{"type" => "future_struct", "is_visible" => false}
+
+    stub_telegram_result(%{chat: %{id: -1001, type: "channel"}, id: 12})
+    encoded = Jason.encode!([%{position: %{}, type: %{type: "future"}}])
+
+    assert {:ok, %Nadia.Model.Story{id: 12}} =
+             Nadia.edit_story("business-1", 11, content, areas: encoded)
+
+    request = assert_telegram_request("editStory")
+    assert {:multipart, parts} = request.body
+    params = Map.new(for {key, value} <- parts, is_binary(key), do: {key, value})
+    assert params["areas"] == encoded
+  end
+
   test "typed profile photos require uploads and integrate with both wrappers" do
     stub_telegram_result(true)
     path = temporary_file("profile.jpg", "jpg")
@@ -373,6 +803,18 @@ defmodule Nadia.TypedOutgoingContentTest do
       date: 1_700_000_000,
       chat: %{id: 123, type: "private"}
     }
+  end
+
+  defp assert_typed_rich_inline_result(request, field) do
+    result =
+      request
+      |> form_params()
+      |> Map.fetch!(field)
+      |> Jason.decode!()
+
+    assert result["input_message_content"] == %{
+             "rich_message" => %{"markdown" => "**Inline**", "is_rtl" => false}
+           }
   end
 
   defp temporary_file(filename, contents) do

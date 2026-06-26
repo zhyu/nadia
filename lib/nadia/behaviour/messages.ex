@@ -46,17 +46,29 @@ defmodule Nadia.Behaviour.Messages do
                   {:ok, Message.t()} | {:error, Error.t()}
       @callback send_message(Client.t(), integer | binary, binary, [{atom, any}]) ::
                   {:ok, Message.t()} | {:error, Error.t()}
-      @callback send_rich_message(integer | binary, list | map | struct | binary) ::
+      @callback send_rich_message(
+                  integer | binary,
+                  Nadia.InputRichMessage.t() | list | map | struct | binary
+                ) ::
                   {:ok, Message.t()} | {:error, Error.t()}
-      @callback send_rich_message(integer | binary, list | map | struct | binary, [
-                  {atom, any}
-                ]) ::
+      @callback send_rich_message(
+                  integer | binary,
+                  Nadia.InputRichMessage.t() | list | map | struct | binary,
+                  [{atom, any}] | map
+                ) ::
                   {:ok, Message.t()} | {:error, Error.t()}
-      @callback send_rich_message(Client.t(), integer | binary, list | map | struct | binary) ::
+      @callback send_rich_message(
+                  Client.t(),
+                  integer | binary,
+                  Nadia.InputRichMessage.t() | list | map | struct | binary
+                ) ::
                   {:ok, Message.t()} | {:error, Error.t()}
-      @callback send_rich_message(Client.t(), integer | binary, list | map | struct | binary, [
-                  {atom, any}
-                ]) ::
+      @callback send_rich_message(
+                  Client.t(),
+                  integer | binary,
+                  Nadia.InputRichMessage.t() | list | map | struct | binary,
+                  [{atom, any}] | map
+                ) ::
                   {:ok, Message.t()} | {:error, Error.t()}
       @callback forward_message(integer | binary, integer | binary, integer) ::
                   {:ok, Message.t()} | {:error, Error.t()}
@@ -219,27 +231,32 @@ defmodule Nadia.Behaviour.Messages do
                   :ok | {:error, Error.t()}
       @callback send_message_draft(Client.t(), integer | binary, integer, [{atom, any}]) ::
                   :ok | {:error, Error.t()}
-      @callback send_rich_message_draft(integer, integer, list | map | struct | binary) ::
-                  :ok | {:error, Error.t()}
-      @callback send_rich_message_draft(integer, integer, list | map | struct | binary, [
-                  {atom, any}
-                ]) ::
+      @callback send_rich_message_draft(
+                  integer,
+                  integer,
+                  Nadia.InputRichMessage.t() | list | map | struct | binary
+                ) ::
                   :ok | {:error, Error.t()}
       @callback send_rich_message_draft(
-                  Client.t(),
                   integer,
                   integer,
-                  list | map | struct | binary
+                  Nadia.InputRichMessage.t() | list | map | struct | binary,
+                  [{atom, any}] | map
                 ) ::
                   :ok | {:error, Error.t()}
       @callback send_rich_message_draft(
                   Client.t(),
                   integer,
                   integer,
-                  list | map | struct | binary,
-                  [
-                    {atom, any}
-                  ]
+                  Nadia.InputRichMessage.t() | list | map | struct | binary
+                ) ::
+                  :ok | {:error, Error.t()}
+      @callback send_rich_message_draft(
+                  Client.t(),
+                  integer,
+                  integer,
+                  Nadia.InputRichMessage.t() | list | map | struct | binary,
+                  [{atom, any}] | map
                 ) ::
                   :ok | {:error, Error.t()}
       @callback send_animation(integer, binary | Nadia.InputFile.t(), [{atom, any}]) ::

@@ -700,9 +700,14 @@ defmodule Nadia.Methods.Business do
       * `:caption` - Caption of the story
       * `:parse_mode` - Mode for parsing entities in the story caption
       * `:caption_entities` - JSON-serializable caption entities array or a pre-encoded JSON string
-      * `:areas` - JSON-serializable story areas array or a pre-encoded JSON string
+      * `:areas` - list containing `Nadia.StoryArea` values, compatible raw
+        story-area objects, or a pre-encoded JSON string
       * `:post_to_chat_page` - Pass true to keep the story accessible after it expires
       * `:protect_content` - Pass true if the content of the story must be protected
+
+      Typed `Nadia.StoryArea` lists validate positions, nested values, and the
+      official per-story limits before HTTP. Raw and pre-encoded values remain
+      compatibility inputs.
       """
       @spec post_story(
               binary,
@@ -741,33 +746,45 @@ defmodule Nadia.Methods.Business do
       end
 
       def post_story(business_connection_id, content, active_period, options) do
-        api_request(
-          "postStory",
-          request_options(
-            [
-              business_connection_id: business_connection_id,
-              content: encode_json_payload(content),
-              active_period: active_period
-            ],
-            encode_story_options(options)
-          )
-        )
+        case validate_story_options(options) do
+          :ok ->
+            api_request(
+              "postStory",
+              request_options(
+                [
+                  business_connection_id: business_connection_id,
+                  content: encode_json_payload(content),
+                  active_period: active_period
+                ],
+                encode_story_options(options)
+              )
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: reason}}
+        end
       end
 
       @doc group: "Business"
       def post_story(%Client{} = client, business_connection_id, content, active_period, options) do
-        api_request(
-          client,
-          "postStory",
-          request_options(
-            [
-              business_connection_id: business_connection_id,
-              content: encode_json_payload(content),
-              active_period: active_period
-            ],
-            encode_story_options(options)
-          )
-        )
+        case validate_story_options(options) do
+          :ok ->
+            api_request(
+              client,
+              "postStory",
+              request_options(
+                [
+                  business_connection_id: business_connection_id,
+                  content: encode_json_payload(content),
+                  active_period: active_period
+                ],
+                encode_story_options(options)
+              )
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: reason}}
+        end
       end
 
       @doc group: "Business"
@@ -786,7 +803,12 @@ defmodule Nadia.Methods.Business do
       * `:caption` - Caption of the story
       * `:parse_mode` - Mode for parsing entities in the story caption
       * `:caption_entities` - JSON-serializable caption entities array or a pre-encoded JSON string
-      * `:areas` - JSON-serializable story areas array or a pre-encoded JSON string
+      * `:areas` - list containing `Nadia.StoryArea` values, compatible raw
+        story-area objects, or a pre-encoded JSON string
+
+      Typed `Nadia.StoryArea` lists validate positions, nested values, and the
+      official per-story limits before HTTP. Raw and pre-encoded values remain
+      compatibility inputs.
       """
       @spec edit_story(
               binary,
@@ -825,33 +847,45 @@ defmodule Nadia.Methods.Business do
       end
 
       def edit_story(business_connection_id, story_id, content, options) do
-        api_request(
-          "editStory",
-          request_options(
-            [
-              business_connection_id: business_connection_id,
-              story_id: story_id,
-              content: encode_json_payload(content)
-            ],
-            encode_story_options(options)
-          )
-        )
+        case validate_story_options(options) do
+          :ok ->
+            api_request(
+              "editStory",
+              request_options(
+                [
+                  business_connection_id: business_connection_id,
+                  story_id: story_id,
+                  content: encode_json_payload(content)
+                ],
+                encode_story_options(options)
+              )
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: reason}}
+        end
       end
 
       @doc group: "Business"
       def edit_story(%Client{} = client, business_connection_id, story_id, content, options) do
-        api_request(
-          client,
-          "editStory",
-          request_options(
-            [
-              business_connection_id: business_connection_id,
-              story_id: story_id,
-              content: encode_json_payload(content)
-            ],
-            encode_story_options(options)
-          )
-        )
+        case validate_story_options(options) do
+          :ok ->
+            api_request(
+              client,
+              "editStory",
+              request_options(
+                [
+                  business_connection_id: business_connection_id,
+                  story_id: story_id,
+                  content: encode_json_payload(content)
+                ],
+                encode_story_options(options)
+              )
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: reason}}
+        end
       end
 
       @doc group: "Business"

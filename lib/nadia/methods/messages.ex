@@ -86,19 +86,31 @@ defmodule Nadia.Methods.Messages do
       Args:
       * `chat_id` - Unique identifier for the target chat or username of the target bot,
       supergroup, or channel
-      * `rich_message` - JSON-serializable InputRichMessage object or a pre-encoded JSON string
+      * `rich_message` - `Nadia.InputRichMessage` value, compatible
+        JSON-serializable object, or a pre-encoded JSON string
       * `options` - keyword list of options
       """
-      @spec send_rich_message(integer | binary, list | map | struct | binary) ::
+      @spec send_rich_message(
+              integer | binary,
+              Nadia.InputRichMessage.t() | list | map | struct | binary
+            ) ::
               {:ok, Message.t()} | {:error, Error.t()}
-      @spec send_rich_message(integer | binary, list | map | struct | binary, [{atom, any}] | map) ::
-              {:ok, Message.t()} | {:error, Error.t()}
-      @spec send_rich_message(Client.t(), integer | binary, list | map | struct | binary) ::
+      @spec send_rich_message(
+              integer | binary,
+              Nadia.InputRichMessage.t() | list | map | struct | binary,
+              [{atom, any}] | map
+            ) ::
               {:ok, Message.t()} | {:error, Error.t()}
       @spec send_rich_message(
               Client.t(),
               integer | binary,
-              list | map | struct | binary,
+              Nadia.InputRichMessage.t() | list | map | struct | binary
+            ) ::
+              {:ok, Message.t()} | {:error, Error.t()}
+      @spec send_rich_message(
+              Client.t(),
+              integer | binary,
+              Nadia.InputRichMessage.t() | list | map | struct | binary,
               [{atom, any}] | map
             ) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -111,25 +123,37 @@ defmodule Nadia.Methods.Messages do
       end
 
       def send_rich_message(chat_id, rich_message, options) do
-        api_request(
-          "sendRichMessage",
-          request_options(
-            [chat_id: chat_id, rich_message: encode_json_payload(rich_message)],
-            encode_rich_message_options(options)
-          )
-        )
+        case validate_rich_message(rich_message, :send) do
+          :ok ->
+            api_request(
+              "sendRichMessage",
+              request_options(
+                [chat_id: chat_id, rich_message: encode_json_payload(rich_message)],
+                encode_rich_message_options(options)
+              )
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: reason}}
+        end
       end
 
       @doc group: "Messages"
       def send_rich_message(%Client{} = client, chat_id, rich_message, options) do
-        api_request(
-          client,
-          "sendRichMessage",
-          request_options(
-            [chat_id: chat_id, rich_message: encode_json_payload(rich_message)],
-            encode_rich_message_options(options)
-          )
-        )
+        case validate_rich_message(rich_message, :send) do
+          :ok ->
+            api_request(
+              client,
+              "sendRichMessage",
+              request_options(
+                [chat_id: chat_id, rich_message: encode_json_payload(rich_message)],
+                encode_rich_message_options(options)
+              )
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: reason}}
+        end
       end
 
       @doc group: "Messages"
@@ -881,9 +905,11 @@ defmodule Nadia.Methods.Messages do
       `Nadia.InputMedia` variants plus `Nadia.InputPollMedia.location/3` and
       `Nadia.InputPollMedia.venue/5`. Poll options additionally accept
       `Nadia.InputPollMedia.link/1` and `Nadia.InputPollMedia.sticker/2`, but
-      do not accept audio or document media. Typed quiz explanation media
-      requires `type: "quiz"`. Raw structured values and pre-encoded JSON
-      remain pass-through compatibility inputs.
+      do not accept audio or document media. Use `Nadia.InputPollOption.new/2`
+      to validate option text, formatting exclusivity, media context, the
+      typed 1-12 option count, and locally inspectable quiz answer indexes.
+      Typed quiz explanation media requires `type: "quiz"`. Raw structured
+      values and pre-encoded JSON remain pass-through compatibility inputs.
       """
       @spec send_poll(integer | binary, binary, [{atom, any}] | map) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -898,7 +924,7 @@ defmodule Nadia.Methods.Messages do
             )
 
           {:error, reason} ->
-            {:error, %Error{reason: {:input_poll_media, reason}}}
+            {:error, %Error{reason: reason}}
         end
       end
 
@@ -914,7 +940,7 @@ defmodule Nadia.Methods.Messages do
             )
 
           {:error, reason} ->
-            {:error, %Error{reason: {:input_poll_media, reason}}}
+            {:error, %Error{reason: reason}}
         end
       end
 
@@ -929,7 +955,7 @@ defmodule Nadia.Methods.Messages do
             )
 
           {:error, reason} ->
-            {:error, %Error{reason: {:input_poll_media, reason}}}
+            {:error, %Error{reason: reason}}
         end
       end
 
@@ -947,7 +973,7 @@ defmodule Nadia.Methods.Messages do
             )
 
           {:error, reason} ->
-            {:error, %Error{reason: {:input_poll_media, reason}}}
+            {:error, %Error{reason: reason}}
         end
       end
 
@@ -1097,22 +1123,35 @@ defmodule Nadia.Methods.Messages do
       @doc """
       Use this method to stream a partial rich message to a user while the message is
       being generated.
-      Returns `:ok` on success.
+      Returns `:ok` on success. The draft is an ephemeral 30-second preview;
+      call `sendRichMessage` with the completed content to persist it.
       """
-      @spec send_rich_message_draft(integer, integer, list | map | struct | binary) ::
+      @spec send_rich_message_draft(
+              integer,
+              integer,
+              Nadia.InputRichMessage.t() | list | map | struct | binary
+            ) ::
               :ok | {:error, Error.t()}
-      @spec send_rich_message_draft(integer, integer, list | map | struct | binary, [
-              {atom, any}
-            ]) ::
-              :ok | {:error, Error.t()}
-      @spec send_rich_message_draft(Client.t(), integer, integer, list | map | struct | binary) ::
+      @spec send_rich_message_draft(
+              integer,
+              integer,
+              Nadia.InputRichMessage.t() | list | map | struct | binary,
+              [{atom, any}] | map
+            ) ::
               :ok | {:error, Error.t()}
       @spec send_rich_message_draft(
               Client.t(),
               integer,
               integer,
-              list | map | struct | binary,
-              [{atom, any}]
+              Nadia.InputRichMessage.t() | list | map | struct | binary
+            ) ::
+              :ok | {:error, Error.t()}
+      @spec send_rich_message_draft(
+              Client.t(),
+              integer,
+              integer,
+              Nadia.InputRichMessage.t() | list | map | struct | binary,
+              [{atom, any}] | map
             ) ::
               :ok | {:error, Error.t()}
       def send_rich_message_draft(chat_id, draft_id, rich_message) do
@@ -1125,21 +1164,45 @@ defmodule Nadia.Methods.Messages do
       end
 
       def send_rich_message_draft(chat_id, draft_id, rich_message, options) do
-        api_request(
-          "sendRichMessageDraft",
-          [chat_id: chat_id, draft_id: draft_id, rich_message: encode_json_payload(rich_message)] ++
-            options
-        )
+        case validate_rich_message(rich_message, :draft) do
+          :ok ->
+            api_request(
+              "sendRichMessageDraft",
+              request_options(
+                [
+                  chat_id: chat_id,
+                  draft_id: draft_id,
+                  rich_message: encode_json_payload(rich_message)
+                ],
+                options
+              )
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: reason}}
+        end
       end
 
       @doc group: "Messages"
       def send_rich_message_draft(%Client{} = client, chat_id, draft_id, rich_message, options) do
-        api_request(
-          client,
-          "sendRichMessageDraft",
-          [chat_id: chat_id, draft_id: draft_id, rich_message: encode_json_payload(rich_message)] ++
-            options
-        )
+        case validate_rich_message(rich_message, :draft) do
+          :ok ->
+            api_request(
+              client,
+              "sendRichMessageDraft",
+              request_options(
+                [
+                  chat_id: chat_id,
+                  draft_id: draft_id,
+                  rich_message: encode_json_payload(rich_message)
+                ],
+                options
+              )
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: reason}}
+        end
       end
 
       @doc group: "Messages"

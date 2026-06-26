@@ -32,6 +32,7 @@ exercises every published example directly.
 | Run several bot identities | [Run Multiple Bots](multiple-bots.md) | `Nadia.Client`, `Nadia.Polling` |
 | Test without credentials or network calls | [Test Bot Handlers](testing-bots.md) | `Nadia.Client`, `Nadia.HTTPClient` |
 | Typed media, stories, uploads, and downloads | [Media And Files](examples/media-and-files.md) | `Nadia.InputMedia`, `Nadia.InputPaidMedia`, `Nadia.InputPollMedia`, `Nadia.InputFile` |
+| Rich formatting and clickable story areas | [Rich Messages And Stories](examples/rich-messages-and-stories.md) | `Nadia.InputRichMessage`, `Nadia.StoryArea` |
 | Handle Telegram errors with bounds | [Errors And Rate Limits](examples/errors-and-rate-limits.md) | `Nadia.Model.Error`, `Nadia.Model.ResponseParameters` |
 | Publish Telegraph pages | [Use The Telegraph API](telegraph.md) | `Nadia.Graph` |
 

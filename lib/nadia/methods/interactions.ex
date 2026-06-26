@@ -241,19 +241,23 @@ defmodule Nadia.Methods.Interactions do
       * `:reply_markup`	- A JSON-serialized object for an inline
       keyboard - `Nadia.Model.InlineKeyboardMarkup`
       """
-      @spec edit_message_text(integer | binary, integer | nil, binary | nil, binary | nil, [
-              {atom, any}
-            ]) ::
-              {:ok, Message.t()} | {:error, Error.t()}
       @spec edit_message_text(
-              Client.t(),
-              integer | binary,
+              integer | binary | nil,
               integer | nil,
               binary | nil,
               binary | nil,
-              [{atom, any}]
+              [{atom, any}] | map
             ) ::
-              {:ok, Message.t()} | {:error, Error.t()}
+              :ok | {:ok, Message.t()} | {:error, Error.t()}
+      @spec edit_message_text(
+              Client.t(),
+              integer | binary | nil,
+              integer | nil,
+              binary | nil,
+              binary | nil,
+              [{atom, any}] | map
+            ) ::
+              :ok | {:ok, Message.t()} | {:error, Error.t()}
       def edit_message_text(chat_id, message_id, inline_message_id, text) do
         edit_message_text(chat_id, message_id, inline_message_id, text, [])
       end
@@ -264,18 +268,24 @@ defmodule Nadia.Methods.Interactions do
       end
 
       def edit_message_text(chat_id, message_id, inline_message_id, text, options) do
-        api_request(
-          "editMessageText",
-          request_options(
-            [
-              chat_id: chat_id,
-              message_id: message_id,
-              inline_message_id: inline_message_id,
-              text: text
-            ],
-            encode_json_option(options, :rich_message)
-          )
-        )
+        case validate_rich_message(option_value(options, :rich_message), :edit) do
+          :ok ->
+            api_request(
+              "editMessageText",
+              request_options(
+                [
+                  chat_id: chat_id,
+                  message_id: message_id,
+                  inline_message_id: inline_message_id,
+                  text: text
+                ],
+                encode_json_option(options, :rich_message)
+              )
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: reason}}
+        end
       end
 
       @doc group: "Interactions And Editing"
@@ -287,19 +297,25 @@ defmodule Nadia.Methods.Interactions do
             text,
             options
           ) do
-        api_request(
-          client,
-          "editMessageText",
-          request_options(
-            [
-              chat_id: chat_id,
-              message_id: message_id,
-              inline_message_id: inline_message_id,
-              text: text
-            ],
-            encode_json_option(options, :rich_message)
-          )
-        )
+        case validate_rich_message(option_value(options, :rich_message), :edit) do
+          :ok ->
+            api_request(
+              client,
+              "editMessageText",
+              request_options(
+                [
+                  chat_id: chat_id,
+                  message_id: message_id,
+                  inline_message_id: inline_message_id,
+                  text: text
+                ],
+                encode_json_option(options, :rich_message)
+              )
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: reason}}
+        end
       end
 
       @doc group: "Interactions And Editing"

@@ -137,9 +137,14 @@ defmodule Nadia do
   defp json_payload_value(%Nadia.InputFile{} = payload), do: payload
   defp json_payload_value(%Nadia.InputMedia{} = payload), do: payload
   defp json_payload_value(%Nadia.InputPaidMedia{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputPollOption{} = payload), do: payload
   defp json_payload_value(%Nadia.InputPollMedia{} = payload), do: payload
   defp json_payload_value(%Nadia.InputProfilePhoto{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputRichMessage{} = payload), do: payload
+  defp json_payload_value(%Nadia.InputRichMessageContent{} = payload), do: payload
+  defp json_payload_value(%Nadia.ReactionType{} = payload), do: payload
   defp json_payload_value(%Nadia.InputSticker{} = payload), do: payload
+  defp json_payload_value(%Nadia.StoryArea{} = payload), do: payload
   defp json_payload_value(%Nadia.InputStoryContent{} = payload), do: payload
 
   defp json_payload_value(%_{} = payload) do
@@ -183,9 +188,9 @@ defmodule Nadia do
   end
 
   defp validate_poll_options(params) do
-    with :ok <- validate_poll_media(option_value(params, :media), :description),
+    with :ok <- validate_poll_media_option(option_value(params, :media), :description),
          :ok <- validate_poll_explanation_media(params),
-         :ok <- validate_poll_option_media(option_value(params, :options)) do
+         :ok <- validate_poll_option_values(params) do
       :ok
     end
   end
@@ -196,42 +201,113 @@ defmodule Nadia do
     if typed_poll_media?(explanation_media) do
       case option_value(params, :type) do
         type when type in ["quiz", :quiz] ->
-          validate_poll_media(explanation_media, :explanation)
+          validate_poll_media_option(explanation_media, :explanation)
 
         _type ->
-          {:error, :explanation_media_requires_quiz}
+          {:error, {:input_poll_media, :explanation_media_requires_quiz}}
       end
     else
       :ok
     end
   end
 
-  defp validate_poll_option_media(options) when is_list(options) do
+  defp validate_poll_option_values(params) do
+    options = option_value(params, :options)
+
+    with :ok <- validate_poll_option_list(options),
+         :ok <- validate_correct_option_ids(params, options) do
+      :ok
+    end
+  end
+
+  defp validate_poll_option_list([]),
+    do: {:error, {:input_poll_option, {:option_count, 0}}}
+
+  defp validate_poll_option_list(options) when is_list(options) do
     if Keyword.keyword?(options) do
       :ok
     else
-      typed? = Enum.any?(options, &typed_poll_media?(poll_option_media(&1)))
+      typed_options? = Enum.any?(options, &match?(%Nadia.InputPollOption{}, &1))
+      typed_media? = Enum.any?(options, &typed_poll_media?(poll_option_media(&1)))
 
       cond do
-        typed? and length(options) not in 1..12 ->
-          {:error, {:poll_option_size, length(options)}}
+        typed_options? and length(options) not in 1..12 ->
+          {:error, {:input_poll_option, {:option_count, length(options)}}}
+
+        typed_media? and length(options) not in 1..12 ->
+          {:error, {:input_poll_media, {:poll_option_size, length(options)}}}
 
         true ->
-          Enum.reduce_while(options, :ok, fn option, :ok ->
-            case validate_poll_media(poll_option_media(option), :option) do
+          options
+          |> Enum.with_index()
+          |> Enum.reduce_while(:ok, fn {option, index}, :ok ->
+            case validate_poll_option(option, index) do
               :ok -> {:cont, :ok}
-              {:error, reason} -> {:halt, {:error, reason}}
+              {:error, _reason} = error -> {:halt, error}
             end
           end)
       end
     end
   end
 
-  defp validate_poll_option_media(_options), do: :ok
+  defp validate_poll_option_list(_options), do: :ok
 
-  defp validate_poll_media(media, context) do
+  defp validate_poll_option(%Nadia.InputPollOption{} = option, index) do
+    case Nadia.InputPollOption.to_map(option) do
+      {:ok, _map} -> :ok
+      {:error, reason} -> {:error, {:input_poll_option, {:option, index, reason}}}
+    end
+  end
+
+  defp validate_poll_option(option, _index) do
+    validate_poll_media_option(poll_option_media(option), :option)
+  end
+
+  defp validate_correct_option_ids(params, options) when is_list(options) do
+    if Keyword.keyword?(options) or
+         not Enum.any?(options, &match?(%Nadia.InputPollOption{}, &1)) do
+      :ok
+    else
+      ids = option_value(params, :correct_option_ids)
+      quiz? = option_value(params, :type) in ["quiz", :quiz]
+
+      cond do
+        is_binary(ids) ->
+          :ok
+
+        quiz? and ids in [nil, []] ->
+          {:error, {:input_poll_option, {:correct_option_ids, :required}}}
+
+        is_nil(ids) ->
+          :ok
+
+        not is_list(ids) ->
+          {:error, {:input_poll_option, {:correct_option_ids, :integer_list_required}}}
+
+        not Enum.all?(ids, &is_integer/1) ->
+          {:error, {:input_poll_option, {:correct_option_ids, :integer_list_required}}}
+
+        ids != Enum.sort(ids) or length(ids) != MapSet.size(MapSet.new(ids)) ->
+          {:error, {:input_poll_option, {:correct_option_ids, :not_strictly_increasing}}}
+
+        invalid = Enum.find(ids, &(&1 < 0 or &1 >= length(options))) ->
+          {:error,
+           {:input_poll_option, {:correct_option_ids, {:out_of_bounds, invalid, length(options)}}}}
+
+        true ->
+          :ok
+      end
+    end
+  end
+
+  defp validate_correct_option_ids(_params, _options), do: :ok
+
+  defp validate_poll_media_option(media, context) do
     if typed_poll_media?(media) do
-      Nadia.InputPollMedia.validate_context(media, context)
+      case Nadia.InputPollMedia.validate_context(media, context) do
+        :ok -> :ok
+        {:error, reason} -> {:error, {:input_poll_media, reason}}
+      end
     else
       :ok
     end
@@ -253,8 +329,24 @@ defmodule Nadia do
 
   defp poll_option_media(_option), do: nil
 
+  defp validate_rich_message(%Nadia.InputRichMessage{} = rich_message, context) do
+    case Nadia.InputRichMessage.validate_context(rich_message, context) do
+      :ok -> :ok
+      {:error, reason} -> {:error, {:input_rich_message, reason}}
+    end
+  end
+
+  defp validate_rich_message(_rich_message, _context), do: :ok
+
+  defp validate_story_options(options) do
+    case Nadia.StoryArea.validate_areas(option_value(options, :areas)) do
+      :ok -> :ok
+      {:error, reason} -> {:error, {:story_area, reason}}
+    end
+  end
+
   defp do_answer_guest_query(client, guest_query_id, result, options) do
-    args = [guest_query_id: guest_query_id, result: encode_inline_query_result(result)]
+    args = [guest_query_id: guest_query_id, result: encode_json_payload(result)]
 
     if client do
       api_request(client, "answerGuestQuery", args ++ options)
@@ -264,7 +356,7 @@ defmodule Nadia do
   end
 
   defp do_save_prepared_inline_message(client, user_id, result, options) do
-    args = [user_id: user_id, result: encode_inline_query_result(result)]
+    args = [user_id: user_id, result: encode_json_payload(result)]
 
     if client do
       api_request(client, "savePreparedInlineMessage", request_options(args, options))
@@ -274,28 +366,13 @@ defmodule Nadia do
   end
 
   defp do_answer_inline_query(client, inline_query_id, results, options) do
-    encoded_results =
-      results
-      |> Enum.map(&inline_query_result_map/1)
-      |> Jason.encode!()
-
-    args = [inline_query_id: inline_query_id, results: encoded_results]
+    args = [inline_query_id: inline_query_id, results: encode_json_array_payload(results)]
 
     if client do
       api_request(client, "answerInlineQuery", args ++ options)
     else
       api_request("answerInlineQuery", args ++ options)
     end
-  end
-
-  defp encode_inline_query_result(result) do
-    result
-    |> inline_query_result_map()
-    |> Jason.encode!()
-  end
-
-  defp inline_query_result_map(result) do
-    for {k, v} <- Map.from_struct(result), v != nil, into: %{}, do: {k, v}
   end
 
   defp request_options(required, options) when is_list(options), do: required ++ options
@@ -308,7 +385,7 @@ defmodule Nadia do
   end
 
   defp encode_json_option(options, key) when is_map(options) do
-    Map.update(options, key, nil, &encode_json_payload/1)
+    update_map_option(options, key, &encode_json_payload/1)
   end
 
   defp encode_json_array_option(options, key) when is_list(options) do
@@ -316,7 +393,17 @@ defmodule Nadia do
   end
 
   defp encode_json_array_option(options, key) when is_map(options) do
-    Map.update(options, key, nil, &encode_json_array_payload/1)
+    update_map_option(options, key, &encode_json_array_payload/1)
+  end
+
+  defp update_map_option(options, key, encoder) do
+    string_key = Atom.to_string(key)
+
+    cond do
+      Map.has_key?(options, key) -> Map.update!(options, key, encoder)
+      Map.has_key?(options, string_key) -> Map.update!(options, string_key, encoder)
+      true -> options
+    end
   end
 
   defp encode_invoice_options(options) do

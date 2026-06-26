@@ -1,6 +1,7 @@
 defmodule Nadia.Model.InputMessageContent do
   @type t ::
           Nadia.Model.InputMessageContent.Text.t()
+          | Nadia.InputRichMessageContent.t()
           | Nadia.Model.InputMessageContent.Location.t()
           | Nadia.Model.InputMessageContent.Venue.t()
           | Nadia.Model.InputMessageContent.Contact.t()

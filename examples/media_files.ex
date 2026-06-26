@@ -11,10 +11,13 @@ defmodule Nadia.Examples.MediaFiles do
   alias Nadia.InputFile
   alias Nadia.InputMedia
   alias Nadia.InputPaidMedia
+  alias Nadia.InputPollOption
   alias Nadia.InputPollMedia
   alias Nadia.InputProfilePhoto
+  alias Nadia.InputRichMessage
   alias Nadia.InputSticker
   alias Nadia.InputStoryContent
+  alias Nadia.StoryArea
 
   @type source :: {:file_id, binary} | {:url, binary} | {:path, Path.t()}
 
@@ -119,7 +122,10 @@ defmodule Nadia.Examples.MediaFiles do
       |> InputFile.path(max_bytes: 10_000_000)
       |> InputStoryContent.photo()
 
-    Nadia.post_story(client, business_connection_id, content, active_period)
+    position = StoryArea.position(50, 85, 40, 10, 0, 2)
+    areas = [StoryArea.link(position, "https://hexdocs.pm/nadia")]
+
+    Nadia.post_story(client, business_connection_id, content, active_period, areas: areas)
   end
 
   @doc """
@@ -129,15 +135,31 @@ defmodule Nadia.Examples.MediaFiles do
   def send_media_poll(%Client{} = client, chat_id) do
     Nadia.send_poll(client, chat_id, "Where should we read the guide?",
       options: [
-        %{
-          text: "Documentation",
+        InputPollOption.new(
+          "Documentation",
           media: InputPollMedia.link("https://hexdocs.pm/nadia")
-        },
-        %{text: "At the office"}
+        ),
+        InputPollOption.new("At the office")
       ],
       media: InputPollMedia.location(35.6762, 139.6503),
       allows_revoting: false
     )
+  end
+
+  @doc """
+  Sends a typed rich message using Telegram's rich HTML formatting.
+
+  Telegram parses and validates the HTML grammar and media permissions.
+  """
+  @spec send_rich_message(Client.t(), integer | binary) :: term
+  def send_rich_message(%Client{} = client, chat_id) do
+    rich_message =
+      InputRichMessage.html(
+        "<h2>Nadia</h2><p>Typed Telegram Bot API helpers.</p>",
+        skip_entity_detection: false
+      )
+
+    Nadia.send_rich_message(client, chat_id, rich_message)
   end
 
   @doc """

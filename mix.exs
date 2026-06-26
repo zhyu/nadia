@@ -66,6 +66,7 @@ defmodule Nadia.Mixfile do
         "guides/examples/conversation-state.md": [title: "Conversation State"],
         "guides/examples/persistent-sessions.md": [title: "Persistent Session Backends"],
         "guides/examples/media-and-files.md": [title: "Media And Files"],
+        "guides/examples/rich-messages-and-stories.md": [title: "Rich Messages And Stories"],
         "guides/examples/errors-and-rate-limits.md": [title: "Errors And Rate Limits"],
         "guides/receive-webhook-updates.md": [title: "Receive Webhook Updates"],
         "guides/multiple-bots.md": [title: "Run Multiple Bots"],
@@ -99,10 +100,15 @@ defmodule Nadia.Mixfile do
           Nadia.InputFile,
           Nadia.InputMedia,
           Nadia.InputPaidMedia,
+          Nadia.InputPollOption,
           Nadia.InputPollMedia,
           Nadia.InputProfilePhoto,
+          Nadia.InputRichMessage,
+          Nadia.InputRichMessageContent,
           Nadia.InputSticker,
-          Nadia.InputStoryContent
+          Nadia.InputStoryContent,
+          Nadia.ReactionType,
+          Nadia.StoryArea
         ],
         "Bot Runtime": [
           Nadia.Context,

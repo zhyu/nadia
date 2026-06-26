@@ -192,6 +192,12 @@ Optional maintainer smoke tests against Telegram are tagged
 mix test --only telegram_live
 ```
 
+## Contributing
+
+See the [contributing guide](https://github.com/zhyu/nadia/blob/master/CONTRIBUTING.md)
+for local checks, changelog expectations, Bot API maintenance notes, and the
+GitHub Actions release process.
+
 ## API Coverage
 
 Since Nadia 1.0.0, the wrapper covers all 180 official methods in Telegram Bot

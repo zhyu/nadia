@@ -38,6 +38,7 @@ defmodule Nadia.Mixfile do
       files: [
         ".formatter.exs",
         "CHANGELOG.md",
+        "CONTRIBUTING.md",
         "examples",
         "LICENSE.md",
         "README.md",

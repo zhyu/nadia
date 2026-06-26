@@ -107,11 +107,11 @@ git diff --check
 mix hex.build
 ```
 
-Tag releases with annotated tags, for example:
+Tag releases with annotated tags, substituting the intended version:
 
 ```sh
-git tag -a v1.5.0 <release-commit> -m "Release 1.5.0"
-git push origin v1.5.0
+git tag -a v<version> <release-commit> -m "Release <version>"
+git push origin v<version>
 ```
 
 Do not run `mix hex.publish` locally. If a local publish command is requested,
@@ -146,6 +146,10 @@ at a time. After pushing each tag:
    ```sh
    curl -fsS https://hex.pm/api/packages/nadia/releases/<version>
    ```
+
+   Use the release response's `docs_html_url` and ExDoc-generated page slugs
+   when checking HexDocs. For example, `guides/examples.md` renders as
+   `examples.html`, not a title-derived `examples-and-learning-paths.html`.
 
 If a wrong tag was pushed and the publish job is waiting for approval, cancel
 the workflow run before deleting the tag. Then delete the bad remote tag and

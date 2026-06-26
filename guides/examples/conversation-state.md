@@ -94,7 +94,10 @@ Telegram sends and session mutations cannot share one transaction. This
 learning example replies before changing the step so a failed send does not
 misinterpret the same update after retry; a lost response can still produce a
 duplicate prompt. Durable business workflows need application-level
-idempotency and often a transactional outbox.
+idempotency and often a transactional outbox. The database session example
+shows the durable shape: record `{bot_ref, update_id}`, commit the session or
+business-state change, and enqueue outbox intent in one application database
+transaction, then send Telegram requests from a worker after commit.
 
 ## Choose A Production Backend
 
@@ -108,4 +111,8 @@ larger transaction. Store only conversational progress in a session; durable
 business records belong in the application's primary database.
 
 See [Persistent Session Backends](persistent-sessions.md) for the complete
-backend contract and a tested application-owned DETS example.
+backend contract, the tested DETS example in `examples/disk_session_store.ex`,
+and the tested database boundary in `examples/database_session_store.ex`. The
+database example covers optimistic conflict retries, processed-update
+idempotency markers, and transactional outbox intent; use that pattern when
+state changes and durable side effects must commit together.

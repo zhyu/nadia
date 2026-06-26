@@ -9,14 +9,22 @@ defmodule Nadia.Examples.MediaFiles do
 
   alias Nadia.Client
   alias Nadia.InputFile
+  alias Nadia.InputContactMessageContent
+  alias Nadia.InputInvoiceMessageContent
+  alias Nadia.InputLocationMessageContent
   alias Nadia.InputMedia
   alias Nadia.InputPaidMedia
   alias Nadia.InputPollOption
   alias Nadia.InputPollMedia
   alias Nadia.InputProfilePhoto
   alias Nadia.InputRichMessage
+  alias Nadia.InputRichMessageContent
   alias Nadia.InputSticker
   alias Nadia.InputStoryContent
+  alias Nadia.InputTextMessageContent
+  alias Nadia.InputVenueMessageContent
+  alias Nadia.LabeledPrice
+  alias Nadia.Model.InlineQueryResult
   alias Nadia.StoryArea
 
   @type source :: {:file_id, binary} | {:url, binary} | {:path, Path.t()}
@@ -160,6 +168,116 @@ defmodule Nadia.Examples.MediaFiles do
       )
 
     Nadia.send_rich_message(client, chat_id, rich_message)
+  end
+
+  @doc """
+  Streams a rich-message draft while content is still being generated.
+
+  Telegram allows `<tg-thinking>` blocks only in draft context.
+  """
+  @spec send_rich_message_draft(Client.t(), integer | binary, integer) :: term
+  def send_rich_message_draft(%Client{} = client, chat_id, draft_id) do
+    rich_message =
+      InputRichMessage.html(
+        "<tg-thinking>Preparing the summary.</tg-thinking><p>Almost ready.</p>"
+      )
+
+    Nadia.send_rich_message_draft(client, chat_id, draft_id, rich_message)
+  end
+
+  @doc """
+  Edits an existing message with typed rich Markdown content.
+  """
+  @spec edit_rich_message(Client.t(), integer | binary, integer) :: term
+  def edit_rich_message(%Client{} = client, chat_id, message_id) do
+    rich_message =
+      InputRichMessage.markdown(
+        "## Updated\nThe example guide is ready.",
+        skip_entity_detection: true
+      )
+
+    Nadia.edit_message_text(client, chat_id, message_id, nil, nil, rich_message: rich_message)
+  end
+
+  @doc """
+  Answers an inline query with a rich-message inline result.
+  """
+  @spec answer_rich_inline_query(Client.t(), binary) :: term
+  def answer_rich_inline_query(%Client{} = client, inline_query_id) do
+    result = %InlineQueryResult.Article{
+      id: "rich-guide",
+      title: "Rich guide",
+      input_message_content:
+        "<p>Inline <b>Nadia</b> result.</p>"
+        |> InputRichMessage.html()
+        |> InputRichMessageContent.new()
+    }
+
+    Nadia.answer_inline_query(client, inline_query_id, [result], cache_time: 60)
+  end
+
+  @doc """
+  Answers an inline query with typed text, invoice, location, venue, and contact content.
+  """
+  @spec answer_inline_content_query(Client.t(), binary) :: term
+  def answer_inline_content_query(%Client{} = client, inline_query_id) do
+    results = [
+      %InlineQueryResult.Article{
+        id: "docs-text",
+        title: "Docs link",
+        input_message_content:
+          InputTextMessageContent.new(
+            "Open Nadia docs: https://hexdocs.pm/nadia",
+            link_preview_options: [is_disabled: true]
+          )
+      },
+      %InlineQueryResult.Article{
+        id: "support-invoice",
+        title: "Support invoice",
+        input_message_content:
+          InputInvoiceMessageContent.stars(
+            "Nadia supporter",
+            "A compact invoice content example.",
+            "docs-inline-invoice",
+            LabeledPrice.new("Example star", 1)
+          )
+      },
+      %InlineQueryResult.Location{
+        id: "tokyo-location",
+        latitude: 35.6762,
+        longitude: 139.6503,
+        title: "Tokyo",
+        input_message_content:
+          InputLocationMessageContent.new(35.6762, 139.6503,
+            horizontal_accuracy: 25,
+            live_period: 60
+          )
+      },
+      %InlineQueryResult.Venue{
+        id: "docs-venue",
+        latitude: 35.6762,
+        longitude: 139.6503,
+        title: "Nadia Docs",
+        address: "https://hexdocs.pm/nadia",
+        input_message_content:
+          InputVenueMessageContent.new(
+            35.6762,
+            139.6503,
+            "Nadia Docs",
+            "https://hexdocs.pm/nadia",
+            google_place_id: "docs-place"
+          )
+      },
+      %InlineQueryResult.Contact{
+        id: "maintainer-contact",
+        phone_number: "+15550123",
+        first_name: "Nadia",
+        input_message_content:
+          InputContactMessageContent.new("+15550123", "Nadia", last_name: "Bot")
+      }
+    ]
+
+    Nadia.answer_inline_query(client, inline_query_id, results, is_personal: true)
   end
 
   @doc """

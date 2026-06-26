@@ -48,6 +48,12 @@ defmodule Nadia.DocumentationExamplesTest do
           String.ends_with?(request.url, "/answerCallbackQuery") ->
             true
 
+          String.ends_with?(request.url, "/answerInlineQuery") ->
+            true
+
+          String.ends_with?(request.url, "/sendRichMessageDraft") ->
+            true
+
           String.ends_with?(request.url, "/getFile") ->
             %{
               file_id: "file-1",
@@ -298,6 +304,101 @@ defmodule Nadia.DocumentationExamplesTest do
              Jason.decode!(encoded_rich_message)
   end
 
+  test "media example covers rich-message drafts, edits, and inline content", %{client: client} do
+    assert :ok = Nadia.Examples.MediaFiles.send_rich_message_draft(client, 123, 42)
+
+    assert_receive {:nadia_request, %HTTPRequest{url: draft_url, body: {:form, draft_params}}}
+    assert String.ends_with?(draft_url, "/sendRichMessageDraft")
+    assert {"chat_id", "123"} in draft_params
+    assert {"draft_id", "42"} in draft_params
+    assert {"rich_message", encoded_draft} = List.keyfind(draft_params, "rich_message", 0)
+
+    assert %{"html" => "<tg-thinking>Preparing the summary.</tg-thinking><p>Almost ready.</p>"} =
+             Jason.decode!(encoded_draft)
+
+    assert {:ok, %Message{}} = Nadia.Examples.MediaFiles.edit_rich_message(client, 123, 2)
+
+    assert_receive {:nadia_request, %HTTPRequest{url: edit_url, body: {:form, edit_params}}}
+    assert String.ends_with?(edit_url, "/editMessageText")
+    assert {"chat_id", "123"} in edit_params
+    assert {"message_id", "2"} in edit_params
+    refute List.keyfind(edit_params, "text", 0)
+    assert {"rich_message", encoded_edit} = List.keyfind(edit_params, "rich_message", 0)
+
+    assert %{
+             "markdown" => "## Updated\nThe example guide is ready.",
+             "skip_entity_detection" => true
+           } = Jason.decode!(encoded_edit)
+
+    assert :ok = Nadia.Examples.MediaFiles.answer_rich_inline_query(client, "inline-rich")
+
+    assert_receive {:nadia_request, %HTTPRequest{url: inline_url, body: {:form, inline_params}}}
+    assert String.ends_with?(inline_url, "/answerInlineQuery")
+    assert {"inline_query_id", "inline-rich"} in inline_params
+    assert {"cache_time", "60"} in inline_params
+    assert {"results", encoded_results} = List.keyfind(inline_params, "results", 0)
+    assert [rich_result] = Jason.decode!(encoded_results)
+
+    assert rich_result["id"] == "rich-guide"
+    assert rich_result["type"] == "article"
+
+    assert rich_result["input_message_content"] == %{
+             "rich_message" => %{"html" => "<p>Inline <b>Nadia</b> result.</p>"}
+           }
+  end
+
+  test "media example answers inline queries with typed input content", %{client: client} do
+    assert :ok = Nadia.Examples.MediaFiles.answer_inline_content_query(client, "inline-content")
+
+    assert_receive {:nadia_request, %HTTPRequest{url: url, body: {:form, params}}}
+    assert String.ends_with?(url, "/answerInlineQuery")
+    assert {"inline_query_id", "inline-content"} in params
+    assert {"is_personal", "true"} in params
+    assert {"results", encoded_results} = List.keyfind(params, "results", 0)
+    assert results = Jason.decode!(encoded_results)
+    assert length(results) == 5
+
+    assert result_by_id(results, "docs-text")["input_message_content"] == %{
+             "message_text" => "Open Nadia docs: https://hexdocs.pm/nadia",
+             "link_preview_options" => %{"is_disabled" => true}
+           }
+
+    invoice = result_by_id(results, "support-invoice")["input_message_content"]
+    assert invoice["currency"] == "XTR"
+    assert invoice["provider_token"] == ""
+    assert invoice["prices"] == [%{"label" => "Example star", "amount" => 1}]
+
+    location = result_by_id(results, "tokyo-location")
+    assert location["type"] == "location"
+
+    assert location["input_message_content"] == %{
+             "latitude" => 35.6762,
+             "longitude" => 139.6503,
+             "horizontal_accuracy" => 25,
+             "live_period" => 60
+           }
+
+    venue = result_by_id(results, "docs-venue")
+    assert venue["type"] == "venue"
+
+    assert venue["input_message_content"] == %{
+             "latitude" => 35.6762,
+             "longitude" => 139.6503,
+             "title" => "Nadia Docs",
+             "address" => "https://hexdocs.pm/nadia",
+             "google_place_id" => "docs-place"
+           }
+
+    contact = result_by_id(results, "maintainer-contact")
+    assert contact["type"] == "contact"
+
+    assert contact["input_message_content"] == %{
+             "phone_number" => "+15550123",
+             "first_name" => "Nadia",
+             "last_name" => "Bot"
+           }
+  end
+
   test "media example streams a bounded download without exposing the token" do
     client =
       Client.new(
@@ -475,4 +576,8 @@ defmodule Nadia.DocumentationExamplesTest do
   end
 
   defp user, do: %User{id: 456, first_name: "User"}
+
+  defp result_by_id(results, id) do
+    Enum.find(results, &(&1["id"] == id))
+  end
 end

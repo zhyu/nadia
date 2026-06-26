@@ -7,6 +7,19 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## 1.6.1 - 2026-06-26
+
+### Added
+
+- Added contributor guidelines covering local checks, live smoke tests,
+  changelog expectations, Bot API maintenance, and the CI release process.
+
+### Fixed
+
+- Replaced low-level request setup failures for invalid option shapes and
+  missing bot tokens with intentional `%Nadia.Model.Error{}` results before
+  HTTP is attempted.
+
 ## 1.6.0 - 2026-06-26
 
 ### Added

@@ -7,6 +7,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## 1.6.0 - 2026-06-26
+
 ### Added
 
 - Added a tested bot example catalog covering command and callback routing,

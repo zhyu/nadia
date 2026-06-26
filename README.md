@@ -33,7 +33,7 @@ Add `:nadia` to `mix.exs`:
 ```elixir
 def deps do
   [
-    {:nadia, "~> 1.5"}
+    {:nadia, "~> 1.6"}
   ]
 end
 ```

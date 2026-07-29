@@ -27,7 +27,7 @@ defmodule Nadia.Mixfile do
   defp deps do
     [
       {:jason, "~> 1.4"},
-      {:req, "~> 0.6.1"},
+      {:req, "~> 0.7.1"},
       {:ex_doc, ">= 0.0.0", only: :docs, runtime: false}
     ]
   end

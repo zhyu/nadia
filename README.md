@@ -200,9 +200,10 @@ GitHub Actions release process.
 
 ## API Coverage
 
-Since Nadia 1.0.0, the wrapper covers all 180 official methods in Telegram Bot
-API 10.1, published on June 11, 2026. Current releases preserve that complete
-method coverage. Modeled response fields are parsed into Nadia structs;
+Nadia tracks complete Bot API method coverage. Nadia 1.0.0 covered all 180
+official methods of Bot API 10.1, and Nadia 1.7.0 covers all 185 official
+methods of Bot API 10.3, which Telegram published on August 24, 2026.
+Modeled response fields are parsed into Nadia structs;
 unknown future fields are ignored until Nadia explicitly models them.
 
 Use the [`Nadia` reference](https://hexdocs.pm/nadia/Nadia.html) for Elixir
@@ -212,8 +213,9 @@ semantics.
 
 Typed outgoing-content helpers include `Nadia.InputMedia`,
 `Nadia.InputPaidMedia`, `Nadia.InputPollMedia`, `Nadia.InputPollOption`,
-`Nadia.InputProfilePhoto`, `Nadia.InputRichMessage`,
-`Nadia.InputRichMessageContent`, `Nadia.InputTextMessageContent`,
+`Nadia.InputProfilePhoto`, `Nadia.InputRichBlock`, `Nadia.InputRichMessage`,
+`Nadia.InputRichMessageContent`, `Nadia.InputRichMessageMedia`,
+`Nadia.InputTextMessageContent`,
 `Nadia.InputInvoiceMessageContent`, `Nadia.InputLocationMessageContent`,
 `Nadia.InputVenueMessageContent`, `Nadia.InputContactMessageContent`,
 `Nadia.InputStoryContent`, `Nadia.InputSticker`, `Nadia.LabeledPrice`,

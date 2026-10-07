@@ -58,6 +58,9 @@ defmodule Nadia.Methods.Messages do
       * `:protect_content` - Protects the message from forwarding and saving
       * `:reply_parameters` - Description of the message to reply to
       * `:reply_markup` - Additional interface options
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_message(integer | binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -89,6 +92,11 @@ defmodule Nadia.Methods.Messages do
       * `rich_message` - `Nadia.InputRichMessage` value, compatible
         JSON-serializable object, or a pre-encoded JSON string
       * `options` - keyword list of options
+
+      Options:
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_rich_message(
               integer | binary,
@@ -417,6 +425,9 @@ defmodule Nadia.Methods.Messages do
       * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_photo(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -463,6 +474,9 @@ defmodule Nadia.Methods.Messages do
       * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_audio(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -503,6 +517,9 @@ defmodule Nadia.Methods.Messages do
       * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_document(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -549,6 +566,9 @@ defmodule Nadia.Methods.Messages do
       * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_sticker(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -598,6 +618,9 @@ defmodule Nadia.Methods.Messages do
       * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_video(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -641,6 +664,9 @@ defmodule Nadia.Methods.Messages do
       * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_voice(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -672,6 +698,9 @@ defmodule Nadia.Methods.Messages do
       * `video_note` - Video note to send. Either a `file_id` to resend a video note that is
       already on the Telegram servers, or a `file_path` to upload a new video note
       * `options` - keyword list of options
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_video_note(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -715,6 +744,9 @@ defmodule Nadia.Methods.Messages do
       * `live_photo` - Live photo media to send
       * `photo` - Cover photo to send as a regular Telegram parameter
       * `options` - keyword list of options
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_live_photo(
               integer | binary,
@@ -1095,6 +1127,11 @@ defmodule Nadia.Methods.Messages do
       @doc """
       Use this method to stream a partial message draft to a user.
       Returns `:ok` on success.
+
+      Options:
+      * `:can_stop` - Pass true if the user can stop the message generation
+      * `:keep_on_stop` - Pass true if the message must be kept when the user
+      stops the generation
       """
       @spec send_message_draft(integer | binary, integer) :: :ok | {:error, Error.t()}
       @spec send_message_draft(integer | binary, integer, [{atom, any}]) ::
@@ -1125,6 +1162,11 @@ defmodule Nadia.Methods.Messages do
       being generated.
       Returns `:ok` on success. The draft is an ephemeral 30-second preview;
       call `sendRichMessage` with the completed content to persist it.
+
+      Options:
+      * `:can_stop` - Pass true if the user can stop the message generation
+      * `:keep_on_stop` - Pass true if the message must be kept when the user
+      stops the generation
       """
       @spec send_rich_message_draft(
               integer,
@@ -1223,6 +1265,9 @@ defmodule Nadia.Methods.Messages do
       * `:reply_markup` - Additional interface options. Instructions to hide keyboard or to
       force a reply from the user - `Nadia.Model.ReplyKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardRemove` or `Nadia.Model.ForceReply`
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_location(integer | binary, float, float, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -1275,6 +1320,9 @@ defmodule Nadia.Methods.Messages do
       or to force a reply from the user. - `Nadia.Model.InlineKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardRemove` or
       `Nadia.Model.ForceReply`
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_venue(integer | binary, float, float, binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -1340,6 +1388,9 @@ defmodule Nadia.Methods.Messages do
       or to force a reply from the user. - `Nadia.Model.InlineKeyboardMarkup` or
       `Nadia.Model.ReplyKeyboardMarkup` or `Nadia.Model.ReplyKeyboardRemove` or
       `Nadia.Model.ForceReply`
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_contact(integer | binary, binary, binary, [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}
@@ -1441,6 +1492,9 @@ defmodule Nadia.Methods.Messages do
       * `:reply_to_message_id` - If the message is a reply, ID of the original message
       * `:reply_markup` - Additional interface options. A JSON-serialized object for an inline keyboard,
       custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
+      * `:ephemeral_message_parameters` - `Nadia.Model.EphemeralMessageParameters`
+      or map; sends the message as an ephemeral message visible only to a
+      specific user
       """
       @spec send_animation(integer | binary, binary | Nadia.InputFile.t(), [{atom, any}]) ::
               {:ok, Message.t()} | {:error, Error.t()}

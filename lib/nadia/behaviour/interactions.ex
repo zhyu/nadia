@@ -126,6 +126,62 @@ defmodule Nadia.Behaviour.Interactions do
                   :ok | {:ok, Message.t()} | {:error, Error.t()}
       @callback edit_message_media(Client.t(), list | map | struct | binary, [{atom, any}]) ::
                   :ok | {:ok, Message.t()} | {:error, Error.t()}
+      @callback edit_ephemeral_message_text(
+                  integer | binary,
+                  integer,
+                  integer,
+                  binary | nil,
+                  [{atom, any}]
+                ) :: :ok | {:error, Error.t()}
+      @callback edit_ephemeral_message_text(
+                  Client.t(),
+                  integer | binary,
+                  integer,
+                  integer,
+                  binary | nil,
+                  [{atom, any}]
+                ) :: :ok | {:error, Error.t()}
+      @callback edit_ephemeral_message_media(
+                  integer | binary,
+                  integer,
+                  integer,
+                  list | map | struct | binary,
+                  [{atom, any}]
+                ) :: :ok | {:error, Error.t()}
+      @callback edit_ephemeral_message_media(
+                  Client.t(),
+                  integer | binary,
+                  integer,
+                  integer,
+                  list | map | struct | binary,
+                  [{atom, any}]
+                ) :: :ok | {:error, Error.t()}
+      @callback edit_ephemeral_message_caption(integer | binary, integer, integer, [{atom, any}]) ::
+                  :ok | {:error, Error.t()}
+      @callback edit_ephemeral_message_caption(
+                  Client.t(),
+                  integer | binary,
+                  integer,
+                  integer,
+                  [{atom, any}]
+                ) :: :ok | {:error, Error.t()}
+      @callback edit_ephemeral_message_reply_markup(
+                  integer | binary,
+                  integer,
+                  integer,
+                  [{atom, any}]
+                ) :: :ok | {:error, Error.t()}
+      @callback edit_ephemeral_message_reply_markup(
+                  Client.t(),
+                  integer | binary,
+                  integer,
+                  integer,
+                  [{atom, any}]
+                ) :: :ok | {:error, Error.t()}
+      @callback delete_ephemeral_message(integer | binary, integer, integer) ::
+                  :ok | {:error, Error.t()}
+      @callback delete_ephemeral_message(Client.t(), integer | binary, integer, integer) ::
+                  :ok | {:error, Error.t()}
       @callback edit_message_live_location(float, float, [{atom, any}]) ::
                   :ok | {:ok, Message.t()} | {:error, Error.t()}
       @callback edit_message_live_location(Client.t(), float, float, [{atom, any}]) ::

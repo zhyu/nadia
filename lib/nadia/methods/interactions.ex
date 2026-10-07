@@ -649,6 +649,430 @@ defmodule Nadia.Methods.Interactions do
 
       @doc group: "Interactions And Editing"
       @doc """
+      Use this method to edit an ephemeral text or rich message. Note that it is
+      not guaranteed that the user will receive the message edit event, especially
+      if they are offline. Returns `:ok` on success.
+
+      Args:
+      * `chat_id` - Unique identifier for the target chat or username of the target
+      supergroup (in the format @channelusername)
+      * `receiver_user_id` - Identifier of the user who received the message
+      * `ephemeral_message_id` - Identifier of the ephemeral message to edit
+      * `text` - New text of the message, 1-4096 characters after entity parsing;
+      pass `nil` when editing rich content via the `:rich_message` option
+      * `options` - keyword list of options
+
+      Options:
+      * `:parse_mode` or `:entities` - Formatting for the message text
+      * `:rich_message` - New rich content of the message (`Nadia.InputRichMessage`)
+      * `:link_preview_options` - Link preview generation options
+      * `:reply_markup` - Additional interface options
+      """
+      @spec edit_ephemeral_message_text(
+              integer | binary,
+              integer,
+              integer,
+              binary | nil,
+              [{atom, any}]
+            ) :: :ok | {:error, Error.t()}
+      @spec edit_ephemeral_message_text(
+              Client.t(),
+              integer | binary,
+              integer,
+              integer,
+              binary | nil,
+              [{atom, any}]
+            ) :: :ok | {:error, Error.t()}
+      def edit_ephemeral_message_text(chat_id, receiver_user_id, ephemeral_message_id, text) do
+        edit_ephemeral_message_text(chat_id, receiver_user_id, ephemeral_message_id, text, [])
+      end
+
+      @doc group: "Interactions And Editing"
+      def edit_ephemeral_message_text(
+            %Client{} = client,
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id,
+            text
+          ) do
+        edit_ephemeral_message_text(
+          client,
+          chat_id,
+          receiver_user_id,
+          ephemeral_message_id,
+          text,
+          []
+        )
+      end
+
+      def edit_ephemeral_message_text(
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id,
+            text,
+            options
+          ) do
+        case validate_rich_message(option_value(options, :rich_message), :edit) do
+          :ok ->
+            api_request(
+              "editEphemeralMessageText",
+              request_options(
+                [
+                  chat_id: chat_id,
+                  receiver_user_id: receiver_user_id,
+                  ephemeral_message_id: ephemeral_message_id,
+                  text: text
+                ],
+                encode_json_option(options, :rich_message)
+              )
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: reason}}
+        end
+      end
+
+      @doc group: "Interactions And Editing"
+      def edit_ephemeral_message_text(
+            %Client{} = client,
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id,
+            text,
+            options
+          ) do
+        case validate_rich_message(option_value(options, :rich_message), :edit) do
+          :ok ->
+            api_request(
+              client,
+              "editEphemeralMessageText",
+              request_options(
+                [
+                  chat_id: chat_id,
+                  receiver_user_id: receiver_user_id,
+                  ephemeral_message_id: ephemeral_message_id,
+                  text: text
+                ],
+                encode_json_option(options, :rich_message)
+              )
+            )
+
+          {:error, reason} ->
+            {:error, %Error{reason: reason}}
+        end
+      end
+
+      @doc group: "Interactions And Editing"
+      @doc """
+      Use this method to edit the media of an ephemeral message. Note that it is
+      not guaranteed that the user will receive the message edit event, especially
+      if they are offline. Returns `:ok` on success.
+
+      Args:
+      * `chat_id` - Unique identifier for the target chat or username of the target
+      supergroup (in the format @channelusername)
+      * `receiver_user_id` - Identifier of the user who received the message
+      * `ephemeral_message_id` - Identifier of the ephemeral message to edit
+      * `media` - `Nadia.InputMedia` value, compatible JSON-serializable object,
+        or pre-encoded JSON; new files can be uploaded
+      * `options` - keyword list of options
+
+      Options:
+      * `:reply_markup` - Additional interface options
+      """
+      @spec edit_ephemeral_message_media(
+              integer | binary,
+              integer,
+              integer,
+              list | map | struct | binary,
+              [{atom, any}]
+            ) :: :ok | {:error, Error.t()}
+      @spec edit_ephemeral_message_media(
+              Client.t(),
+              integer | binary,
+              integer,
+              integer,
+              list | map | struct | binary,
+              [{atom, any}]
+            ) :: :ok | {:error, Error.t()}
+      def edit_ephemeral_message_media(chat_id, receiver_user_id, ephemeral_message_id, media) do
+        edit_ephemeral_message_media(chat_id, receiver_user_id, ephemeral_message_id, media, [])
+      end
+
+      @doc group: "Interactions And Editing"
+      def edit_ephemeral_message_media(
+            %Client{} = client,
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id,
+            media
+          ) do
+        edit_ephemeral_message_media(
+          client,
+          chat_id,
+          receiver_user_id,
+          ephemeral_message_id,
+          media,
+          []
+        )
+      end
+
+      def edit_ephemeral_message_media(
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id,
+            media,
+            options
+          ) do
+        api_request(
+          "editEphemeralMessageMedia",
+          [
+            chat_id: chat_id,
+            receiver_user_id: receiver_user_id,
+            ephemeral_message_id: ephemeral_message_id,
+            media: encode_json_payload(media)
+          ] ++ options
+        )
+      end
+
+      @doc group: "Interactions And Editing"
+      def edit_ephemeral_message_media(
+            %Client{} = client,
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id,
+            media,
+            options
+          ) do
+        api_request(
+          client,
+          "editEphemeralMessageMedia",
+          [
+            chat_id: chat_id,
+            receiver_user_id: receiver_user_id,
+            ephemeral_message_id: ephemeral_message_id,
+            media: encode_json_payload(media)
+          ] ++ options
+        )
+      end
+
+      @doc group: "Interactions And Editing"
+      @doc """
+      Use this method to edit the caption of an ephemeral message. Note that it is
+      not guaranteed that the user will receive the message edit event, especially
+      if they are offline. Returns `:ok` on success.
+
+      Args:
+      * `chat_id` - Unique identifier for the target chat or username of the target
+      supergroup (in the format @channelusername)
+      * `receiver_user_id` - Identifier of the user who received the message
+      * `ephemeral_message_id` - Identifier of the ephemeral message to edit
+      * `options` - keyword list of options
+
+      Options:
+      * `:caption` - New caption of the message, 0-1024 characters after entities
+      parsing
+      * `:parse_mode` or `:caption_entities` - Formatting for the caption
+      * `:show_caption_above_media` - Pass true if the caption must be shown above
+      the message media; supported only for animation, photo and video messages
+      * `:reply_markup` - Additional interface options
+      """
+      @spec edit_ephemeral_message_caption(integer | binary, integer, integer, [{atom, any}]) ::
+              :ok | {:error, Error.t()}
+      @spec edit_ephemeral_message_caption(
+              Client.t(),
+              integer | binary,
+              integer,
+              integer,
+              [{atom, any}]
+            ) :: :ok | {:error, Error.t()}
+      def edit_ephemeral_message_caption(chat_id, receiver_user_id, ephemeral_message_id) do
+        edit_ephemeral_message_caption(chat_id, receiver_user_id, ephemeral_message_id, [])
+      end
+
+      @doc group: "Interactions And Editing"
+      def edit_ephemeral_message_caption(
+            %Client{} = client,
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id
+          ) do
+        edit_ephemeral_message_caption(
+          client,
+          chat_id,
+          receiver_user_id,
+          ephemeral_message_id,
+          []
+        )
+      end
+
+      def edit_ephemeral_message_caption(
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id,
+            options
+          ) do
+        api_request(
+          "editEphemeralMessageCaption",
+          [
+            chat_id: chat_id,
+            receiver_user_id: receiver_user_id,
+            ephemeral_message_id: ephemeral_message_id
+          ] ++ options
+        )
+      end
+
+      @doc group: "Interactions And Editing"
+      def edit_ephemeral_message_caption(
+            %Client{} = client,
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id,
+            options
+          ) do
+        api_request(
+          client,
+          "editEphemeralMessageCaption",
+          [
+            chat_id: chat_id,
+            receiver_user_id: receiver_user_id,
+            ephemeral_message_id: ephemeral_message_id
+          ] ++ options
+        )
+      end
+
+      @doc group: "Interactions And Editing"
+      @doc """
+      Use this method to edit only the reply markup of an ephemeral message. Note
+      that it is not guaranteed that the user will receive the message edit event,
+      especially if they are offline. Returns `:ok` on success.
+
+      Args:
+      * `chat_id` - Unique identifier for the target chat or username of the target
+      supergroup (in the format @channelusername)
+      * `receiver_user_id` - Identifier of the user who received the message
+      * `ephemeral_message_id` - Identifier of the ephemeral message to edit
+      * `options` - keyword list of options
+
+      Options:
+      * `:reply_markup` - Additional interface options
+      """
+      @spec edit_ephemeral_message_reply_markup(
+              integer | binary,
+              integer,
+              integer,
+              [{atom, any}]
+            ) :: :ok | {:error, Error.t()}
+      @spec edit_ephemeral_message_reply_markup(
+              Client.t(),
+              integer | binary,
+              integer,
+              integer,
+              [{atom, any}]
+            ) :: :ok | {:error, Error.t()}
+      def edit_ephemeral_message_reply_markup(chat_id, receiver_user_id, ephemeral_message_id) do
+        edit_ephemeral_message_reply_markup(
+          chat_id,
+          receiver_user_id,
+          ephemeral_message_id,
+          []
+        )
+      end
+
+      @doc group: "Interactions And Editing"
+      def edit_ephemeral_message_reply_markup(
+            %Client{} = client,
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id
+          ) do
+        edit_ephemeral_message_reply_markup(
+          client,
+          chat_id,
+          receiver_user_id,
+          ephemeral_message_id,
+          []
+        )
+      end
+
+      def edit_ephemeral_message_reply_markup(
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id,
+            options
+          ) do
+        api_request(
+          "editEphemeralMessageReplyMarkup",
+          [
+            chat_id: chat_id,
+            receiver_user_id: receiver_user_id,
+            ephemeral_message_id: ephemeral_message_id
+          ] ++ options
+        )
+      end
+
+      @doc group: "Interactions And Editing"
+      def edit_ephemeral_message_reply_markup(
+            %Client{} = client,
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id,
+            options
+          ) do
+        api_request(
+          client,
+          "editEphemeralMessageReplyMarkup",
+          [
+            chat_id: chat_id,
+            receiver_user_id: receiver_user_id,
+            ephemeral_message_id: ephemeral_message_id
+          ] ++ options
+        )
+      end
+
+      @doc group: "Interactions And Editing"
+      @doc """
+      Use this method to delete an ephemeral message. Note that it is not
+      guaranteed that the user will receive the message deletion event, especially
+      if they are offline. Returns `:ok` on success.
+
+      Args:
+      * `chat_id` - Unique identifier for the target chat or username of the target
+      supergroup (in the format @channelusername)
+      * `receiver_user_id` - Identifier of the user who received the message
+      * `ephemeral_message_id` - Identifier of the ephemeral message to delete
+      """
+      @spec delete_ephemeral_message(integer | binary, integer, integer) ::
+              :ok | {:error, Error.t()}
+      @spec delete_ephemeral_message(Client.t(), integer | binary, integer, integer) ::
+              :ok | {:error, Error.t()}
+      def delete_ephemeral_message(chat_id, receiver_user_id, ephemeral_message_id) do
+        api_request(
+          "deleteEphemeralMessage",
+          chat_id: chat_id,
+          receiver_user_id: receiver_user_id,
+          ephemeral_message_id: ephemeral_message_id
+        )
+      end
+
+      @doc group: "Interactions And Editing"
+      def delete_ephemeral_message(
+            %Client{} = client,
+            chat_id,
+            receiver_user_id,
+            ephemeral_message_id
+          ) do
+        api_request(
+          client,
+          "deleteEphemeralMessage",
+          chat_id: chat_id,
+          receiver_user_id: receiver_user_id,
+          ephemeral_message_id: ephemeral_message_id
+        )
+      end
+
+      @doc group: "Interactions And Editing"
+      @doc """
       Use this method to edit live location messages. On success, the edited Message
       is returned, or `:ok` is returned when editing an inline message.
 

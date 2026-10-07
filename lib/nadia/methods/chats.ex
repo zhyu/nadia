@@ -203,6 +203,10 @@ defmodule Nadia.Methods.Chats do
       * `chat_id` - Unique identifier for the target chat or username of the target channel
       * `user_id` - Unique identifier of the target user
       * `options` - keyword list of options
+
+      Options:
+      * `:can_send_welcome_messages` - Pass true if the administrator can send
+      welcome messages
       """
       @spec promote_chat_member(integer | binary, integer) :: :ok | {:error, Error.t()}
       @spec promote_chat_member(integer | binary, integer, [{atom, any}]) ::

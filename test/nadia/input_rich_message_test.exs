@@ -85,7 +85,7 @@ defmodule Nadia.InputRichMessageTest do
   end
 
   test "to_map rejects both, neither, mismatched, and malformed opaque modes" do
-    assert {:error, {:invalid_content_fields, :both}} =
+    assert {:error, {:invalid_content_fields, :multiple}} =
              struct(InputRichMessage,
                mode: :html,
                fields: %{html: "html", markdown: "markdown"}
@@ -96,7 +96,7 @@ defmodule Nadia.InputRichMessageTest do
              struct(InputRichMessage, mode: :html, fields: %{is_rtl: false})
              |> InputRichMessage.to_map()
 
-    assert {:error, {:mode_mismatch, :html, :markdown}} =
+    assert {:error, {:mode_mismatch, :html, :blocks}} =
              struct(InputRichMessage, mode: :html, fields: %{markdown: "markdown"})
              |> InputRichMessage.to_map()
 
@@ -175,7 +175,7 @@ defmodule Nadia.InputRichMessageTest do
         fields: %{html: "html", markdown: "markdown"}
       )
 
-    assert {:error, {:invalid_content_fields, :both}} =
+    assert {:error, {:invalid_content_fields, :multiple}} =
              InputRichMessage.validate_context(tampered, :send)
   end
 
@@ -215,7 +215,7 @@ defmodule Nadia.InputRichMessageTest do
         fields: %{html: "html", markdown: "markdown"}
       )
 
-    assert {:error, {:input_rich_message, {:invalid_content_fields, :both}}} =
+    assert {:error, {:input_rich_message, {:invalid_content_fields, :multiple}}} =
              struct(InputRichMessageContent, rich_message: tampered_rich_message)
              |> InputRichMessageContent.to_map()
 

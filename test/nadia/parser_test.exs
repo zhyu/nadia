@@ -10,6 +10,7 @@ defmodule Nadia.ParserTest do
     Audio,
     BotAccessSettings,
     BotCommand,
+    BotSubscriptionUpdated,
     BotDescription,
     BotName,
     BotShortDescription,
@@ -34,6 +35,10 @@ defmodule Nadia.ParserTest do
     ChatBoostUpdated,
     Checklist,
     ChecklistTask,
+    Community,
+    CommunityChatAdded,
+    CommunityChatJoined,
+    CommunityChatRemoved,
     Document,
     ForumTopic,
     GameHighScore,
@@ -51,6 +56,7 @@ defmodule Nadia.ParserTest do
     PhotoSize,
     UserProfilePhotos,
     Message,
+    MessageGenerationStopped,
     MessageId,
     MessageEntity,
     ManagedBotCreated,
@@ -144,6 +150,153 @@ defmodule Nadia.ParserTest do
              %BotCommand{command: "start", description: "Start the bot"},
              %BotCommand{command: "help", description: "Show help"}
            ]
+  end
+
+  test "parse result of get_my_commands keeps is_ephemeral" do
+    commands =
+      Parser.parse_result(
+        [
+          %{
+            "command" => "moderate",
+            "description" => "Moderate the chat",
+            "is_ephemeral" => true
+          }
+        ],
+        "getMyCommands"
+      )
+
+    assert commands == [
+             %BotCommand{
+               command: "moderate",
+               description: "Moderate the chat",
+               is_ephemeral: true
+             }
+           ]
+  end
+
+  test "parse message keeps ephemeral receiver fields" do
+    message =
+      Parser.parse_result(
+        %{
+          "message_id" => 11,
+          "date" => 1_700_000_000,
+          "chat" => %{"id" => 666, "type" => "group"},
+          "receiver_user" => %{"id" => 42, "first_name" => "Eve", "is_bot" => false},
+          "ephemeral_message_id" => 9001
+        },
+        "sendMessage"
+      )
+
+    assert %Message{
+             message_id: 11,
+             receiver_user: %User{id: 42, first_name: "Eve", is_bot: false},
+             ephemeral_message_id: 9001
+           } = message
+  end
+
+  test "parse_update parses community, subscription, and generation updates" do
+    updates =
+      Parser.parse_updates([
+        %{
+          "update_id" => 790_000_101,
+          "message" => %{
+            "message_id" => 21,
+            "date" => 1_700_000_000,
+            "chat" => %{"id" => 666, "type" => "supergroup"},
+            "community_chat_added" => %{
+              "community" => %{"id" => 9_001, "name" => "Nadia Community"}
+            }
+          }
+        },
+        %{
+          "update_id" => 790_000_102,
+          "message" => %{
+            "message_id" => 22,
+            "date" => 1_700_000_000,
+            "chat" => %{"id" => 666, "type" => "supergroup"},
+            "community_chat_removed" => %{}
+          }
+        },
+        %{
+          "update_id" => 790_000_103,
+          "message" => %{
+            "message_id" => 23,
+            "date" => 1_700_000_000,
+            "chat" => %{"id" => 666, "type" => "supergroup"},
+            "community_chat_joined" => %{
+              "community" => %{"id" => 9_001, "name" => "Nadia Community"}
+            }
+          }
+        },
+        %{
+          "update_id" => 790_000_104,
+          "subscription" => %{
+            "user" => %{"id" => 42, "first_name" => "Eve", "is_bot" => false},
+            "invoice_payload" => "monthly",
+            "state" => "canceled"
+          }
+        },
+        %{
+          "update_id" => 790_000_105,
+          "stopped_message_generation" => %{
+            "chat" => %{"id" => 666, "type" => "supergroup"},
+            "message_thread_id" => 12,
+            "draft_id" => 77
+          }
+        }
+      ])
+
+    assert {:ok,
+            [
+              %Update{
+                message: %Message{
+                  community_chat_added: %CommunityChatAdded{
+                    community: %Community{id: 9_001, name: "Nadia Community"}
+                  }
+                }
+              },
+              %Update{message: %Message{community_chat_removed: %CommunityChatRemoved{}}},
+              %Update{
+                message: %Message{
+                  community_chat_joined: %CommunityChatJoined{
+                    community: %Community{id: 9_001, name: "Nadia Community"}
+                  }
+                }
+              },
+              %Update{
+                subscription: %BotSubscriptionUpdated{
+                  user: %User{id: 42, first_name: "Eve", is_bot: false},
+                  invoice_payload: "monthly",
+                  state: "canceled"
+                }
+              },
+              %Update{
+                stopped_message_generation: %MessageGenerationStopped{
+                  chat: %Chat{id: 666, type: "supergroup"},
+                  message_thread_id: 12,
+                  draft_id: 77
+                }
+              }
+            ]} = updates
+  end
+
+  test "parse chat keeps community field from ChatFullInfo" do
+    chat =
+      Parser.parse_result(
+        %{
+          "id" => 666,
+          "type" => "supergroup",
+          "title" => "Nadia Group",
+          "community" => %{"id" => 9_001, "name" => "Nadia Community"}
+        },
+        "getChat"
+      )
+
+    assert %Chat{
+             id: 666,
+             title: "Nadia Group",
+             community: %Community{id: 9_001, name: "Nadia Community"}
+           } = chat
   end
 
   test "parse_update parses decoded and raw webhook update payloads" do
@@ -708,6 +861,16 @@ defmodule Nadia.ParserTest do
           "owned_gift_id" => "owned-unique-1",
           "sender_user" => %{"id" => 91_003, "is_bot" => false, "first_name" => "Unique Sender"},
           "send_date" => 1_780_005_100,
+          "text" => "A unique gift",
+          "entities" => [
+            %{
+              "type" => "bold",
+              "offset" => 0,
+              "length" => 6,
+              "future_entity_field" => "ignored"
+            }
+          ],
+          "is_private" => true,
           "is_saved" => true,
           "can_be_transferred" => true,
           "transfer_star_count" => 75,
@@ -765,6 +928,10 @@ defmodule Nadia.ParserTest do
                  %OwnedGift{type: "future"} = future
                ]
              } = owned_gifts = Parser.parse_result(raw_owned_gifts, method)
+
+      assert unique.text == "A unique gift"
+      assert unique.entities == [%MessageEntity{type: "bold", offset: 0, length: 6}]
+      assert unique.is_private == true
 
       refute Map.has_key?(owned_gifts, :future_owned_gifts_field)
       refute Map.has_key?(regular, :future_regular_field)

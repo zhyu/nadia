@@ -7,6 +7,11 @@ defmodule Nadia.Parser do
     AffiliateInfo,
     BotAccessSettings,
     BotCommand,
+    BotSubscriptionUpdated,
+    Community,
+    CommunityChatAdded,
+    CommunityChatJoined,
+    CommunityChatRemoved,
     BotDescription,
     BotName,
     BotShortDescription,
@@ -40,6 +45,7 @@ defmodule Nadia.Parser do
     ChecklistTask,
     Link,
     Message,
+    MessageGenerationStopped,
     MenuButton,
     MenuButtonCommands,
     MenuButtonDefault,
@@ -294,7 +300,8 @@ defmodule Nadia.Parser do
     :via_bot,
     :sender_business_bot,
     :guest_bot_caller_user,
-    :added_by_user
+    :added_by_user,
+    :receiver_user
   ]
 
   @keys_of_chat [
@@ -459,6 +466,9 @@ defmodule Nadia.Parser do
   defp parse(OwnedGiftUnique, {:gift, val}), do: {:gift, parse(UniqueGift, val)}
   defp parse(OwnedGiftUnique, {:sender_user, val}), do: {:sender_user, parse(User, val)}
 
+  defp parse(OwnedGiftUnique, {:entities, val}) when is_list(val),
+    do: {:entities, Enum.map(val, &parse(MessageEntity, &1))}
+
   defp parse(UserProfileAudios, {:audios, val}) when is_list(val),
     do: {:audios, Enum.map(val, &parse(Audio, &1))}
 
@@ -527,6 +537,22 @@ defmodule Nadia.Parser do
     do: {:managed_bot_created, parse(ManagedBotCreated, val)}
 
   defp parse({:managed_bot, val}), do: {:managed_bot, parse(ManagedBotUpdated, val)}
+
+  defp parse({:subscription, val}), do: {:subscription, parse(BotSubscriptionUpdated, val)}
+
+  defp parse({:stopped_message_generation, val}),
+    do: {:stopped_message_generation, parse(MessageGenerationStopped, val)}
+
+  defp parse({:community, val}), do: {:community, parse(Community, val)}
+
+  defp parse({:community_chat_added, val}),
+    do: {:community_chat_added, parse(CommunityChatAdded, val)}
+
+  defp parse({:community_chat_removed, val}),
+    do: {:community_chat_removed, parse(CommunityChatRemoved, val)}
+
+  defp parse({:community_chat_joined, val}),
+    do: {:community_chat_joined, parse(CommunityChatJoined, val)}
 
   defp parse({:chat_join_request, val}),
     do: {:chat_join_request, parse(ChatJoinRequest, val)}

@@ -427,7 +427,7 @@ defmodule Nadia.TypedOutgoingContentTest do
 
     assert {:error,
             %Error{
-              reason: {:input_rich_message, {:invalid_content_fields, :both}}
+              reason: {:input_rich_message, {:invalid_content_fields, :multiple}}
             }} = Nadia.send_rich_message(123, malformed)
 
     refute_receive {:nadia_http_request, _request}
@@ -502,7 +502,7 @@ defmodule Nadia.TypedOutgoingContentTest do
             %Error{
               reason:
                 {:input_rich_message_content,
-                 {:input_rich_message, {:invalid_content_fields, :both}}}
+                 {:input_rich_message, {:invalid_content_fields, :multiple}}}
             }} = Nadia.answer_inline_query("query", [malformed_result])
 
     refute_receive {:nadia_http_request, _request}

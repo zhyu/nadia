@@ -49,11 +49,12 @@ defmodule Nadia.Model do
   end
 
   defmodule BotCommand do
-    defstruct command: nil, description: nil
+    defstruct command: nil, description: nil, is_ephemeral: nil
 
     @type t :: %BotCommand{
             command: binary,
-            description: binary
+            description: binary,
+            is_ephemeral: boolean
           }
   end
 
@@ -295,7 +296,8 @@ defmodule Nadia.Model do
               can_pin_messages: nil,
               can_manage_topics: nil,
               can_manage_direct_messages: nil,
-              can_manage_tags: nil
+              can_manage_tags: nil,
+              can_send_welcome_messages: nil
 
     @type t :: %ChatAdministratorRights{
             is_anonymous: boolean,
@@ -314,7 +316,8 @@ defmodule Nadia.Model do
             can_pin_messages: boolean,
             can_manage_topics: boolean,
             can_manage_direct_messages: boolean,
-            can_manage_tags: boolean
+            can_manage_tags: boolean,
+            can_send_welcome_messages: boolean
           }
   end
 
@@ -340,6 +343,7 @@ defmodule Nadia.Model do
               first_name: nil,
               last_name: nil,
               photo: nil,
+              community: nil,
               business_intro: nil,
               business_location: nil,
               business_opening_hours: nil
@@ -352,9 +356,41 @@ defmodule Nadia.Model do
             first_name: binary,
             last_name: binary,
             photo: ChatPhoto.t(),
+            community: Community.t(),
             business_intro: BusinessIntro.t(),
             business_location: BusinessLocation.t(),
             business_opening_hours: BusinessOpeningHours.t()
+          }
+  end
+
+  defmodule Community do
+    defstruct id: nil, name: nil
+
+    @type t :: %Community{
+            id: integer,
+            name: binary
+          }
+  end
+
+  defmodule CommunityChatAdded do
+    defstruct community: nil
+
+    @type t :: %CommunityChatAdded{
+            community: Community.t()
+          }
+  end
+
+  defmodule CommunityChatRemoved do
+    defstruct []
+
+    @type t :: %CommunityChatRemoved{}
+  end
+
+  defmodule CommunityChatJoined do
+    defstruct community: nil
+
+    @type t :: %CommunityChatJoined{
+            community: Community.t()
           }
   end
 
@@ -717,6 +753,9 @@ defmodule Nadia.Model do
               owned_gift_id: nil,
               sender_user: nil,
               send_date: nil,
+              text: nil,
+              entities: nil,
+              is_private: nil,
               is_saved: nil,
               can_be_transferred: nil,
               transfer_star_count: nil,
@@ -728,6 +767,9 @@ defmodule Nadia.Model do
             owned_gift_id: binary,
             sender_user: User.t(),
             send_date: integer,
+            text: binary,
+            entities: [MessageEntity.t()],
+            is_private: boolean,
             is_saved: boolean,
             can_be_transferred: boolean,
             transfer_star_count: integer,
@@ -989,6 +1031,8 @@ defmodule Nadia.Model do
               sender_boost_count: nil,
               sender_business_bot: nil,
               sender_tag: nil,
+              receiver_user: nil,
+              ephemeral_message_id: nil,
               date: nil,
               guest_query_id: nil,
               business_connection_id: nil,
@@ -1047,6 +1091,9 @@ defmodule Nadia.Model do
               venue: nil,
               boost_added: nil,
               managed_bot_created: nil,
+              community_chat_added: nil,
+              community_chat_removed: nil,
+              community_chat_joined: nil,
               new_chat_member: nil,
               new_chat_members: [],
               left_chat_member: nil,
@@ -1072,6 +1119,8 @@ defmodule Nadia.Model do
             sender_boost_count: integer,
             sender_business_bot: User.t(),
             sender_tag: binary,
+            receiver_user: User.t(),
+            ephemeral_message_id: integer,
             date: integer,
             guest_query_id: binary,
             business_connection_id: binary,
@@ -1130,6 +1179,9 @@ defmodule Nadia.Model do
             venue: any,
             boost_added: ChatBoostAdded.t(),
             managed_bot_created: ManagedBotCreated.t(),
+            community_chat_added: CommunityChatAdded.t(),
+            community_chat_removed: CommunityChatRemoved.t(),
+            community_chat_joined: CommunityChatJoined.t(),
             new_chat_member: User.t(),
             new_chat_members: [User.t()],
             left_chat_member: User.t(),
@@ -1153,6 +1205,18 @@ defmodule Nadia.Model do
     defstruct message_id: nil
 
     @type t :: %MessageId{message_id: integer}
+  end
+
+  defmodule EphemeralMessageParameters do
+    defstruct receiver_user_id: nil,
+              callback_query_id: nil,
+              replace_callback_query_message: nil
+
+    @type t :: %EphemeralMessageParameters{
+            receiver_user_id: integer,
+            callback_query_id: binary,
+            replace_callback_query_message: boolean
+          }
   end
 
   defmodule PaidMediaInfo do
@@ -1331,6 +1395,26 @@ defmodule Nadia.Model do
     @type t :: %ManagedBotUpdated{
             user: User.t(),
             bot: User.t()
+          }
+  end
+
+  defmodule BotSubscriptionUpdated do
+    defstruct user: nil, invoice_payload: nil, state: nil
+
+    @type t :: %BotSubscriptionUpdated{
+            user: User.t(),
+            invoice_payload: binary,
+            state: binary
+          }
+  end
+
+  defmodule MessageGenerationStopped do
+    defstruct chat: nil, message_thread_id: nil, draft_id: nil
+
+    @type t :: %MessageGenerationStopped{
+            chat: Chat.t(),
+            message_thread_id: integer | nil,
+            draft_id: integer
           }
   end
 
@@ -1734,7 +1818,9 @@ defmodule Nadia.Model do
               chat_join_request: nil,
               chat_boost: nil,
               removed_chat_boost: nil,
-              managed_bot: nil
+              managed_bot: nil,
+              subscription: nil,
+              stopped_message_generation: nil
 
     @type t :: %Update{
             update_id: integer,
@@ -1762,7 +1848,9 @@ defmodule Nadia.Model do
             chat_join_request: ChatJoinRequest.t(),
             chat_boost: ChatBoostUpdated.t(),
             removed_chat_boost: ChatBoostRemoved.t(),
-            managed_bot: ManagedBotUpdated.t()
+            managed_bot: ManagedBotUpdated.t(),
+            subscription: BotSubscriptionUpdated.t(),
+            stopped_message_generation: MessageGenerationStopped.t()
           }
   end
 
@@ -1789,13 +1877,18 @@ defmodule Nadia.Model do
 
   defmodule ReplyKeyboardMarkup do
     @derive Jason.Encoder
-    defstruct keyboard: [], resize_keyboard: false, one_time_keyboard: false, selective: false
+    defstruct keyboard: [],
+              resize_keyboard: false,
+              one_time_keyboard: false,
+              selective: false,
+              force_reply: false
 
     @type t :: %ReplyKeyboardMarkup{
             keyboard: [[KeyboardButton.t()]],
             resize_keyboard: atom,
             one_time_keyboard: atom,
-            selective: atom
+            selective: atom,
+            force_reply: atom
           }
   end
 
@@ -1811,10 +1904,20 @@ defmodule Nadia.Model do
     @type t :: %ReplyKeyboardRemove{remove_keyboard: true, selective: atom}
   end
 
+  defmodule DisabledButton do
+    @derive Jason.Encoder
+    defstruct []
+    @type t :: %DisabledButton{}
+  end
+
   defmodule InlineKeyboardMarkup do
     @derive Jason.Encoder
-    defstruct inline_keyboard: []
-    @type t :: %InlineKeyboardMarkup{inline_keyboard: [[InlineKeyboardButton.t()]]}
+    defstruct inline_keyboard: [], force_reply: false
+
+    @type t :: %InlineKeyboardMarkup{
+            inline_keyboard: [[InlineKeyboardButton.t()]],
+            force_reply: atom
+          }
   end
 
   defmodule InlineKeyboardButton do
@@ -1822,14 +1925,16 @@ defmodule Nadia.Model do
               url: nil,
               callback_data: nil,
               switch_inline_query: nil,
-              switch_inline_query_current_chat: nil
+              switch_inline_query_current_chat: nil,
+              disabled: nil
 
     @type t :: %InlineKeyboardButton{
             text: binary,
             url: binary,
             callback_data: binary,
             switch_inline_query: binary,
-            switch_inline_query_current_chat: binary
+            switch_inline_query_current_chat: binary,
+            disabled: DisabledButton.t()
           }
   end
 

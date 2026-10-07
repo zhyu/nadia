@@ -5,7 +5,47 @@ All notable changes to this project will be documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 1.7.0 - 2026-10-07
+
+### Added
+
+- Added complete Telegram Bot API 10.2 and 10.3 coverage, bringing Nadia to
+  185/185 official methods, up from the 180 methods of Bot API 10.1.
+- Added Bot API 10.2/10.3 ephemeral message support: wrappers for
+  `editEphemeralMessageText`, `editEphemeralMessageMedia`,
+  `editEphemeralMessageCaption`, `editEphemeralMessageReplyMarkup`, and
+  `deleteEphemeralMessage`, restoring complete official method coverage
+  (185/185 methods).
+- Added `Nadia.Model.EphemeralMessageParameters` and JSON encoding of the
+  `:ephemeral_message_parameters` option for all send wrappers, including
+  `send_rich_message/3,4`.
+- Added Bot API 10.2 message fields: `is_ephemeral` on
+  `Nadia.Model.BotCommand` and `receiver_user`/`ephemeral_message_id` on
+  `Nadia.Model.Message` parsing.
+- Added Bot API 10.2 communities support: `Nadia.Model.Community` and
+  `Nadia.Model.CommunityChatAdded`/`CommunityChatRemoved`/`CommunityChatJoined`
+  service messages, `community` on `Nadia.Model.Chat`, and community service
+  message parsing.
+- Added Bot API 10.2/10.3 update payloads: `Nadia.Model.BotSubscriptionUpdated`
+  (`Update.subscription`) and `Nadia.Model.MessageGenerationStopped`
+  (`Update.stopped_message_generation`) parsing.
+- Added Bot API 10.3 reply markup support: `Nadia.Model.DisabledButton`,
+  `disabled` on `Nadia.Model.InlineKeyboardButton`, and `force_reply` on
+  `Nadia.Model.InlineKeyboardMarkup` and `Nadia.Model.ReplyKeyboardMarkup`.
+- Added Bot API 10.3 admin rights: `can_send_welcome_messages` on
+  `Nadia.Model.ChatAdministratorRights` and the `promote_chat_member/3,4`
+  option, plus `can_stop`/`keep_on_stop` draft options documented for
+  `send_message_draft` and `send_rich_message_draft`.
+- Added Bot API 10.3 `text`, `entities`, and `is_private` fields on
+  `Nadia.Model.OwnedGiftUnique` parsing.
+- Added Bot API 10.2/10.3 rich-message builders: block-based content via
+  `Nadia.InputRichMessage.blocks/2`, explicit embedded media via
+  `Nadia.InputRichMessage.with_media/2` and the new
+  `Nadia.InputRichMessageMedia` module, and one constructor per official
+  InputRichBlock type in the new `Nadia.InputRichBlock` module, including
+  buttons, expandable block quotations, compact tables, and thinking blocks.
+- Added `Nadia.InputMedia.voice_note/2` for the Bot API 10.2
+  `InputMediaVoiceNote` object.
 
 ## 1.6.1 - 2026-06-26
 

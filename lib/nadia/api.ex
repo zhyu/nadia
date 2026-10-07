@@ -99,12 +99,14 @@ defmodule Nadia.API do
   defp build_request(params, file_field) when is_list(params) do
     params
     |> Keyword.update(:reply_markup, nil, &encode_json_param/1)
+    |> Keyword.update(:ephemeral_message_parameters, nil, &encode_json_param/1)
     |> normalize_params(file_field)
   end
 
   defp build_request(params, file_field) when is_map(params) do
     params
     |> Map.update(:reply_markup, nil, &encode_json_param/1)
+    |> Map.update(:ephemeral_message_parameters, nil, &encode_json_param/1)
     |> normalize_params(file_field)
   end
 

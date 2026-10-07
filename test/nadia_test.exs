@@ -313,6 +313,141 @@ defmodule NadiaTest do
              end)
   end
 
+  test "ephemeral message wrappers build expected request bodies" do
+    assert :ok =
+             assert_wrapper_call(
+               "editEphemeralMessageText",
+               [
+                 {"chat_id", "666"},
+                 {"receiver_user_id", "42"},
+                 {"ephemeral_message_id", "7"},
+                 {"text", "hello"}
+               ],
+               true,
+               fn -> Nadia.edit_ephemeral_message_text(666, 42, 7, "hello") end
+             )
+
+    assert :ok =
+             assert_wrapper_call(
+               "editEphemeralMessageText",
+               [
+                 {"chat_id", "666"},
+                 {"receiver_user_id", "42"},
+                 {"ephemeral_message_id", "7"},
+                 {"rich_message", Jason.encode!(%{"html" => "<b>hi</b>"})}
+               ],
+               true,
+               fn ->
+                 Nadia.edit_ephemeral_message_text(666, 42, 7, nil,
+                   rich_message: %{"html" => "<b>hi</b>"}
+                 )
+               end
+             )
+
+    media = %{type: "photo", media: "photo_file_id"}
+
+    assert :ok =
+             assert_wrapper_call(
+               "editEphemeralMessageMedia",
+               [
+                 {"chat_id", "666"},
+                 {"receiver_user_id", "42"},
+                 {"ephemeral_message_id", "7"},
+                 {"media", Jason.encode!(media)}
+               ],
+               true,
+               fn -> Nadia.edit_ephemeral_message_media(666, 42, 7, media) end
+             )
+
+    assert :ok =
+             assert_wrapper_call(
+               "editEphemeralMessageCaption",
+               [
+                 {"chat_id", "666"},
+                 {"receiver_user_id", "42"},
+                 {"ephemeral_message_id", "7"},
+                 {"caption", "new caption"},
+                 {"show_caption_above_media", "true"}
+               ],
+               true,
+               fn ->
+                 Nadia.edit_ephemeral_message_caption(666, 42, 7,
+                   caption: "new caption",
+                   show_caption_above_media: true
+                 )
+               end
+             )
+
+    reply_markup = %{inline_keyboard: [[%{text: "OK", callback_data: "ok"}]]}
+
+    assert :ok =
+             assert_wrapper_call(
+               "editEphemeralMessageReplyMarkup",
+               [
+                 {"chat_id", "666"},
+                 {"receiver_user_id", "42"},
+                 {"ephemeral_message_id", "7"},
+                 {"reply_markup", Jason.encode!(reply_markup)}
+               ],
+               true,
+               fn ->
+                 Nadia.edit_ephemeral_message_reply_markup(666, 42, 7, reply_markup: reply_markup)
+               end
+             )
+
+    assert :ok =
+             assert_wrapper_call(
+               "deleteEphemeralMessage",
+               [
+                 {"chat_id", "666"},
+                 {"receiver_user_id", "42"},
+                 {"ephemeral_message_id", "7"}
+               ],
+               true,
+               fn -> Nadia.delete_ephemeral_message(666, 42, 7) end
+             )
+  end
+
+  test "send wrappers JSON-encode ephemeral_message_parameters" do
+    parameters = %Nadia.Model.EphemeralMessageParameters{
+      receiver_user_id: 42,
+      replace_callback_query_message: true
+    }
+
+    expected =
+      Jason.encode!(%{receiver_user_id: 42, replace_callback_query_message: true})
+
+    assert {:ok, %Message{}} =
+             assert_wrapper_call(
+               "sendMessage",
+               [
+                 {"chat_id", "666"},
+                 {"text", "hello"},
+                 {"ephemeral_message_parameters", expected}
+               ],
+               message_result(%{}),
+               fn ->
+                 Nadia.send_message(666, "hello", ephemeral_message_parameters: parameters)
+               end
+             )
+
+    assert {:ok, %Message{}} =
+             assert_wrapper_call(
+               "sendMessage",
+               [
+                 {"chat_id", "666"},
+                 {"text", "hello"},
+                 {"ephemeral_message_parameters", Jason.encode!(%{receiver_user_id: 42})}
+               ],
+               message_result(%{}),
+               fn ->
+                 Nadia.send_message(666, "hello",
+                   ephemeral_message_parameters: %{receiver_user_id: 42}
+                 )
+               end
+             )
+  end
+
   test "inline query and sticker wrappers encode requests and parse results" do
     photo = %InlineQueryResult.Photo{
       id: "1",

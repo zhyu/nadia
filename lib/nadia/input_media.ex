@@ -20,6 +20,8 @@ defmodule Nadia.InputMedia do
   Poll options accept animation, live photo, photo, and video; audio and
   document are rejected locally when used as typed option media. See
   `Nadia.InputPollMedia` for typed link, location, sticker, and venue values.
+  Voice notes are supported for `editMessageMedia`, rich-message media, and
+  other single-media positions; they are not a `sendMediaGroup` album variant.
   """
 
   alias Nadia.InputFile
@@ -30,7 +32,7 @@ defmodule Nadia.InputMedia do
   @typedoc "A typed Telegram InputMedia value. Its representation is opaque."
   @opaque t :: %__MODULE__{variant: variant, fields: map}
 
-  @type variant :: :animation | :audio | :document | :live_photo | :photo | :video
+  @type variant :: :animation | :audio | :document | :live_photo | :photo | :video | :voice_note
   @type source :: binary | InputFile.t()
   @type options :: keyword | map
 
@@ -116,10 +118,18 @@ defmodule Nadia.InputMedia do
     ])
   end
 
+  @doc "Builds a voice-note media object."
+  @spec voice_note(source, options) :: t
+  def voice_note(media, options \\ []) do
+    build(:voice_note, %{media: required_source!(media, :media)}, options, [
+      :duration | @common_caption_options
+    ])
+  end
+
   @doc false
   @spec to_map(t) :: {:ok, map} | {:error, term}
   def to_map(%__MODULE__{variant: variant, fields: fields})
-      when variant in [:animation, :audio, :document, :live_photo, :photo, :video] and
+      when variant in [:animation, :audio, :document, :live_photo, :photo, :video, :voice_note] and
              is_map(fields) do
     with :ok <- validate_required_fields(variant, fields),
          :ok <- validate_thumbnail(fields) do
